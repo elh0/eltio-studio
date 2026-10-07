@@ -190,3 +190,15 @@
   .eltio.alt-iris .i-down { animation: none; }
   .eltio.alt-iris .i-rise { translate: none; transition: none; }
 }
+
+/* Cargo sets its own text sizes on paragraphs and buttons, so the big type is pinned on the elements themselves.
+   Diatype Mono comes from Cargo's font library (pick it in Cargo's type settings so it loads); elsewhere it falls back to Geist Mono. */
+.eltio.alt-iris { --big: "Diatype Mono Variable", "Diatype Mono", "ABC Diatype Mono", var(--mono); }
+.eltio.alt-iris.t-b .i-intro p, .eltio.alt-iris.t-b .i-intro .ln { font-family: var(--big) !important; font-size: clamp(24px, 3.5vw, 54px) !important; line-height: 1.08 !important; font-weight: 300 !important; letter-spacing: -.015em !important; margin: 0 !important; }
+.eltio.alt-iris.t-b .i-intro .ln { font-size: inherit !important; }
+.eltio.alt-iris.t-b .i-copy, .eltio.alt-iris.t-b .i-copy .i-mask, .eltio.alt-iris.t-b .i-copy .i-rise { font-family: var(--big) !important; font-size: clamp(36px, 8.4vw, 136px) !important; line-height: 1.15 !important; font-weight: 300 !important; letter-spacing: -.03em !important; }
+.eltio.alt-iris.t-b .i-copy .i-mask, .eltio.alt-iris.t-b .i-copy .i-rise { font-size: inherit !important; }
+@media (max-width: 640px) {
+  .eltio.alt-iris.t-b .i-intro p { font-size: 22px !important; }
+  .eltio.alt-iris.t-b .i-copy { font-size: 30px !important; }
+}

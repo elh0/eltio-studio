@@ -202,3 +202,8 @@
   .eltio.alt-iris.t-b .i-intro p { font-size: 22px !important; }
   .eltio.alt-iris.t-b .i-copy { font-size: 30px !important; }
 }
+/* Cargo's Diatype Mono is the variable Diatype with its mono axis turned up. */
+.eltio.alt-iris.t-b .i-l1, .eltio.alt-iris.t-b .i-l2, .eltio.alt-iris.t-b .i-copy { font-variation-settings: "MONO" 1, "wght" 300 !important; }
+.eltio.alt-iris.t-b .i-l1 *, .eltio.alt-iris.t-b .i-l2 *, .eltio.alt-iris.t-b .i-copy * { font: inherit !important; letter-spacing: inherit !important; font-variation-settings: inherit !important; color: inherit; }
+.eltio.alt-iris.t-b .i-intro p.i-lab, .eltio.alt-iris.t-b .i-intro p.i-lab * { font-family: var(--mono) !important; font-size: 11px !important; line-height: 1.15 !important; font-weight: 400 !important; letter-spacing: 0 !important; font-variation-settings: normal !important; margin: 0 0 1.6em !important; }
+.eltio.alt-iris.t-b .i-intro p.i-lab * { margin: 0 !important; color: var(--s5); }

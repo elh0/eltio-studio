@@ -82,6 +82,9 @@ document.addEventListener('click', function (e) {
     f.src = b.dataset.src; f.title = 'Out & Scout, working prototype'; f.loading = 'eager';
     f.onload = function () { fig.classList.add('on'); };
     stage.appendChild(f);
+    var fitF = function () { if (stage.clientWidth) f.style.setProperty('--ifs', (stage.clientWidth / 844).toFixed(4)); };
+    fitF(); addEventListener('resize', fitF);
+    if (window.ResizeObserver) new ResizeObserver(fitF).observe(stage);
   } else fig.classList.add('on');
   cap.dataset.was = cap.dataset.was || cap.textContent;
   cap.textContent = 'Working prototype. Tap anything, drag the time'; b.textContent = '(Close)';

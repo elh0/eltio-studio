@@ -124,7 +124,8 @@
 /* live prototype: the loop swaps for the working app in place */
 .eltio .live .stage { position: relative; aspect-ratio: 844 / 390; border: 1px solid var(--hr); background: var(--ink); overflow: hidden; }
 .eltio .live .stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0; transition: opacity .6s; }
-.eltio .live .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; opacity: 0; transition: opacity .6s; }
+/* the prototype is laid out for a phone held sideways (844 x 390), so it runs at that size and is scaled to the stage */
+.eltio .live .stage iframe { position: absolute; left: 0; top: 0; width: 844px; height: 390px; transform: scale(var(--ifs, 1)); transform-origin: 0 0; border: 0; opacity: 0; transition: opacity .6s; }
 .eltio .live.on .stage iframe { opacity: 1; }
 .eltio .live.on .stage video { opacity: 0; }
 .eltio .cap { display: flex; justify-content: space-between; gap: var(--gap); }

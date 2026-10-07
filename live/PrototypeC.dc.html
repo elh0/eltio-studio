@@ -1,0 +1,1538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Out &amp; Scout prototype v3c</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+.os-btn{cursor:pointer}
+.os-range{-webkit-appearance:none;appearance:none;background:transparent;margin:0}
+.os-range::-webkit-slider-runnable-track{height:1px;background:rgba(243,243,240,0.5)}
+.os-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:8px;background:#FF5A1F;margin-top:-8px;border:0}
+.os-range::-moz-range-track{height:1px;background:rgba(243,243,240,0.5)}
+.os-range::-moz-range-thumb{width:16px;height:16px;border-radius:8px;background:#FF5A1F;border:0}
+</style>
+</helmet>
+<div ref="{{rootRef}}" onPointerDown="{{stopDemo}}" style="width: 844px; height: 390px; position: relative; overflow: hidden; background: #0B0B0A; font-family: 'Geist Mono', monospace; color: #F3F3F0">
+
+<div style="position: absolute; left: 72px; top: 44px; width: 652px; height: 290px; overflow: hidden">
+<div style="position: absolute; left: {{ghostLeft}}px; top: {{ghostTop}}px; width: {{sceneW}}px; height: {{sceneH}}px; opacity: 0.28">
+<svg width="100%" height="100%" viewBox="0 0 600 300" aria-hidden="true">
+<rect x="0" y="0" width="600" height="210" fill="{{skyFill}}"></rect>
+<rect x="0" y="210" width="600" height="90" fill="#20201E"></rect>
+<rect x="60" y="150" width="70" height="60" fill="#151513"></rect>
+<rect x="140" y="120" width="44" height="90" fill="#151513"></rect>
+<rect x="196" y="165" width="90" height="45" fill="#151513"></rect>
+<rect x="330" y="100" width="36" height="110" fill="#151513"></rect>
+<rect x="372" y="140" width="80" height="70" fill="#151513"></rect>
+<rect x="470" y="160" width="60" height="50" fill="#151513"></rect>
+</svg>
+</div>
+<sc-if value="{{showPath}}" hint-placeholder-val="{{true}}">
+<sc-for list="{{hourLabelsOuter}}" as="t" hint-placeholder-count="4">
+<div style="position: absolute; left: {{t.x}}px; top: {{t.y}}px; width: 30px; margin-left: -15px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 9px; color: rgba(243,243,240,0.4); pointer-events: none">{{t.label}}</div>
+</sc-for>
+</sc-if>
+<div style="position: absolute; left: {{frameLeft}}px; top: {{frameTop}}px; width: {{frameW}}px; height: {{frameH}}px; overflow: hidden; outline: 1px solid rgba(243,243,240,0.85)">
+<div style="position: absolute; left: {{sceneLeft}}px; top: {{sceneTop}}px; width: {{sceneW}}px; height: {{sceneH}}px; filter: brightness({{evBright}})">
+<svg width="100%" height="100%" viewBox="0 0 600 300" aria-hidden="true">
+<rect x="0" y="0" width="600" height="210" fill="{{skyFill}}"></rect>
+<sc-if value="{{showPath}}" hint-placeholder-val="{{true}}">
+<path d="M 40 210 Q 300 -60 560 210" fill="none" stroke="rgba(243,243,240,0.55)" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+<path d="{{goldAm}}" fill="none" stroke="{{accent}}" stroke-width="2.4" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+<path d="{{goldPm}}" fill="none" stroke="{{accent}}" stroke-width="2.4" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+<sc-for list="{{hourTicks}}" as="t" hint-placeholder-count="6">
+<circle cx="{{t.x}}" cy="{{t.y}}" r="2" fill="#F3F3F0"></circle>
+</sc-for>
+<sc-if value="{{showNowRing}}" hint-placeholder-val="{{false}}">
+<circle cx="{{nowX}}" cy="{{nowY}}" r="6" fill="none" stroke="#F3F3F0" stroke-width="1.2" vector-effect="non-scaling-stroke"></circle>
+</sc-if>
+</sc-if>
+<sc-if value="{{sunUp}}" hint-placeholder-val="{{true}}">
+<g transform="translate({{sunX}} {{sunY}})">
+<circle cx="0" cy="0" r="16" fill="{{accent}}" fill-opacity="0.18"></circle>
+<g stroke="{{accent}}" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke">
+<line x1="0" y1="-10" x2="0" y2="-15" vector-effect="non-scaling-stroke"></line>
+<line x1="0" y1="10" x2="0" y2="15" vector-effect="non-scaling-stroke"></line>
+<line x1="-10" y1="0" x2="-15" y2="0" vector-effect="non-scaling-stroke"></line>
+<line x1="10" y1="0" x2="15" y2="0" vector-effect="non-scaling-stroke"></line>
+<line x1="-7" y1="-7" x2="-10.6" y2="-10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="7" y1="-7" x2="10.6" y2="-10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="-7" y1="7" x2="-10.6" y2="10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="7" y1="7" x2="10.6" y2="10.6" vector-effect="non-scaling-stroke"></line>
+</g>
+<circle cx="0" cy="0" r="6.5" fill="{{accent}}"></circle>
+</g>
+</sc-if>
+<rect x="0" y="210" width="600" height="90" fill="#20201E"></rect>
+<rect x="60" y="150" width="70" height="60" fill="#151513"></rect>
+<rect x="140" y="120" width="44" height="90" fill="#151513"></rect>
+<rect x="196" y="165" width="90" height="45" fill="#151513"></rect>
+<rect x="330" y="100" width="36" height="110" fill="#151513"></rect>
+<rect x="372" y="140" width="80" height="70" fill="#151513"></rect>
+<rect x="470" y="160" width="60" height="50" fill="#151513"></rect>
+</svg>
+</div>
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: {{accent}}; opacity: {{warmOpacity}}"></div>
+<sc-if value="{{showPath}}" hint-placeholder-val="{{true}}">
+<sc-for list="{{hourLabels}}" as="t" hint-placeholder-count="6">
+<div style="position: absolute; left: {{t.x}}px; top: {{t.y}}px; width: 30px; margin-left: -15px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 9px; color: rgba(243,243,240,0.75); pointer-events: none">{{t.label}}</div>
+</sc-for>
+<sc-if value="{{sunInView}}" hint-placeholder-val="{{true}}">
+<div style="position: absolute; left: {{sunLabelX}}px; top: {{sunLabelY}}px; padding: 2px 6px; border-radius: 4px; background: rgba(11,11,10,0.72); font-family: 'Geist Mono', monospace; font-size: 10px; color: #F3F3F0; white-space: nowrap; pointer-events: none">{{sunReadout}}</div>
+</sc-if>
+<sc-if value="{{sunOff}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: {{sunEdgeX}}px; top: {{sunEdgeY}}px; width: 144px; display: flex; justify-content: center; pointer-events: none"><span style="padding: 2px 6px; border-radius: 4px; background: rgba(11,11,10,0.72); border: 1px solid {{accent}}; font-family: 'Geist Mono', monospace; font-size: 10px; color: #F3F3F0; white-space: nowrap">{{sunOffText}}</span></div>
+</sc-if>
+</sc-if>
+<sc-if value="{{showGrid}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; bottom: 0; left: 33.33%; width: 1px; background: rgba(243,243,240,0.25)"></div>
+<div style="position: absolute; top: 0; bottom: 0; left: 66.66%; width: 1px; background: rgba(243,243,240,0.25)"></div>
+<div style="position: absolute; left: 0; right: 0; top: 33.33%; height: 1px; background: rgba(243,243,240,0.25)"></div>
+<div style="position: absolute; left: 0; right: 0; top: 66.66%; height: 1px; background: rgba(243,243,240,0.25)"></div>
+</sc-if>
+<sc-if value="{{showLevel}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 50%; top: 50%; width: 120px; margin-left: -60px; height: 1px; background: rgba(243,243,240,0.9)"></div>
+<div style="position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 3px; background: #F3F3F0"></div>
+</sc-if>
+<div style="position: absolute; left: 8px; bottom: 6px; font-family: 'Geist Mono', monospace; font-size: 10px; color: rgba(243,243,240,0.7)">{{aspectLabel}} · {{lens}}mm</div>
+<button type="button" class="os-btn" onClick="{{tapFocus}}" aria-label="Tap to focus and expose" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; padding: 0; background: transparent"></button>
+<sc-if value="{{hasFocus}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: {{focusX}}px; top: {{focusY}}px; width: 0; height: 0">
+<div style="position: absolute; left: -32px; top: -32px; width: 64px; height: 64px; box-sizing: border-box; border: 1.5px solid #F3F3F0; border-radius: 4px; pointer-events: none"></div>
+<div style="position: absolute; left: 40px; top: -58px; width: 28px; height: 116px; display: flex; flex-direction: column; align-items: center">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F3F3F0" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+<input class="os-ev" type="range" min="-20" max="20" step="1" value="{{evStep}}" onChange="{{onEv}}" aria-label="Exposure" style="width: 20px; height: 92px; margin: 2px 0 0; writing-mode: vertical-lr; direction: rtl; accent-color: #F3F3F0">
+</div>
+<span style="position: absolute; left: -32px; top: 38px; white-space: nowrap; font-family: 'Geist Mono', monospace; font-size: 10px; color: #F3F3F0; pointer-events: none">{{evLabel}}</span>
+<button type="button" class="os-btn" onClick="{{toggleLock}}" style="position: absolute; left: -32px; top: -58px; height: 20px; padding: 0 8px; border: 0; border-radius: 10px; font-family: 'Geist Mono', monospace; font-size: 9px; white-space: nowrap; {{lockCss}}">{{lockLabel}}</button>
+</div>
+</sc-if>
+</div>
+</div>
+
+<div style="position: absolute; left: 16px; right: 16px; top: 0; height: 44px; display: flex; align-items: center; gap: 8px">
+<button type="button" class="os-btn" onClick="{{openProjects}}" aria-label="Projects and scenes" style="height: 36px; padding: 0 4px; border: 0; background: transparent; color: #F3F3F0; display: flex; align-items: center; gap: 8px; font-family: 'Geist Mono', monospace">
+<span style="font-size: 11px; color: #8A8A83">{{projName}} /</span>
+<span style="font-size: 12px; font-weight: 400">{{projectName}}</span>
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B5B5AE" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+<button type="button" class="os-btn" onClick="{{quickScene}}" aria-label="New scene here" style="height: 26px; padding: 0 10px; border: 1px solid #2E2E2B; border-radius: 13px; background: transparent; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px; display: flex; align-items: center; gap: 5px">
+<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F3F3F0" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+scene
+</button>
+<div style="position: absolute; left: 50%; top: 4px; width: 200px; margin-left: -100px; height: 36px; overflow: hidden" aria-label="Compass bearing {{bearingLabel}}">
+<sc-for list="{{ticks}}" as="t" hint-placeholder-count="10">
+<div style="position: absolute; left: {{t.x}}px; top: 24px; width: 1px; height: {{t.h}}px; margin-top: -{{t.h}}px; background: {{t.color}}"></div>
+<div style="position: absolute; left: {{t.x}}px; top: 0; width: 24px; margin-left: -12px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 9px; color: #66665F">{{t.label}}</div>
+</sc-for>
+<div style="position: absolute; left: 99px; top: 10px; width: 2px; height: 16px; background: {{accent}}"></div>
+<div style="position: absolute; left: 0; right: 0; top: 25px; text-align: center; font-family: 'Geist Mono', monospace; font-size: 10px; color: #F3F3F0">{{bearingLabel}} <span style="color: #8A8A83">±3° true n</span></div>
+</div>
+<button type="button" class="os-btn" onClick="{{snapNow}}" aria-label="{{clockAria}}" style="margin-left: auto; height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid #2E2E2B; background: transparent; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px; display: flex; align-items: center; gap: 6px">
+<span>{{clockNow}}</span>
+<sc-if value="{{scrubbed}}" hint-placeholder-val="{{false}}">
+<span style="color: #8A8A83">→</span><span style="color: {{accent}}">{{timeLabel}}</span><span style="color: #8A8A83">{{scrubDelta}}</span>
+</sc-if>
+<sc-if value="{{notScrubbed}}" hint-placeholder-val="{{true}}">
+<span style="color: #8A8A83">now</span>
+</sc-if>
+</button>
+<button type="button" class="os-btn" onClick="{{openKit}}" style=" height: 30px; padding: 0 12px; border-radius: 15px; border: 1px solid #2E2E2B; background: transparent; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px">{{kitLabel}}</button>
+</div>
+
+<div style="position: absolute; left: 12px; top: 44px; width: 48px; height: 290px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+<button type="button" class="os-btn" onClick="{{togglePath}}" aria-label="Sun path" aria-pressed="{{pathPressed}}" style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 20px; display: flex; align-items: center; justify-content: center; {{pathCss}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 20h20" ></path><path d="M4 20a8 8 0 0 1 16 0" stroke-dasharray="2 2.4"></path><circle cx="16.5" cy="9.5" r="2.4"></circle><path d="M16.5 4.6v1.2M16.5 13.2v1.2M11.6 9.5h1.2M20.2 9.5h1.2M13 6l.9.9M19.1 12.1l.9.9M13 13l.9-.9M19.1 6.9l.9-.9"></path></svg>
+</button>
+<span style="font-family: 'Geist Mono', monospace; font-size: 9px; color: #8A8A83">sun path</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+<button type="button" class="os-btn" onClick="{{toggleGrid}}" aria-label="Grid" aria-pressed="{{gridPressed}}" style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 20px; display: flex; align-items: center; justify-content: center; {{gridCss}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 3v18M15 3v18M3 9h18M3 15h18"></path></svg>
+</button>
+<span style="font-family: 'Geist Mono', monospace; font-size: 9px; color: #8A8A83">grid</span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+<button type="button" class="os-btn" onClick="{{toggleLevel}}" aria-label="Level" aria-pressed="{{levelPressed}}" style="width: 40px; height: 40px; box-sizing: border-box; border-radius: 20px; display: flex; align-items: center; justify-content: center; {{levelCss}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h7M14 12h7"></path><circle cx="12" cy="12" r="2"></circle></svg>
+</button>
+<span style="font-family: 'Geist Mono', monospace; font-size: 9px; color: #8A8A83">level</span>
+</div>
+</div>
+
+<div style="position: absolute; right: 16px; top: 44px; width: 104px; height: 290px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px">
+<div style="display: flex; flex-direction: column; align-items: center">
+<button type="button" class="os-btn" onClick="{{lensUp}}" aria-label="Longer lens" style="width: 44px; height: 30px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"></path></svg>
+</button>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #45453F">{{lensNext}}</div>
+<div style="font-size: 20px; line-height: 1; font-weight: 400; letter-spacing: 0">{{lens}}</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #8A8A83">mm</div>
+<div title="Phone zoom" style="margin-top: 3px; font-family: 'Geist Mono', monospace; font-size: 9px; color: {{iphoneColor}}; white-space: nowrap">{{iphoneLens}}</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #45453F">{{lensPrev}}</div>
+<button type="button" class="os-btn" onClick="{{lensDown}}" aria-label="Wider lens" style="width: 44px; height: 30px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8A8A83" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+</button>
+</div>
+<button type="button" class="os-btn" onClick="{{pin}}" aria-label="Pin as shot {{nextId}}" style="width: 64px; height: 64px; box-sizing: border-box; border: 3px solid #F3F3F0; border-radius: 32px; background: transparent; display: flex; align-items: center; justify-content: center">
+<span style="width: 48px; height: 48px; border-radius: 24px; background: #F3F3F0"></span>
+</button>
+<span style="margin-top: -6px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #8A8A83">next {{nextId}}</span>
+<button type="button" class="os-btn" onClick="{{goShots}}" aria-label="Shot list, {{shotCount}} shots" style="width: 44px; height: 44px; position: relative; border: 0; background: transparent">
+<span style="position: absolute; left: 8px; top: 4px; width: 32px; height: 24px; border-radius: 4px; border: 1px solid #45453F; box-sizing: border-box; display: block"></span>
+<span style="position: absolute; left: 4px; top: 10px; width: 32px; height: 24px; border-radius: 4px; background: #2B2B28; border: 1px solid #66665F; box-sizing: border-box; display: block"></span>
+<span style="position: absolute; right: 0; bottom: 2px; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; background: #F3F3F0; color: #111111; font-family: 'Geist Mono', monospace; font-size: 10px; line-height: 18px; text-align: center">{{shotCount}}</span>
+</button>
+</div>
+
+<div style="position: absolute; left: 72px; right: 136px; bottom: 0; height: 56px; display: flex; align-items: center; gap: 16px">
+<div style="display: flex; gap: 4px; flex-shrink: 0" role="group" aria-label="Aspect ratio">
+<sc-for list="{{aspectBar}}" as="item" hint-placeholder-count="4">
+<button type="button" class="os-btn" onClick="{{item.pick}}" aria-label="{{item.aria}}" style="height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 14px; font-family: 'Geist Mono', monospace; font-size: 11px; {{item.css}}">{{item.label}}</button>
+</sc-for>
+<button type="button" class="os-btn" onClick="{{toggleCustom}}" aria-label="Add a custom aspect ratio" style="width: 28px; height: 28px; box-sizing: border-box; border-radius: 14px; display: flex; align-items: center; justify-content: center; {{plusCss}}">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+</button>
+</div>
+<div style="width: 112px; flex-shrink: 0; display: flex; flex-direction: column; gap: 3px">
+<div style="display: flex; align-items: baseline; gap: 8px">
+<span style="font-family: 'Geist Mono', monospace; font-size: 13px">{{timeLabel}}</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #8A8A83">{{elevLabel}}</span>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #B5B5AE">
+<span style="width: 6px; height: 6px; border-radius: 3px; box-sizing: border-box; background: {{lightDotFill}}; border: 1px solid {{lightDotBorder}}"></span>
+{{lightLabel}}
+</div>
+</div>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px">
+<div style="position: relative; height: 18px">
+<div style="position: absolute; left: 88%; width: 5.1%; top: 2px; height: 14px; border-radius: 3px; background: {{accent}}; opacity: 0.35"></div>
+<input class="os-range" type="range" min="360" max="1260" step="1" value="{{minutes}}" onChange="{{onScrub}}" aria-label="Time of day" style="position: absolute; left: 0; top: 0; width: 100%; height: 18px">
+</div>
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 9px; color: #66665F"><span>06</span><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span></div>
+</div>
+</div>
+
+<sc-if value="{{kitOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+<button type="button" class="os-btn" onClick="{{closeSheets}}" aria-label="Close" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 0; background: rgba(0,0,0,0.5)"></button>
+<div style="position: absolute; right: 0; top: 0; bottom: 0; width: 400px; box-sizing: border-box; padding: 16px 18px 0; background: #F3F3F0; color: #111111; display: flex; flex-direction: column; gap: 10px; border-radius: 20px 0 0 20px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">kit panel</div>
+<div style="font-size: 13px; font-weight: 400; letter-spacing: 0">your kit</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{kitSummary}}</div>
+</div>
+<button type="button" class="os-btn" onClick="{{closeSheets}}" style="height: 34px; padding: 0 16px; flex-shrink: 0; border: 0; border-radius: 17px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400">done</button>
+</div>
+<div style="display: flex; gap: 6px">
+<button type="button" class="os-btn" onClick="{{showCamTab}}" style="height: 30px; padding: 0 12px; box-sizing: border-box; border-radius: 15px; font-family: 'Geist Mono', monospace; font-size: 11px; {{camTabCss}}">{{camTabLabel}}</button>
+<button type="button" class="os-btn" onClick="{{showLensTab}}" style="height: 30px; padding: 0 12px; box-sizing: border-box; border-radius: 15px; font-family: 'Geist Mono', monospace; font-size: 11px; {{lensTabCss}}">{{lensTabLabel}}</button>
+</div>
+<sc-if value="{{hasModes}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 10px; border-radius: 12px; background: #FFFFFF; border: 1px solid #D9D9D3">
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">{{modeTitle}}</div>
+<div style="display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none">
+<sc-for list="{{modeChips}}" as="item" hint-placeholder-count="5">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="flex-shrink: 0; height: 28px; padding: 0 10px; box-sizing: border-box; border-radius: 14px; font-family: 'Geist Mono', monospace; font-size: 10px; white-space: nowrap; {{item.css}}">{{item.label}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div>
+<label for="os-kit-search" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search kit</label>
+<input id="os-kit-search" type="search" value="{{kitQuery}}" onChange="{{onKitQuery}}" placeholder="{{kitSearchHint}}" style="width: 100%; height: 36px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D9D9D3; border-radius: 18px; background: #FFFFFF; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">
+</div>
+<div style="flex-grow: 1; min-height: 0; overflow-y: auto; margin: 0 -6px; padding: 0 6px 16px">
+<sc-if value="{{kitEmpty}}" hint-placeholder-val="{{false}}">
+<div style="padding: 16px 4px; font-size: 11px; color: #66665F">Nothing matches. Missing something? It can be requested.</div>
+</sc-if>
+<sc-for list="{{kitRows}}" as="item" hint-placeholder-count="8">
+<sc-if value="{{item.isHeader}}" hint-placeholder-val="{{false}}">
+<div style="padding: 10px 4px 4px; font-family: 'Geist Mono', monospace; font-size: 10px; letter-spacing: 0.04em; color: #66665F">{{item.brand}}</div>
+</sc-if>
+<sc-if value="{{item.isRow}}" hint-placeholder-val="{{true}}">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="width: 100%; height: 44px; padding: 0 10px; box-sizing: border-box; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: left; font-family: 'Geist Mono', monospace; color: #111111; {{item.css}}">
+<span style="display: flex; flex-direction: column; gap: 1px; min-width: 0"><span style="font-size: 12px; font-weight: 400">{{item.name}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{item.sub}}</span></span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F; flex-shrink: 0">{{item.tag}}</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{isShots}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; width: 844px; height: 390px; background: #F3F3F0; color: #111111; display: flex">
+<div style="width: 360px; flex-shrink: 0; border-right: 1px solid #D9D9D3; display: flex; flex-direction: column">
+<div style="height: 68px; flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #D9D9D3">
+<button type="button" class="os-btn" onClick="{{goViewfinder}}" aria-label="Back to viewfinder" style="width: 40px; height: 40px; border: 0; border-radius: 20px; background: #E3E3DD; display: flex; align-items: center; justify-content: center">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<div style="flex-grow: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0">
+<button type="button" class="os-btn" onClick="{{openProjects}}" aria-label="Switch project" style="align-self: flex-start; padding: 0; border: 0; background: transparent; display: flex; align-items: center; gap: 4px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">shot list · {{projName}}<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#66665F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+<div style="font-size: 13px; font-weight: 400; letter-spacing: 0">{{browseTitle}}</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{browseSub}}</div>
+</div>
+<button type="button" class="os-btn" onClick="{{openProjects}}" style="flex-shrink: 0; height: 32px; padding: 0 12px; border: 1px solid #111111; border-radius: 16px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400">projects</button>
+</div>
+<div style="height: 46px; flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #D9D9D3" role="group" aria-label="Scenes">
+<sc-for list="{{sceneTabs}}" as="t" hint-placeholder-count="4">
+<button type="button" class="os-btn" onClick="{{t.pick}}" style="flex-shrink: 0; height: 30px; padding: 0 12px; box-sizing: border-box; border-radius: 15px; display: flex; align-items: center; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; white-space: nowrap; {{t.css}}">{{t.label}}<span style="font-family: 'Geist Mono', monospace; font-size: 10px; opacity: 0.65">{{t.count}}</span></button>
+</sc-for>
+</div>
+<div style="flex-grow: 1; overflow-y: auto; padding: 0 16px">
+<sc-if value="{{noShots}}" hint-placeholder-val="{{false}}">
+<div style="padding: 24px 0; font-size: 12px; line-height: 1.5; color: #66665F">No shots in this scene yet. Pin one from the viewfinder and it lands here.</div>
+</sc-if>
+<sc-for list="{{shotRows}}" as="item" hint-placeholder-count="5">
+<sc-if value="{{item.isHeader}}" hint-placeholder-val="{{false}}">
+<div style="padding: 12px 0 4px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F; border-bottom: 1px solid #D9D9D3">{{item.label}}</div>
+</sc-if>
+<sc-if value="{{item.isRow}}" hint-placeholder-val="{{true}}">
+<button type="button" class="os-btn" onClick="{{item.open}}" style="width: 100%; padding: 10px 8px; margin: 0 -8px; box-sizing: content-box; border: 0; border-bottom: 1px solid #D9D9D3; display: flex; align-items: center; gap: 12px; text-align: left; color: #111111; font-family: 'Geist Mono', monospace; {{item.css}}">
+<span style="width: 64px; height: 40px; flex-shrink: 0; border-radius: 4px; background: #2B2B28; position: relative; display: block"><span style="position: absolute; left: 5px; bottom: 3px; font-family: 'Geist Mono', monospace; font-size: 10px; color: #F3F3F0">{{item.id}}</span></span>
+<span style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 12px; font-weight: 400">{{item.title}}</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{item.meta}}</span>
+</span>
+<span style="width: 7px; height: 7px; flex-shrink: 0; border-radius: 4px; box-sizing: border-box; background: {{item.dotFill}}; border: 1px solid {{item.dotBorder}}"></span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+</div>
+<div style="flex-grow: 1; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<sc-if value="{{hasDetail}}" hint-placeholder-val="{{true}}">
+<div style="width: 444px; height: 186px; position: relative; overflow: hidden; border-radius: 6px; background: #1A1A18">
+<div style="position: absolute; left: {{dSceneLeft}}px; top: {{dSceneTop}}px; width: {{dSceneW}}px; height: {{dSceneH}}px">
+<svg width="100%" height="100%" viewBox="0 0 600 300" aria-hidden="true">
+<rect x="0" y="0" width="600" height="210" fill="{{dSky}}"></rect>
+<sc-if value="{{dSunUp}}" hint-placeholder-val="{{true}}">
+<g transform="translate({{dSunX}} {{dSunY}})">
+<circle cx="0" cy="0" r="16" fill="{{accent}}" fill-opacity="0.18"></circle>
+<g stroke="{{accent}}" stroke-width="1.4" stroke-linecap="round">
+<line x1="0" y1="-10" x2="0" y2="-15" vector-effect="non-scaling-stroke"></line>
+<line x1="0" y1="10" x2="0" y2="15" vector-effect="non-scaling-stroke"></line>
+<line x1="-10" y1="0" x2="-15" y2="0" vector-effect="non-scaling-stroke"></line>
+<line x1="10" y1="0" x2="15" y2="0" vector-effect="non-scaling-stroke"></line>
+<line x1="-7" y1="-7" x2="-10.6" y2="-10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="7" y1="-7" x2="10.6" y2="-10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="-7" y1="7" x2="-10.6" y2="10.6" vector-effect="non-scaling-stroke"></line>
+<line x1="7" y1="7" x2="10.6" y2="10.6" vector-effect="non-scaling-stroke"></line>
+</g>
+<circle cx="0" cy="0" r="6.5" fill="{{accent}}"></circle>
+</g>
+</sc-if>
+<rect x="0" y="210" width="600" height="90" fill="#20201E"></rect>
+<rect x="60" y="150" width="70" height="60" fill="#151513"></rect>
+<rect x="140" y="120" width="44" height="90" fill="#151513"></rect>
+<rect x="196" y="165" width="90" height="45" fill="#151513"></rect>
+<rect x="330" y="100" width="36" height="110" fill="#151513"></rect>
+<rect x="372" y="140" width="80" height="70" fill="#151513"></rect>
+<rect x="470" y="160" width="60" height="50" fill="#151513"></rect>
+</svg>
+</div>
+<span style="position: absolute; left: 10px; bottom: 8px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #F3F3F0">{{detail.id}} · 2.39 · {{detail.lens}}mm · {{detail.time}}</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<div style="font-size: 13px; font-weight: 400; letter-spacing: 0">{{detail.title}}</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{detailScene}} · {{cameraName}}</div>
+</div>
+<div style="margin-top: -6px; display: flex; align-items: center; gap: 6px; font-family: 'Geist Mono', monospace; font-size: 11px; color: #33332F">
+<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#66665F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+{{detailLoc}}
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #D9D9D3; border-bottom: 1px solid #D9D9D3">
+<div style="padding: 8px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">lens</span><span style="font-family: 'Geist Mono', monospace; font-size: 11px">{{detail.lens}}mm</span></div>
+<div style="padding: 8px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">time</span><span style="font-family: 'Geist Mono', monospace; font-size: 11px">{{detail.time}}</span></div>
+<div style="padding: 8px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">light</span><span style="font-family: 'Geist Mono', monospace; font-size: 11px">{{detail.light}}</span></div>
+<div style="padding: 8px 0; display: flex; flex-direction: column; gap: 2px"><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">sun</span><span style="font-family: 'Geist Mono', monospace; font-size: 11px">{{detail.sun}}</span></div>
+</div>
+<div style="display: flex; gap: 8px">
+<button type="button" class="os-btn" onClick="{{deleteShot}}" style="height: 44px; padding: 0 18px; border: 1px solid #D9D9D3; border-radius: 22px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 12px">delete</button>
+<button type="button" class="os-btn" onClick="{{reframe}}" style="height: 44px; padding: 0 18px; border: 1px solid #111111; border-radius: 22px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 400">reframe</button>
+<div style="flex-grow: 1"></div>
+<button type="button" class="os-btn" onClick="{{openExport}}" style="height: 44px; padding: 0 20px; border: 0; border-radius: 22px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 400; display: flex; align-items: center; gap: 8px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F3F3F0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="M7 10l5 5 5-5"></path><path d="M4 20h16"></path></svg>
+export list
+</button>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{exportOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+<button type="button" class="os-btn" onClick="{{closeExport}}" aria-label="Close export" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 0; background: rgba(17,17,17,0.45)"></button>
+<div style="position: absolute; right: 0; top: 0; bottom: 0; width: 380px; box-sizing: border-box; padding: 18px 20px; background: #F3F3F0; display: flex; flex-direction: column; gap: 12px; border-radius: 20px 0 0 20px; overflow-y: auto">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">export panel</div>
+<div style="font-size: 13px; font-weight: 400; letter-spacing: 0">export shot list</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{exportSummary}}</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px" role="group" aria-label="What to export">
+<sc-for list="{{scopeRows}}" as="item" hint-placeholder-count="2">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="height: 50px; padding: 0 12px; box-sizing: border-box; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; text-align: left; font-family: 'Geist Mono', monospace; color: #111111; {{item.css}}">
+<span style="font-size: 12px; font-weight: 400">{{item.label}}</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">{{item.sub}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{showOrder}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; justify-content: space-between; font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F"><span>scene order</span><span>drag to reorder</span></div>
+<div data-order-list="1" onPointerMove="{{orderMove}}" onPointerUp="{{orderEnd}}" onPointerCancel="{{orderEnd}}" onPointerLeave="{{orderEnd}}" style="display: flex; flex-direction: column; gap: 4px; touch-action: none">
+<sc-for list="{{orderRows}}" as="item" hint-placeholder-count="3">
+<div style="height: 40px; box-sizing: border-box; padding: 0 4px 0 10px; border-radius: 10px; display: flex; align-items: center; gap: 10px; font-family: 'Geist Mono', monospace; color: #111111; {{item.css}}">
+<span style="width: 16px; font-size: 10px; color: #66665F">{{item.num}}</span>
+<span style="flex-grow: 1; font-size: 12px">{{item.name}}</span>
+<span style="font-size: 10px; color: #66665F">{{item.count}}</span>
+<button type="button" class="os-btn" onPointerDown="{{item.grab}}" aria-label="Drag to reorder {{item.name}}" style="width: 36px; height: 36px; border: 0; background: transparent; cursor: grab; touch-action: none; display: flex; align-items: center; justify-content: center">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="#66665F" aria-hidden="true"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>
+</button>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{formatRows}}" as="item" hint-placeholder-count="3">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="height: 48px; padding: 0 14px; box-sizing: border-box; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Geist Mono', monospace; color: #111111; {{item.css}}">
+<span style="font-size: 12px; font-weight: 400">{{item.label}}</span>
+<span style="font-size: 11px; color: #66665F">{{item.sub}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{includeChips}}" as="item" hint-placeholder-count="4">
+<button type="button" class="os-btn" onClick="{{item.toggle}}" aria-pressed="{{item.on}}" style="height: 32px; padding: 0 12px; box-sizing: border-box; border-radius: 16px; font-family: 'Geist Mono', monospace; font-size: 11px; {{item.css}}">{{item.label}}</button>
+</sc-for>
+</div>
+<div style="flex-grow: 1"></div>
+<button type="button" class="os-btn" onClick="{{doExport}}" style="height: 48px; flex-shrink: 0; border: 0; border-radius: 24px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 400">{{exportCta}}</button>
+<div style="text-align: center; font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{exportFile}}</div>
+<sc-if value="{{hasPreview}}" hint-placeholder-val="{{true}}">
+<a href="{{previewHref}}" style="align-self: center; font-family: 'Geist Mono', monospace; font-size: 11px; color: #111111">{{previewLabel}} →</a>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{projectsOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0">
+<button type="button" class="os-btn" onClick="{{closeSheets}}" aria-label="Close projects" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 0; background: rgba(0,0,0,0.5)"></button>
+<div style="position: absolute; left: 0; top: 0; bottom: 0; width: 340px; box-sizing: border-box; padding: 16px 18px; background: #F3F3F0; color: #111111; display: flex; flex-direction: column; gap: 10px; border-radius: 0 20px 20px 0">
+<div style="display: flex; flex-direction: column; gap: 2px">
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">projects panel</div>
+<div style="font-size: 13px; font-weight: 400; letter-spacing: 0">projects</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">{{projectCountLabel}}</div>
+</div>
+<div style="flex-grow: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{panelRows}}" as="item" hint-placeholder-count="5">
+<sc-if value="{{item.isProj}}" hint-placeholder-val="{{true}}">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="flex-shrink: 0; padding: 10px 12px; box-sizing: border-box; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; text-align: left; color: #111111; font-family: 'Geist Mono', monospace; {{item.css}}">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; font-weight: 400">{{item.name}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">{{item.sub}}</span></span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#66665F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{item.chev}}"></path></svg>
+</button>
+</sc-if>
+<sc-if value="{{item.isScene}}" hint-placeholder-val="{{false}}">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="flex-shrink: 0; margin-left: 14px; padding: 8px 10px; box-sizing: border-box; border: 0; border-left: 1px solid #D9D9D3; border-radius: 0; background: transparent; display: flex; justify-content: space-between; align-items: center; text-align: left; color: #111111; font-family: 'Geist Mono', monospace">
+<span style="display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; font-weight: 400">{{item.name}}</span><span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">{{item.sub}}</span></span>
+<span style="width: 8px; height: 8px; border-radius: 4px; background: {{item.dot}}"></span>
+</button>
+</sc-if>
+<sc-if value="{{item.isAdd}}" hint-placeholder-val="{{false}}">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="flex-shrink: 0; margin-left: 14px; height: 34px; padding: 0 10px; box-sizing: border-box; border: 0; border-left: 1px dashed #66665F; background: transparent; display: flex; align-items: center; gap: 6px; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+{{item.name}}
+</button>
+</sc-if>
+</sc-for>
+</div>
+<div style="display: flex; gap: 6px; padding-top: 8px; border-top: 1px solid #D9D9D3">
+<label for="os-new-proj" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">New project name</label>
+<input id="os-new-proj" type="text" value="{{newProjName}}" onChange="{{onNewProjName}}" placeholder="new project name" style="flex-grow: 1; min-width: 0; height: 38px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D9D9D3; border-radius: 19px; background: #FFFFFF; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">
+<button type="button" class="os-btn" onClick="{{addProject}}" style="height: 38px; padding: 0 14px; border: 0; border-radius: 19px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400; white-space: nowrap">+ new project</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasPermAsk}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center">
+<div role="dialog" aria-label="Location permission" style="width: 440px; box-sizing: border-box; padding: 20px 22px; background: #F3F3F0; color: #111111; border-radius: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+<div style="display: flex; flex-direction: column; gap: 1px">
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">location permission</span>
+<span style="font-size: 13px; font-weight: 400; letter-spacing: 0">Use your precise location?</span>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 11px; line-height: 1.45; color: #33332F">
+<div style="display: flex; gap: 8px"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F; width: 16px">01</span><span>Names each scene after the street you're on.</span></div>
+<div style="display: flex; gap: 8px"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F; width: 16px">02</span><span>Tags every shot with where it was taken, for the shot list and map.</span></div>
+<div style="display: flex; gap: 8px"><span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F; width: 16px">03</span><span>Works out the sun for that exact spot.</span></div>
+</div>
+<div style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">[privacy line: e.g. stays on your phone unless you share a shot list]</div>
+<div style="display: flex; gap: 8px; align-items: center">
+<button type="button" class="os-btn" onClick="{{permPrecise}}" style="flex-grow: 1; height: 44px; border: 0; border-radius: 22px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 400">allow precise</button>
+<button type="button" class="os-btn" onClick="{{permApprox}}" style="height: 44px; padding: 0 14px; border: 1px solid #111111; border-radius: 22px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">approximate</button>
+<button type="button" class="os-btn" onClick="{{permOff}}" style="height: 44px; padding: 0 12px; border: 0; background: transparent; color: #66665F; font-family: 'Geist Mono', monospace; font-size: 11px">not now</button>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasNaming}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 150px; right: 150px; bottom: 12px; box-sizing: border-box; padding: 16px 18px; background: #F3F3F0; color: #111111; border-radius: 20px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+<span style="font-size: 12px; font-weight: 400">name this scene</span>
+</div>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{namingMeta}}</span>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{nameChips}}" as="item" hint-placeholder-count="5">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="height: 32px; padding: 0 12px; box-sizing: border-box; border-radius: 16px; font-family: 'Geist Mono', monospace; font-size: 11px; {{item.css}}">{{item.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; gap: 8px">
+<label for="os-scene-name" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Scene name</label>
+<input id="os-scene-name" type="text" value="{{nameText}}" onChange="{{onNameText}}" placeholder="or type a name · e.g. farm track, studio b" style="flex-grow: 1; min-width: 0; height: 40px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D9D9D3; border-radius: 20px; background: #FFFFFF; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">
+<button type="button" class="os-btn" onClick="{{finishNaming}}" style="height: 40px; padding: 0 20px; border: 0; border-radius: 20px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 400">done</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{customOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 72px; bottom: 60px; width: 310px; box-sizing: border-box; padding: 14px 16px; background: #F3F3F0; color: #111111; border-radius: 16px; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<span style="font-size: 12px; font-weight: 400">custom aspect</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; color: #66665F">saved to your kit</span>
+</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap">
+<sc-for list="{{presetAspects}}" as="item" hint-placeholder-count="5">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="height: 30px; padding: 0 10px; box-sizing: border-box; border: 1px solid #D9D9D3; border-radius: 15px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">{{item.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; gap: 6px">
+<label for="os-aspect" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Aspect ratio</label>
+<input id="os-aspect" type="text" inputmode="decimal" value="{{customText}}" onChange="{{onCustomText}}" placeholder="2.20 or 4:3" style="flex-grow: 1; min-width: 0; height: 36px; box-sizing: border-box; padding: 0 12px; border: 1px solid #D9D9D3; border-radius: 18px; background: #FFFFFF; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">
+<button type="button" class="os-btn" onClick="{{addCustom}}" style="height: 36px; padding: 0 16px; border: 0; border-radius: 18px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px; font-weight: 400">add</button>
+</div>
+<sc-if value="{{hasCustomError}}" hint-placeholder-val="{{false}}">
+<div style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{customError}}</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{hasPending}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 150px; right: 150px; bottom: 12px; box-sizing: border-box; padding: 16px 18px; background: #F3F3F0; color: #111111; border-radius: 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline">
+<div style="display: flex; align-items: center; gap: 8px">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+<span style="font-size: 12px; font-weight: 400">{{cardTitle}}</span>
+</div>
+<span style="font-family: 'Geist Mono', monospace; font-size: 11px; color: #66665F">{{pendingMeta}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{suggestions}}" as="item" hint-placeholder-count="3">
+<button type="button" class="os-btn" onClick="{{item.pick}}" style="height: 36px; padding: 0 12px; box-sizing: border-box; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; text-align: left; font-family: 'Geist Mono', monospace; font-size: 12px; {{item.css}}">
+<span>{{item.label}}</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 10px; opacity: 0.7">{{item.tag}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; gap: 8px; align-items: center">
+<label for="os-custom" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Your own caption</label>
+<input id="os-custom" type="text" value="{{custom}}" onChange="{{onCustom}}" placeholder="or type your own" style="flex-grow: 1; min-width: 0; height: 40px; box-sizing: border-box; padding: 0 14px; border: 1px solid #D9D9D3; border-radius: 20px; background: #FFFFFF; color: #111111; font-family: 'Geist Mono', monospace; font-size: 12px">
+<button type="button" class="os-btn" onClick="{{cancelPending}}" style="height: 40px; padding: 0 14px; border: 1px solid #D9D9D3; border-radius: 20px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">{{cancelLabel}}</button>
+<button type="button" class="os-btn" onClick="{{savePending}}" style="height: 40px; padding: 0 18px; border: 0; border-radius: 20px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 12px; font-weight: 400">{{saveLabel}}</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasFlash}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: #F3F3F0; opacity: 0.35; pointer-events: none"></div>
+</sc-if>
+
+<sc-if value="{{hasLast}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; right: 0; top: 52px; display: flex; justify-content: center; pointer-events: none">
+<button type="button" class="os-btn" onClick="{{editLast}}" aria-label="Edit caption for shot {{lastLabel}}" style="pointer-events: auto; height: 36px; padding: 0 6px 0 14px; border: 0; border-radius: 18px; background: #F3F3F0; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px; display: flex; align-items: center; gap: 10px">
+<span style="width: 7px; height: 7px; border-radius: 4px; background: {{accent}}"></span>
+<span>{{lastLabel}}</span>
+<span style="height: 26px; padding: 0 10px; border-radius: 13px; background: #111111; color: #F3F3F0; display: flex; align-items: center">edit</span>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{hasMoved}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; right: 0; top: 52px; display: flex; justify-content: center; pointer-events: none">
+<div role="status" style="pointer-events: auto; height: 40px; box-sizing: border-box; padding: 0 4px 0 14px; border-radius: 20px; background: #F3F3F0; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px; display: flex; align-items: center; gap: 10px">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+<span>{{movedText}} · new scene?</span>
+<button type="button" class="os-btn" onClick="{{movedKeep}}" style="height: 32px; padding: 0 12px; border: 1px solid #D9D9D3; border-radius: 16px; background: transparent; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px">keep</button>
+<button type="button" class="os-btn" onClick="{{movedNew}}" style="height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: #111111; color: #F3F3F0; font-family: 'Geist Mono', monospace; font-size: 11px">new scene</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; left: 0; right: 0; top: 52px; display: flex; justify-content: center; pointer-events: none">
+<div role="status" style="padding: 8px 14px; border-radius: 18px; background: #F3F3F0; color: #111111; font-family: 'Geist Mono', monospace; font-size: 11px; display: flex; align-items: center; gap: 8px">
+<span style="width: 7px; height: 7px; border-radius: 4px; background: {{accent}}"></span>
+{{toast}}
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{hasTouch}}" hint-placeholder-val="{{false}}">
+<div aria-hidden="true" style="position: absolute; left: {{touchX}}px; top: {{touchY}}px; width: 36px; height: 36px; box-sizing: border-box; border-radius: 18px; border: 2px solid rgba(243,243,240,0.9); background: rgba(243,243,240,0.25); transform: scale({{touchScale}}); transition: left 0.5s ease, top 0.5s ease, transform 0.15s ease; pointer-events: none"></div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FF5A1F","options":["#FF5A1F","#E8A33D","#2F6BFF"]},"start":{"editor":"enum","options":["viewfinder","caption","shots","export","kit","projects","perm","moved","exportall","shot"],"default":"viewfinder"},"sceneDetect":{"editor":"enum","options":["auto","off"],"default":"auto"},"demo":{"editor":"enum","options":["off","loop"],"default":"off"},"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this._root = { current: null };
+    this.state = {
+      screen: 'viewfinder',
+      sheet: null,
+      project: 'brick',
+      lens: 35,
+      aspect: 2.39,
+      minutes: 1152,
+      camera: 'ARRI ALEXA 35',
+      mode: null,
+      series: 'Canon K35',
+      kitTab: 'camera',
+      kitQuery: '',
+      showPath: true,
+      showGrid: false,
+      showLevel: false,
+      detailId: null,
+      exportOpen: false,
+      format: 'pdf',
+      include: { frames: true, 'sun times': true, map: true, notes: false },
+      toast: null,
+      pending: null,
+      lastShot: null,
+      moved: null,
+      movedDone: false,
+      flash: false,
+      custom: '',
+      aspects: [
+        { v: 2.39, label: '2.39' },
+        { v: 1.85, label: '1.85' },
+        { v: 16 / 9, label: '16:9' },
+        { v: 9 / 16, label: '9:16' }
+      ],
+      customOpen: false,
+      customText: '',
+      customError: '',
+      shots: {
+        brick: [
+          { id: '1A', title: 'wide · café front', lens: 24, minutes: 1152 },
+          { id: '1B', title: 'mid · two-shot at window', lens: 50, minutes: 1160 },
+          { id: '2A', title: 'close · hands, coffee', lens: 85, minutes: 780 },
+          { id: '3A', title: 'tracking · walk to corner', lens: 35, minutes: 1180 },
+          { id: '4A', title: 'wide · rooftop silhouette', lens: 25, minutes: 1196 }
+        ],
+        canal: [
+          { id: '1A', title: 'wide · towpath at dawn', lens: 25, minutes: 400 },
+          { id: '2A', title: 'mid · bridge underside', lens: 50, minutes: 430 }
+        ],
+        roof: [],
+        dock: [
+          { id: '1A', title: 'wide · runner on the quay', lens: 25, minutes: 1170 },
+          { id: '1B', title: 'tight · shoe detail, wet stone', lens: 100, minutes: 1175 }
+        ]
+      },
+      proj: 'ns',
+      expanded: 'ns',
+      newProjName: '',
+      projectList: [
+        { key: 'ns', name: 'night shift', sub: 'short film', scenes: ['brick', 'canal', 'roof'] },
+        { key: 'nk', name: 'spring campaign', sub: 'commercial', scenes: ['dock'] }
+      ],
+      scenes: {
+        brick: { name: 'brick lane', sub: 'ext. day · 12 apr', loc: 'brick lane, e1 · 51.5216°N 0.0717°W' },
+        canal: { name: 'canal path', sub: 'ext. dawn · 12 apr', loc: "regent's canal, n1 · 51.5363°N 0.0847°W" },
+        roof: { name: 'rooftop', sub: 'ext. night · 12 apr', loc: 'shoreditch, e2 · 51.5262°N 0.0779°W' },
+        dock: { name: 'east dock', sub: 'ext. day · 14 apr', loc: 'royal victoria dock, e16 · 51.5079°N 0.0244°E' }
+      },
+      locPerm: null,
+      permAsk: null,
+      naming: null,
+      nameText: ''
+    };
+    const start = props && props.start;
+    if (start === 'caption') {
+      this.state.pending = { id: '5A', project: 'brick', lens: 25, minutes: 1196, options: [{ text: 'wide · rooftop silhouette', tag: 'auto' }].concat(this.suggest('brick', 25, 1196, false, 5).slice(0, 2)), pick: 0, editing: true };
+    } else if (start === 'shots') {
+      this.state.screen = 'shots'; this.state.browse = 'brick';
+    } else if (start === 'export') {
+      this.state.screen = 'shots'; this.state.browse = 'brick'; this.state.exportOpen = true;
+    } else if (start === 'kit') {
+      this.state.sheet = 'kit';
+    } else if (start === 'projects') {
+      this.state.sheet = 'projects';
+    } else if (start === 'shot') {
+      const opts = [{ text: 'wide · street, low sun', tag: 'auto' }].concat(this.suggest('brick', 35, 1152, true, 5).slice(0, 2));
+      this.state.shots = { ...this.state.shots, brick: [...this.state.shots.brick, { id: '6A', title: opts[0].text, lens: 35, minutes: 1152 }] };
+      this.state.lastShot = { id: '6A', project: 'brick', lens: 35, minutes: 1152, options: opts, title: opts[0].text };
+    } else if (start === 'exportall') {
+      this.state.screen = 'shots'; this.state.browse = 'all'; this.state.exportScope = 'all'; this.state.exportOpen = true;
+    } else if (start === 'moved') {
+      this.state.moved = { from: 'brick', dist: 320 };
+      this.state.movedDone = true;
+    } else if (start === 'perm') {
+      this.state.permAsk = 'ns';
+    }
+  }
+  componentDidMount() {
+    if (this.props.demo === 'loop') { this.setState({ demoOn: true }); this._dt = setTimeout(() => this.runDemo(), 800); }
+    const mode = this.props.sceneDetect || 'auto';
+    if (mode === 'auto' && (this.props.start || 'viewfinder') === 'viewfinder') {
+      this._mt = setTimeout(() => this.triggerMove(), 9000);
+    }
+  }
+  stopDemo() {
+    clearTimeout(this._dt); clearInterval(this._di); (this._dts || []).forEach(clearTimeout); this._dts = [];
+    this.setState({ demoOn: false, touch: null });
+  }
+  demoPos(sel, fx, fy) {
+    const root = this._root.current;
+    if (!root) return null;
+    const el = root.querySelector(sel);
+    if (!el) return null;
+    const rr = root.getBoundingClientRect(), er = el.getBoundingClientRect();
+    const k = rr.width / 844 || 1;
+    return { x: (er.left - rr.left + er.width * (fx ?? 0.5)) / k, y: (er.top - rr.top + er.height * (fy ?? 0.5)) / k };
+  }
+  runDemo() {
+    if (!this.state.demoOn) return;
+    this._dts = [];
+    const steps = [];
+    const at = (ms, fn) => steps.push([ms, fn]);
+    const tap = (ms, sel, fn) => {
+      at(ms, () => { const p = this.demoPos(sel); if (p) this.setState({ touch: { ...p, down: false } }); });
+      at(ms + 550, () => { this.setState({ touch: { ...this.state.touch, down: true } }); fn(); });
+      at(ms + 750, () => this.setState({ touch: { ...this.state.touch, down: false } }));
+    };
+    const base = this._base || (this._base = { shots: this.state.shots, lens: this.state.lens });
+    at(0, () => this.setState({ minutes: 1000, lens: base.lens, shots: base.shots, lastShot: null, pending: null, sheet: null, screen: 'viewfinder' }));
+    // 1. drag the sun timeline from now to golden hour
+    at(300, () => { const p = this.demoPos('input[aria-label="Time of day"]', (1000 - 360) / 900, 0.5); if (p) this.setState({ touch: { ...p, down: true } }); });
+    at(900, () => {
+      const t0 = Date.now();
+      clearInterval(this._di);
+      this._di = setInterval(() => {
+        const k = Math.min(1, (Date.now() - t0) / 2600);
+        const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        const m = Math.round(1000 + (1180 - 1000) * e);
+        const p = this.demoPos('input[aria-label="Time of day"]', (m - 360) / 900, 0.5);
+        this.setState({ minutes: m, touch: p ? { ...p, down: true } : this.state.touch });
+        if (k >= 1) clearInterval(this._di);
+      }, 40);
+    });
+    at(3700, () => this.setState({ touch: { ...this.state.touch, down: false } }));
+    // 2. turn the focal dial: longer, longer, then back one
+    tap(4300, 'button[aria-label="Longer lens"]', () => this._vals.lensUp());
+    tap(5300, 'button[aria-label="Longer lens"]', () => this._vals.lensUp());
+    tap(6300, 'button[aria-label="Wider lens"]', () => this._vals.lensDown());
+    // 3. take the shot
+    tap(7500, 'button[aria-label^="Pin as shot"]', () => this._vals.pin());
+    at(9000, () => this.setState({ touch: null }));
+    at(12500, () => this.runDemo());
+    steps.forEach(([ms, fn]) => {
+      const id = setTimeout(() => { if (this.state.demoOn) fn(); }, ms);
+      this._dts.push(id);
+    });
+  }
+  triggerMove() {
+    const s = this.state;
+    if (s.movedDone || s.screen !== 'viewfinder' || s.pending || s.naming || s.permAsk || s.sheet) {
+      if (!s.movedDone) this._mt = setTimeout(() => this.triggerMove(), 4000);
+      return;
+    }
+    this.setState({ moved: { from: s.project, dist: 320 }, movedDone: true });
+  }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._lt); clearTimeout(this._ft); clearTimeout(this._mt); clearTimeout(this._dt); clearInterval(this._di); (this._dts || []).forEach(clearTimeout); }
+  showToast(msg) {
+    clearTimeout(this._t);
+    this.setState({ toast: msg });
+    this._t = setTimeout(() => this.setState({ toast: null }), 1800);
+  }
+  fmt(m) {
+    const h = Math.floor(m / 60), mm = Math.round(m % 60);
+    return String(h).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  }
+  light(m) {
+    if (m < 372) return 'before sunrise';
+    if (m < 420) return 'golden hour';
+    if (m < 660) return 'morning';
+    if (m < 900) return 'midday';
+    if (m < 1152) return 'afternoon';
+    if (m < 1198) return 'golden hour';
+    if (m < 1234) return 'blue hour';
+    return 'after dark';
+  }
+  bearing(m) { return Math.round(90 + (m - 360) / 900 * 180); }
+  elev(m) { return Math.round(45 * Math.sin(Math.PI * (m - 372) / 826)); }
+  dir(b) {
+    const names = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw'];
+    return names[Math.round((((b % 360) + 360) % 360) / 45) % 8];
+  }
+  sky(m) {
+    if (m >= 1198 && m < 1234) return '#22262E';
+    if (m >= 1234 || m < 372) return '#161716';
+    return '#2B2B28';
+  }
+  sun(m) {
+    const t = Math.min(1, Math.max(0, (m - 360) / 900));
+    return {
+      x: Math.round((1 - t) * (1 - t) * 40 + 2 * (1 - t) * t * 300 + t * t * 560),
+      y: Math.round((1 - t) * (1 - t) * 210 + 2 * (1 - t) * t * -60 + t * t * 210),
+      up: m >= 372 && m < 1198
+    };
+  }
+  pathSeg(a, b2) {
+    const pts = [];
+    for (let m = a; m <= b2; m += 4) { const p = this.sun(m); pts.push(p.x + ' ' + p.y); }
+    return 'M ' + pts.join(' L ');
+  }
+  sunHud(m, sc, fw, fh, b, el, fl, ft) {
+    const NOW = 1000;
+    const toF = (p) => ({ x: sc.left + p.x / 600 * sc.w, y: sc.top + p.y / 300 * sc.h });
+    const hourTicks = [], hourLabels = [], hourLabelsOuter = [];
+    for (let h = 7; h <= 19; h += 2) {
+      const p = this.sun(h * 60);
+      hourTicks.push({ x: p.x, y: p.y });
+      const q = toF(p);
+      const lab = String(h).padStart(2, '0');
+      if (q.x > 10 && q.x < fw - 10 && q.y > 4 && q.y < fh - 14) hourLabels.push({ x: Math.round(q.x), y: Math.round(q.y - 16), label: lab });
+      else hourLabelsOuter.push({ x: Math.round(fl + q.x), y: Math.round(ft + q.y - 16), label: lab });
+    }
+    const sp = this.sun(m), sf = toF(sp);
+    const up = sp.up;
+    const inView = up && sf.x >= 0 && sf.x <= fw && sf.y >= 0 && sf.y <= fh;
+    const az = Math.round(b), off = Math.round((sf.x - fw / 2) / sc.w * 180);
+    const nowP = this.sun(NOW);
+    const delta = m - NOW;
+    const dh = Math.floor(Math.abs(delta) / 60), dmn = Math.round(Math.abs(delta) % 60);
+    return {
+      goldAm: this.pathSeg(372, 420),
+      goldPm: this.pathSeg(1152, 1198),
+      hourTicks, hourLabels,
+      showNowRing: Math.abs(delta) > 6 && nowP.up,
+      nowX: nowP.x, nowY: nowP.y,
+      sunInView: inView,
+      sunLabelX: Math.round(Math.min(fw - 120, sf.x + 14)),
+      sunLabelY: Math.round(Math.max(2, sf.y - 26)),
+      sunReadout: 'az ' + az + '° · el ' + Math.max(0, el) + '°',
+      hourLabelsOuter,
+      sunOff: up && !inView,
+      sunEdgeX: Math.round(Math.max(6, Math.min(fw - 150, sf.x - 70))),
+      sunEdgeY: Math.round(Math.max(6, Math.min(fh - 26, sf.y))),
+      sunOffText: (sf.x < 0 ? '← ' : sf.x > fw ? '' : '↑ ') + 'sun ' + (Math.abs(off) > 2 ? Math.abs(off) + '° ' + (off < 0 ? 'left' : 'right') + ' · ' : '') + 'el ' + Math.max(0, el) + '°' + (sf.x > fw ? ' →' : ''),
+      clockNow: this.fmt(NOW),
+      scrubbed: Math.abs(delta) > 1,
+      notScrubbed: Math.abs(delta) <= 1,
+      scrubDelta: (delta > 0 ? '+' : '−') + dh + 'h' + String(dmn).padStart(2, '0'),
+      clockAria: Math.abs(delta) > 1 ? 'Now ' + this.fmt(NOW) + ', showing ' + this.fmt(m) + '. Tap to go back to now' : 'Now ' + this.fmt(NOW),
+      snapNow: () => this.setState({ minutes: NOW })
+    };
+  }
+  suggest(project, lens, m, sunInFrame, count) {
+    const size = lens <= 25 ? 'wide' : lens <= 35 ? 'medium wide' : lens <= 50 ? 'mid' : lens <= 75 ? 'close' : 'tight';
+    const alt = lens <= 25 ? 'establishing' : lens <= 50 ? 'two-shot' : 'detail';
+    const seen = {
+      brick: ['shopfront, string lights', 'rooftops against sky', 'street corner, long shadows', 'doorway in shade', 'café window'],
+      canal: ['towpath and water', 'bridge underside', 'moored narrowboat', 'brick arch'],
+      roof: ['skyline', 'water tank and railings', 'stairwell door']
+    }[project] || ['location'];
+    const a = seen[count % seen.length];
+    const b = seen[(count + 1) % seen.length];
+    const golden = this.light(m) === 'golden hour';
+    const lightBit = !this.sun(m).up ? ', after dark' : sunInFrame ? ', into the sun' : golden ? ', golden light' : '';
+    return [
+      { text: size + ' · ' + a + lightBit, tag: 'best match' },
+      { text: size + ' · ' + b, tag: 'also in frame' },
+      { text: alt + ' · ' + a, tag: 'alt framing' }
+    ];
+  }
+  catalog() {
+    if (this._cat) return this._cat;
+    const C = (brand, name, format, res, modes) => ({ brand, name, format, res, modes: modes || null });
+    const M = (name, w) => ({ name, w });
+    const alexa35 = [
+      M('4.6K 3:2 Open Gate', 28.0), M('4.6K 16:9', 28.0), M('4K 16:9', 24.9), M('4K 2:1', 24.9),
+      M('3.8K 16:9 UHD', 23.3), M('3.3K 6:5', 20.2), M('3K 1:1', 18.7), M('2.7K 8:9', 16.4), M('2K 16:9 S16', 12.4)
+    ];
+    const L = (brand, name, type, focals, zoom) => ({ brand, name, type, focals, zoom: !!zoom });
+    this._cat = {
+      cameras: [
+        C('ARRI', 'ALEXA 35', 'S35', '4.6K', alexa35),
+        C('ARRI', 'ALEXA 35 Xtreme', 'S35', '4.6K · up to 660fps', [M('4K 16:9 · 330fps · 660 overdrive', 24.88), M('other formats · to confirm', 24.88)]),
+        C('ARRI', 'ALEXA Mini LF', 'LF', '4.5K', [M('4.5K LF Open Gate', 36.7), M('4.5K LF 3:2', 36.7), M('4.5K LF 2.39:1', 36.7), M('3.8K LF 16:9 UHD', 31.7), M('2.8K LF 1:1', 23.8)]),
+        C('ARRI', 'ALEXA Mini', 'S35', '3.4K', [M('3.4K Open Gate', 28.3), M('3.2K 16:9', 26.4), M('2.8K 4:3', 23.8), M('2.8K 16:9', 23.8), M('2.8K 6:5 anamorphic', 23.8), M('HD 16:9', 23.8)]),
+        C('ARRI', 'ALEXA LF', 'LF', '4.5K'),
+        C('ARRI', 'ALEXA 65', '65mm', '6.5K'),
+        C('ARRI', 'AMIRA', 'S35', '3.2K'),
+        C('ARRI', 'ARRICAM LT', '35mm film', '4-perf'),
+        C('ARRI', 'ARRIFLEX 416', 'S16', 'film'),
+        C('RED', 'V-RAPTOR 8K VV', 'VV', '8K'),
+        C('RED', 'V-RAPTOR [X] 8K VV', 'VV', '8K'),
+        C('RED', 'V-RAPTOR 8K S35', 'S35', '8K'),
+        C('RED', 'KOMODO-X 6K', 'S35', '6K'),
+        C('RED', 'KOMODO 6K', 'S35', '6K'),
+        C('RED', 'MONSTRO 8K VV', 'VV', '8K'),
+        C('Sony', 'VENICE 2 8K', 'FF', '8.6K', [M('8.6K 3:2 FF', 36.0), M('8.2K 17:9 FF', 34.4), M('8.2K 2.39:1 FF', 34.4), M('5.8K 6:5 S35 anamorphic', 24.3), M('5.5K 2.39:1 S35', 23.0)]),
+        C('Sony', 'VENICE 2 6K', 'FF', '6K'),
+        C('Sony', 'BURANO', 'FF', '8.6K'),
+        C('Sony', 'FX9', 'FF', '6K'),
+        C('Sony', 'FX6', 'FF', '4K'),
+        C('Sony', 'FX3', 'FF', '4K'),
+        C('Canon', 'EOS C700 FF', 'FF', '5.9K'),
+        C('Canon', 'EOS C500 Mark II', 'FF', '5.9K'),
+        C('Canon', 'EOS C400', 'FF', '6K'),
+        C('Canon', 'EOS C300 Mark III', 'S35', '4K'),
+        C('Canon', 'EOS C70', 'S35', '4K'),
+        C('Blackmagic', 'URSA Cine 12K LF', 'LF', '12K'),
+        C('Blackmagic', 'URSA Mini Pro 12K', 'S35', '12K'),
+        C('Blackmagic', 'PYXIS 6K', 'FF', '6K'),
+        C('Blackmagic', 'Cinema Camera 6K', 'FF', '6K'),
+        C('Blackmagic', 'Pocket 6K Pro', 'S35', '6K'),
+        C('Blackmagic', 'Pocket 4K', 'MFT', '4K'),
+        C('Panavision', 'Millennium DXL2', 'VV', '8K'),
+        C('Panasonic', 'VariCam LT', 'S35', '4K'),
+        C('Panasonic', 'Lumix S1H', 'FF', '6K'),
+        C('DJI', 'Ronin 4D 8K', 'FF', '8K'),
+        C('Freefly', 'Ember S5K', 'S35', '5K high speed', [M('5K 5:4 full sensor', 23.04)]),
+        C('Freefly', 'Ember S2.5K', 'S35', '2.5K high speed', [M('2.5K 5:4 full sensor', 23.04)]),
+        C('Aaton', 'XTR Prod', 'S16', 'film')
+      ],
+      lenses: [
+        L('Canon', 'K35', 'spherical · vintage', [18, 24, 35, 55, 85]),
+        L('Canon', 'Sumire Prime', 'spherical', [14, 20, 24, 35, 50, 85, 135]),
+        L('Cooke', 'S4/i', 'spherical', [18, 25, 32, 40, 50, 75, 100, 135]),
+        L('Cooke', 'S7/i Full Frame Plus', 'spherical', [18, 25, 32, 40, 50, 75, 100, 135]),
+        L('Cooke', 'Panchro/i Classic FF', 'spherical · vintage look', [18, 25, 32, 40, 50, 75, 100, 135]),
+        L('Cooke', 'Speed Panchro', 'spherical · vintage', [18, 25, 32, 40, 50, 75]),
+        L('Cooke', 'Anamorphic/i SF', 'anamorphic 2x', [32, 40, 50, 75, 100]),
+        L('Zeiss', 'Super Speed', 'spherical · vintage', [18, 25, 35, 50, 85]),
+        L('Zeiss', 'Standard Speed', 'spherical · vintage', [16, 20, 24, 28, 32, 40, 50, 85]),
+        L('Zeiss', 'Supreme Prime', 'spherical', [18, 21, 25, 29, 35, 50, 65, 85, 100, 135]),
+        L('Zeiss', 'CP.3', 'spherical', [18, 21, 25, 28, 35, 50, 85, 100, 135]),
+        L('ARRI', 'Signature Prime', 'spherical', [18, 25, 35, 47, 58, 75, 95, 125]),
+        L('ARRI / Zeiss', 'Master Prime', 'spherical', [18, 25, 32, 40, 50, 75, 100, 135]),
+        L('ARRI / Zeiss', 'Ultra Prime', 'spherical', [16, 20, 24, 28, 32, 40, 50, 65, 85, 100, 135]),
+        L('ARRI / Zeiss', 'Master Anamorphic', 'anamorphic 2x', [35, 40, 50, 60, 75, 100]),
+        L('Leitz', 'Summilux-C', 'spherical', [18, 21, 25, 29, 35, 40, 50, 65, 75, 100, 135]),
+        L('Leitz', 'Thalia', 'spherical', [24, 30, 35, 45, 55, 70, 90, 100, 120, 180]),
+        L('Panavision', 'Primo', 'spherical', [17.5, 21, 24, 27, 35, 40, 50, 75, 100]),
+        L('Panavision', 'Ultra Speed', 'spherical · vintage', [24, 29, 35, 50, 85]),
+        L('Panavision', 'C Series', 'anamorphic 2x', [35, 40, 50, 75, 100]),
+        L('Atlas', 'Orion', 'anamorphic 2x', [21, 25, 32, 40, 50, 65, 80, 100]),
+        L('Kowa', 'Cine Prominar', 'anamorphic 2x · vintage', [40, 50, 75, 100]),
+        L('Lomo', 'Roundfront', 'anamorphic 2x · vintage', [35, 50, 75, 100]),
+        L('Sigma', 'Cine FF High Speed', 'spherical', [14, 20, 24, 28, 35, 40, 50, 85, 105, 135]),
+        L('Tokina', 'Vista', 'spherical', [18, 25, 29, 35, 40, 50, 85, 105, 135]),
+        L('DZOFilm', 'Vespid', 'spherical', [16, 21, 25, 35, 50, 75, 100, 125]),
+        L('Sony', 'G Master', 'spherical · stills', [24, 35, 50, 85, 135]),
+        L('Angénieux', 'Optimo Ultra 12x', 'zoom', [24, 28, 35, 50, 70, 100, 135, 180, 240, 290], true),
+        L('Angénieux', 'Optimo 15–40', 'zoom', [15, 18, 21, 25, 30, 35, 40], true),
+        L('Fujinon', 'Premista 28–100', 'zoom', [28, 35, 40, 50, 65, 75, 85, 100], true)
+      ]
+    };
+    return this._cat;
+  }
+  scene(fw, fh, lens, crop) {
+    const w = Math.round(fw * Math.max(1, lens * (crop || 1) / 12));
+    const h = Math.round(w / 2);
+    return { w, h, left: Math.round((fw - w) / 2), top: Math.round(fh * 0.62 - h * 0.7) };
+  }
+  renderVals() {
+    const s = this.state;
+    const accent = this.props.accent ?? '#FF5A1F';
+    const projects = s.scenes;
+    const proj = s.projectList.find((p) => p.key === s.proj) || s.projectList[0];
+    const createScene = (pkey, perm) => {
+      const p = s.projectList.find((x) => x.key === pkey);
+      if (!p) return;
+      const key = 'sc' + Date.now();
+      const streets = [
+        { name: 'redchurch st', loc: 'redchurch st, e2 · 51.5246°N 0.0734°W', landmark: 'boxpark corner' },
+        { name: 'sclater st', loc: 'sclater st, e1 · 51.5233°N 0.0716°W', landmark: 'sclater st market' },
+        { name: 'cheshire st', loc: 'cheshire st, e2 · 51.5240°N 0.0688°W', landmark: 'railway arches' },
+        { name: 'hanbury st', loc: 'hanbury st, e1 · 51.5203°N 0.0712°W', landmark: 'truman brewery' }
+      ];
+      const used = p.scenes.map((k) => s.scenes[k].name);
+      const st = streets.find((x) => used.indexOf(x.name) === -1) || streets[0];
+      let name, sub, loc, options;
+      if (perm === 'precise') {
+        name = st.name; sub = 'named from location · today'; loc = st.loc;
+        options = [st.name, st.landmark, 'shoreditch', 'studio', 'interior', 'field'];
+      } else if (perm === 'approx') {
+        name = 'shoreditch ' + (p.scenes.length + 1); sub = 'approximate area · today'; loc = 'shoreditch, london · approximate';
+        options = [name, 'studio', 'interior', 'field', 'exterior'];
+      } else {
+        name = 'scene ' + (p.scenes.length + 1); sub = 'new · today'; loc = 'location off';
+        options = [name, 'studio', 'interior', 'field', 'exterior'];
+      }
+      this.setState({
+        scenes: { ...s.scenes, [key]: { name, sub, loc } },
+        shots: { ...s.shots, [key]: [] },
+        projectList: s.projectList.map((x) => x.key === pkey ? { ...x, scenes: [...x.scenes, key] } : x),
+        proj: pkey, project: key, browse: key, expanded: pkey, detailId: null,
+        naming: { key, options, pname: p.name }, nameText: '', permAsk: null, sheet: null
+      });
+    };
+    const addScene = (pkey) => {
+      if (s.locPerm == null) { this.setState({ permAsk: pkey, sheet: null }); return; }
+      createScene(pkey, s.locPerm);
+    };
+    const addProject = () => {
+      const name = (s.newProjName || '').trim() || 'untitled project';
+      const pkey = 'p' + Date.now();
+      const skey = 'sc' + Date.now();
+      this.setState({
+        projectList: [...s.projectList, { key: pkey, name, sub: 'new project', scenes: [skey] }],
+        scenes: { ...s.scenes, [skey]: { name: 'scene 1', sub: 'new · today' } },
+        shots: { ...s.shots, [skey]: [] },
+        proj: pkey, project: skey, browse: skey, expanded: pkey, newProjName: '', detailId: null, sheet: null
+      });
+      this.showToast('project "' + name + '" created · scene 1 ready');
+    };
+    const panelRows = [];
+    s.projectList.forEach((p) => {
+      const open = s.expanded === p.key;
+      const shotsIn = p.scenes.reduce((n, k) => n + (s.shots[k] || []).length, 0);
+      panelRows.push({
+        isProj: true, isScene: false, isAdd: false,
+        name: p.name,
+        sub: p.sub + ' · ' + p.scenes.length + (p.scenes.length === 1 ? ' scene' : ' scenes') + ' · ' + shotsIn + ' shots',
+        css: p.key === proj.key ? 'background: #FFFFFF; border: 2px solid #111111;' : 'background: transparent; border: 1px solid #D9D9D3;',
+        chev: open ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6',
+        pick: () => this.setState({ expanded: open ? null : p.key })
+      });
+      if (open) {
+        p.scenes.forEach((k) => {
+          const n = (s.shots[k] || []).length;
+          panelRows.push({
+            isProj: false, isScene: true, isAdd: false,
+            name: s.scenes[k].name,
+            sub: s.scenes[k].sub + ' · ' + n + (n === 1 ? ' shot' : ' shots'),
+            dot: k === s.project ? accent : 'transparent',
+            pick: () => this.setState({ proj: p.key, project: k, browse: k, sheet: null, detailId: null })
+          });
+        });
+        panelRows.push({ isProj: false, isScene: false, isAdd: true, name: 'new scene in ' + p.name, pick: () => addScene(p.key) });
+      }
+    });
+    const cat = this.catalog();
+    const cam = cat.cameras.find((c) => c.brand + ' ' + c.name === s.camera) || cat.cameras[0];
+    const series = cat.lenses.find((l) => l.brand + ' ' + l.name === s.series) || cat.lenses[0];
+    const mode = cam.modes ? (cam.modes.find((x) => x.name === s.mode) || cam.modes[0]) : null;
+    const crop = mode ? 24.9 / mode.w : ({ S35: 1, FF: 0.69, LF: 0.66, VV: 0.66, '65mm': 0.5, '35mm film': 1, S16: 2.05, MFT: 1.45 }[cam.format] || 1);
+    const modeChips = cam.modes ? cam.modes.map((x) => ({
+      label: x.name.toLowerCase(),
+      css: x === mode ? 'background: #111111; color: #F3F3F0; border: 1px solid #111111;' : 'background: transparent; color: #111111; border: 1px solid #D9D9D3;',
+      pick: () => this.setState({ mode: x.name })
+    })) : [];
+    const q = (s.kitQuery || '').toLowerCase().trim();
+    const match = (txt) => !q || txt.toLowerCase().indexOf(q) !== -1;
+    const kitRows = [];
+    let lastBrand = '';
+    let kitHits = 0;
+    if (s.kitTab === 'camera') {
+      cat.cameras.forEach((c) => {
+        if (!match(c.brand + ' ' + c.name + ' ' + c.format)) return;
+        if (c.brand !== lastBrand) { kitRows.push({ isHeader: true, isRow: false, brand: c.brand }); lastBrand = c.brand; }
+        const sel = c === cam;
+        kitHits++;
+        kitRows.push({
+          isHeader: false, isRow: true,
+          name: c.name.toLowerCase(),
+          sub: c.format + ' · ' + c.res + (c.modes ? ' · ' + c.modes.length + ' modes' : ''),
+          tag: sel ? 'selected' : '',
+          css: sel ? 'border: 2px solid #111111; background: #FFFFFF;' : 'border: 1px solid transparent; background: transparent;',
+          pick: () => this.setState({ camera: c.brand + ' ' + c.name, mode: null })
+        });
+      });
+    } else {
+      cat.lenses.forEach((l) => {
+        if (!match(l.brand + ' ' + l.name + ' ' + l.type)) return;
+        if (l.brand !== lastBrand) { kitRows.push({ isHeader: true, isRow: false, brand: l.brand }); lastBrand = l.brand; }
+        const sel = l === series;
+        const lo = l.focals[0], hi = l.focals[l.focals.length - 1];
+        kitHits++;
+        kitRows.push({
+          isHeader: false, isRow: true,
+          name: l.name.toLowerCase(),
+          sub: l.type + ' · ' + (l.zoom ? 'zoom ' + lo + '–' + hi + 'mm' : lo + '–' + hi + 'mm · ' + l.focals.length + ' lenses'),
+          tag: sel ? 'selected' : '',
+          css: sel ? 'border: 2px solid #111111; background: #FFFFFF;' : 'border: 1px solid transparent; background: transparent;',
+          pick: () => {
+            const near = l.focals.reduce((a, f) => Math.abs(f - s.lens) < Math.abs(a - s.lens) ? f : a, l.focals[0]);
+            const ana = l.type.indexOf('anamorphic') !== -1;
+            this.setState({ series: l.brand + ' ' + l.name, lens: near, aspect: ana ? 2.39 : s.aspect });
+            if (ana) this.showToast('anamorphic · frame set to 2.39');
+          }
+        });
+      });
+    }
+    const shots = s.shots[s.project] || [];
+    const nextId = (shots.length + 1) + 'A';
+    const on = 'background: #111111; color: #F3F3F0; border: 1px solid #111111;';
+    const off = 'background: transparent; color: #111111; border: 1px solid #D9D9D3;';
+    const railOn = 'background: #F3F3F0; color: #111111; border: 0;';
+    const railOff = 'background: transparent; color: #B5B5AE; border: 1px solid #2E2E2B;';
+    const lenses = series.focals;
+    let li = lenses.indexOf(s.lens);
+    if (li === -1) li = lenses.reduce((bi, f, i) => Math.abs(f - s.lens) < Math.abs(lenses[bi] - s.lens) ? i : bi, 0);
+    const aspects = s.aspects;
+    const aspectName = (a) => {
+      const f = aspects.find((x) => Math.abs(x.v - a) < 0.001);
+      return f ? f.label : String(Math.round(a * 100) / 100);
+    };
+    const barOn = 'background: #F3F3F0; color: #111111; border: 1px solid #F3F3F0;';
+    const barOff = 'background: transparent; color: #B5B5AE; border: 1px solid #2E2E2B;';
+    const addAspect = (raw) => {
+      const txt = String(raw || '').trim().replace(/\s+/g, '');
+      let v = NaN;
+      let label = txt;
+      const parts = txt.split(':');
+      if (parts.length === 2 && Number(parts[0]) > 0 && Number(parts[1]) > 0) {
+        v = Number(parts[0]) / Number(parts[1]);
+        if (Number(parts[1]) === 1) label = String(Number(parts[0]));
+      } else if (parts.length === 1) {
+        v = Number(txt);
+        label = String(v);
+      }
+      if (!(v >= 0.3 && v <= 4)) {
+        this.setState({ customError: 'try 2.20, 4:3 or 2.76:1' });
+        return;
+      }
+      const exists = aspects.find((x) => Math.abs(x.v - v) < 0.005);
+      this.setState({
+        aspects: exists ? aspects : [...aspects, { v, label }],
+        aspect: exists ? exists.v : v,
+        customOpen: false,
+        customText: '',
+        customError: ''
+      });
+    };
+
+    const m = s.minutes;
+    const lightLabel = this.light(m);
+    const golden = lightLabel === 'golden hour';
+    const b = this.bearing(m);
+    const el = this.elev(m);
+    const sun = this.sun(m);
+
+    const fh0 = 276;
+    let fw = Math.round(fh0 * s.aspect);
+    let fh = fh0;
+    if (fw > 632) { fw = 632; fh = Math.round(632 / s.aspect); }
+    const frameLeft = Math.round((652 - fw) / 2);
+    const frameTop = Math.round((290 - fh) / 2);
+    const sc = this.scene(fw, fh, s.lens, crop);
+    const eq = s.lens * crop * 1.446;
+    const phys = [{ eq: 13, l: '0.5×' }, { eq: 24, l: '1×' }, { eq: 48, l: '2×' }, { eq: 120, l: '5×' }];
+    let pl = phys[0];
+    phys.forEach((p) => { if (p.eq <= eq) pl = p; });
+    const dig = eq / pl.eq;
+    const iph = eq < 13
+      ? { label: '0.5×', soft: true }
+      : { label: (Math.round(pl.eq / 24 * dig * 10) / 10) + '×', soft: dig > 2.5 };
+
+    const ticks = [];
+    const start = Math.ceil((b - 25) / 5) * 5;
+    for (let d = start; d <= b + 25; d += 5) {
+      const nd = ((d % 360) + 360) % 360;
+      const major = nd % 45 === 0;
+      ticks.push({
+        x: 100 + (d - b) * 4,
+        h: major ? 10 : 5,
+        color: major ? '#B5B5AE' : '#45453F',
+        label: major ? this.dir(nd).toUpperCase() : ''
+      });
+    }
+
+    const sceneKeys = proj.scenes;
+    const browse = s.browse || s.project;
+    const isAll = browse === 'all';
+    const pool = isAll
+      ? sceneKeys.reduce((acc, k) => acc.concat((s.shots[k] || []).map((sh) => ({ ...sh, scene: k }))), [])
+      : (s.shots[browse] || []).map((sh) => ({ ...sh, scene: browse }));
+    const uid = (sh) => sh.scene + ':' + sh.id;
+    const dsh = pool.find((x) => uid(x) === s.detailId) || pool[0];
+    const shotRows = [];
+    let lastScene = '';
+    pool.forEach((sh) => {
+      if (isAll && sh.scene !== lastScene) {
+        shotRows.push({ isHeader: true, isRow: false, label: projects[sh.scene].name + ' · ' + projects[sh.scene].sub });
+        lastScene = sh.scene;
+      }
+      const g = this.light(sh.minutes) === 'golden hour';
+      shotRows.push({
+        isHeader: false, isRow: true,
+        id: sh.id,
+        title: sh.title,
+        meta: sh.lens + 'mm · ' + this.fmt(sh.minutes) + ' · ' + this.light(sh.minutes),
+        dotFill: g ? accent : 'transparent',
+        dotBorder: g ? accent : '#66665F',
+        css: dsh && uid(sh) === uid(dsh) ? 'background: #E8E8E2;' : 'background: transparent;',
+        open: () => this.setState({ detailId: uid(sh) })
+      });
+    });
+    const totalShots = sceneKeys.reduce((n, k) => n + (s.shots[k] || []).length, 0);
+    const tabOn = 'background: #111111; color: #F3F3F0; border: 1px solid #111111;';
+    const tabOff = 'background: transparent; color: #111111; border: 1px solid #D9D9D3;';
+    const sceneTabs = sceneKeys.map((k) => ({
+      label: projects[k].name,
+      count: (s.shots[k] || []).length,
+      css: browse === k ? tabOn : tabOff,
+      pick: () => this.setState({ browse: k, detailId: null })
+    })).concat([{
+      label: 'all scenes',
+      count: totalShots,
+      css: isAll ? tabOn : tabOff,
+      pick: () => this.setState({ browse: 'all', detailId: null, exportScope: 'all' })
+    }, {
+      label: '+ scene',
+      count: '',
+      css: 'background: transparent; color: #111111; border: 1px dashed #66665F;',
+      pick: () => addScene(proj.key)
+    }]);
+    const exportSceneKey = isAll ? (dsh ? dsh.scene : s.project) : browse;
+    const exportScope = isAll ? 'all' : (s.exportScope || 'scene');
+    const sceneCount = (s.shots[exportSceneKey] || []).length;
+    const dm = dsh ? dsh.minutes : m;
+    const dl = dsh ? dsh.lens : s.lens;
+    const dB = this.bearing(dm);
+    const dE = this.elev(dm);
+    const dSun = this.sun(dm);
+    const dSc = this.scene(444, 186, dl, crop);
+    const detail = dsh ? {
+      id: dsh.id,
+      title: dsh.title,
+      lens: dsh.lens,
+      time: this.fmt(dsh.minutes),
+      light: this.light(dsh.minutes),
+      sun: dE > 0 ? dB + '° ' + this.dir(dB) : 'down'
+    } : { id: '', title: '', lens: '', time: '', light: '', sun: '' };
+
+    const formats = [
+      { key: 'pdf', label: 'pdf', sub: 'for the crew' },
+      { key: 'csv', label: 'csv', sub: 'for spreadsheets' },
+      { key: 'link', label: 'link', sub: 'view-only, live' }
+    ];
+    const slug = exportScope === 'all' ? proj.name.replace(/\s+/g, '-') + '_all-scenes' : proj.name.replace(/\s+/g, '-') + '_' + projects[exportSceneKey].name.replace(/\s+/g, '-');
+    const exportFile = s.format === 'link' ? 'outandscout.com/s/' + slug : 'shot-list_' + slug + '.' + s.format;
+    const exportCount = exportScope === 'all' ? totalShots : sceneCount;
+
+    const vals = {
+      accent,
+      isShots: s.screen === 'shots',
+      projectsOpen: s.sheet === 'projects',
+      kitOpen: s.sheet === 'kit',
+      projectName: projects[s.project].name,
+      projectSub: projects[s.project].sub,
+      kitLabel: cam.name.toLowerCase() + ' · ' + series.name.toLowerCase(),
+      cameraName: cam.name.toLowerCase(),
+      kitSummary: (mode ? mode.name.toLowerCase() : cam.format + ' · ' + cam.res) + ' · ' + series.brand.toLowerCase() + ' ' + series.name.toLowerCase(),
+      hasModes: s.kitTab === 'camera' && !!cam.modes,
+      modeChips,
+      modeTitle: 'sensor mode · ' + cam.name.toLowerCase(),
+      modeLabel: mode ? mode.name.toLowerCase() : cam.format.toLowerCase(),
+      kitRows,
+      kitEmpty: kitHits === 0,
+      kitQuery: s.kitQuery || '',
+      onKitQuery: (e) => this.setState({ kitQuery: e.target.value }),
+      camTabCss: s.kitTab === 'camera' ? on : off,
+      lensTabCss: s.kitTab === 'lenses' ? on : off,
+      camTabLabel: 'cameras · ' + cat.cameras.length,
+      lensTabLabel: 'lenses · ' + cat.lenses.length,
+      showCamTab: () => this.setState({ kitTab: 'camera', kitQuery: '' }),
+      showLensTab: () => this.setState({ kitTab: 'lenses', kitQuery: '' }),
+      kitSearchHint: s.kitTab === 'camera' ? 'search cameras · alexa, venice, s16…' : 'search lenses · k35, super speed, anamorphic…',
+      shotCount: shots.length,
+      shotCountLabel: shots.length + (shots.length === 1 ? ' shot' : ' shots'),
+      noShots: shots.length === 0,
+      hasDetail: !!dsh,
+      nextId,
+      lens: s.lens,
+      lensNext: li < lenses.length - 1 ? lenses[li + 1] : '',
+      lensPrev: li > 0 ? lenses[li - 1] : '',
+      lensUp: () => { if (li < lenses.length - 1) this.setState({ lens: lenses[li + 1] }); },
+      lensDown: () => { if (li > 0) this.setState({ lens: lenses[li - 1] }); },
+      minutes: m,
+      timeLabel: this.fmt(m),
+      elevLabel: el > 0 ? el + '° up' : 'sun down',
+      ...this.sunHud(m, sc, fw, fh, b, el, frameLeft, frameTop),
+      bearingLabel: b + '° ' + this.dir(b),
+      lightLabel,
+      lightDotFill: golden ? accent : 'transparent',
+      lightDotBorder: golden ? accent : '#66665F',
+      sunUp: sun.up,
+      sunX: sun.x,
+      sunY: sun.y,
+      skyFill: this.sky(m),
+      warmOpacity: golden ? 0.1 : 0,
+      aspectLabel: aspectName(s.aspect),
+      frameW: fw, frameH: fh, frameLeft, frameTop,
+      sceneW: sc.w, sceneH: sc.h, sceneLeft: sc.left, sceneTop: sc.top,
+      ghostLeft: frameLeft + sc.left,
+      ghostTop: frameTop + sc.top,
+      ticks,
+      showPath: s.showPath,
+      showGrid: s.showGrid,
+      showLevel: s.showLevel,
+      pathCss: s.showPath ? railOn : railOff,
+      gridCss: s.showGrid ? railOn : railOff,
+      levelCss: s.showLevel ? railOn : railOff,
+      pathPressed: s.showPath ? 'true' : 'false',
+      gridPressed: s.showGrid ? 'true' : 'false',
+      levelPressed: s.showLevel ? 'true' : 'false',
+      togglePath: () => this.setState({ showPath: !s.showPath }),
+      toggleGrid: () => this.setState({ showGrid: !s.showGrid }),
+      toggleLevel: () => this.setState({ showLevel: !s.showLevel }),
+      onScrub: (e) => this.setState({ minutes: Number(e.target.value) }),
+      pin: () => {
+        const sx = sc.left + sun.x / 600 * sc.w;
+        const sy = sc.top + sun.y / 300 * sc.h;
+        const inFrame = sun.up && sx >= 0 && sx <= fw && sy >= 0 && sy <= fh;
+        const options = this.suggest(s.project, s.lens, m, inFrame, shots.length);
+        const shot = { id: nextId, title: options[0].text, lens: s.lens, minutes: m };
+        clearTimeout(this._t); clearTimeout(this._lt); clearTimeout(this._ft);
+        this.setState({ toast: null, flash: true, pending: null, custom: '', sheet: null, lastShot: { id: nextId, project: s.project, lens: s.lens, minutes: m, options, title: shot.title }, shots: { ...s.shots, [s.project]: [...shots, shot] } });
+        this._ft = setTimeout(() => this.setState({ flash: false }), 140);
+        this._lt = setTimeout(() => this.setState({ lastShot: null }), 4000);
+      },
+      hasFlash: !!s.flash,
+      hasLast: !!s.lastShot,
+      lastLabel: s.lastShot ? s.lastShot.id + ' · ' + s.lastShot.title : '',
+      editLast: () => {
+        const l = s.lastShot;
+        if (!l) return;
+        clearTimeout(this._lt);
+        this.setState({ lastShot: null, custom: '', pending: { id: l.id, project: l.project, lens: l.lens, minutes: l.minutes, options: l.options, pick: 0, editing: true } });
+      },
+      hasPending: !!s.pending,
+      pendingId: s.pending ? s.pending.id : '',
+      cardTitle: s.pending && s.pending.editing ? 'edit caption' : 'suggested caption',
+      cancelLabel: s.pending && s.pending.editing ? 'cancel' : 'retake',
+      saveLabel: s.pending && s.pending.editing ? 'save' : 'save ' + (s.pending ? s.pending.id : ''),
+      pendingMeta: s.pending ? 'shot ' + s.pending.id + ' · ' + s.pending.lens + 'mm · ' + this.fmt(s.pending.minutes) : '',
+      suggestions: s.pending ? s.pending.options.map((o, i) => ({
+        label: o.text,
+        tag: o.tag,
+        css: (i === s.pending.pick && !s.custom) ? 'background: #111111; color: #F3F3F0; border: 1px solid #111111;' : 'background: transparent; color: #111111; border: 1px solid #D9D9D3;',
+        pick: () => this.setState({ pending: { ...s.pending, pick: i }, custom: '' })
+      })) : [],
+      custom: s.custom,
+      onCustom: (e) => this.setState({ custom: e.target.value }),
+      cancelPending: () => this.setState({ pending: null, custom: '' }),
+      savePending: () => {
+        const p = s.pending;
+        if (!p) return;
+        const title = s.custom.trim() || p.options[p.pick].text;
+        if (p.editing) {
+          const list = (s.shots[p.project] || []).map((x) => x.id === p.id ? { ...x, title } : x);
+          this.setState({ pending: null, custom: '', shots: { ...s.shots, [p.project]: list } });
+          this.showToast('caption updated · ' + p.id);
+          return;
+        }
+        const shot = { id: p.id, title, lens: p.lens, minutes: p.minutes };
+        this.setState({ pending: null, custom: '', shots: { ...s.shots, [s.project]: [...shots, shot] } });
+        this.showToast('shot ' + p.id + ' saved · ' + title);
+      },
+      openProjects: () => this.setState({ sheet: 'projects', expanded: proj.key, exportOpen: false }),
+      openKit: () => this.setState({ sheet: 'kit' }),
+      closeSheets: () => this.setState({ sheet: null }),
+      goViewfinder: () => this.setState({ screen: 'viewfinder', exportOpen: false }),
+      goShots: () => this.setState({ screen: 'shots', detailId: null, browse: s.project, exportScope: 'scene' }),
+      shotRows,
+      sceneTabs,
+      browseTitle: isAll ? 'all scenes' : projects[browse].name,
+      browseSub: isAll ? totalShots + ' shots in ' + sceneKeys.length + ' scenes' : projects[browse].sub + ' · ' + pool.length + (pool.length === 1 ? ' shot' : ' shots'),
+      projName: proj.name,
+      quickScene: () => addScene(proj.key),
+      hasMoved: !!s.moved && !s.lastShot && !s.pending && !s.naming && !s.permAsk && s.screen === 'viewfinder',
+      movedText: s.moved ? "you've moved " + s.moved.dist + ' m from ' + (s.scenes[s.moved.from] ? s.scenes[s.moved.from].name : 'this scene') : '',
+      movedNew: () => { this.setState({ moved: null }); addScene(proj.key); },
+      movedKeep: () => { this.setState({ moved: null }); this.showToast('staying in ' + projects[s.project].name); },
+      tapFocus: (e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        const x = Math.round((e.clientX - r.left) * fw / r.width);
+        const y = Math.round((e.clientY - r.top) * fh / r.height);
+        this.setState({ focus: { x, y }, ev: s.aeLock ? s.ev : 0 });
+      },
+      hasFocus: !!s.focus,
+      focusX: s.focus ? s.focus.x : 0,
+      focusY: s.focus ? s.focus.y : 0,
+      evStep: Math.round((s.ev || 0) * 10),
+      onEv: (e) => this.setState({ ev: Number(e.target.value) / 10 }),
+      evLabel: ((s.ev || 0) > 0 ? '+' : '') + (s.ev || 0).toFixed(1) + ' ev',
+      evBright: Math.round(Math.pow(2, (s.ev || 0) * 0.6) * 100) / 100,
+      toggleLock: () => this.setState({ aeLock: !s.aeLock }),
+      lockLabel: s.aeLock ? 'ae/af lock' : 'lock',
+      lockCss: s.aeLock ? 'background: ' + accent + '; color: #111111;' : 'background: rgba(17,17,17,0.6); color: #F3F3F0;',
+      iphoneLens: iph.label,
+      iphoneColor: iph.soft ? '#B5B5AE' : '#66665F',
+      hasPermAsk: !!s.permAsk,
+      permPrecise: () => { const k = s.permAsk; this.setState({ locPerm: 'precise' }); createScene(k, 'precise'); },
+      permApprox: () => { const k = s.permAsk; this.setState({ locPerm: 'approx' }); createScene(k, 'approx'); },
+      permOff: () => { const k = s.permAsk; this.setState({ locPerm: 'off' }); createScene(k, 'off'); },
+      hasNaming: !!s.naming,
+      namingMeta: s.naming ? s.naming.pname + ' · ' + (s.scenes[s.naming.key] ? s.scenes[s.naming.key].loc : '') : '',
+      nameChips: s.naming ? s.naming.options.map((o) => ({
+        label: o,
+        css: s.scenes[s.naming.key] && s.scenes[s.naming.key].name === o && !s.nameText ? 'background: #111111; color: #F3F3F0; border: 1px solid #111111;' : 'background: transparent; color: #111111; border: 1px solid #D9D9D3;',
+        pick: () => this.setState({ nameText: '', scenes: { ...s.scenes, [s.naming.key]: { ...s.scenes[s.naming.key], name: o } } })
+      })) : [],
+      nameText: s.nameText || '',
+      onNameText: (e) => this.setState({ nameText: e.target.value }),
+      finishNaming: () => {
+        const n = s.naming;
+        if (!n) return;
+        const typed = (s.nameText || '').trim();
+        const sc = s.scenes[n.key];
+        const finalName = typed || sc.name;
+        this.setState({ naming: null, nameText: '', scenes: { ...s.scenes, [n.key]: { ...sc, name: finalName } } });
+        this.showToast('scene ' + finalName + ' · ' + n.pname + ' · next 1A');
+      },
+      locLabel: s.locPerm === 'precise' ? 'location · precise' : s.locPerm === 'approx' ? 'location · approximate' : s.locPerm === 'off' ? 'location · off' : 'location · not asked',
+      detailLoc: dsh && projects[dsh.scene] ? (projects[dsh.scene].loc || '') : '',
+      panelRows,
+      newProjName: s.newProjName,
+      onNewProjName: (e) => this.setState({ newProjName: e.target.value }),
+      addProject,
+      projectCountLabel: s.projectList.length + ' projects · tap a scene to work in it',
+      noShots: pool.length === 0,
+      detailScene: dsh ? projects[dsh.scene].name : '',
+      scopeRows: [
+        { key: 'scene', label: 'this scene', sub: projects[exportSceneKey].name + ' · ' + sceneCount + ' shots' },
+        { key: 'all', label: 'all scenes', sub: proj.name + ' · ' + totalShots + ' shots' }
+      ].map((r) => ({
+        label: r.label,
+        sub: r.sub,
+        css: r.key === exportScope ? 'border: 2px solid #111111; background: #FFFFFF;' : 'border: 1px solid #D9D9D3; background: transparent;',
+        pick: () => this.setState({ exportScope: r.key, browse: r.key === 'all' ? 'all' : (isAll ? exportSceneKey : browse) })
+      })),
+      exportSummary: proj.name + ' · ' + (exportScope === 'all' ? 'all scenes · ' : projects[exportSceneKey].name + ' · ') + exportCount + ' shots',
+      detail,
+      dSceneW: dSc.w, dSceneH: dSc.h, dSceneLeft: dSc.left, dSceneTop: dSc.top,
+      dSky: this.sky(dm),
+      dSunUp: dSun.up,
+      dSunX: dSun.x,
+      dSunY: dSun.y,
+      deleteShot: () => {
+        if (!dsh) return;
+        const list = s.shots[dsh.scene] || [];
+        this.setState({ detailId: null, shots: { ...s.shots, [dsh.scene]: list.filter((x) => x.id !== dsh.id) } });
+        this.showToast('shot ' + dsh.id + ' deleted · ' + projects[dsh.scene].name);
+      },
+      reframe: () => { if (dsh) this.setState({ screen: 'viewfinder', project: dsh.scene, lens: dsh.lens, minutes: dsh.minutes }); },
+      showOrder: exportScope === 'all' && sceneKeys.length > 1,
+      orderRows: sceneKeys.map((k, i) => ({
+        num: String(i + 1).padStart(2, '0'),
+        name: projects[k].name,
+        count: (s.shots[k] || []).length + ' shots',
+        css: s.dragKey === k ? 'background: #FFFFFF; border: 2px solid #111111;' : 'background: transparent; border: 1px solid #D9D9D3;',
+        grab: (e) => {
+          const list = e.currentTarget.closest('[data-order-list]');
+          this._orderTop = list ? list.getBoundingClientRect().top : 0;
+          this._orderScale = list ? list.getBoundingClientRect().height / list.offsetHeight || 1 : 1;
+          this.setState({ dragKey: k });
+        }
+      })),
+      orderMove: (e) => {
+        if (!s.dragKey) return;
+        const pitch = 44 * (this._orderScale || 1);
+        const to = Math.max(0, Math.min(sceneKeys.length - 1, Math.floor((e.clientY - this._orderTop) / pitch)));
+        const from = sceneKeys.indexOf(s.dragKey);
+        if (from === -1 || to === from) return;
+        const next = sceneKeys.slice();
+        next.splice(from, 1);
+        next.splice(to, 0, s.dragKey);
+        this.setState({ projectList: s.projectList.map((x) => x.key === proj.key ? { ...x, scenes: next } : x) });
+      },
+      orderEnd: () => { if (s.dragKey) this.setState({ dragKey: null }); },
+      exportOpen: s.exportOpen,
+      openExport: () => this.setState({ exportOpen: true }),
+      closeExport: () => this.setState({ exportOpen: false }),
+      formatRows: formats.map((f) => ({
+        label: f.label,
+        sub: f.sub,
+        css: (f.key === s.format ? 'border: 2px solid #111111; background: #FFFFFF;' : 'border: 1px solid #D9D9D3; background: transparent;') + ' height: 42px;',
+        pick: () => this.setState({ format: f.key })
+      })),
+      includeChips: Object.keys(s.include).map((k) => ({
+        label: k,
+        on: s.include[k] ? 'true' : 'false',
+        css: s.include[k] ? on : off,
+        toggle: () => this.setState({ include: { ...s.include, [k]: !s.include[k] } })
+      })),
+      hasPreview: s.format !== 'csv',
+      previewHref: s.format === 'link' ? 'LinkView.dc.html' : 'ShotlistPDFCover.dc.html',
+      previewLabel: s.format === 'link' ? 'preview the live link' : 'preview the pdf',
+      exportCta: s.format === 'link' ? 'copy link' : (exportScope === 'all' ? 'export all scenes · ' : 'export scene · ') + s.format,
+      exportFile,
+      doExport: () => {
+        this.setState({ exportOpen: false });
+        this.showToast(s.format === 'link' ? 'link copied' : exportFile + ' ready');
+      },
+      aspectChips: aspects.map((a) => ({
+        label: a.label,
+        css: Math.abs(a.v - s.aspect) < 0.001 ? on : off,
+        pick: () => this.setState({ aspect: a.v })
+      })),
+      aspectBar: aspects.map((a) => ({
+        label: a.label,
+        aria: 'Aspect ratio ' + a.label,
+        css: Math.abs(a.v - s.aspect) < 0.001 ? barOn : barOff,
+        pick: () => this.setState({ aspect: a.v, customOpen: false })
+      })),
+      customOpen: s.customOpen,
+      plusCss: s.customOpen ? barOn : barOff,
+      toggleCustom: () => this.setState({ customOpen: !s.customOpen, customError: '', pending: null }),
+      customText: s.customText,
+      customError: s.customError,
+      hasCustomError: !!s.customError,
+      onCustomText: (e) => this.setState({ customText: e.target.value, customError: '' }),
+      addCustom: () => addAspect(s.customText),
+      presetAspects: ['4:3', '1.66', '2:1', '1:1', '2.76'].map((p) => ({ label: p, pick: () => addAspect(p) })),
+      hasToast: !!s.toast,
+      toast: s.toast || '',
+      rootRef: this._root,
+      stopDemo: () => { if (this.state.demoOn) this.stopDemo(); },
+      hasTouch: !!s.touch,
+      touchX: s.touch ? s.touch.x - 18 : 0,
+      touchY: s.touch ? s.touch.y - 18 : 0,
+      touchScale: s.touch && s.touch.down ? 0.7 : 1,
+      touchOpacity: s.touch ? 1 : 0
+    };
+    this._vals = vals;
+    return vals;
+  }
+}
+</script>
+</body>
+</html>

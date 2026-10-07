@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Out &amp; Scout (live)</title>
+<style>html,body{margin:0;height:100%;background:#0B0B0A;overflow:hidden}#fit{width:844px;height:390px;transform-origin:0 0}</style></head><body>
+<script src="./support.js"></script>
+<x-dc>
+<div id="fit"><dc-import name="PrototypeC" start="viewfinder" scene-detect="auto" demo="loop" accent="#FF5A1F" hint-size="844px,390px"></dc-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":844,"height":390}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+<script>
+// The prototype is drawn at 844 x 390 (an iPhone held sideways); scale it to whatever frame it sits in.
+function fit(){var f=document.getElementById('fit');if(f)f.style.transform='scale('+Math.min(innerWidth/844,innerHeight/390)+')';}
+addEventListener('resize',fit);new MutationObserver(fit).observe(document.body,{childList:true,subtree:true});fit();
+</script>
+</body></html>

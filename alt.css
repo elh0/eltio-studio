@@ -208,3 +208,8 @@
 .eltio.alt-iris.t-b .i-intro p.i-lab * { margin: 0 !important; color: var(--s5); }
 /* The email is a plain mail link; strip any link styling Cargo adds. */
 .eltio.alt-iris .i-end a.i-copy, .eltio.alt-iris .i-end a.i-copy:hover, .eltio.alt-iris .i-end a.i-copy:active { color: var(--paper) !important; background: none !important; border: 0 !important; text-decoration: none !important; opacity: 1 !important; box-shadow: none !important; }
+/* Opening read-out (letterbox ratio, focus distance) */
+.eltio.alt-iris .i-read { position: absolute; left: 0; right: 0; text-align: center; color: rgba(243,243,240,.7); opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 2; }
+.eltio.alt-iris.o-2 .i-read { color: var(--s5); }
+.eltio.alt-iris.o-2 .i-intro { will-change: filter, transform; transform-origin: 0 100%; }
+.eltio.alt-iris.o-1 .i-intro { justify-content: center !important; padding-bottom: 0 !important; }

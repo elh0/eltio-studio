@@ -646,3 +646,5 @@
 .eltio:is(.mo-2, .mo-3) .work .mo-w > :is(.el-stack, .bp) { transform-origin: 50% 0; will-change: transform; }
 .eltio.mo-3 .brandrow .tile { transition: transform .5s cubic-bezier(.2,.7,0,1); transform-style: preserve-3d; }
 .mo-cur { position: fixed; left: 0; top: 0; z-index: 99; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #fff; mix-blend-mode: difference; pointer-events: none; display: none; }
+/* Cargo gives <i> its own text size, which shrank the cue dot (sized in em); keep it on the wordmark's size */
+.eltio .wm i { font-size: inherit !important; font-style: normal !important; line-height: 0 !important; display: block !important; }

@@ -161,23 +161,70 @@
     var op = root.querySelector('.i-open'), shutEl = root.querySelector('.i-shut'), ieye = root.querySelector('.i-eye');
     var setT = function () {
       // preview only: alt-iris.html#t-b picks a type layout; with no hash the page keeps the class it was built with
-      var m = /t-[a-d]|t-0/.exec(location.hash);
+      var m = /t-[a-d]|t-0/.exec(location.hash), o = /o-[0-3]/.exec(location.hash);
       if (m) ['t-a', 't-b', 't-c', 't-d'].forEach(function (k) { root.classList.toggle(k, m[0] === k); });
+      // preview only: #o-1..3 swaps the opening (o-0 or none = the iris)
+      if (o) ['o-1', 'o-2', 'o-3'].forEach(function (k) { root.classList.toggle(k, o[0] === k); });
+      // the live opening is the focus pull; set here too so the page already pasted into Cargo picks it up without re-pasting
+      else if (!/\bo-[0-3]\b/.test(root.className)) root.classList.add('o-2');
       fitAll();
     };
     setT(); addEventListener('hashchange', setT);
-    var down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
+    var intro = root.querySelector('.i-intro'), read = root.querySelector('.i-read');
+    if (!read) { read = document.createElement('span'); read.className = 'm i-read'; read.setAttribute('aria-hidden', 'true'); root.querySelector('.i-open-sticky').appendChild(read); }
+    var t0 = Date.now(), down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
     (function loop() {
       var vh = innerHeight, vw = innerWidth, r = op.getBoundingClientRect();
       // the aperture follows the scroll even with Reduce Motion on (only the eye's spin is dropped), so phones with it set still see it open
       var q = cl(-r.top / Math.max(1, op.offsetHeight - vh), 0, 1);
       var e = q * q * (3 - 2 * q);
       // the mask is written out in full each frame: Safari doesn't repaint a mask when only a CSS variable inside it changes
-      var hole = e * Math.hypot(vw, vh) * .55, g = 'radial-gradient(circle at 50% 50%, transparent ' + hole.toFixed(1) + 'px, #000 ' + (hole + 1).toFixed(1) + 'px)';
-      shutEl.style.webkitMaskImage = g; shutEl.style.maskImage = g;
-      shutEl.style.visibility = q >= 1 ? 'hidden' : '';
-      if (!reduce) ieye.style.transform = 'rotate(' + (e * 120).toFixed(1) + 'deg) scale(' + (1 + e * 5).toFixed(3) + ')';
-      ieye.style.opacity = (1 - e * 1.6).toFixed(3);
+      var mode = root.classList.contains('o-1') ? 1 : root.classList.contains('o-2') ? 2 : root.classList.contains('o-3') ? 3 : 0, g = 'none';
+      shutEl.style.background = ''; intro.style.filter = ''; intro.style.transform = ''; read.style.opacity = '0';
+      if (mode === 0) {
+        var hole = e * Math.hypot(vw, vh) * .55, g = 'radial-gradient(circle at 50% 50%, transparent ' + hole.toFixed(1) + 'px, #000 ' + (hole + 1).toFixed(1) + 'px)';
+        shutEl.style.webkitMaskImage = g; shutEl.style.maskImage = g;
+        shutEl.style.visibility = q >= 1 ? 'hidden' : '';
+        if (!reduce) ieye.style.transform = 'rotate(' + (e * 120).toFixed(1) + 'deg) scale(' + (1 + e * 5).toFixed(3) + ')';
+        ieye.style.opacity = (1 - e * 1.6).toFixed(3);
+      } else if (mode === 1) {
+        // Letterbox: a slit of picture opens to a 2.39 frame, holds, then the bars run off to full screen
+        var full = vh, scope = narrow() ? vh * .5 : Math.min(vh * .8, vw / 2.39), f1 = cl(q / .45, 0, 1), f2 = cl((q - .6) / .4, 0, 1);
+        f1 = f1 * f1 * (3 - 2 * f1); f2 = f2 * f2 * (3 - 2 * f2);
+        var h = f1 * scope + f2 * (full - scope), top = (vh - h) / 2;
+        g = 'linear-gradient(#000 ' + top.toFixed(1) + 'px, transparent ' + top.toFixed(1) + 'px, transparent ' + (top + h).toFixed(1) + 'px, #000 ' + (top + h).toFixed(1) + 'px)';
+        shutEl.style.webkitMaskImage = g; shutEl.style.maskImage = g;
+        shutEl.style.visibility = q >= 1 ? 'hidden' : '';
+        ieye.style.transform = ''; ieye.style.opacity = (1 - f1 * 1.4).toFixed(3);
+        var ratio = h < 2 ? '' : f2 > .98 ? 'full frame' : (vw / h).toFixed(2) + ':1';
+        read.textContent = ratio ? '(' + ratio + ')' : '';
+        read.style.top = Math.min(vh - 40, top + h + 12).toFixed(1) + 'px';
+        read.style.opacity = q > .01 && f2 < .98 && !narrow() ? '1' : '0';
+      } else if (mode === 2) {
+        // Focus pull: the black falls away like a lens finding focus; the eye drifts soft as the words come sharp
+        var f = cl(q / .8, 0, 1); f = f * f * (3 - 2 * f);
+        shutEl.style.webkitMaskImage = ''; shutEl.style.maskImage = '';
+        var fd = cl((q - .3) / .35, 0, 1);
+        shutEl.style.background = 'rgba(11,11,10,' + (1 - fd * fd * (3 - 2 * fd)).toFixed(3) + ')';
+        shutEl.style.visibility = f >= 1 ? 'hidden' : '';
+        ieye.style.transform = 'scale(' + (1 + f * 1.5).toFixed(3) + ')';
+        ieye.style.filter = 'blur(' + (f * 18).toFixed(1) + 'px)'; ieye.style.opacity = (1 - f).toFixed(3);
+        intro.style.filter = f < 1 ? 'blur(' + ((1 - f) * 22).toFixed(1) + 'px)' : '';
+        intro.style.transform = 'scale(' + (1 + (1 - f) * .04).toFixed(4) + ')';
+        var dist = f >= .995 ? '1.2m' : f < .01 ? '\u221e' : (1.2 / Math.max(.02, f)).toFixed(1) + 'm';
+        read.textContent = '(focus ' + dist + ')'; read.style.top = '64px';
+        read.style.opacity = q > .005 && q < .95 ? '1' : '0';
+      } else {
+        // Blink: two lids part into an almond, the eye takes a quick blink before you scroll
+        var t = (Date.now() - t0) / 1000, peek = q < .01 ? Math.max(0, Math.sin(Math.min(1, Math.max(0, t - .8) / .9) * Math.PI)) * .06 : 0;
+        var o2 = Math.max(q, peek), eo = o2 * o2 * (3 - 2 * o2);
+        var rx = vw * (.42 + eo * 1.4), ry = Math.max(.5, eo * vh * 1.25);
+        g = 'radial-gradient(ellipse ' + rx.toFixed(1) + 'px ' + ry.toFixed(1) + 'px at 50% 50%, transparent 99%, #000 100%)';
+        shutEl.style.webkitMaskImage = g; shutEl.style.maskImage = g;
+        shutEl.style.visibility = q >= 1 ? 'hidden' : '';
+        ieye.style.transform = 'scale(' + (1 + eo * .6).toFixed(3) + ')'; ieye.style.opacity = (1 - eo * 2.2).toFixed(3);
+      }
+      if (mode !== 2) ieye.style.filter = '';
       down.style.opacity = q > .02 ? Math.max(0, .7 - q * 4).toFixed(3) : '';
       var total = document.documentElement.scrollHeight - vh;
       pct.textContent = '(' + ('00' + Math.round(cl(scrollY / Math.max(1, total), 0, 1) * 100)).slice(-3) + ')';

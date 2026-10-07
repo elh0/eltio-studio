@@ -648,3 +648,15 @@
 .mo-cur { position: fixed; left: 0; top: 0; z-index: 99; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #fff; mix-blend-mode: difference; pointer-events: none; display: none; }
 /* Cargo gives <i> its own text size, which shrank the cue dot (sized in em); keep it on the wordmark's size */
 .eltio .wm i { font-size: inherit !important; font-style: normal !important; line-height: 0 !important; display: block !important; }
+/* Cargo gives p, span, a, i, button and friends their own font, size and line height. Everything inside the site takes them from its parent instead, so only our own classes set type. */
+.eltio :where(p, span, a, i, b, em, strong, small, button, li, label, figcaption) { font-family: inherit; font-size: inherit; line-height: inherit; font-weight: inherit; letter-spacing: inherit; }
+/* Phones: the sideways viewfinder drawing is cropped to its middle so the frame is bigger and the side rails stop crowding it; the header drops the clock and gets room to breathe */
+@media (max-width: 640px) {
+  .eltio .os .bp-top { margin-bottom: 2.4em; row-gap: .9em; }
+  .eltio .os .bp-top .clock { display: none; }
+  .eltio .os .live:not(.on) .stage.wfs { aspect-ratio: 844 / 540; overflow: hidden; }
+  .eltio .os .live:not(.on) .stage.wfs > svg { left: -16.5%; width: 135%; height: 100%; right: auto; }
+  .eltio .os .fig.live .cap { margin-top: 1.4em; }
+  .eltio .os .os-cta { margin: 2.2em 0; }
+  .eltio .os .duo { gap: 14px; }
+}

@@ -66,6 +66,8 @@
 .eltio .num { display: grid; grid-template-columns: 4em minmax(0,1fr); }
 .eltio .colset { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 1.15em; }
 .eltio .colset > * { min-width: 0; }
+.eltio .colset > :is(.cs-d, .cs-s) { grid-column: 2; }
+.eltio .colset > .cs-d { margin-top: .6em; }
 
 /* moving work: loops sit in plain windows, no device chrome */
 .eltio video { display: block; width: 100%; height: auto; background: var(--paper); }
@@ -105,6 +107,7 @@
 }
 @container (max-width: 480px) {
   .eltio .colset { grid-template-columns: 1fr; gap: .4em; }
+  .eltio .colset > :is(.cs-d, .cs-s) { grid-column: auto; }
   .eltio .pair { grid-template-columns: minmax(0,1fr); }
   .eltio .pair .phonewin { width: 62%; justify-self: center; }
   .eltio .duo { grid-template-columns: minmax(0,1fr); }
@@ -567,3 +570,78 @@
 .eltio .brandrow .tile.gp-type { container-type: inline-size; place-items: end start; align-content: end; padding: 0; }
 .eltio .brandrow .tile.gp-type > * { display: block; padding: 0 10%; }
 .eltio .brandrow .tile.gp-type > span:last-child { font: 400 9cqi/1.05 "Host Grotesk", system-ui, sans-serif; letter-spacing: -.025em; padding-bottom: 10%; padding-top: .5em; }
+
+/* ---------- layout options (7 Oct): add lay-a / lay-b / lay-c to the .eltio root ---------- */
+@container (min-width: 901px) {
+  /* A. Band: the intro runs across the top in thirds like the header, work goes full width, notes sit in the right third */
+  .eltio.lay-a .site { grid-template-columns: repeat(3, minmax(0,1fr)); grid-template-areas: "side side idx" "main main main"; }
+  .eltio.lay-a .site > .side:first-child { grid-area: side; position: static; min-height: 0; display: block; column-count: 2; column-gap: calc(var(--gap) * 2); column-rule: 1px solid var(--hr); padding-bottom: 3em; }
+  .eltio.lay-a .site > .side:first-child > .head, .eltio.lay-a .site > .side:first-child > hr.top { column-span: all; }
+  .eltio.lay-a .site > .side:first-child p { break-inside: avoid; }
+  .eltio.lay-a .site > .side:first-child .foot { margin-top: 1.15em; }
+  .eltio.lay-a .idx { grid-area: idx; position: static; min-height: 0; padding-bottom: 3em; }
+  .eltio.lay-a .idx .foot { margin-top: 1.15em; }
+  .eltio.lay-a main.col { grid-area: main; border-left: 0; border-top: 1px solid var(--hr); padding-inline: 0; }
+  .eltio.lay-a main.col > .head { min-height: 3.6em; }
+  .eltio.lay-a .work { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); column-gap: calc(var(--gap) * 2); align-items: start; }
+  .eltio.lay-a .work > * { grid-column: 1 / 3; }
+  .eltio.lay-a .work > .colset { grid-column: 3; grid-row: 1 / span 3; position: sticky; top: var(--gap); margin-top: 0; grid-template-columns: 1fr; gap: 1.15em; }
+
+  /* B. Rail: one narrow rail on the left (profile, then the index pinned), work takes the other three quarters */
+  .eltio.lay-b .site { grid-template-columns: minmax(0,1fr) minmax(0,3fr); grid-template-rows: auto 1fr; }
+  .eltio.lay-b .site > .side:first-child { grid-column: 1; grid-row: 1; position: static; min-height: 0; padding-bottom: 2.3em; }
+  .eltio.lay-b .site > .side:first-child .foot { margin-top: 1.15em; }
+  .eltio.lay-b .idx { grid-column: 1; grid-row: 2; border-left: 0; padding-left: 0; padding-right: var(--gap); }
+  .eltio.lay-b .idx .head { min-height: 0; }
+  .eltio.lay-b main.col { grid-column: 2; grid-row: 1 / 3; padding-right: 0; }
+  .eltio.lay-b .colset { grid-template-columns: 1fr 2fr; }
+
+  /* C. Full bleed: the index becomes a bar pinned to the top, the intro runs in four columns, work edge to edge */
+  .eltio.lay-c .site { grid-template-columns: minmax(0,1fr); }
+  .eltio.lay-c .idx { order: -1; position: sticky; top: 0; z-index: 3; min-height: 0; background: var(--bg); border: 0; border-bottom: 1px solid var(--hr); padding: var(--gap) 0; flex-direction: row; align-items: baseline; gap: 3em; }
+  .eltio.lay-c .idx .head { min-height: 0; }
+  .eltio.lay-c .idx hr.top, .eltio.lay-c .idx .foot { display: none; }
+  .eltio.lay-c .idx .list { display: flex; gap: 2.4em; }
+  .eltio.lay-c .idx .list p { margin: 0; height: 1.15em; overflow: hidden; width: 14ch; }
+  .eltio.lay-c .site > .side:first-child { position: static; min-height: 0; display: block; column-count: 4; column-gap: calc(var(--gap) * 2); column-rule: 1px solid var(--hr); border: 0; padding: var(--gap) 0 3em; }
+  .eltio.lay-c .site > .side:first-child > .head, .eltio.lay-c .site > .side:first-child > hr.top { column-span: all; }
+  .eltio.lay-c .site > .side:first-child > .head { min-height: 3.6em; }
+  .eltio.lay-c .site > .side:first-child p { break-inside: avoid; }
+  .eltio.lay-c .site > .side:first-child .foot { margin-top: 1.15em; }
+  .eltio.lay-c main.col { border-left: 0; border-top: 1px solid var(--hr); padding-inline: 0; }
+  .eltio.lay-c main.col > .head { min-height: 3.6em; }
+  /* the notes line up with the four brand tiles above: name | kind | what it does | built with */
+  .eltio.lay-c .colset { grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--gap); }
+  .eltio.lay-c .colset > :is(.cs-d, .cs-s) { grid-column: auto; margin-top: 0; }
+  .eltio.lay-c .colset > .cs-s { justify-self: start; }
+}
+/* phones */
+@container (max-width: 900px) {
+  /* A: the index follows the intro, before the work */
+  .eltio.lay-a .idx { order: 1; }
+  .eltio.lay-a main.col { order: 2; }
+  /* C: the index becomes a sideways strip under the bar */
+  .eltio.lay-c .mbar { display: none; }
+  .eltio.lay-c .idx { order: -1; position: sticky; top: 0; z-index: 3; background: var(--bg); border: 0; border-bottom: 1px solid var(--hr); padding: 12px 0; }
+  .eltio.lay-c .idx .head, .eltio.lay-c .idx hr.top, .eltio.lay-c .idx .foot { display: none; }
+  .eltio.lay-c .idx .list { display: flex; gap: 1.8em; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+  .eltio.lay-c .idx .list::-webkit-scrollbar { display: none; }
+  .eltio.lay-c .idx .list p { margin: 0; height: 1.15em; overflow: hidden; flex: none; width: 14ch; }
+  .eltio.lay-c .site > .side:first-child { border: 0; }
+}
+/* very wide (full-bleed layout): Lampwerk puts plan, readout and lamps side by side so the plan doesn't balloon */
+@container (min-width: 1200px) {
+  .eltio .lc-body { grid-template-columns: minmax(0, 1.4fr) minmax(0, .8fr) minmax(0, .9fr); grid-template-areas: "plan side list"; }
+  .eltio .lc-list .lis { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- scroll motion (motion.js): mo-1 low, mo-2 medium, mo-3 high ---------- */
+.eltio .mo-prog { display: none; }
+.eltio:is(.mo-1, .mo-2, .mo-3) .mo-prog { display: block; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--s1); transform-origin: 0 0; transform: scaleX(0); pointer-events: none; }
+.eltio:is(.mo-1, .mo-2, .mo-3) .idx { isolation: isolate; }
+.eltio:is(.mo-1, .mo-2, .mo-3) .mo-r { opacity: 0; translate: 0 1.6em; transition: opacity .9s cubic-bezier(.2,.7,0,1), translate 1.1s cubic-bezier(.2,.7,0,1); }
+.eltio:is(.mo-1, .mo-2, .mo-3) .mo-r.mo-in { opacity: 1; translate: 0 0; }
+.eltio .mo-w { transform-origin: 50% 0; will-change: transform; }
+.eltio:is(.mo-2, .mo-3) .work .mo-w > :is(.el-stack, .bp) { transform-origin: 50% 0; will-change: transform; }
+.eltio.mo-3 .brandrow .tile { transition: transform .5s cubic-bezier(.2,.7,0,1); transform-style: preserve-3d; }
+.mo-cur { position: fixed; left: 0; top: 0; z-index: 99; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #fff; mix-blend-mode: difference; pointer-events: none; display: none; }

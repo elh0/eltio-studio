@@ -161,22 +161,36 @@
     var op = root.querySelector('.i-open'), shutEl = root.querySelector('.i-shut'), ieye = root.querySelector('.i-eye');
     var setT = function () {
       // preview only: alt-iris.html#t-b picks a type layout; with no hash the page keeps the class it was built with
-      var m = /t-[a-d]|t-0/.exec(location.hash), o = /o-[0-3]/.exec(location.hash);
+      var m = /t-[a-d]|t-0/.exec(location.hash), o = /o-[0-5]/.exec(location.hash);
       if (m) ['t-a', 't-b', 't-c', 't-d'].forEach(function (k) { root.classList.toggle(k, m[0] === k); });
       // preview only: #o-1..3 swaps the opening (o-0 or none = the iris)
-      if (o) ['o-1', 'o-2', 'o-3'].forEach(function (k) { root.classList.toggle(k, o[0] === k); });
-      // the live opening is the focus pull; set here too so the page already pasted into Cargo picks it up without re-pasting
-      else if (!/\bo-[0-3]\b/.test(root.className)) root.classList.add('o-2');
+      if (o) { ['o-1', 'o-2', 'o-3'].forEach(function (k) { root.classList.toggle(k, o[0] === k || ((o[0] === 'o-4' || o[0] === 'o-5') && k === 'o-2')); }); root.classList.toggle('pk', o[0] === 'o-4' || o[0] === 'o-5'); root.classList.toggle('cf', o[0] === 'o-5'); t0 = Date.now(); }
+      // the live opening is D: the focus pull playing by itself with the first card peeking. Set here too so the page
+      // already pasted into Cargo (built as o-2) picks it up without re-pasting
+      else { if (!/\bo-[0-3]\b/.test(root.className)) root.classList.add('o-2'); if (root.classList.contains('o-2')) root.classList.add('pk'); }
       fitAll();
     };
     setT(); addEventListener('hashchange', setT);
     var intro = root.querySelector('.i-intro'), read = root.querySelector('.i-read');
     if (!read) { read = document.createElement('span'); read.className = 'm i-read'; read.setAttribute('aria-hidden', 'true'); root.querySelector('.i-open-sticky').appendChild(read); }
-    var t0 = Date.now(), down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
+    var t0 = Date.now(), cfDone = false, stackEl = root.querySelector('.i-stack'), down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
     (function loop() {
       var vh = innerHeight, vw = innerWidth, r = op.getBoundingClientRect();
       // the aperture follows the scroll even with Reduce Motion on (only the eye's spin is dropped), so phones with it set still see it open
       var q = cl(-r.top / Math.max(1, op.offsetHeight - vh), 0, 1);
+      // peek mode: the opening plays by itself on load instead of waiting for a scroll, and the first card sits peeking at the bottom
+      if (root.classList.contains('pk')) {
+        var since = (Date.now() - t0) / 1000;
+        if (root.classList.contains('cf')) {
+          // card first: the first project fills the screen, then drops away to reveal the intro and waits at the bottom
+          if (scrollY > 4) cfDone = true;
+          var dp = cfDone || reduce ? 1 : cl((since - 1.5) / 1.5, 0, 1); dp = 1 - Math.pow(1 - dp, 3);
+          stackEl.style.translate = dp < 1 ? '0 ' + (-(1 - dp) * (op.offsetHeight - 56)).toFixed(1) + 'px' : '';
+          var qa = cfDone ? 1 : cl((since - 1.7) / 1.8, 0, 1);
+        } else var qa = cl((since - .6) / 2.6, 0, 1);
+        q = reduce ? 1 : qa * qa * (3 - 2 * qa);
+      } else stackEl.style.translate = '';
+      root.classList.toggle('at-top', scrollY < 24);
       var e = q * q * (3 - 2 * q);
       // the mask is written out in full each frame: Safari doesn't repaint a mask when only a CSS variable inside it changes
       var mode = root.classList.contains('o-1') ? 1 : root.classList.contains('o-2') ? 2 : root.classList.contains('o-3') ? 3 : 0, g = 'none';

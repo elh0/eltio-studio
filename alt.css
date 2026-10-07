@@ -213,3 +213,15 @@
 .eltio.alt-iris.o-2 .i-read { color: var(--s5); }
 .eltio.alt-iris.o-2 .i-intro { will-change: filter, transform; transform-origin: 0 100%; }
 .eltio.alt-iris.o-1 .i-intro { justify-content: center !important; padding-bottom: 0 !important; }
+/* Peek mode: no long scroll-driven opening; the intro is one screen and the first project card peeks up from the bottom */
+.eltio.alt-iris.pk .i-open { height: calc(100svh - 64px); }
+.eltio.alt-iris.pk .i-open-sticky { position: relative; height: 100%; }
+.eltio.alt-iris.pk .i-down { display: none; }
+.eltio.alt-iris.pk .i-intro { padding-bottom: 40px; }
+.eltio.alt-iris.pk.at-top .i-card[data-i="0"] { animation: i-nudge 3.2s cubic-bezier(.3,0,.2,1) 3.6s infinite; }
+@keyframes i-nudge { 0%, 70%, 100% { translate: 0 0; } 80% { translate: 0 -18px; } 90% { translate: 0 0; } 95% { translate: 0 -5px; } }
+.eltio.alt-iris.pk .i-stack::before { content: "(5) projects, scroll"; position: absolute; right: 30px; top: -22px; font: 400 11px/1 var(--mono); color: #8A8A83; transition: opacity .4s; }
+.eltio.alt-iris.pk:not(.at-top) .i-stack::before { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .eltio.alt-iris.pk.at-top .i-card[data-i="0"] { animation: none; } }
+.eltio.alt-iris.cf .i-stack { z-index: 3; }
+.eltio.alt-iris.cf .i-stack::before { content: none; }

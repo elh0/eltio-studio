@@ -1,0 +1,211 @@
+// Behaviour for the alternate designs (alt-reel, alt-index, alt-iris). ASCII only.
+(function () {
+  var root = document.querySelector('.eltio.alt');
+  if (!root) return;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function cl(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function arr(n) { return Array.prototype.slice.call(n); }
+  function narrow() { return innerWidth <= 760; }
+
+  // ---------- pieces drawn at a design width and scaled to fit their box ----------
+  function maxH(fit) {
+    if (narrow()) return Infinity;
+    var stage = fit.closest('.r-stage, .i-stage');
+    if (!stage) return Infinity;
+    if (stage.classList.contains('r-stage')) return stage.parentNode.clientHeight - 148;
+    return stage.clientHeight;
+  }
+  function fitOne(fit) {
+    var inn = fit.firstElementChild, cw = fit.clientWidth || fit.parentNode.clientWidth;
+    if (!cw) return;
+    var dw = cw < 700 ? Math.max(340, cw) : 1100;
+    inn.style.setProperty('--dw', dw + 'px');
+    var h = inn.offsetHeight || 1;
+    var s = Math.min(cw / dw, maxH(fit) / h, 1.25);
+    inn.style.setProperty('--s', s.toFixed(4));
+    fit.style.height = Math.ceil(h * s) + 'px';
+  }
+  var fits = arr(root.querySelectorAll('.fit'));
+  function fitAll() { fits.forEach(fitOne); }
+  if (window.ResizeObserver) { var ro = new ResizeObserver(function () { fitAll(); }); fits.forEach(function (f) { ro.observe(f.firstElementChild); }); }
+  addEventListener('resize', fitAll); addEventListener('load', fitAll); fitAll();
+
+  // letters decode from noise
+  var GLY = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/_-+';
+  function decode(el) {
+    if (reduce) return;
+    var txt = el.getAttribute('data-txt') || el.textContent; el.setAttribute('data-txt', txt);
+    var t0 = performance.now(), dur = 380 + txt.length * 30;
+    (function step(now) {
+      var k = cl((now - t0) / dur, 0, 1), n = Math.floor(k * txt.length), s = txt.slice(0, n);
+      for (var i = n; i < txt.length; i++) s += txt[i] === ' ' ? ' ' : GLY[(Math.random() * GLY.length) | 0];
+      el.textContent = s;
+      if (k < 1) requestAnimationFrame(step); else el.textContent = txt;
+    })(t0);
+  }
+
+  // ---------- A. Reel ----------
+  if (root.classList.contains('alt-reel')) {
+    var wrap = root.querySelector('.r-track-wrap'), track = root.querySelector('.r-track');
+    var panels = arr(root.querySelectorAll('.r-panel')), clips = arr(root.querySelectorAll('.r-clip'));
+    var head = root.querySelector('.r-head'), line = root.querySelector('.r-clips'), tc = root.querySelector('.r-tc');
+    var eye = root.querySelector('.r-eye'), slate = root.querySelector('.r-slate');
+    var cur = -1, ready = false;
+    function size() { wrap.style.height = narrow() ? '' : (track.scrollWidth - innerWidth + innerHeight) + 'px'; }
+    addEventListener('resize', size); addEventListener('load', size); size();
+    function pad(n) { return (n < 10 ? '0' : '') + n; }
+    function frame() {
+      var vw = innerWidth, vh = innerHeight, x, p, i;
+      if (narrow()) {
+        var dh = document.documentElement.scrollHeight - vh;
+        p = dh > 0 ? cl(scrollY / dh, 0, 1) : 0;
+        i = 0; panels.forEach(function (pn, j) { if (pn.getBoundingClientRect().top < vh * .5) i = j; });
+        x = p * (panels.length - 1) * vw;
+      } else {
+        var r = wrap.getBoundingClientRect(), span = wrap.offsetHeight - vh;
+        p = span > 0 ? cl(-r.top / span, 0, 1) : 0;
+        x = p * (track.scrollWidth - vw);
+        track.style.transform = 'translate3d(' + (-x).toFixed(1) + 'px,0,0)';
+        i = Math.round(x / vw);
+        // the drawing in each panel drifts against the scroll, like a slower plane
+        panels.forEach(function (pn, j) {
+          var st = pn.querySelector('.r-stage'); if (!st) return;
+          var off = (j * vw - x) / vw;
+          st.style.transform = Math.abs(off) < 1.2 ? 'translate3d(' + (off * -90).toFixed(1) + 'px,0,0)' : '';
+        });
+      }
+      var secs = x / vw * 12, f = Math.floor((secs % 1) * 25);
+      tc.textContent = '00:' + pad(Math.floor(secs / 60)) + ':' + pad(Math.floor(secs % 60)) + ':' + pad(f);
+      var lr = line.getBoundingClientRect();
+      head.style.transform = 'translate3d(' + (p * (lr.width - 1)).toFixed(1) + 'px,0,0)';
+      if (eye) eye.style.transform = 'rotate(' + (x * .06).toFixed(2) + 'deg) scale(' + (1 + Math.min(x / vw, 1) * .5).toFixed(3) + ')';
+      if (i !== cur) {
+        cur = i;
+        clips.forEach(function (c, j) { c.classList.toggle('on', j === i); });
+        if (ready && !reduce && !narrow() && i > 0) {
+          slate.querySelector('.r-slate-n').textContent = 'Scene 0' + i;
+          slate.querySelector('.r-slate-t').textContent = panels[i].getAttribute('data-name');
+          slate.classList.remove('go'); void slate.offsetWidth; slate.classList.add('go');
+        }
+      }
+      ready = true;
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    clips.forEach(function (c) {
+      c.addEventListener('click', function () {
+        var i = +c.getAttribute('data-i');
+        var y = narrow() ? panels[i].getBoundingClientRect().top + scrollY - 48 : wrap.offsetTop + i * innerWidth;
+        scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' });
+      });
+    });
+  }
+
+  // ---------- B. Index ----------
+  if (root.classList.contains('alt-index')) {
+    var rows = arr(root.querySelectorAll('.x-row')), sheets = arr(root.querySelectorAll('.x-sheet'));
+    var peek = root.querySelector('.x-peek'), peeks = arr(root.querySelectorAll('.x-peek-i'));
+    var label = document.createElement('div'); label.className = 'x-cur'; label.textContent = 'Open'; label.setAttribute('aria-hidden', 'true'); root.appendChild(label);
+    var tx = -999, ty = -999, px = -999, py = -999, lx = -999, ly = -999;
+    addEventListener('pointermove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
+    (function loop() {
+      px += (tx - px) * .12; py += (ty - py) * .12; lx += (tx - lx) * .35; ly += (ty - ly) * .35;
+      peek.style.transform = 'translate(' + (px + 40).toFixed(1) + 'px,' + (py - 120).toFixed(1) + 'px)';
+      label.style.transform = 'translate(' + (lx + 12).toFixed(1) + 'px,' + (ly + 12).toFixed(1) + 'px)';
+      requestAnimationFrame(loop);
+    })();
+    rows.forEach(function (r, i) {
+      r.addEventListener('pointerenter', function () {
+        peeks.forEach(function (p, j) { p.classList.toggle('on', j === i); });
+        peek.classList.add('on'); label.classList.add('on');
+        decode(r.querySelector('.x-name'));
+      });
+      r.addEventListener('pointerleave', function () { peek.classList.remove('on'); label.classList.remove('on'); });
+      r.querySelector('.x-open').addEventListener('click', function (e) { open(i, e.clientX, e.clientY); });
+    });
+    var openI = -1, lastBtn = null;
+    function open(i, x, y) {
+      if (openI >= 0) shut(true);
+      var s = sheets[i]; openI = i; lastBtn = rows[i].querySelector('.x-open');
+      s.style.setProperty('--ox', (x == null ? innerWidth / 2 : x) + 'px');
+      s.style.setProperty('--oy', (y == null ? innerHeight / 2 : y) + 'px');
+      s.hidden = false; s.scrollTop = 0; document.documentElement.style.overflow = 'hidden';
+      arr(s.querySelectorAll('.fit')).forEach(fitOne);
+      requestAnimationFrame(function () { requestAnimationFrame(function () { s.classList.add('open'); }); });
+      s.querySelector('.x-close').focus({ preventScroll: true });
+      peek.classList.remove('on'); label.classList.remove('on');
+    }
+    function shut(now) {
+      if (openI < 0) return;
+      var s = sheets[openI]; openI = -1;
+      s.classList.remove('open');
+      document.documentElement.style.overflow = '';
+      if (now || reduce) s.hidden = true; else setTimeout(function () { if (!s.classList.contains('open')) s.hidden = true; }, 800);
+      if (!now && lastBtn) lastBtn.focus({ preventScroll: true });
+    }
+    sheets.forEach(function (s, i) {
+      s.querySelector('.x-close').addEventListener('click', function () { shut(); });
+      s.querySelector('.x-next').addEventListener('click', function () { open((i + 1) % sheets.length); });
+      s.querySelector('.x-prev').addEventListener('click', function () { open((i + sheets.length - 1) % sheets.length); });
+    });
+    addEventListener('keydown', function (e) {
+      if (openI < 0) return;
+      if (e.key === 'Escape') shut();
+      if (e.key === 'ArrowRight') open((openI + 1) % sheets.length);
+      if (e.key === 'ArrowLeft') open((openI + sheets.length - 1) % sheets.length);
+    });
+  }
+
+  // ---------- C. Iris ----------
+  if (root.classList.contains('alt-iris')) {
+    var op = root.querySelector('.i-open'), shutEl = root.querySelector('.i-shut'), ieye = root.querySelector('.i-eye');
+    var setT = function () {
+      // preview only: alt-iris.html#t-b picks a type layout; with no hash the page keeps the class it was built with
+      var m = /t-[a-d]|t-0/.exec(location.hash);
+      if (m) ['t-a', 't-b', 't-c', 't-d'].forEach(function (k) { root.classList.toggle(k, m[0] === k); });
+      fitAll();
+    };
+    setT(); addEventListener('hashchange', setT);
+    var down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
+    (function loop() {
+      var vh = innerHeight, vw = innerWidth, r = op.getBoundingClientRect();
+      var q = reduce ? 1 : cl(-r.top / Math.max(1, op.offsetHeight - vh), 0, 1);
+      var e = q * q * (3 - 2 * q);
+      shutEl.style.setProperty('--hole', (e * Math.hypot(vw, vh) * .55).toFixed(1) + 'px');
+      shutEl.style.visibility = q >= 1 ? 'hidden' : '';
+      ieye.style.transform = 'rotate(' + (e * 120).toFixed(1) + 'deg) scale(' + (1 + e * 5).toFixed(3) + ')';
+      ieye.style.opacity = (1 - e * 1.6).toFixed(3);
+      down.style.opacity = q > .02 ? Math.max(0, .7 - q * 4).toFixed(3) : '';
+      var total = document.documentElement.scrollHeight - vh;
+      pct.textContent = '(' + ('00' + Math.round(cl(scrollY / Math.max(1, total), 0, 1) * 100)).slice(-3) + ')';
+      cards.forEach(function (c, i) {
+        var n = cards[i + 1];
+        if (!n || narrow()) { c.style.transform = ''; return; }
+        var d = cl((vh - n.getBoundingClientRect().top) / (vh * .85), 0, 1);
+        c.style.transform = 'scale(' + (1 - d * .05).toFixed(4) + ')';
+        c.style.filter = d > 0 ? 'brightness(' + (1 - d * .12).toFixed(3) + ')' : '';
+      });
+      requestAnimationFrame(loop);
+    })();
+    cards.forEach(function (c) {
+      c.addEventListener('pointermove', function (e) {
+        var b = c.getBoundingClientRect();
+        c.style.setProperty('--mx', (e.clientX - b.left) + 'px'); c.style.setProperty('--my', (e.clientY - b.top) + 'px');
+      });
+      c.addEventListener('pointerleave', function () { c.style.setProperty('--mx', '-999px'); });
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) { es.forEach(function (x) { c.classList.toggle('in', x.isIntersecting); }); }, { threshold: .5 });
+        io.observe(c);
+      } else c.classList.add('in');
+    });
+    down.addEventListener('click', function () {
+      scrollTo({ top: op.offsetTop + op.offsetHeight - innerHeight, behavior: reduce ? 'auto' : 'smooth' });
+    });
+    var copy = root.querySelector('.i-copy'), said = root.querySelector('.i-copied');
+    if (copy) copy.addEventListener('click', function () {
+      var done = function () { said.textContent = '(copied, speak soon)'; setTimeout(function () { said.textContent = '(tap to copy)'; }, 2400); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('hello@eltio.studio').then(done, function () { location.href = 'mailto:hello@eltio.studio'; });
+      else location.href = 'mailto:hello@eltio.studio';
+    });
+  }
+})();

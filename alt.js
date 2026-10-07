@@ -194,7 +194,7 @@
     })();
     cards.forEach(function (c) {
       if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function (es) { es.forEach(function (x) { c.classList.toggle('in', x.isIntersecting); }); }, { threshold: .5 });
+        var io = new IntersectionObserver(function (es) { es.forEach(function (x) { if (x.isIntersecting) { c.classList.add('in'); io.unobserve(c); } }); }, { threshold: .5 });
         io.observe(c);
       } else c.classList.add('in');
     });

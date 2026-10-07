@@ -169,16 +169,21 @@
     var down = root.querySelector('.i-down'), pct = root.querySelector('.i-pct'), cards = arr(root.querySelectorAll('.i-card'));
     (function loop() {
       var vh = innerHeight, vw = innerWidth, r = op.getBoundingClientRect();
-      var q = reduce ? 1 : cl(-r.top / Math.max(1, op.offsetHeight - vh), 0, 1);
+      // the aperture follows the scroll even with Reduce Motion on (only the eye's spin is dropped), so phones with it set still see it open
+      var q = cl(-r.top / Math.max(1, op.offsetHeight - vh), 0, 1);
       var e = q * q * (3 - 2 * q);
-      shutEl.style.setProperty('--hole', (e * Math.hypot(vw, vh) * .55).toFixed(1) + 'px');
+      // the mask is written out in full each frame: Safari doesn't repaint a mask when only a CSS variable inside it changes
+      var hole = e * Math.hypot(vw, vh) * .55, g = 'radial-gradient(circle at 50% 50%, transparent ' + hole.toFixed(1) + 'px, #000 ' + (hole + 1).toFixed(1) + 'px)';
+      shutEl.style.webkitMaskImage = g; shutEl.style.maskImage = g;
       shutEl.style.visibility = q >= 1 ? 'hidden' : '';
-      ieye.style.transform = 'rotate(' + (e * 120).toFixed(1) + 'deg) scale(' + (1 + e * 5).toFixed(3) + ')';
+      if (!reduce) ieye.style.transform = 'rotate(' + (e * 120).toFixed(1) + 'deg) scale(' + (1 + e * 5).toFixed(3) + ')';
       ieye.style.opacity = (1 - e * 1.6).toFixed(3);
       down.style.opacity = q > .02 ? Math.max(0, .7 - q * 4).toFixed(3) : '';
       var total = document.documentElement.scrollHeight - vh;
       pct.textContent = '(' + ('00' + Math.round(cl(scrollY / Math.max(1, total), 0, 1) * 100)).slice(-3) + ')';
       cards.forEach(function (c, i) {
+        // phones: cards are taller than the screen, so each one sticks by its bottom edge once it has scrolled fully into view
+        c.style.top = narrow() ? Math.min(52 + i * 22, vh - c.offsetHeight - 12) + 'px' : '';
         var n = cards[i + 1];
         if (!n || narrow()) { c.style.transform = ''; return; }
         var d = cl((vh - n.getBoundingClientRect().top) / (vh * .85), 0, 1);

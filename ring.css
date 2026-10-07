@@ -1,0 +1,89 @@
+/* D. Carousel: the projects as cards on a carousel. Three ways, picked by class:
+   c-1 a ring you spin, c-2 the page scroll turns the ring, c-3 a flat strip you swipe. */
+
+.eltio.alt-ring { --kw: clamp(180px, 22vw, 300px); overflow-x: clip; }
+.eltio.alt-ring .k-wrap { position: relative; height: 100svh; }
+.eltio.alt-ring.c-2 .k-wrap { height: 560svh; }
+.eltio.alt-ring .k-sticky { position: sticky; top: 0; height: 100svh; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; padding: 64px 16px 20px; overflow: hidden; }
+.eltio.alt-ring .k-intro { display: grid; gap: .3em; max-width: 56ch; }
+.eltio.alt-ring .k-intro p { margin: 0; }
+
+.eltio.alt-ring .k-stage { position: relative; display: grid; place-items: center; perspective: 1100px; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+.eltio.alt-ring.c-2 .k-stage { cursor: default; }
+.eltio.alt-ring .k-stage.drag { cursor: grabbing; }
+.eltio.alt-ring .k-rot { position: relative; width: var(--kw); aspect-ratio: 3 / 4; transform-style: preserve-3d; }
+.eltio.alt-ring .k-card { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; padding: 10px; background: var(--bg); border: 1px solid var(--hr); color: var(--s1); text-align: left; text-decoration: none; -webkit-backface-visibility: hidden; backface-visibility: hidden; will-change: transform, opacity; }
+.eltio.alt-ring .k-card:focus-visible { outline: 1px solid var(--s1); outline-offset: 3px; }
+.eltio.alt-ring .k-top { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; overflow: hidden; }
+.eltio.alt-ring .k-top .caps { overflow: hidden; text-overflow: ellipsis; }
+.eltio.alt-ring .k-ic { display: block; margin: 0; flex: 1 1 auto; min-height: 0; }
+.eltio.alt-ring .k-ic .tile { width: 100%; height: 100%; aspect-ratio: auto; }
+.eltio.alt-ring .k-eye { display: grid; place-items: center; border: 1px solid var(--hr); }
+.eltio.alt-ring .k-eye .eye { width: 34%; }
+.eltio.alt-ring .k-bot { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.eltio.alt-ring .k-cap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 16px; align-items: baseline; border-top: 1px solid var(--hr); padding-top: 10px; min-height: 2.6em; }
+.eltio.alt-ring .k-cap > * { transition: opacity .25s; }
+.eltio.alt-ring .k-cap.sw > :not(.k-hint) { opacity: 0; }
+.eltio.alt-ring .k-foot { display: flex; justify-content: space-between; padding: 0 16px 16px; }
+.eltio.alt-ring.c-2 .k-foot { padding-top: 16px; }
+
+/* c-3: a flat strip, no depth */
+.eltio.alt-ring.c-3 .k-stage { perspective: none; }
+.eltio.alt-ring.c-3 .k-rot { transform-style: flat; }
+
+/* the project sheet slides up over the carousel */
+.eltio.alt-ring .k-sheet { position: fixed; inset: 0; z-index: 40; background: var(--bg); overflow-y: auto; overscroll-behavior: contain; transform: translateY(100%); transition: transform .7s cubic-bezier(.7,0,.2,1); }
+.eltio.alt-ring .k-sheet.open { transform: none; }
+.eltio.alt-ring .k-sheet-bar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 1em; padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--hr); }
+.eltio.alt-ring .k-nav { display: flex; gap: 1.4em; }
+.eltio.alt-ring .k-nav button { color: var(--s4); }
+.eltio.alt-ring .k-nav button:hover, .eltio.alt-ring .k-nav .k-close { color: var(--s1); }
+.eltio.alt-ring .k-sheet-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; max-width: 1440px; margin: 0 auto; }
+.eltio.alt-ring .k-sheet .a-notes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+
+@media (max-width: 760px) {
+  .eltio.alt-ring { --kw: min(56vw, 230px); }
+  .eltio.alt-ring .k-sticky { padding-top: 56px; }
+  .eltio.alt-ring .k-cap { grid-template-columns: minmax(0, 1fr) auto; }
+  .eltio.alt-ring .k-meta { grid-row: 2; grid-column: 1 / -1; }
+  .eltio.alt-ring .k-sheet .a-notes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .eltio.alt-ring .k-sheet { transition: none; } }
+
+/* covers: each project in its own brand, framed by the studio's plain card */
+.eltio.alt-ring .k-cov { position: relative; overflow: hidden; background: #0B0B0A; color: #F3F3F0; container-type: inline-size; }
+.eltio.alt-ring .k-cov > * { position: absolute; }
+.eltio.alt-ring .k-elliot-onl img { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; transform: scale(1.9); transform-origin: 0 0; }
+.eltio.alt-ring .k-out-and-scout .k-sun { left: 56%; top: 24%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: #FF5A1F; }
+.eltio.alt-ring .k-out-and-scout .lock { left: 9%; bottom: 8%; font-size: 8.5cqi !important; color: #F3F3F0; }
+.eltio.alt-ring .k-lampwerk { background: #0E0E0D; }
+.eltio.alt-ring .k-gel { inset: 40% -30% -30%; background: radial-gradient(closest-side, rgba(255,194,26,.42), rgba(255,194,26,0)); }
+.eltio.alt-ring .k-lwm { left: 50%; top: 22%; width: 22%; translate: -50% 0; fill: #EDEDEA; }
+.eltio.alt-ring .k-lww { left: 9%; bottom: 8%; width: 52%; fill: #EDEDEA; }
+.eltio.alt-ring .k-spoolends { background: #000; }
+.eltio.alt-ring .k-bands { left: 0; right: 0; top: 34%; height: 16%; display: grid; grid-template-columns: repeat(8, 1fr); }
+.eltio.alt-ring .k-bands i { background: var(--pc); }
+.eltio.alt-ring .k-spoolends .wm { left: 9%; bottom: 8%; font-size: 13cqi !important; color: #F3F3F0; }
+.eltio.alt-ring .k-grip { background: #000; }
+.eltio.alt-ring .k-crimp { left: 50%; top: 42%; width: 62%; height: auto; aspect-ratio: 1; translate: -50% -50%; }
+.eltio.alt-ring .k-grip .gp-wm2 { left: 9%; bottom: 8%; width: auto; height: 7cqi; }
+
+/* big intro, as on the Iris page: Diatype Mono from Cargo when set, Geist Mono elsewhere */
+.eltio.alt-ring { --big: "Diatype Mono Variable", "Diatype Mono", "ABC Diatype Mono", var(--mono); }
+.eltio.alt-ring .k-intro { max-width: none; gap: .5em; will-change: filter, transform; transform-origin: 0 0; }
+.eltio.alt-ring .k-intro p, .eltio.alt-ring .k-intro p * { font-family: var(--big) !important; font-size: clamp(24px, 3.5vw, 54px) !important; line-height: 1.08 !important; font-weight: 300 !important; letter-spacing: -.015em !important; margin: 0 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; }
+.eltio.alt-ring .k-intro p * { color: inherit; }
+.eltio.alt-ring .k-intro .ln { display: block; }
+.eltio.alt-ring .k-intro .nw { white-space: nowrap; }
+.eltio.alt-ring .k-intro .k-l1 { color: var(--s1); }
+.eltio.alt-ring .k-intro .k-l2 { color: var(--s5, rgba(0,0,0,.28)); }
+/* focus pull: the black thins out, the eye drifts soft and away, the words come from a blur to sharp */
+.eltio.alt-ring .k-shut { position: fixed; inset: 0; z-index: 30; background: #0B0B0A; display: grid; place-items: center; pointer-events: none; }
+.eltio.alt-ring .k-eye { width: 120px; background: #F3F3F0; will-change: transform, filter, opacity; }
+.eltio.alt-ring .k-read { position: fixed; left: 0; right: 0; top: 64px; z-index: 31; text-align: center; opacity: 0; transition: opacity .3s; pointer-events: none; }
+@media (max-width: 760px) {
+  .eltio.alt-ring .k-intro p, .eltio.alt-ring .k-intro p * { font-size: 22px !important; }
+  .eltio.alt-ring .k-intro .ln { display: inline; }
+  .eltio.alt-ring .k-eye { width: 90px; }
+}

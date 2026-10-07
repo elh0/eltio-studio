@@ -248,6 +248,10 @@
     down.addEventListener('click', function () {
       scrollTo({ top: op.offsetTop + op.offsetHeight - innerHeight, behavior: reduce ? 'auto' : 'smooth' });
     });
+    // the page pasted into Cargo before 7 Oct 19:50 still has the old copy button and its label: turn it into the plain mail link
+    var oldLab = root.querySelector('.i-copied'); if (oldLab) oldLab.remove();
+    var oldBtn = root.querySelector('button.i-copy');
+    if (oldBtn) { var a = document.createElement('a'); a.className = oldBtn.className; a.href = 'mailto:hello@eltio.studio'; a.innerHTML = oldBtn.innerHTML; oldBtn.replaceWith(a); }
     // On Cargo, take the big font from Cargo's own text style (set Bodycopy to Diatype Mono) so it matches exactly.
     var host = root.parentElement, hs = host && getComputedStyle(host);
     if (hs && /diatype/i.test(hs.fontFamily)) {

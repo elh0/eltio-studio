@@ -96,7 +96,6 @@
 @keyframes i-bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 8px; } }
 .eltio.alt-iris .i-stack { position: relative; padding: 0 16px 16px; }
 .eltio.alt-iris .i-card { position: sticky; top: calc(56px + var(--i) * 34px); height: calc(100vh - 72px - var(--i) * 34px); min-height: 420px; margin-bottom: 24vh; background: var(--bg); border: 1px solid var(--s1); border-radius: 14px; overflow: hidden; display: flex; flex-direction: column; transform-origin: 50% 0; will-change: transform; box-shadow: 0 -12px 30px rgba(0,0,0,.06); }
-.eltio.alt-iris .i-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(420px circle at var(--mx, -999px) var(--my, -999px), rgba(255,255,255,.12), transparent 60%); mix-blend-mode: screen; }
 .eltio.alt-iris .i-tab { display: flex; justify-content: space-between; gap: 1em; padding: 9px 14px; border-bottom: 1px solid var(--hr); flex: none; }
 .eltio.alt-iris .i-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr); gap: 16px; padding: 14px; }
 .eltio.alt-iris .i-stage { min-width: 0; min-height: 0; position: relative; }
@@ -203,7 +202,9 @@
   .eltio.alt-iris.t-b .i-copy { font-size: 30px !important; }
 }
 /* Cargo's Diatype Mono is the variable Diatype with its mono axis turned up. */
-.eltio.alt-iris.t-b .i-l1, .eltio.alt-iris.t-b .i-l2, .eltio.alt-iris.t-b .i-copy { font-variation-settings: "MONO" 1, "wght" 300 !important; }
+.eltio.alt-iris.t-b .i-l1, .eltio.alt-iris.t-b .i-l2, .eltio.alt-iris.t-b .i-copy { font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; }
 .eltio.alt-iris.t-b .i-l1 *, .eltio.alt-iris.t-b .i-l2 *, .eltio.alt-iris.t-b .i-copy * { font: inherit !important; letter-spacing: inherit !important; font-variation-settings: inherit !important; color: inherit; }
 .eltio.alt-iris.t-b .i-intro p.i-lab, .eltio.alt-iris.t-b .i-intro p.i-lab * { font-family: var(--mono) !important; font-size: 11px !important; line-height: 1.15 !important; font-weight: 400 !important; letter-spacing: 0 !important; font-variation-settings: normal !important; margin: 0 0 1.6em !important; }
 .eltio.alt-iris.t-b .i-intro p.i-lab * { margin: 0 !important; color: var(--s5); }
+/* The email is a plain mail link; strip any link styling Cargo adds. */
+.eltio.alt-iris .i-end a.i-copy, .eltio.alt-iris .i-end a.i-copy:hover, .eltio.alt-iris .i-end a.i-copy:active { color: var(--paper) !important; background: none !important; border: 0 !important; text-decoration: none !important; opacity: 1 !important; box-shadow: none !important; }

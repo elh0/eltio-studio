@@ -193,11 +193,6 @@
       requestAnimationFrame(loop);
     })();
     cards.forEach(function (c) {
-      c.addEventListener('pointermove', function (e) {
-        var b = c.getBoundingClientRect();
-        c.style.setProperty('--mx', (e.clientX - b.left) + 'px'); c.style.setProperty('--my', (e.clientY - b.top) + 'px');
-      });
-      c.addEventListener('pointerleave', function () { c.style.setProperty('--mx', '-999px'); });
       if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (es) { es.forEach(function (x) { c.classList.toggle('in', x.isIntersecting); }); }, { threshold: .5 });
         io.observe(c);
@@ -206,11 +201,12 @@
     down.addEventListener('click', function () {
       scrollTo({ top: op.offsetTop + op.offsetHeight - innerHeight, behavior: reduce ? 'auto' : 'smooth' });
     });
-    var copy = root.querySelector('.i-copy'), said = root.querySelector('.i-copied');
-    if (copy) copy.addEventListener('click', function () {
-      var done = function () { said.textContent = '(copied, speak soon)'; setTimeout(function () { said.textContent = '(tap to copy)'; }, 2400); };
-      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText('hello@eltio.studio').then(done, function () { location.href = 'mailto:hello@eltio.studio'; });
-      else location.href = 'mailto:hello@eltio.studio';
-    });
+    // On Cargo, take the big font from Cargo's own text style (set Bodycopy to Diatype Mono) so it matches exactly.
+    var host = root.parentElement, hs = host && getComputedStyle(host);
+    if (hs && /diatype/i.test(hs.fontFamily)) {
+      root.style.setProperty('--big', hs.fontFamily);
+      var v = hs.fontVariationSettings;
+      if (v && v !== 'normal') root.style.setProperty('--bigv', /wght/.test(v) ? v.replace(/"wght"\s+[\d.]+/, '"wght" 300') : v + ', "wght" 300');
+    }
   }
 })();

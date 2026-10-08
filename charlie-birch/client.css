@@ -1,0 +1,32 @@
+/* Charlie Birch page: the fill-in, tick and sign layer. Same type, one size; lines not boxes. */
+.in, .ta { display: block; width: 100%; font: inherit; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--s5); border-radius: 0; padding: .35em 0; margin-top: .2em; outline: none; -webkit-appearance: none; appearance: none; }
+.ta { resize: vertical; min-height: 4.6em; line-height: var(--lh); border: 1px solid var(--s6); padding: .45em .55em; }
+.in:focus, .ta:focus { border-color: var(--ink); }
+.in::placeholder, .ta::placeholder { color: var(--s5); }
+.fld { display: block; margin-top: var(--lh); }
+.fld > span { display: block; }
+.tick { display: flex; gap: .7em; align-items: baseline; cursor: pointer; padding-block: .1em; }
+.tick input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.tick .bx2 { flex: none; width: .95em; height: .95em; border: 1px solid var(--s4); position: relative; top: .12em; }
+.tick input:checked + .bx2 { background: var(--ink); border-color: var(--ink); }
+.tick input:checked ~ .tx { color: var(--s4); text-decoration: line-through; text-decoration-color: var(--s5); }
+.tick input:focus-visible + .bx2 { outline: 1px solid var(--ink); outline-offset: 2px; }
+.btn { font: inherit; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--ink); border-radius: 0; padding: .55em .9em; cursor: pointer; }
+.btn.solid { background: var(--ink); color: var(--bg); }
+.btn:disabled { opacity: .35; cursor: default; }
+.btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+.btns { display: flex; flex-wrap: wrap; gap: .5em; margin-top: var(--lh); }
+.lnk { font: inherit; color: var(--s4); background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: .2em; cursor: pointer; }
+.pad { display: block; width: 100%; height: 7.5em; border: 1px solid var(--s6); background: var(--bg); touch-action: none; cursor: crosshair; margin-top: .2em; }
+.signbox .done img { display: block; max-width: 16em; height: auto; margin-top: .3em; }
+.signbox [hidden] { display: none !important; }
+.saved { color: var(--s4); min-height: var(--lh); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--lh); }
+.steps li { display: grid; grid-template-columns: 2.6em minmax(0,1fr); }
+.steps .on { color: var(--ink); }
+.steps li.ok > span:first-child { color: var(--ink); }
+.steps li.ok > span:first-child::before { content: "\2713 "; }
+.steps li.ok > span:last-child { color: var(--s4); }
+.state { color: var(--s4); align-self: end; text-transform: uppercase; }
+.state.ok { color: var(--ink); }
+.note { color: var(--s4); margin-top: .5em; }

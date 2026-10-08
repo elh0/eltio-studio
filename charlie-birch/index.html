@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="client.css">
+<script src="client.js" defer></script>
 <title>Charlie Birch and Brainrot: Eltio Studio</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,7 +126,7 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
 .doc .go { color: var(--s4); align-self: end; }
 </style>
 
-<div class="site two">
+<div data-page="home" class="site two">
 
   <aside class="col side">
     <div class="head bar"><span class="caps" id="top">Eltio Studio</span><span class="eye" style="width:14px" aria-hidden="true"></span></div>
@@ -133,19 +135,30 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     <div>For Charlie Birch and Brainrot</div>
     <div class="m">8 October 2026</div>
     <div class="br"></div>
-    <p>Everything for your site and Brainrot's, in one place. Start with the roadmap.</p>
+    <div class="caps">How this works (5)</div>
     <div class="br"></div>
-    <p class="m">To go ahead, reply yes to the email this came with.</p>
+    <ol class="steps">
+      <li data-step="roadmap"><span>(1)</span><span>Read the <a href="roadmap.html">roadmap</a>.<br><span class="m">Five minutes on how it all runs.</span></span></li>
+      <li data-step="proposal"><span>(2)</span><span>Sign the <a href="proposal.html">proposal</a>.<br><span class="m">Signing box at the bottom of the quote.</span></span></li>
+      <li data-step="terms"><span>(3)</span><span>Sign the <a href="terms.html">terms</a>.<br><span class="m">One page, signing box at the end.</span></span></li>
+      <li data-step="send"><span>(4)</span><span>Press Send to Eltio.<br><span class="m">The deposit invoice follows the same day.</span></span></li>
+      <li data-step="start"><span>(5)</span><span>Work through <a href="getting-started.html">getting started</a>.<br><span class="m">At your own pace. Send again as you add things.</span></span></li>
+    </ol>
+    <div class="br"></div>
+    <p class="m">What you type, tick and sign is saved on this device as you go, so you can leave and come back.</p>
     <div class="m push" style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:2rem"><span>hello@eltio.studio<br>(<span class="num" id="clock" aria-label="London time">00:00:00</span> LDN)</span><span class="eye" style="width:24px;background:var(--s4)" aria-hidden="true"></span></div>
   </aside>
 
   <main class="col">
     <div class="head caps">Documents (4)</div>
     <hr style="margin-top:0;margin-bottom:0;border:0">
-    <a class="doc" href="roadmap.html"><span class="m">(1)</span><span><span class="caps">Roadmap</span><br><span class="m">How the two sites get made, step by step, with a first look at Brainrot.</span></span><span class="go caps">Open</span></a>
-    <a class="doc" href="proposal.html"><span class="m">(2)</span><span><span class="caps">Proposal and quote</span><br><span class="m">Both sites, the price and the dates.</span></span><span class="go caps">Open</span></a>
-    <a class="doc" href="terms.html"><span class="m">(3)</span><span><span class="caps">Terms</span><br><span class="m">Payment, changes and ownership, on one page.</span></span><span class="go caps">Open</span></a>
-    <a class="doc" href="getting-started.html"><span class="m">(4)</span><span><span class="caps">Getting started</span><br><span class="m">What we need from you to begin.</span></span><span class="go caps">Open</span></a>
+    <a class="doc" href="roadmap.html"><span class="m">(1)</span><span><span class="caps">Roadmap</span><br><span class="m">How the two sites get made, step by step, with a first look at Brainrot.</span></span><span class="state" data-state="roadmap">Open</span></a>
+    <a class="doc" href="proposal.html"><span class="m">(2)</span><span><span class="caps">Proposal and quote</span><br><span class="m">Both sites, the price and the dates.</span></span><span class="state" data-state="proposal">Open</span></a>
+    <a class="doc" href="terms.html"><span class="m">(3)</span><span><span class="caps">Terms</span><br><span class="m">Payment, changes and ownership, on one page.</span></span><span class="state" data-state="terms">Open</span></a>
+    <a class="doc" href="getting-started.html"><span class="m">(4)</span><span><span class="caps">Getting started</span><br><span class="m">What we need from you to begin.</span></span><span class="state" data-state="start">Open</span></a>
+    <div class="br"></div><div class="br"></div>
+    <div class="caps">Send to Eltio</div>
+    <div class="sendbar"></div>
     <div class="br"></div><div class="br"></div>
     <div class="m caps">© Eltio Studio (2026)</div>
   </main>

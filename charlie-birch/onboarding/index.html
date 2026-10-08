@@ -425,11 +425,20 @@ p { margin: 0; }
   .done-scr > div[style*="justify-content:center"] { justify-content: flex-start !important; }
   .done-scr > .lnk { align-self: flex-start; }
   .slip { background: transparent !important; padding: 0 !important; -webkit-mask: none; mask: none; border-top: 1px solid var(--hr); border-radius: 0; }
-  .slip .ln { grid-template-columns: 10px 22ch 1fr auto; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
+  .slip .ln { grid-template-columns: 22ch 1fr auto !important; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
   .slip .ln .v { max-width: none; text-align: left; white-space: normal; }
   .slip .bk-t { padding-top: 14px; }
   .slip-h { margin-top: 18px; }
 }
+
+/* receipt: one font, one colour (Elliot, 8 Oct) */
+.slip, .slip .ln .k, .slip .ln .v, .slip .ln .v.cn, .slip .chg, .slip .q, .slip-h, .slip .oq, .slip .bk-t { color: var(--fg) !important; font-family: var(--mono) !important; font-size: 13px !important; }
+.slip .chg { text-decoration: none !important; }
+.slip .oq { grid-template-columns: 1fr auto !important; }
+.slip .chg:hover { text-decoration: underline !important; text-underline-offset: .2em; }
+.slip .dot, .slip .oq .dot { display: none; }
+@container (max-width: 759px) { .slip .ln { grid-template-columns: 1fr auto auto !important; } }
+.slip .strike { opacity: .5; }
 
 .done-scr .big { display: none; } /* no tick above the thank-you (Elliot, 8 Oct) */
 
@@ -626,7 +635,7 @@ function doneHTML(c) {
   return '<div class="done-scr"><div class="big">&#10003;</div><div class="wt">' + h(c.s[c.s.length - 1].t) + '</div><div class="q">' + sub + '</div>' +
     '<div class="pips">' + FLOW.map(function (x) { return '<i class="' + (S.done[x.id] ? 'on' : '') + '" style="' + (S.done[x.id] ? 'background:var(--d)' : '') + '"></i>'; }).join('') + '</div>' +
     '<div class="slip-h">' + (last ? 'Your plan, everything' : 'What you picked') + '</div>' + receiptHTML(last ? FLOW.map(function (x) { return x.id; }) : [c.id], true) +
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' + '<button class="btn" data-act="home" data-hot>All documents</button>' + (nx ? '<button class="btn solid" data-act="nextchap" data-hot>Next: ' + nx.name.toLowerCase() + '</button>' : '') + '</div></div>';
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' + '<button class="btn" data-act="home" data-hot>All documents</button>' + (nx ? '<button class="btn solid" data-act="nextchap" data-hot>Next: ' + nx.name.toLowerCase() + '</button>' : '') + (last ? '<button class="btn" data-act="reset" data-hot>Start over &#8635;</button>' : '') + '</div></div>';
 }
 
 /* ---------- views ---------- */
@@ -785,6 +794,7 @@ page.addEventListener('click', function (e) {
   else if (a === 'sheet') { if (!S.done.proposal) { S.sheet = true; S.keep = true; render(); } }
   else if (a === 'unsheet') { S.sheet = false; S.keep = true; render(); }
   else if (a === 'send') { mailIt(); S.sent = true; S.done.start = true; S.i = chap('start').s.length - 1; render(); }
+  else if (a === 'reset') { try { localStorage.removeItem('eltio-onb-charlie'); } catch (er) {} location.reload(); }
   else if (a === 'bk') { S.shut = !S.shut; S.keep = true; render(); }
   else if (a === 'unjoke') { S.joke = false; S.jokeDone = true; S.keep = true; render(); countTo('tot', 1e11, 1000, 1100); var tt = document.getElementById('tot'); if (tt) tt.parentNode.parentNode.classList.add('shake'); }
 });

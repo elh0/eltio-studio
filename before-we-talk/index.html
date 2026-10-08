@@ -425,11 +425,20 @@ p { margin: 0; }
   .done-scr > div[style*="justify-content:center"] { justify-content: flex-start !important; }
   .done-scr > .lnk { align-self: flex-start; }
   .slip { background: transparent !important; padding: 0 !important; -webkit-mask: none; mask: none; border-top: 1px solid var(--hr); border-radius: 0; }
-  .slip .ln { grid-template-columns: 10px 22ch 1fr auto; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
+  .slip .ln { grid-template-columns: 22ch 1fr auto !important; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
   .slip .ln .v { max-width: none; text-align: left; white-space: normal; }
   .slip .bk-t { padding-top: 14px; }
   .slip-h { margin-top: 18px; }
 }
+
+/* receipt: one font, one colour (Elliot, 8 Oct) */
+.slip, .slip .ln .k, .slip .ln .v, .slip .ln .v.cn, .slip .chg, .slip .q, .slip-h, .slip .oq, .slip .bk-t { color: var(--fg) !important; font-family: var(--mono) !important; font-size: 13px !important; }
+.slip .chg { text-decoration: none !important; }
+.slip .oq { grid-template-columns: 1fr auto !important; }
+.slip .chg:hover { text-decoration: underline !important; text-underline-offset: .2em; }
+.slip .dot, .slip .oq .dot { display: none; }
+@container (max-width: 759px) { .slip .ln { grid-template-columns: 1fr auto auto !important; } }
+.slip .strike { opacity: .5; }
 
 .done-scr .big { display: none; } /* no tick above the thank-you (Elliot, 8 Oct) */
 
@@ -627,8 +636,7 @@ function doneHTML() {
   return '<div class="done-scr"><div class="big">&#10003;</div><div class="wt">Thank you' + (first() ? ', ' + h(first()) : '') + '.</div><div class="q">That\'s really helpful. We\'ll be in touch soon to set up a quick call.</div>' +
     '<div class="slip-h">Your answers</div>' + slipHTML() +
     '<p class="q mail-fb">No email opened? Copy your answers and send them to <span class="addr">' + STUDIO.email + '</span>.</p>' +
-    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn" data-act="copy" data-hot>Copy answers</button><button class="btn solid" data-act="send" data-hot>Open the email again</button></div>' +
-    '<button class="lnk q" style="text-decoration:underline;text-underline-offset:.2em" data-act="reset" data-hot>Start over</button></div>';
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button class="btn" data-act="copy" data-hot>Copy answers</button><button class="btn solid" data-act="send" data-hot>Open the email again</button><button class="btn" data-act="reset" data-hot>Start over &#8635;</button></div></div>';
 }
 
 /* ---------- views ---------- */

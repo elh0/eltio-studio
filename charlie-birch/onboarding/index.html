@@ -377,6 +377,47 @@ p { margin: 0; }
 .toast .dot { background: var(--bg); box-shadow: none; flex: none; }
 
 
+/* landing: index layout */
+.hv { min-height: 100%; padding: 20px; display: flex; flex-direction: column; gap: 28px; }
+.hv .wt { margin: 0; }
+.hv-foot { margin-top: auto; }
+.hv .btn { justify-self: start; align-self: flex-start; }
+.hv-a { align-items: center; text-align: center; }
+.hv-a .hv-mid { margin: auto 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.hv-a .btn { align-self: center; margin-top: 6px; }
+.hv-a .hv-parts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 18px; }
+.hv-a .hv-parts .lnk { display: inline-flex; gap: 7px; align-items: center; color: var(--q); }
+.hv-a .hv-parts .lnk.done { color: var(--fg); text-decoration: line-through; text-decoration-thickness: 1px; }
+.hv-a .hv-foot { margin-top: 0; }
+.hv-b .hv-col { margin: auto 0; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; }
+.hv-b .list { margin: 10px 0 8px; width: 100%; }
+.hv .wt { font-size: clamp(34px, 10cqw, 48px) !important; }
+.hv-a .hv-parts .dot { box-shadow: 0 0 0 1px var(--q); }
+.hv-c .hv-top { display: flex; justify-content: space-between; gap: 12px; }
+.hv-c .hv-bot { margin-top: auto; display: grid; gap: 22px; }
+.hv-c .hv-idx { display: grid; border-top: 1px solid var(--hr); }
+.hv-c .hv-idx .lnk { display: grid; grid-template-columns: 5ch 1fr auto; gap: 12px; text-align: left; padding: 11px 0; border-bottom: 1px solid var(--hr); transition: padding .2s; }
+.hv-c .hv-idx .lnk:hover { padding-left: 6px; }
+.hv-c .hv-go { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+@container (min-width: 760px) { .hv-c .wt { font-size: clamp(40px, 8cqw, 96px) !important; } .hv-a .wt { font-size: clamp(36px, 5.6cqw, 64px) !important; } .hv-b .wt { font-size: clamp(34px, 5cqw, 56px) !important; } }
+.hv-c .hv-idx .lnk.next span:last-child { color: var(--fg); }
+
+/* desktop: the cards span the whole screen, the question on one line (Elliot, 8 Oct) */
+@container (min-width: 760px) {
+  .ob-top, .ctl, .scr { max-width: none !important; }
+  .ob-top { padding: 20px 28px 0; }
+  .ob-main { padding: 12px 28px 28px; }
+  .scr { justify-content: center; }
+  .scr .qt { white-space: nowrap; font-size: 9cqw !important; line-height: 1; letter-spacing: -.045em; }
+  .scr .qt.wrap { white-space: normal; }
+  .ops { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .ops .op { align-items: flex-start; min-height: 64px; }
+  .rows { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .rows > .acc { grid-column: 1 / -1; }
+  .cool, .ta, .in, .scr > p { max-width: 720px; }
+  .scr .cant { align-self: flex-start; }
+}
+
 /* live: the page is the whole screen */
 html, body { height: 100%; }
 body { background: #061469; }
@@ -447,7 +488,7 @@ var WHY0 = {
   splash: 'Calm and white until he answers: colour splashes out from where he taps, and a ring fills as he goes. The colour mostly arrives as a reward.',
   grouped: 'The settings-style lists you liked, on light grey, in mono. Colour is only an accent: the tick, the picked line and the chapter.'
 };
-function coolNote(v) {
+function coolNote(v) { return '<div class="reply" id="cn"></div>'; /* no reactions (Elliot, 8 Oct) */
   var t = v <= 1 ? 'That\'s not very fun. It\'s still going to cost you.' : v <= 3 ? 'Bold choice. Same price either way.' : '';
   return '<div class="reply' + (t ? ' on meh' : '') + '" id="cn">' + t + '</div>';
 }
@@ -523,7 +564,7 @@ function replyFor(sc) {
   if (sc.k === 'one' && S.ans[sc.key] != null) return sc.o[S.ans[sc.key]][1];
   return '';
 }
-function replyBox(sc) { var r = replyFor(sc); return '<div class="reply' + (r ? ' on' : '') + (S.ans[sc.key] === 'cant' ? ' meh' : '') + '">' + h(r) + '</div>'; }
+function replyBox(sc) { return ''; } /* no reactions after answering (Elliot, 8 Oct) */
 function opsHTML(sc) {
   var own = S.txt[sc.key + '-own'], open = S.ownOpen[sc.key] || own;
   return '<div class="ops">' + sc.o.map(function (o, j) {
@@ -584,11 +625,13 @@ function homeHTML() {
     var w = WELCOME[S.w || 0], last = (S.w || 0) === WELCOME.length - 1;
     return '<div class="home"><div class="top"><a class="lnk" href="https://eltio.studio" target="_blank" rel="noopener" data-hot>Eltio Studio</a><button class="lnk q" data-act="skipwelcome" data-hot>Skip</button></div><div class="welcome"><div class="wcard anim" style="background:' + ['#DCE8D6', '#F4E7B8', '#D6E4F1'][S.w || 0] + '"><div class="wpips">' + WELCOME.map(function (_, k) { return '<i class="' + (k <= (S.w || 0) ? 'on' : '') + '"></i>'; }).join('') + '</div><div class="wt">' + w.t + '</div><p>' + w.p + '</p><div><button class="btn solid" data-act="' + (last ? 'skipwelcome' : 'wnext') + '" data-hot>' + (last ? 'Show me' : 'Next') + '</button></div></div></div></div>';
   }
-  var nx = FLOW.find(function (c) { return !S.done[c.id]; }), n = Object.keys(S.done).length, ix = nx ? FLOW.indexOf(nx) : -1;
-  var hero = nx ? '<button class="hero" style="--rc:' + CHC[nx.id] + '" data-act="open" data-c="' + nx.id + '" data-hot><span class="q">' + (n ? 'Up next' : 'Start here') + ' &middot; ' + nx.mins + ' min</span><span class="wt">' + nx.name + '</span><span>' + nx.tag + '</span><span class="go">' + (n ? 'Carry on' : 'Start') + ' &rarr;</span></button>' : '<div class="hero" style="--rc:#DCE8D6"><span class="wt">All four done.</span><span>Thank you. We\'ll be in touch.</span></div>';
-  return '<div class="home"><div class="top"><a class="lnk" href="https://eltio.studio" target="_blank" rel="noopener" data-hot>Eltio Studio</a><span class="q">' + n + ' of 4 done</span></div><div class="h-grid"><aside><div>' + CLIENT.title + '</div><div class="q">For ' + CLIENT.for + '</div>' + hero + '</aside><div><div class="list">' +
-    FLOW.map(function (c, i) { var st = S.done[c.id] ? 'Done' : nx === c ? 'Next' : c.mins + ' min'; return '<button class="row' + (S.done[c.id] ? ' done' : nx === c ? ' next' : '') + '" style="--rc:' + CHC[c.id] + ';--rf:' + FGC[c.id] + '" data-act="open" data-c="' + c.id + '" data-hot><span class="n">' + (S.done[c.id] ? '&#10003;' : i + 1) + '</span><span>' + c.name + '</span><span class="st">' + st + '</span></button>'; }).join('') +
-    '</div>' + (basket().length ? '<details class="home-open"><summary>Still to answer (' + openQs().length + ')</summary>' + openHTML(8) + '</details>' : '<p class="q" style="margin-top:14px">You can come back to any part, any time.</p>') + '</div></div><div class="foot"><span>©2026 Eltio Studio</span><span>' + CLIENT.email + '</span></div></div>';
+  var nx = FLOW.find(function (c) { return !S.done[c.id]; }), n = FLOW.filter(function (c) { return S.done[c.id]; }).length;
+  var link = '<a class="lnk" href="https://eltio.studio" target="_blank" rel="noopener" data-hot>Eltio Studio</a>';
+  var sub = nx ? 'For ' + CLIENT.for + '. ' + (n ? n + ' of 4 done.' : 'Four short parts, about ten minutes.') : 'All four done. Thank you, we\'ll be in touch.';
+  var btn = nx ? '<button class="btn solid" data-act="open" data-c="' + nx.id + '" data-hot>' + (n ? 'Carry on' : 'Start') + ' &rarr;</button>' : '';
+  return '<div class="hv hv-c"><div class="hv-top">' + link + '<span class="q">' + CLIENT.email + '</span></div><div class="hv-bot"><div class="hv-idx">' +
+    FLOW.map(function (c, i) { var st = S.done[c.id] ? 'Done' : nx === c ? 'Next' : c.mins + ' min'; return '<button class="lnk' + (S.done[c.id] ? ' done' : nx === c ? ' next' : '') + '" data-act="open" data-c="' + c.id + '" data-hot><span class="q">(0' + (i + 1) + ')</span><span>' + c.name + '</span><span class="q">' + st + '</span></button>'; }).join('') +
+    '</div><div class="wt">' + CLIENT.title + '.</div><div class="hv-go"><p class="q">' + sub + '</p>' + btn + '</div></div></div>';
 }
 function bkInner() {
   var L = basket(), pc = Math.round(L.length / qTotal() * 100);
@@ -612,6 +655,14 @@ function obHTML() {
     (S.sheet ? '<div class="sheet-bg" data-act="unsheet"></div><div class="sheet"><div class="kick"><span class="dot"></span>Proposal No. 001</div><div>Book your start: two sites for ' + CLIENT.price + '. The ' + CLIENT.today + ' invoice follows the same day.</div>' + signHTML('proposal') + '</div>' : '') +
     (S.joke ? '<div class="alert-bg"></div><div class="alert" role="alertdialog" aria-label="Cool level 10"><button class="x" data-act="unjoke" aria-label="Close" data-hot>&#10005;</button><div class="q">Cool level 10</div><div class="huge" id="huge">' + JOKE + '</div><div class="q">Unreasonably cool costs unreasonable money. Your total has been updated.</div><button class="btn solid" data-act="unjoke" data-hot>Fine, I\'ll be reasonable</button></div>' : '');
 }
+function fitQ() { /* shrink the question until it sits on one line across the screen */
+  var q = page.querySelector('.scr .qt'); if (!q) return; q.classList.remove('wrap'); q.style.fontSize = '';
+  if (getComputedStyle(q).whiteSpace !== 'nowrap') return;
+  var fs = parseFloat(getComputedStyle(q).fontSize), n = 0;
+  while (q.scrollWidth > q.clientWidth + 1 && fs > 30 && n++ < 60) { fs -= 2; q.style.setProperty('font-size', fs + 'px', 'important'); }
+  if (q.scrollWidth > q.clientWidth + 1) { q.classList.add('wrap'); q.style.fontSize = ''; }
+}
+addEventListener('resize', fitQ);
 var dc = document.createElement('div'); dc.className = 'dc';
 function render() {
   var sc0 = page.querySelector('.scroller'), keepTop = sc0 && S.keep ? sc0.scrollTop : 0;
@@ -619,11 +670,11 @@ function render() {
   page.dataset.ch = S.c || (S.welcomed ? (nxc ? nxc.id : 'start') : ['roadmap', 'proposal', 'terms'][S.w || 0]);
   page.innerHTML = S.c ? obHTML() : '<div class="scroller">' + homeHTML() + '</div>';
   page.appendChild(dc); if (TOAST && TOAST.classList.contains('on')) page.appendChild(TOAST); if (S.keep) { page.querySelector('.scroller').scrollTop = keepTop; S.keep = false; }
-  S.fresh = null; save();
+  S.fresh = null; save(); fitQ();
   var acc = page.querySelectorAll('.acc'); if (acc.length && !S.accSeen) { S.accSeen = true; setTimeout(function () { if (acc[0].isConnected) acc[0].classList.add('open'); }, 300 + acc.length * 420 + 500); }
 }
 var CHEERS = ['Nice.', 'Lovely.', 'Good one.', 'That helps a lot.', 'Perfect.', 'Noted.', 'Great pick.'];
-function cheer() {
+function cheer() { return; /* no encouragement banners (Elliot, 8 Oct) */
   var total = qTotal(), done = total - openQs().length, open = openQs().length, msg;
   if (!S.half && done >= total / 2) { S.half = true; msg = 'Halfway there.'; }
   else if (open === 1) msg = 'One left. Nearly there.';
@@ -712,7 +763,7 @@ page.addEventListener('click', function (e) {
   else if (a === 'later') { var nc = nextChap(S.c); S.sheet = false; if (nc && !S.done[nc.id]) go(nc.id); else { S.c = null; render(); } toast('No rush. It\'s waiting in Still to answer.', 450); }
   else if (a === 'jump') go(b.dataset.c, +b.dataset.j);
   else if (a === 'pick') { S.ans[key] = +b.dataset.j; delete S.txt[key + '-own']; S.ownOpen[key] = false; S.fresh = key; splash(b, e); S.keep = true; setTimeout(function () { render(); cheer(); }, 0); }
-  else if (a === 'cant') { S.ans[key] = S.ans[key] === 'cant' ? null : 'cant'; S.fresh = key; S.keep = true; render(); }
+  else if (a === 'cant') { var was = S.ans[key] === 'cant'; S.ans[key] = was ? null : 'cant'; if (was) { S.keep = true; render(); } else { S.i = Math.min(S.i + 1, chap(S.c).s.length - 1); render(); } }
   else if (a === 'own') { S.ownOpen[key] = true; S.ans[key] = null; S.keep = true; render(); var inp = page.querySelector('.scr .in'); if (inp) inp.focus(); }
   else if (a === 'multi' || a === 'pill') { var arr = S.multi[key] = S.multi[key] || [], ix = arr.indexOf(b.dataset.p); if (ix > -1) arr.splice(ix, 1); else { arr.push(b.dataset.p); S.fresh = key; if (arr.length === 1) setTimeout(cheer, 10); } if (S.ans[key] === 'cant') S.ans[key] = null; S.keep = true; setTimeout(render, S.skin === 'splash' && ix < 0 ? 160 : 0); }
   else if (a === 'sign') { var d = b.dataset.doc, nm = (S.txt['name-' + d] || '').trim(); if (!nm) { var ni = b.closest('.scr, .sheet').querySelector('.in'); ni.classList.remove('shake'); void ni.offsetWidth; ni.classList.add('shake'); ni.placeholder = 'Your full name, to sign'; ni.focus(); return; } S.done[d] = true; S.fresh = d === 'proposal' ? 'Proposal' : 'Terms'; S.sheet = false; var c = chap(d); S.c = d; S.i = c.s.length - 1; render(); }

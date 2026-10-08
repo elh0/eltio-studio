@@ -377,6 +377,47 @@ p { margin: 0; }
 .toast .dot { background: var(--bg); box-shadow: none; flex: none; }
 
 
+/* landing: index layout */
+.hv { min-height: 100%; padding: 20px; display: flex; flex-direction: column; gap: 28px; }
+.hv .wt { margin: 0; }
+.hv-foot { margin-top: auto; }
+.hv .btn { justify-self: start; align-self: flex-start; }
+.hv-a { align-items: center; text-align: center; }
+.hv-a .hv-mid { margin: auto 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.hv-a .btn { align-self: center; margin-top: 6px; }
+.hv-a .hv-parts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 18px; }
+.hv-a .hv-parts .lnk { display: inline-flex; gap: 7px; align-items: center; color: var(--q); }
+.hv-a .hv-parts .lnk.done { color: var(--fg); text-decoration: line-through; text-decoration-thickness: 1px; }
+.hv-a .hv-foot { margin-top: 0; }
+.hv-b .hv-col { margin: auto 0; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; }
+.hv-b .list { margin: 10px 0 8px; width: 100%; }
+.hv .wt { font-size: clamp(34px, 10cqw, 48px) !important; }
+.hv-a .hv-parts .dot { box-shadow: 0 0 0 1px var(--q); }
+.hv-c .hv-top { display: flex; justify-content: space-between; gap: 12px; }
+.hv-c .hv-bot { margin-top: auto; display: grid; gap: 22px; }
+.hv-c .hv-idx { display: grid; border-top: 1px solid var(--hr); }
+.hv-c .hv-idx .lnk { display: grid; grid-template-columns: 5ch 1fr auto; gap: 12px; text-align: left; padding: 11px 0; border-bottom: 1px solid var(--hr); transition: padding .2s; }
+.hv-c .hv-idx .lnk:hover { padding-left: 6px; }
+.hv-c .hv-go { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+@container (min-width: 760px) { .hv-c .wt { font-size: clamp(40px, 8cqw, 96px) !important; } .hv-a .wt { font-size: clamp(36px, 5.6cqw, 64px) !important; } .hv-b .wt { font-size: clamp(34px, 5cqw, 56px) !important; } }
+.hv-c .hv-idx .lnk.next span:last-child { color: var(--fg); }
+
+/* desktop: the cards span the whole screen, the question on one line (Elliot, 8 Oct) */
+@container (min-width: 760px) {
+  .ob-top, .ctl, .scr { max-width: none !important; }
+  .ob-top { padding: 20px 28px 0; }
+  .ob-main { padding: 12px 28px 28px; }
+  .scr { justify-content: center; }
+  .scr .qt { white-space: nowrap; font-size: 9cqw !important; line-height: 1; letter-spacing: -.045em; }
+  .scr .qt.wrap { white-space: normal; }
+  .ops { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .ops .op { align-items: flex-start; min-height: 64px; }
+  .rows { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .rows > .acc { grid-column: 1 / -1; }
+  .cool, .ta, .in, .scr > p { max-width: 720px; }
+  .scr .cant { align-self: flex-start; }
+}
+
 /* live: the page is the whole screen */
 html, body { height: 100%; }
 body { background: #061469; }
@@ -385,6 +426,32 @@ body { background: #061469; }
 .mail-fb { align-self: stretch; text-align: left; }
 .mail-fb .addr { color: var(--fg); user-select: all; -webkit-user-select: all; }
 .ob-top .top .q { white-space: nowrap; }
+/* landing: three layouts */
+.hv { min-height: 100%; padding: 20px; display: flex; flex-direction: column; gap: 28px; }
+.hv .wt { margin: 0; }
+.hv-foot { margin-top: auto; }
+.hv .btn { justify-self: start; align-self: flex-start; }
+.hv-a { align-items: center; text-align: center; }
+.hv-a .hv-mid { margin: auto 0; width: 100%; max-width: 520px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.hv-a .btn { align-self: center; margin-top: 6px; }
+.hv-a .hv-parts { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 18px; }
+.hv-a .hv-parts .lnk { display: inline-flex; gap: 7px; align-items: center; color: var(--q); }
+.hv-a .hv-parts .lnk.done { color: var(--fg); text-decoration: line-through; text-decoration-thickness: 1px; }
+.hv-a .hv-foot { margin-top: 0; }
+.hv-b .hv-col { margin: auto 0; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; }
+.hv-b .list { margin: 10px 0 8px; width: 100%; }
+.hv .wt { font-size: clamp(34px, 10cqw, 48px) !important; }
+.hv-a .hv-parts .dot { box-shadow: 0 0 0 1px var(--q); }
+.hv-c .hv-top { display: flex; justify-content: space-between; gap: 12px; }
+.hv-c .hv-bot { margin-top: auto; display: grid; gap: 22px; }
+.hv-c .hv-idx { display: grid; border-top: 1px solid var(--hr); }
+.hv-c .hv-idx .lnk { display: grid; grid-template-columns: 5ch 1fr auto; gap: 12px; text-align: left; padding: 11px 0; border-bottom: 1px solid var(--hr); transition: padding .2s; }
+.hv-c .hv-idx .lnk:hover { padding-left: 6px; }
+.hv-c .hv-go { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; justify-content: space-between; }
+@container (min-width: 760px) { .hv-c .wt { font-size: clamp(40px, 8cqw, 96px) !important; } .hv-a .wt { font-size: clamp(36px, 5.6cqw, 64px) !important; } .hv-b .wt { font-size: clamp(34px, 5cqw, 56px) !important; } }
+.vbar { position: fixed; z-index: 99999; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(0,0,0,.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); font: 400 12px/1 var(--mono); }
+.vbar button { border: 0; background: none; color: #fff; padding: 8px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.vbar button[aria-pressed=true] { background: #fff; color: #000; }
 </style>
 
 <div class="stage" id="stage"><div class="page s-chapters" id="page"></div></div>
@@ -397,24 +464,35 @@ var CANT_REPLY = ['No stress. We\'ll work it out together on the call.', 'Fair. 
 var FLOW = [
   { id: 'roadmap', name: 'You', tag: 'Who you are and what you do', mins: 1, s: [
     { k: 'field', key: 'name', b: 'Name', kick: 'You', t: 'First, who are we talking to?', ph: 'Your name' },
+    { k: 'one', key: 'what', b: 'Making', kick: 'You', t: 'What are we making?', o: [
+      ['A website', 'A site made around your work.'], ['An app', 'An iPhone app, from idea to the App Store.'], ['Both', 'Good. They can share one look.']], own: 'Not sure yet? Tell us the idea' },
     { k: 'one', key: 'who', b: 'You are', kick: 'You', t: 'What do you do?', o: [
       ['A photographer', 'Pictures first, then. Big, sharp and fast.'], ['A filmmaker or director', 'Films that play in place. No logos, no ads.'],
-      ['A studio or small company', 'The work, the people and how to reach you.'], ['An artist or maker', 'The work, with room to breathe.']], own: 'Tell us in a few words' },
-    { k: 'one', key: 'now', b: 'Site now', kick: 'You', t: 'Have you got a site already?', o: [
+      ['A studio or small company', 'The work, the people and how to reach you.'], ['An artist or maker', 'The work, with room to breathe.'], ['Starting something new', 'A new business or idea. Exciting.']], own: 'Tell us in a few words' },
+    { k: 'one', key: 'now', b: 'Site now', only: 'site', kick: 'You', t: 'Have you got a site already?', o: [
       ['Yes, it needs a refresh', 'We\'ll look at what\'s working before the call.'], ['Yes, but I want to start over', 'Clean slate. Good.'], ['No, this is my first', 'Even better. Nothing to undo.']] },
-    { k: 'field', key: 'link', b: 'Links', kick: 'You', t: 'Where can we see your work?', p: 'Your site, Instagram, Vimeo, anywhere.', ph: 'Paste a link or two' }
+    { k: 'field', key: 'link', b: 'Links', kick: 'You', t: 'Where can we see what you do?', p: 'Your site, Instagram, Vimeo, anywhere.', ph: 'Paste a link or two' }
   ] },
-  { id: 'proposal', name: 'The site', tag: 'What it needs to do', mins: 1, s: [
-    { k: 'many', key: 'show', b: 'Shows', kick: 'The site', t: 'What should it show?', p: 'Pick as many as you like.', o: ['Photographs', 'Films', 'Projects with words', 'A shop', 'Writing or news', 'Clients and press'] },
-    { k: 'one', key: 'size', b: 'How much', kick: 'The site', t: 'Roughly how much work?', o: [
+  { id: 'proposal', name: 'The site', tag: 'What it needs to do', mins: 1, alt: function () { return mk() === 'app' ? { name: 'The app', tag: 'The idea and how we\'d build it', mins: 2 } : mk() === 'both' ? { name: 'The project', tag: 'The site and the app', mins: 3 } : null; }, s: [
+    { k: 'many', key: 'show', b: 'Shows', only: 'site', kick: 'The site', t: 'What should it show?', p: 'Pick as many as you like.', o: ['Photographs', 'Films', 'Projects with words', 'A shop', 'Writing or news', 'Clients and press'] },
+    { k: 'one', key: 'size', b: 'How much', only: 'site', kick: 'The site', t: 'Roughly how much work?', o: [
       ['A handful', 'Short and sharp. Every piece earns its place.'], ['10 to 25 pieces', 'The sweet spot for most portfolios.'],
       ['25 to 50', 'A proper body of work. We\'ll make it easy to browse.'], ['Loads, an archive', 'We\'ll find a way to show the lot without the clutter.']] },
-    { k: 'one', key: 'job', b: 'Main job', kick: 'The site', t: 'What should people do when they land?', o: [
+    { k: 'one', key: 'job', b: 'Main job', only: 'site', kick: 'The site', t: 'What should people do when they land?', o: [
       ['Get in touch', 'Contact sits one tap away on every page.'], ['Watch or look', 'The work opens big, with nothing in the way.'],
-      ['Buy something', 'A shop, kept simple.'], ['Remember the name', 'Something they\'ll still be thinking about later.']], own: 'Something else?' }
+      ['Buy something', 'A shop, kept simple.'], ['Remember the name', 'Something they\'ll still be thinking about later.']], own: 'Something else?' },
+    { k: 'text', key: 'idea', b: 'App idea', only: 'app', kick: 'The app', t: 'What\'s the idea, in a sentence?', p: 'What does it help someone do? Rough is fine.', ph: 'It helps people…' },
+    { k: 'one', key: 'for', b: 'For', only: 'app', kick: 'The app', t: 'Who is it for?', o: [
+      ['Me and my team', 'A tool that saves you time. Often the best kind.'], ['A particular crowd', 'A niche that really needs it. Easier to reach.'], ['Pretty much everyone', 'Big ambition. We\'ll find the first thousand on the call.']], own: 'Describe them' },
+    { k: 'one', key: 'stage', b: 'Stage', only: 'app', kick: 'The app', t: 'How far along is it?', o: [
+      ['Just an idea', 'Perfect place to start. Nothing to undo.'], ['Sketches or notes', 'Bring them to the call.'], ['A prototype', 'Great. We\'ll start from what you\'ve learnt.'], ['Live, but needs work', 'We\'ll look at it before the call.']] },
+    { k: 'many', key: 'needs', b: 'Needs', only: 'app', kick: 'The app', t: 'What will it need?', p: 'Pick any that sound right. Not sure is fine.', o: ['Accounts and sign in', 'Payments or subscriptions', 'Camera or photos', 'Maps and location', 'Notifications', 'Sharing with friends', 'Works offline'] },
+    { k: 'one', key: 'platform', b: 'Phones', only: 'app', kick: 'The app', t: 'Which phones?', o: [
+      ['iPhone', 'What we build in: native, fast, made for the camera and the hand.'], ['iPhone and Android', 'iPhone first, then Android once it\'s working.'], ['Not sure', 'We\'ll work out where your people are.']] },
+    { k: 'info', only: 'app', kick: 'How we\'d approach it', t: 'Small first, then real people.', rows: [['01 Idea', 'One call to pin down the one thing it does best'], ['02 Prototype', 'A clickable version on your phone, early'], ['03 TestFlight', 'Real people try it before it\'s public'], ['04 App Store', 'We handle the review and the launch'], ['Then', 'Everything in your name; improve as people use it']] }
   ] },
   { id: 'terms', name: 'The look', tag: 'How it should feel', mins: 2, s: [
-    { k: 'scale', key: 'feel', b: 'Feel', kick: 'The look', t: 'How simple or full on should it feel?' },
+    { k: 'scale', key: 'feel', b: 'Feel', only: 'site', kick: 'The look', t: 'How simple or full on should it feel?' },
     { k: 'one', key: 'colour', b: 'Colour', kick: 'The look', t: 'What about colour?', o: [
       ['Black and white', 'The work brings the colour.'], ['One strong colour', 'Like this page. One colour, used with confidence.'],
       ['Soft and warm', 'Off-whites and paper tones, nothing harsh.'], ['Let the work decide', 'We\'ll pull it from your pictures.']] },
@@ -422,10 +500,10 @@ var FLOW = [
       ['Clean and quiet', 'Small, neat and out of the way.'], ['Big and bold', 'Your name, large. Hard to miss.'],
       ['Mono and techy', 'Like this. A bit of the machine about it.'], ['Classic serif', 'Books and magazines.']] },
     { k: 'cool', key: 'cool', b: 'Cool level', kick: 'Be honest', t: 'How cool do you want your site to be?', p: 'On a scale of 1 to 10.' },
-    { k: 'text', key: 'refs', b: 'Loves', kick: 'The look', t: 'Any sites you love?', p: 'Or books, magazines, films. One line on why beats the link.', ph: 'Links, and why' }
+    { k: 'text', key: 'refs', b: 'Loves', kick: 'The look', t: 'Any sites you love?', alt: function () { if (mk() === 'app') return { t: 'Any apps you love using?', p: 'Or sites, books, films. One line on why beats the name.' }; if (mk() === 'both') return { t: 'Any sites or apps you love?' }; }, p: 'Or books, magazines, films. One line on why beats the link.', ph: 'Links, and why' }
   ] },
   { id: 'start', name: 'Last bit', tag: 'Timing, then send', mins: 1, s: [
-    { k: 'one', key: 'when', b: 'When', kick: 'Last bit', t: 'When would you like it live?', o: [
+    { k: 'one', key: 'when', b: 'When', kick: 'Last bit', t: 'When would you like it out?', o: [
       ['As soon as we can', 'We\'ll find the earliest start on the call.'], ['In the next month or two', 'Plenty of time to do it properly.'], ['No rush, just looking', 'Good. No pressure either way.']] },
     { k: 'text', key: 'else', b: 'Anything else', kick: 'Last bit', t: 'Anything else we should know?', ph: 'Optional' },
     { k: 'send', kick: 'Last bit', t: 'Send it over.', p: 'It opens an email to us with your answers in it. Hit send there and it\'s with us.' }
@@ -439,7 +517,7 @@ var FEEL = [
   ['full on', 'Parallax, difference layers, a custom cursor. Lots moving at once.']
 ];
 var COOL = { 1: 'just fine', 2: 'tidy', 3: 'clean', 4: 'nice', 5: 'quite cool', 6: 'cool', 7: 'properly cool', 8: 'very cool', 9: 'extremely cool', 10: 'unreasonably cool' };
-function coolNote(v) {
+function coolNote(v) { return '<div class="reply" id="cn"></div>'; /* no reactions (Elliot, 8 Oct) */
   var t = v <= 1 ? 'That\'s not very fun. We\'ll talk you round.' : v >= 10 ? 'Unreasonably cool. We like you already.' : '';
   return '<div class="reply' + (t ? ' on' : '') + '" id="cn">' + t + '</div>';
 }
@@ -459,12 +537,16 @@ function h(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace
 function chap(id) { return FLOW.find(function (c) { return c.id === id; }); }
 function cix(id) { return FLOW.findIndex(function (c) { return c.id === id; }); }
 function hash(s) { var n = 0; for (var i = 0; i < s.length; i++) n += s.charCodeAt(i); return n; }
+function mk() { var a = S.ans.what; if (S.txt['what-own'] || a === 'cant') return 'both'; return a === 1 ? 'app' : a === 2 ? 'both' : 'site'; }
+function on(sc) { var m = mk(); return !sc.only || m === 'both' || sc.only === m; }
+function res(sc) { var o = sc.alt && sc.alt(); if (!o) return sc; var r = {}; for (var k in sc) r[k] = sc[k]; for (var k2 in o) r[k2] = o[k2]; return r; }
+function vs(c) { return c.s.filter(on).map(res); }
 function isQ(sc) { return /^(one|text|many|field|cool|scale)$/.test(sc.k); }
 function first() { var n = (S.txt.name || '').trim().split(/\s+/)[0]; return n ? n.charAt(0).toUpperCase() + n.slice(1) : ''; }
 
 function basket() {
   var L = [];
-  FLOW.forEach(function (c) { c.s.forEach(function (sc, j) {
+  FLOW.forEach(function (c) { vs(c).forEach(function (sc, j) {
     if (!sc.b) return; var v = null, cn = false;
     if (S.ans[sc.key] === 'cant') { v = 'ask on the call'; cn = true; }
     else if (sc.k === 'one') { if (S.txt[sc.key + '-own']) v = S.txt[sc.key + '-own']; else if (S.ans[sc.key] != null) v = sc.o[S.ans[sc.key]][0]; }
@@ -478,12 +560,12 @@ function basket() {
 }
 function openQs() {
   var L = basket(), out = [];
-  FLOW.forEach(function (c) { c.s.forEach(function (sc, j) {
+  FLOW.forEach(function (c) { vs(c).forEach(function (sc, j) {
     if (isQ(sc) && sc.key !== 'else') { var l = L.find(function (x) { return x.key === sc.key; }); if (!l || l.cn) out.push({ c: c.id, j: j, t: sc.b, cn: !!(l && l.cn) }); }
   }); });
   return out;
 }
-function qTotal() { var n = 0; FLOW.forEach(function (c) { c.s.forEach(function (sc) { if (isQ(sc) && sc.key !== 'else') n++; }); }); return n; }
+function qTotal() { var n = 0; FLOW.forEach(function (c) { vs(c).forEach(function (sc) { if (isQ(sc) && sc.key !== 'else') n++; }); }); return n; }
 
 /* ---------- screens ---------- */
 function cantHTML(sc) {
@@ -497,7 +579,7 @@ function replyFor(sc) {
   if (sc.key === 'name' && first()) return 'Nice to meet you, ' + first() + '.';
   return '';
 }
-function replyBox(sc) { var r = replyFor(sc); return '<div class="reply' + (r ? ' on' : '') + (S.ans[sc.key] === 'cant' ? ' meh' : '') + '" id="rp">' + h(r) + '</div>'; }
+function replyBox(sc) { return ''; } /* no reactions after answering (Elliot, 8 Oct) */
 function opsHTML(sc) {
   var own = S.txt[sc.key + '-own'], open = S.ownOpen[sc.key] || own;
   return '<div class="ops">' + sc.o.map(function (o, j) {
@@ -512,6 +594,7 @@ function feelHTML(v) {
 function screenHTML(c, sc) {
   var o = '<div class="kick"><span class="dot"></span>' + h(sc.kick) + '</div><div class="qt">' + h(sc.t) + '</div>';
   if (sc.p) o += '<p class="q">' + h(sc.p) + '</p>';
+  if (sc.rows) o += '<div class="rows">' + sc.rows.map(function (r, i) { return '<div class="fd" style="--i:' + (i + 1) + '"><span class="k">' + r[0] + '</span><span>' + h(r[1]) + '</span></div>'; }).join('') + '</div>';
   if (sc.k === 'one') o += opsHTML(sc) + cantHTML(sc) + replyBox(sc);
   if (sc.k === 'many') o += '<div class="ops">' + sc.o.map(function (d) { var on = (S.multi[sc.key] || []).indexOf(d) > -1; return '<button class="op sq' + (on ? ' sel' : '') + '" data-act="multi" data-key="' + sc.key + '" data-p="' + h(d) + '" data-hot><span class="mk"></span><span class="lb">' + h(d) + '</span><span class="tag"></span></button>'; }).join('') + '</div>' + cantHTML(sc) + replyBox(sc);
   if (sc.k === 'text') o += '<textarea class="ta" data-t="' + sc.key + '" placeholder="' + h(sc.ph) + '">' + h(S.txt[sc.key] || '') + '</textarea>' + (sc.key === 'else' ? '' : cantHTML(sc)) + replyBox(sc);
@@ -534,24 +617,42 @@ function doneHTML() {
 }
 
 /* ---------- views ---------- */
+var LAYOUT = 'c'; try { var lh = (location.hash.match(/l-([abc])/) || [])[1]; if (lh) LAYOUT = lh; } catch (e) {}
 function homeHTML() {
-  var started = basket().length > 0, nx = S.sent ? null : FLOW.find(function (c) { return c.s.some(function (sc) { return isQ(sc) && sc.key !== 'else' && openQs().some(function (o) { return o.c === c.id && o.j === c.s.indexOf(sc); }); }); }) || FLOW[FLOW.length - 1];
-  var hero = S.sent ? '<button class="hero" data-act="finish" data-hot><span class="q">Sent</span><span class="wt">Thank you.</span><span>We\'ll be in touch soon to set up a call.</span><span class="go">Your answers &rarr;</span></button>'
-    : '<button class="hero" data-act="' + (started ? 'resume' : 'begin') + '" data-hot><span class="q">' + (started ? 'Carry on' : 'About five minutes') + '</span><span class="wt">' + (started ? 'Pick up where you left off.' : 'A few questions before we talk.') + '</span><span>' + (started ? 'Your answers are saved on this device.' : 'So we turn up to the call with ideas, not a blank page. Answer what you can, skip the rest.') + '</span><span class="go">' + (started ? 'Carry on' : 'Start') + ' &rarr;</span></button>';
-  return '<div class="home"><div class="top"><a class="lnk" href="https://eltio.studio" target="_blank" rel="noopener" data-hot>Eltio Studio</a><span class="q">Before we talk</span></div><div class="h-grid"><aside><div>Before we talk</div><div class="q">A short questionnaire for new websites</div>' + hero + '</aside><div><div class="list">' +
-    FLOW.map(function (c, i) { var done = S.sent || (c.s.filter(function (sc) { return isQ(sc) && sc.key !== 'else'; }).length && !openQs().some(function (o) { return o.c === c.id; })); return '<button class="row' + (done ? ' done' : '') + '" style="--rc:' + CHC[c.id] + ';--rf:' + FGC[c.id] + '" data-act="open" data-c="' + c.id + '" data-hot><span class="n">' + (done ? '&#10003;' : i + 1) + '</span><span>' + c.name + '</span><span class="st">' + (done ? 'Done' : c.mins + ' min') + '</span></button>'; }).join('') +
-    '</div><p class="q" style="margin-top:14px">Four short parts. It saves as you go.</p></div></div><div class="foot"><span>&copy;2026 ' + STUDIO.name + '</span><span>' + STUDIO.email + '</span></div></div>';
+  var started = basket().length > 0, st = S.sent ? 'sent' : started ? 'resume' : 'begin';
+  var head = S.sent ? 'Thank you.' : 'Before we talk.';
+  var sub = S.sent ? 'We\'ll be in touch soon.' : started ? 'Pick up where you left off.' : 'A few questions about your site or app.';
+  var btn = '<button class="btn solid" data-act="' + (S.sent ? 'finish' : st) + '" data-hot>' + (S.sent ? 'Your answers' : started ? 'Carry on' : 'Start') + ' &rarr;</button>';
+  var parts = FLOW.map(function (c, i) { c = res(c); var done = S.sent || (vs(c).filter(function (sc) { return isQ(sc) && sc.key !== 'else'; }).length && !openQs().some(function (o) { return o.c === c.id; })); return { c: c, i: i, done: done }; });
+  var link = '<a class="lnk" href="https://eltio.studio" target="_blank" rel="noopener" data-hot>' + STUDIO.name + '</a>';
+  var foot = '<span>' + STUDIO.email + '</span>';
+  if (LAYOUT === 'a') return '<div class="hv hv-a"><div class="hv-top">' + link + '</div><div class="hv-mid"><div class="wt">' + head + '</div><p class="q">' + sub + '</p>' + btn +
+    '<div class="hv-parts">' + parts.map(function (x) { return '<button class="lnk' + (x.done ? ' done' : '') + '" data-act="open" data-c="' + x.c.id + '" data-hot><span class="dot" style="background:' + CHC[x.c.id] + '"></span>' + x.c.name + '</button>'; }).join('') + '</div></div><div class="hv-foot q">' + foot + '</div></div>';
+  if (LAYOUT === 'b') return '<div class="hv hv-b"><div class="hv-top">' + link + '</div><div class="hv-col"><div class="wt">' + head + '</div><p class="q">' + sub + '</p><div class="list">' +
+    parts.map(function (x) { return '<button class="row' + (x.done ? ' done' : '') + '" style="--rc:' + CHC[x.c.id] + ';--rf:' + FGC[x.c.id] + '" data-act="open" data-c="' + x.c.id + '" data-hot><span class="n">' + (x.done ? '&#10003;' : x.i + 1) + '</span><span>' + x.c.name + '</span><span class="st">' + (x.done ? 'Done' : x.c.mins + ' min') + '</span></button>'; }).join('') +
+    '</div>' + btn + '</div><div class="hv-foot q">' + foot + '</div></div>';
+  return '<div class="hv hv-c"><div class="hv-top">' + link + '<span class="q">' + foot + '</span></div><div class="hv-bot"><div class="hv-idx">' +
+    parts.map(function (x) { return '<button class="lnk' + (x.done ? ' done' : '') + '" data-act="open" data-c="' + x.c.id + '" data-hot><span class="q">(0' + (x.i + 1) + ')</span><span>' + x.c.name + '</span><span class="q">' + (x.done ? 'Done' : x.c.mins + ' min') + '</span></button>'; }).join('') +
+    '</div><div class="wt">' + head + '</div><div class="hv-go"><p class="q">' + sub + '</p>' + btn + '</div></div></div>';
 }
 function obHTML() {
   if (S.c === 'done') return '<div class="scroller"><div class="ob"><div class="ob-top"><div class="top"><button class="lnk" data-act="home" data-hot>&larr; ' + STUDIO.name + '</button><span class="q">Sent</span></div></div><div class="ob-body"><div class="ob-main">' + doneHTML() + '</div></div></div></div>';
-  var c = chap(S.c), sc = c.s[S.i], n = c.s.length, ci = cix(c.id);
+  var c = res(chap(S.c)), V = vs(c), sc = V[S.i], n = V.length, ci = cix(c.id);
   var answered = isQ(sc) && basket().some(function (l) { return l.key === sc.key; });
   var right = sc.k === 'send' ? '' : (isQ(sc) && !answered && sc.k !== 'scale' && sc.k !== 'cool') ? '<button class="lnk q" data-act="next" data-hot>Skip</button><button class="btn" data-act="next" data-hot>Continue</button>' : '<button class="btn solid" data-act="next" data-hot>Continue</button>';
   var back = (S.i || ci) ? '<button class="btn" data-act="prev" data-hot>Back</button>' : '';
   return '<div class="scroller"><div class="ob"><div class="ob-top"><div class="top"><button class="lnk" data-act="home" data-hot>&larr; ' + STUDIO.name + '</button><span class="q">' + c.name + ' (0' + (ci + 1) + ')</span></div>' +
-    '<div class="segs">' + c.s.map(function (_, j) { return '<i class="' + (j <= S.i ? 'on' : '') + '"></i>'; }).join('') + '</div></div>' +
+    '<div class="segs">' + V.map(function (_, j) { return '<i class="' + (j <= S.i ? 'on' : '') + '"></i>'; }).join('') + '</div></div>' +
     '<div class="ob-body"><div class="ob-main"><div class="scr anim">' + screenHTML(c, sc) + '</div><div class="ctl"><span>' + back + '</span><span class="r">' + right + '</span></div></div></div></div></div>';
 }
+function fitQ() { /* shrink the question until it sits on one line across the screen */
+  var q = page.querySelector('.scr .qt'); if (!q) return; q.classList.remove('wrap'); q.style.fontSize = '';
+  if (getComputedStyle(q).whiteSpace !== 'nowrap') return;
+  var fs = parseFloat(getComputedStyle(q).fontSize), n = 0;
+  while (q.scrollWidth > q.clientWidth + 1 && fs > 30 && n++ < 60) { fs -= 2; q.style.setProperty('font-size', fs + 'px', 'important'); }
+  if (q.scrollWidth > q.clientWidth + 1) { q.classList.add('wrap'); q.style.fontSize = ''; }
+}
+addEventListener('resize', fitQ);
 var dc = document.createElement('div'); dc.className = 'dc';
 function render() {
   var sc0 = page.querySelector('.scroller'), keepTop = sc0 && S.keep ? sc0.scrollTop : 0;
@@ -559,9 +660,9 @@ function render() {
   page.innerHTML = S.c ? obHTML() : '<div class="scroller">' + homeHTML() + '</div>';
   page.appendChild(dc); if (TOAST && TOAST.classList.contains('on')) page.appendChild(TOAST);
   if (S.keep) { page.querySelector('.scroller').scrollTop = keepTop; S.keep = false; }
-  save();
+  save(); fitQ();
 }
-function cheer() {
+function cheer() { return; /* no encouragement banners (Elliot, 8 Oct) */
   var total = qTotal(), open = openQs().length, done = total - open, msg;
   if (!S.half && done >= total / 2) { S.half = true; msg = 'Halfway there.'; }
   else if (open === 1) msg = 'One left. Nearly there.';
@@ -611,13 +712,13 @@ function mailIt() {
 }
 function go(c, i) { S.c = c; S.i = i || 0; render(); }
 function step(d) {
-  var ci = cix(S.c), c = FLOW[ci], k0 = c.s[S.i].k;
+  var ci = cix(S.c), c = FLOW[ci], V = vs(c), k0 = V[S.i].k;
   if (d > 0 && k0 === 'cool' && !S.cool) S.cool = 5; if (d > 0 && k0 === 'scale' && !S.feel) S.feel = 3;
-  if (d > 0) { if (S.i < c.s.length - 1) S.i++; else if (FLOW[ci + 1]) { S.c = FLOW[ci + 1].id; S.i = 0; } }
-  else { if (S.i > 0) S.i--; else if (ci > 0) { S.c = FLOW[ci - 1].id; S.i = FLOW[ci - 1].s.length - 1; } }
+  if (d > 0) { if (S.i < V.length - 1) S.i++; else if (FLOW[ci + 1]) { S.c = FLOW[ci + 1].id; S.i = 0; } }
+  else { if (S.i > 0) S.i--; else if (ci > 0) { S.c = FLOW[ci - 1].id; S.i = vs(FLOW[ci - 1]).length - 1; } }
   render(); var inp = page.querySelector('.scr .in, .scr .ta'); if (inp && fine) inp.focus();
 }
-function liveReply(k) { var c = S.c && chap(S.c), sc = c && c.s[S.i], rp = document.getElementById('rp'); if (!sc || !rp || sc.key !== k) return; var r = replyFor(sc); rp.textContent = r; rp.className = 'reply' + (r ? ' on' : ''); }
+function liveReply(k) { var c = S.c && chap(S.c), sc = c && vs(c)[S.i], rp = document.getElementById('rp'); if (!sc || !rp || sc.key !== k) return; var r = replyFor(sc); rp.textContent = r; rp.className = 'reply' + (r ? ' on' : ''); }
 page.addEventListener('input', function (e) {
   if (e.target.id === 'fr') { var fv = +e.target.value; S.feel = fv; e.target.style.setProperty('--p', ((fv - 1) / 4 * 100) + '%'); document.getElementById('fv').className = 'feel lv' + fv; document.getElementById('fvn').textContent = fv; document.getElementById('fvl').textContent = FEEL[fv - 1][0]; document.getElementById('fvd').textContent = FEEL[fv - 1][1]; save(); return; }
   if (e.target.id === 'cr') { var v = +e.target.value; S.cool = v; e.target.style.setProperty('--p', ((v - 1) / 9 * 100) + '%'); document.getElementById('cv').textContent = v; document.getElementById('cl').textContent = COOL[v]; var cn = document.getElementById('cn'); if (cn) cn.outerHTML = coolNote(v); save(); return; }
@@ -629,14 +730,14 @@ page.addEventListener('click', function (e) {
   var a = b.dataset.act, key = b.dataset.key;
   if (a === 'open') go(b.dataset.c);
   else if (a === 'begin') go(FLOW[0].id);
-  else if (a === 'resume') { var o = openQs()[0]; if (o) go(o.c, o.j); else go('start', chap('start').s.length - 1); }
+  else if (a === 'resume') { var o = openQs()[0]; if (o) go(o.c, o.j); else go('start', vs(chap('start')).length - 1); }
   else if (a === 'finish') go('done');
   else if (a === 'home') { S.c = null; render(); }
   else if (a === 'next') step(1);
   else if (a === 'prev') step(-1);
   else if (a === 'jump') go(b.dataset.c, +b.dataset.j);
   else if (a === 'pick') { S.ans[key] = +b.dataset.j; delete S.txt[key + '-own']; S.ownOpen[key] = false; S.keep = true; render(); cheer(); }
-  else if (a === 'cant') { S.ans[key] = S.ans[key] === 'cant' ? null : 'cant'; S.keep = true; render(); }
+  else if (a === 'cant') { var was = S.ans[key] === 'cant'; S.ans[key] = was ? null : 'cant'; if (was) { S.keep = true; render(); } else step(1); }
   else if (a === 'own') { S.ownOpen[key] = true; S.ans[key] = null; S.keep = true; render(); var inp = page.querySelector('.scr .in'); if (inp) inp.focus(); }
   else if (a === 'multi') { var arr = S.multi[key] = S.multi[key] || [], ix = arr.indexOf(b.dataset.p); if (ix > -1) arr.splice(ix, 1); else { arr.push(b.dataset.p); if (arr.length === 1) setTimeout(cheer, 10); } if (S.ans[key] === 'cant') S.ans[key] = null; S.keep = true; render(); }
   else if (a === 'send') { mailIt(); S.sent = true; go('done'); }
@@ -646,6 +747,6 @@ page.addEventListener('click', function (e) {
 });
 function fallbackCopy(t) { var ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} ta.remove(); }
 if (S.c && S.c !== 'done' && !chap(S.c)) S.c = null;
-if (S.c && S.c !== 'done' && !chap(S.c).s[S.i]) S.i = 0;
+if (S.c && S.c !== 'done' && !vs(chap(S.c))[S.i]) S.i = 0;
 render();
 </script>

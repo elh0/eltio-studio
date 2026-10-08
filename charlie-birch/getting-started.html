@@ -1,4 +1,6 @@
 <meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="client.css">
+<script src="client.js" defer></script>
 <title>Charlie Birch: getting started</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,7 +120,7 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
 @media (max-width: 520px) { .cmp { grid-template-columns: minmax(0,1.2fr) repeat(3, minmax(0,1fr)); font-size: .9em; gap: 0 .6em; } }
 </style>
 
-<div class="site">
+<div data-page="start" class="site">
 
   <aside class="col side">
     <div class="head bar"><a href="./" class="caps" id="top">Eltio Studio</a> <a href="./" class="m" style="margin-left:auto;margin-right:1em">(All documents)</a><span class="eye" style="width:14px" aria-hidden="true"></span></div>
@@ -127,12 +129,25 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     <div>For Charlie Birch and Brainrot</div>
     <div class="m">8 October 2026</div>
     <div class="br"></div>
-    <p>Thanks for booking in. This is everything we need from you to build your site. Brainrot's list comes later, once its look is set. Put it all in the shared folder whenever it's ready. Rough is fine, we'll sort it together.</p>
+    <p>Thanks for booking in. This is everything we need from you to build your site. Brainrot's list comes later, once its look is set. Fill in what you can here and put files in your Drive folder. Rough is fine, we'll sort it together. Everything saves on this device as you go.</p>
     <div class="br"></div>
     <p class="m">The photographs do most of the work on a site like this, so the better the selection, the better the site. If something is missing, send what you have and say so.</p>
     <div class="br"></div>
-    <div>Folder (<a href="#" class="f">[Drive link]</a>)</div>
-    <div>Messages (<span class="f">[WhatsApp group]</span>)</div>
+    <div class="caps">First, two things</div>
+    <div class="br"></div>
+    <div>(a) &nbsp; A Drive folder</div>
+    <ol class="plain m">
+      <li>1. In Google Drive, make a folder called Charlie Birch for Eltio</li>
+      <li>2. Inside it, make three folders: References, Photographs, Info</li>
+      <li>3. Share it with hello@eltio.studio as an Editor</li>
+      <li>4. Copy the folder's link and paste it here</li>
+    </ol>
+    <label class="fld"><span>Drive folder link</span><input class="in" data-k="drive" id="drive-6" placeholder="https://drive.google.com/…"></label>
+    <div class="br"></div>
+    <div>(b) &nbsp; WhatsApp</div>
+    <p class="m">Add your number and Elliot will start a group with you, for quick questions between sessions.</p>
+    <label class="fld"><span>Your WhatsApp number</span><input class="in" data-k="wa" id="wa-7" placeholder="+44 …"></label>
+    <div class="saved"></div>
     <div class="br"></div>
     <ol class="plain">
       <li>(1) &nbsp; <a href="#refs">References</a></li>
@@ -140,12 +155,13 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
       <li>(3) &nbsp; <a href="#stills">Photographs</a></li>
       <li>(4) &nbsp; <a href="#info">Info page</a></li>
       <li>(5) &nbsp; <a href="#accounts">Accounts</a></li>
+      <li>(6) &nbsp; <a href="#brainrot">Brainrot</a></li>
     </ol>
     <div class="m push" style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:2rem"><span>hello@eltio.studio<br>(<span class="num" id="clock" aria-label="London time">00:00:00</span> LDN)</span><span class="eye" style="width:24px;background:var(--s4)" aria-hidden="true"></span></div>
   </aside>
 
   <main class="col">
-    <div class="head caps">What we need (5)</div>
+    <div class="head caps">What we need (6)</div>
 
     <hr style="margin-top:0">
     <section class="item" id="refs">
@@ -160,6 +176,8 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
         <div>
           Three to five sites you love<br><span class="m">(and one line on why)</span>
           <div class="br"></div>
+          <label class="fld"><span>(1)</span><input class="in" data-k="ref1" id="ref1-1" placeholder="site.com, and one line on why"></label><label class="fld"><span>(2)</span><input class="in" data-k="ref2" id="ref2-2" placeholder="site.com, and one line on why"></label><label class="fld"><span>(3)</span><input class="in" data-k="ref3" id="ref3-3" placeholder="site.com, and one line on why"></label><label class="fld"><span>(4)</span><input class="in" data-k="ref4" id="ref4-4" placeholder="site.com, and one line on why"></label><label class="fld"><span>(5)</span><input class="in" data-k="ref5" id="ref5-5" placeholder="site.com, and one line on why"></label>
+          <div class="br"></div>
           <p class="m">They don't have to be photographers' sites. A photo book, a magazine or a gallery's site is just as useful. One you dislike helps too. The "why" matters more than the link: how big the images sit, how quiet the type is, how you move through a series.</p>
         </div>
       </div>
@@ -173,6 +191,10 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
           <p>Every project you want on the site, newest first, in a spreadsheet. One row each. Leave a cell empty if it doesn't apply.</p>
           <div class="br"></div>
           <p class="m">Spell every name the way it should appear. We copy it exactly, so this is the list we check against before launch.</p>
+          <div class="btns"><button type="button" class="btn" data-csv>Download the template</button></div>
+          <p class="note">Open it in Google Sheets, fill it in, save it in your Drive folder and paste its link below.</p>
+          <label class="fld"><span>Spreadsheet link</span><input class="in" data-k="sheet" id="sheet-8" placeholder="https://docs.google.com/…"></label>
+          <label class="fld"><span>Films, if any</span><textarea class="ta" data-k="films" id="films-9" placeholder="Title and Vimeo link, one per line"></textarea></label>
         </div>
       </div>
       <div style="overflow-x:auto;margin-top:var(--lh)">
@@ -198,6 +220,8 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
           The images for each project, in order<br><span class="m">(at least 2400 px on the long side)</span>
           <div class="br"></div>
           <p class="m">Your final edits, in the sequence you want them seen. Name them like the list (series-title-01.jpg) so they find their project, and mark the cover. We size them for the web; the full files never go online.</p>
+          <div class="br"></div>
+          <label class="tick"><input type="checkbox" data-k="c-photos" id="c-photos-10"><span class="bx2"></span><span class="tx">In the Photographs folder, in order, covers marked</span></label>
         </div>
       </div>
     </section>
@@ -207,13 +231,7 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
       <div class="colset" style="margin-top:0">
         <div>(4) &nbsp; Info page</div>
         <div>
-          <ul class="plain">
-            <li>A short bio <span class="m">(three or four lines, we can help)</span></li>
-            <li>Agent or rep, with their contact <span class="m">(if you have one)</span></li>
-            <li>Your email and Instagram</li>
-            <li>Selected clients, publications and shows <span class="m">(optional)</span></li>
-            <li>A portrait <span class="m">(optional)</span></li>
-          </ul>
+<label class="fld"><span>A short bio <span class="m">(three or four lines, we can help)</span></span><textarea class="ta" data-k="bio" id="bio-11" placeholder=""></textarea></label><label class="fld"><span>Agent or rep, with their contact <span class="m">(if you have one)</span></span><input class="in" data-k="agent" id="agent-12" placeholder=""></label><label class="fld"><span>Your email and Instagram</span><input class="in" data-k="contact" id="contact-13" placeholder=""></label><label class="fld"><span>Selected clients, publications and shows <span class="m">(optional)</span></span><textarea class="ta" data-k="clients" id="clients-14" placeholder=""></textarea></label><div class="br"></div><label class="tick"><input type="checkbox" data-k="c-portrait" id="c-portrait-15"><span class="bx2"></span><span class="tx">A portrait in the Info folder <span class="m">(optional)</span></span></label>
         </div>
       </div>
     </section>
@@ -222,54 +240,69 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     <section class="item" id="accounts">
       <div class="colset" style="margin-top:0">
         <div>(5) &nbsp; Accounts</div>
-        <div><p class="m">We set these up together on the first call, about 30 minutes. Everything is in your name and on your card. Have your card and your email login to hand.</p></div>
+        <div><p class="m">We set these up together on the first call, about 30 minutes. Everything is in your name and on your card. Have your card and your email login to hand. Tick each one off once it's done.</p></div>
       </div>
       <div class="rows four">
-        <div>Domain</div><div>Buy yourname.com, or bring the one you have</div><div class="m x">registrar login</div><div class="m x">yearly</div>
-        <div>Cargo</div><div>Start a paid site, add us as an editor</div><div class="m x">new account</div><div class="m x">yearly</div>
+        <div><label class="tick"><input type="checkbox" data-k="c-domain" id="c-domain-16"><span class="bx2"></span><span class="tx">Domain</span></label></div><div>Buy yourname.com, or bring the one you have</div><div class="m x">registrar login</div><div class="m x">yearly</div>
+        <div><label class="tick"><input type="checkbox" data-k="c-cargo" id="c-cargo-17"><span class="bx2"></span><span class="tx">Cargo</span></label></div><div>Start a paid site, add us as an editor</div><div class="m x">new account</div><div class="m x">yearly</div>
         <div>GitHub</div><div>Make a free account, add us as a collaborator</div><div class="m x">new account</div><div class="m x">free</div>
-        <div>Vimeo</div><div>Only if there are films. A plan with direct file links</div><div class="m x">your account</div><div class="m x">yearly</div>
+        <div><label class="tick"><input type="checkbox" data-k="c-vimeo" id="c-vimeo-18"><span class="bx2"></span><span class="tx">Vimeo</span></label></div><div>Only if there are films. A plan with direct file links</div><div class="m x">your account</div><div class="m x">yearly</div>
       </div>
     </section>
 
     <hr class="sep">
+    <section class="item" id="brainrot">
+      <div class="colset" style="margin-top:0">
+        <div>(6) &nbsp; Brainrot<br><span class="m">(for its look, week 3)</span></div>
+        <div>
+          <p class="m">Two lines now so we can start thinking. The rest comes in the Brainrot session.</p>
+          <label class="fld"><span>What Brainrot makes, and for which brands</span><textarea class="ta" data-k="br-what" id="br-what-19" placeholder=""></textarea></label>
+          <label class="fld"><span>How it should feel, in one line</span><input class="in" data-k="br-feel" id="br-feel-20" placeholder=""></label>
+        </div>
+      </div>
+    </section>
+
+    <hr class="sep">
+    <div class="caps">When you've added something</div>
+    <div class="sendbar"></div>
     <div class="br"></div><div class="br"></div>
     <div class="m caps">© Eltio Studio (2026)</div>
   </main>
 
   <aside class="col">
-    <div class="head caps">Checklist (9)</div>
+    <div class="head caps">Checklist (9)</div><div class="saved"></div>
     <hr style="margin-top:0">
     <dl class="cv">
-      <dt>By <span class="f">[9 Oct]</span></dt>
-      <dd>☐ &nbsp;References (3 to 5)</dd>
-      <dd>☐ &nbsp;Project list</dd>
-      <dd>☐ &nbsp;Films on your Vimeo <span class="m">(if any)</span></dd>
+      <dt>Before the first call</dt>
+      <dd><label class="tick"><input type="checkbox" data-k="c-refs" id="c-refs-21"><span class="bx2"></span><span class="tx">References (3 to 5)</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-list" id="c-list-22"><span class="bx2"></span><span class="tx">Project list</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-films" id="c-films-23"><span class="bx2"></span><span class="tx">Films on your Vimeo <span class="m">(if any)</span></span></label></dd>
     </dl>
     <hr>
     <dl class="cv">
-      <dt>By <span class="f">[14 Oct]</span></dt>
-      <dd>☐ &nbsp;Photographs, per project</dd>
-      <dd>☐ &nbsp;Credits, as shown</dd>
-      <dd>☐ &nbsp;Bio and contacts</dd>
+      <dt>In week 1</dt>
+      <dd><label class="tick"><input type="checkbox" data-k="c-photos" id="c-photos-24"><span class="bx2"></span><span class="tx">Photographs, per project</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-credits" id="c-credits-25"><span class="bx2"></span><span class="tx">Credits, as shown</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-bio" id="c-bio-26"><span class="bx2"></span><span class="tx">Bio and contacts</span></label></dd>
     </dl>
     <hr>
     <dl class="cv">
       <dt>First call</dt>
-      <dd>☐ &nbsp;Domain</dd>
-      <dd>☐ &nbsp;Cargo and GitHub</dd>
-      <dd>☐ &nbsp;Vimeo <span class="m">(if any)</span></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-domain" id="c-domain-27"><span class="bx2"></span><span class="tx">Domain</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-cargo" id="c-cargo-28"><span class="bx2"></span><span class="tx">Cargo and GitHub</span></label></dd>
+      <dd><label class="tick"><input type="checkbox" data-k="c-vimeo" id="c-vimeo-29"><span class="bx2"></span><span class="tx">Vimeo <span class="m">(if any)</span></span></label></dd>
     </dl>
     <hr>
     <dl class="cv">
       <dt>Sessions</dt>
-      <dd>References<br><span class="m">90 min, <span class="f">[day, time]</span></span></dd>
-      <dd>Pick a direction<br><span class="m">60 min, <span class="f">[day, time]</span></span></dd>
+      <dd>References<br><span class="m">90 min</span></dd>
+      <dd>Pick a direction<br><span class="m">60 min</span></dd>
+      <dd><label class="fld"><span>Days and times that suit you</span><input class="in" data-k="times" id="times-30" placeholder="e.g. weekday mornings"></label></dd>
     </dl>
     <hr>
     <dl class="cv">
       <dt>Good to know</dt>
-      <dd>Rights are yours to clear: every film, credit and track</dd>
+      <dd>Rights are yours to clear: every photograph, film, credit and track</dd>
       <dd>Notes are batched into rounds, once or twice a week</dd>
     </dl>
   </aside>

@@ -1,4 +1,6 @@
 <meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="client.css">
+<script src="client.js" defer></script>
 <title>Charlie Birch: terms</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,7 +120,7 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
 @media (max-width: 520px) { .cmp { grid-template-columns: minmax(0,1.2fr) repeat(3, minmax(0,1fr)); font-size: .9em; gap: 0 .6em; } }
 </style>
 
-<div class="site two">
+<div data-page="terms" class="site two">
 
   <aside class="col side">
     <div class="head bar"><a href="./" class="caps" id="top">Eltio Studio</a> <a href="./" class="m" style="margin-left:auto;margin-right:1em">(All documents)</a><span class="eye" style="width:14px" aria-hidden="true"></span></div>
@@ -127,7 +129,7 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     <div>For Charlie Birch and Brainrot</div>
     <div class="m">With proposal No. 001</div>
     <div class="br"></div>
-    <p>One page, in plain words. It sits alongside the proposal. Saying yes to the proposal, by email or message, means you agree to these.</p>
+    <p>One page, in plain words. It sits alongside the proposal. Sign at the end, then send it from the main page.</p>
     <div class="br"></div>
     <p class="m">If anything here doesn't suit you, say so before the deposit and we'll change it in writing.</p>
     <div class="m push" style="margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;padding-top:2rem"><span>hello@eltio.studio<br>(<span class="num" id="clock" aria-label="London time">00:00:00</span> LDN)</span><span class="eye" style="width:24px;background:var(--s4)" aria-hidden="true"></span></div>
@@ -138,19 +140,19 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     <hr style="margin-top:0">
     <dl class="cv" style="grid-template-columns:12em minmax(0,62ch)">
       <dt>(1) &nbsp; Scope</dt>
-      <dd>We build the site described in the proposal: its pages, number of projects and rounds of changes. Anything beyond that is quoted before we start on it, and only goes ahead once you say yes.</dd>
+      <dd>We build the two sites described in the proposal: its pages, number of projects and rounds of changes. Anything beyond that is quoted before we start on it, and only goes ahead once you say yes.</dd>
 
       <dt>(2) &nbsp; Payment</dt>
-      <dd>50% deposit to book your start date. 50% balance before the site goes live. Invoices are due within 7 days. Work starts when the deposit lands.</dd>
+      <dd>50% deposit to book your start date. 50% balance before the second site goes live. Invoices are due within 7 days. Work starts when the deposit lands.</dd>
 
       <dt>(3) &nbsp; Changes</dt>
       <dd>Notes are collected into rounds. A round is one list of changes, sent together. When the included rounds are used, extra rounds are £250 each. We'll always tell you before a round costs extra.</dd>
 
       <dt>(4) &nbsp; Timing</dt>
-      <dd>Builds take about two weeks once we have the photographs, any films and the project list. If material arrives late, the launch moves with it. A launch in under two weeks is +25%.</dd>
+      <dd>Each site takes about two weeks once we have its material, plus a week on Brainrot's look. If material arrives late, the launch moves with it.</dd>
 
       <dt>(5) &nbsp; Ownership</dt>
-      <dd>The site is yours. The domain, Cargo, GitHub and any Vimeo accounts are in your name and paid by you. Once the balance is paid, the code in your GitHub is yours to keep, change or hand to someone else.</dd>
+      <dd>Each site is yours. The domain, Cargo, GitHub and any Vimeo accounts are in your name and paid by you. Once the balance is paid, the code in your GitHub is yours to keep, change or hand to someone else.</dd>
 
       <dt>(6) &nbsp; Your material</dt>
       <dd>You confirm you have the right to show every photograph, film, credit and piece of music on the site, and that the names are spelled the way you want. We use what you send as it is.</dd>
@@ -169,8 +171,24 @@ ul.plain, ol.plain { list-style: none; margin: 0; padding: 0; }
     </dl>
     <hr>
     <div class="colset" style="max-width:62ch">
-      <div><div class="sign"></div><span class="m">Client, date</span></div>
-      <div><div class="sign"></div><span class="m">Eltio Studio, date</span></div>
+      <div><div class="caps">Client</div>
+      <div class="signbox" data-sign="terms">
+        <div class="form">
+          <label class="fld"><span>Your name</span><input class="in nm" id="nm-terms" autocomplete="name" placeholder="Charlie Birch"></label>
+          <div class="fld"><span>Signature <span class="m">(draw with a finger or mouse, optional)</span></span><canvas class="pad" aria-label="Signature pad"></canvas><button type="button" class="lnk clr">Clear</button></div>
+          <label class="tick fld"><input type="checkbox" class="ag" id="ag-terms"><span class="bx2"></span><span>I agree to these terms</span></label>
+          <div class="btns"><button type="button" class="btn solid go">Sign</button></div>
+        </div>
+        <div class="done" hidden>
+          <div class="caps">Signed</div>
+          <div class="who"></div><div class="m when"></div>
+          <img alt="Signature" hidden>
+          <div class="btns"><a class="btn" href="./">Back to send it</a></div>
+          <button type="button" class="lnk undo" style="margin-top:.6em">Change or sign again</button>
+        </div>
+      </div>
+      </div>
+      <div><div class="caps">Eltio Studio</div><div class="br"></div><p class="m">Elliot Holbrow signs these for the studio when the deposit invoice goes out.</p></div>
     </div>
     <div class="br"></div><div class="br"></div>
     <div class="m caps">© Eltio Studio (2026)</div>

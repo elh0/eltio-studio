@@ -416,6 +416,19 @@ p { margin: 0; }
   .rows > .acc { grid-column: 1 / -1; }
   .cool, .ta, .in, .scr > p { max-width: 720px; }
   .scr .cant { align-self: flex-start; }
+  /* thank-you and receipt screens span too */
+  .done-scr { max-width: none !important; margin: 0 !important; background: transparent !important; border-radius: 0; padding: 28px 0 !important; align-items: stretch; text-align: left; gap: 22px; }
+  .done-scr .big { align-self: flex-start; }
+  .done-scr .wt { white-space: nowrap; font-size: 9cqw !important; line-height: 1; letter-spacing: -.045em; }
+  .done-scr .wt.wrap { white-space: normal; }
+  .done-scr .pips { justify-content: flex-start; }
+  .done-scr > div[style*="justify-content:center"] { justify-content: flex-start !important; }
+  .done-scr > .lnk { align-self: flex-start; }
+  .slip { background: transparent !important; padding: 0 !important; -webkit-mask: none; mask: none; border-top: 1px solid var(--hr); border-radius: 0; }
+  .slip .ln { grid-template-columns: 10px 22ch 1fr auto; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
+  .slip .ln .v { max-width: none; text-align: left; white-space: normal; }
+  .slip .bk-t { padding-top: 14px; }
+  .slip-h { margin-top: 18px; }
 }
 
 /* live: the page is the whole screen */
@@ -646,7 +659,7 @@ function obHTML() {
     '<div class="ob-body"><div class="ob-main"><div class="scr anim">' + screenHTML(c, sc) + '</div><div class="ctl"><span>' + back + '</span><span class="r">' + right + '</span></div></div></div></div></div>';
 }
 function fitQ() { /* shrink the question until it sits on one line across the screen */
-  var q = page.querySelector('.scr .qt'); if (!q) return; q.classList.remove('wrap'); q.style.fontSize = '';
+  var q = page.querySelector('.scr .qt') || page.querySelector('.done-scr .wt'); if (!q) return; q.classList.remove('wrap'); q.style.fontSize = '';
   if (getComputedStyle(q).whiteSpace !== 'nowrap') return;
   var fs = parseFloat(getComputedStyle(q).fontSize), n = 0;
   while (q.scrollWidth > q.clientWidth + 1 && fs > 30 && n++ < 60) { fs -= 2; q.style.setProperty('font-size', fs + 'px', 'important'); }

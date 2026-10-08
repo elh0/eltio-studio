@@ -352,7 +352,7 @@ p { margin: 0; }
 .ticks span::before { background: var(--fg); color: var(--bg); }
 .chap button.on { background: var(--fg); color: var(--bg); }
 .segs i.on { background: var(--fg); }
-.dot { box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+.dot { box-shadow: none; }
 .row .n { background: var(--rc); color: var(--rf); }
 .row.done { background: var(--fill); }
 .row.done .n { background: var(--rc); }
@@ -392,7 +392,7 @@ p { margin: 0; }
 .hv-b .hv-col { margin: auto 0; width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 16px; }
 .hv-b .list { margin: 10px 0 8px; width: 100%; }
 .hv .wt { font-size: clamp(34px, 10cqw, 48px) !important; }
-.hv-a .hv-parts .dot { box-shadow: 0 0 0 1px var(--q); }
+.hv-a .hv-parts .dot { box-shadow: none; }
 .hv-c .hv-top { display: flex; justify-content: space-between; gap: 12px; }
 .hv-c .hv-bot { margin-top: auto; display: grid; gap: 22px; }
 .hv-c .hv-idx { display: grid; border-top: 1px solid var(--hr); }
@@ -425,7 +425,7 @@ p { margin: 0; }
   .done-scr > div[style*="justify-content:center"] { justify-content: flex-start !important; }
   .done-scr > .lnk { align-self: flex-start; }
   .slip { background: transparent !important; padding: 0 !important; -webkit-mask: none; mask: none; border-top: 1px solid var(--hr); border-radius: 0; }
-  .slip .ln { grid-template-columns: 22ch 1fr auto !important; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
+  .slip .ln { grid-template-columns: 10px 22ch 1fr auto !important; gap: 16px; padding: 14px 0; border-top: 0; border-bottom: 1px solid var(--hr); }
   .slip .ln .v { max-width: none; text-align: left; white-space: normal; }
   .slip .bk-t { padding-top: 14px; }
   .slip-h { margin-top: 18px; }
@@ -436,8 +436,9 @@ p { margin: 0; }
 .slip .chg { text-decoration: none !important; }
 .slip .oq { grid-template-columns: 1fr auto !important; }
 .slip .chg:hover { text-decoration: underline !important; text-underline-offset: .2em; }
-.slip .dot, .slip .oq .dot { display: none; }
-@container (max-width: 759px) { .slip .ln { grid-template-columns: 1fr auto auto !important; } }
+.slip .dot { display: inline-block; box-shadow: none; }
+.dot.hollow { background: transparent !important; box-shadow: inset 0 0 0 1.5px var(--fg) !important; }
+@container (max-width: 759px) { .slip .ln { grid-template-columns: 10px 1fr auto auto !important; } }
 .slip .strike { opacity: .5; }
 
 .done-scr .big { display: none; } /* no tick above the thank-you (Elliot, 8 Oct) */
@@ -623,10 +624,12 @@ function signHTML(doc) {
   return S.done[doc] ? '<div class="reply">Signed, ' + h(S.txt['name-' + doc] || 'Charlie Birch') + '. Thank you.</div>' :
     '<input class="in" data-t="name-' + doc + '" placeholder="Your full name" value="' + h(S.txt['name-' + doc] || '') + '"><div><button class="btn solid" data-act="sign" data-doc="' + doc + '" data-hot>Sign</button></div>';
 }
+function dotC(c) { return c === page.dataset.ch ? 'var(--fg)' : CHC[c]; }
+function rowHTML(l) { var open = l.cn || l.open; return '<div class="ln"><span class="dot' + (open ? ' hollow' : '') + '"' + (open ? '' : ' style="background:' + dotC(l.c) + '"') + '></span><span class="k">' + h(l.k) + '</span><span class="v' + (open ? ' cn' : '') + '">' + h(l.v) + '</span><button class="lnk q chg" data-act="jump" data-c="' + l.c + '" data-j="' + l.j + '" data-hot>' + (l.open ? 'answer' : 'change') + '</button></div>'; }
 function receiptHTML(ids, withTotal) {
-  var L = basket().filter(function (l) { return ids.indexOf(l.c) > -1; }), O = openQs().filter(function (o) { return ids.indexOf(o.c) > -1; });
-  return '<div class="slip">' + (L.length ? L.map(function (l) { return '<div class="ln"><span class="dot" style="background:' + CHC[l.c] + '"></span><span class="k">' + h(l.k) + '</span><span class="v' + (l.cn ? ' cn' : '') + '">' + h(l.v) + '</span><button class="lnk q chg" data-act="jump" data-c="' + l.c + '" data-j="' + l.j + '" data-hot>change</button></div>'; }).join('') : '<div class="q">Nothing picked here yet, and that\'s fine.</div>') +
-    (O.length ? '<div class="slip-open"><div class="q">Still to answer</div>' + O.map(function (o) { return '<button class="oq" data-act="jump" data-c="' + o.c + '" data-j="' + o.j + '" data-hot><span class="dot" style="background:' + CHC[o.c] + '"></span><span>' + h(o.t) + (o.cn ? ' <span class="q">(later)</span>' : '') + '</span><span class="q">&rarr;</span></button>'; }).join('') + '</div>' : '') +
+  var L = basket().filter(function (l) { return ids.indexOf(l.c) > -1; }), O = openQs().filter(function (o) { return ids.indexOf(o.c) > -1 && !o.cn; });
+  var rows = L.concat(O.map(function (o) { return o.sign ? { k: o.c === 'proposal' ? 'Proposal' : 'Terms', v: 'Not signed yet', c: o.c, j: o.j, open: true } : { k: o.t, v: 'Not answered', c: o.c, j: o.j, open: true }; }));
+  return '<div class="slip">' + (rows.length ? rows.map(rowHTML).join('') : '<div class="q">Nothing here yet, and that\'s fine.</div>') +
     (withTotal ? '<div class="bk-t"><span>Total</span><span><span class="strike">' + CLIENT.usual + '</span><span id="tot">' + CLIENT.price + '</span></span></div>' : '') + '</div>';
 }
 function doneHTML(c) {
@@ -691,7 +694,8 @@ var dc = document.createElement('div'); dc.className = 'dc';
 function render() {
   var sc0 = page.querySelector('.scroller'), keepTop = sc0 && S.keep ? sc0.scrollTop : 0;
   var nxc = FLOW.find(function (c) { return !S.done[c.id]; });
-  page.dataset.ch = S.c || (S.welcomed ? (nxc ? nxc.id : 'start') : ['roadmap', 'proposal', 'terms'][S.w || 0]);
+  var cc = S.c && chap(S.c), endNavy = S.c === 'start' && S.sent && cc.s[S.i] && cc.s[S.i].k === 'done'; /* the last screen ends in navy, like it starts */
+  page.dataset.ch = endNavy ? 'roadmap' : S.c || (S.welcomed ? (nxc ? nxc.id : 'start') : ['roadmap', 'proposal', 'terms'][S.w || 0]);
   page.innerHTML = S.c ? obHTML() : '<div class="scroller">' + homeHTML() + '</div>';
   page.appendChild(dc); if (TOAST && TOAST.classList.contains('on')) page.appendChild(TOAST); if (S.keep) { page.querySelector('.scroller').scrollTop = keepTop; S.keep = false; }
   S.fresh = null; save(); fitQ();

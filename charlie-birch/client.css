@@ -11,7 +11,7 @@
 .tick input:checked + .bx2 { background: var(--ink); border-color: var(--ink); }
 .tick input:checked ~ .tx { color: var(--s4); text-decoration: line-through; text-decoration-color: var(--s5); }
 .tick input:focus-visible + .bx2 { outline: 1px solid var(--ink); outline-offset: 2px; }
-.btn { font: inherit; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--ink); border-radius: 0; padding: .55em .9em; cursor: pointer; }
+.btn { text-decoration: none; display: inline-block; font: inherit; text-transform: uppercase; color: var(--ink); background: transparent; border: 1px solid var(--ink); border-radius: 0; padding: .55em .9em; cursor: pointer; }
 .btn.solid { background: var(--ink); color: var(--bg); }
 .btn:disabled { opacity: .35; cursor: default; }
 .btn:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }

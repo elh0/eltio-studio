@@ -1,0 +1,667 @@
+/* E. Parallax: a dead simple page (plain text, one small type size, lots of room) that moves like a
+   Webflow build. Four versions by class: p-1 depth, p-2 zoom, p-3 index, p-4 drift. plx.js does the motion. */
+
+.eltio.alt-plx { --big: "Diatype Mono Variable", "Diatype Mono", "ABC Diatype Mono", var(--mono); overflow-x: clip; }
+.eltio.alt-plx .x-hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; gap: .5em; padding: 96px 16px 40px; }
+.eltio.alt-plx .x-hero p, .eltio.alt-plx .x-hero p .ln, .eltio.alt-plx .x-run span, .eltio.alt-plx .x-mail { font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; letter-spacing: -.015em !important; margin: 0 !important; }
+.eltio.alt-plx .x-hero p, .eltio.alt-plx .x-hero p .ln { font-size: clamp(24px, 3.5vw, 54px) !important; line-height: 1.08 !important; }
+.eltio.alt-plx .x-hero .ln { display: block; will-change: transform; }
+.eltio.alt-plx .x-hero .nw { white-space: nowrap; }
+.eltio.alt-plx .x-l2 { color: var(--s5); }
+.eltio.alt-plx .x-hero p.x-cue { font: 400 11px/1.2 var(--mono) !important; letter-spacing: 0 !important; margin-top: 2.4em !important; font-variation-settings: normal !important; }
+
+.eltio.alt-plx .x-list { padding: 0 16px; }
+.eltio.alt-plx .x-p { position: relative; margin: 0 0 30vh; }
+.eltio.alt-plx .x-pin { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: center; }
+.eltio.alt-plx .x-txt { grid-column: 1 / span 4; display: grid; gap: .7em; max-width: 44ch; align-content: start; will-change: transform, opacity; }
+.eltio.alt-plx .x-txt p { margin: 0; }
+.eltio.alt-plx .x-name { font-size: inherit; font-weight: 400; margin: 0; }
+.eltio.alt-plx .x-go { justify-self: start; color: var(--s1); border-bottom: 1px solid var(--s5) !important; }
+.eltio.alt-plx .x-media { grid-column: 6 / span 4; position: relative; }
+.eltio.alt-plx .x-p:nth-child(even) .x-txt { grid-column: 9 / span 4; grid-row: 1; }
+.eltio.alt-plx .x-p:nth-child(even) .x-media { grid-column: 3 / span 4; grid-row: 1; }
+.eltio.alt-plx .x-frame { display: block; width: 100%; aspect-ratio: 4 / 5; position: relative; overflow: hidden; will-change: transform; transform-origin: 50% 50%; }
+.eltio.alt-plx .x-frame .k-cov { position: absolute; inset: 0; display: block; will-change: transform; }
+.eltio.alt-plx .x-frame .k-elliot-onl img { transform: scale(1.6); }
+.eltio.alt-plx .x-run, .eltio.alt-plx .x-idx { display: none; }
+
+.eltio.alt-plx .x-end { min-height: 80svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; padding: 0 16px 16px; }
+.eltio.alt-plx .x-end .x-n { margin: 0; }
+.eltio.alt-plx .x-mail { font-size: clamp(36px, 8.4vw, 136px) !important; line-height: 1.1 !important; letter-spacing: -.03em !important; color: var(--s1); text-decoration: none; }
+.eltio.alt-plx .x-foot { display: flex; justify-content: space-between; margin: 0; }
+
+/* p-2 zoom: each project pins and its cover grows from a small picture to the whole screen */
+.eltio.alt-plx.p-2 .x-p { height: 260svh; margin: 0; }
+.eltio.alt-plx.p-2 .x-pin { position: sticky; top: 0; height: 100svh; padding: 0 16px; margin: 0 -16px; overflow: hidden; }
+.eltio.alt-plx.p-2 .x-media, .eltio.alt-plx.p-2 .x-p:nth-child(even) .x-media { grid-column: 8 / span 3; grid-row: 1; z-index: 2; }
+.eltio.alt-plx.p-2 .x-txt, .eltio.alt-plx.p-2 .x-p:nth-child(even) .x-txt { grid-column: 1 / span 5; grid-row: 1; }
+
+/* p-3 index: the names sit in a plain list that stays put; the covers wipe open beside it */
+.eltio.alt-plx.p-3 .x-idx { display: block; position: fixed; left: 16px; top: 50%; translate: 0 -50%; z-index: 5; opacity: 0; transition: opacity .4s; }
+.eltio.alt-plx.p-3.in-list .x-idx { opacity: 1; }
+.eltio.alt-plx .x-idx ol { list-style: none; margin: 0; padding: 0; display: grid; gap: .5em; }
+.eltio.alt-plx .x-idx button { color: var(--s5); text-transform: uppercase; transition: color .3s; }
+.eltio.alt-plx .x-idx button.on { color: var(--s1); }
+.eltio.alt-plx.p-3 .x-list { margin-left: 34%; }
+.eltio.alt-plx.p-3 .x-p { margin-bottom: 22vh; }
+.eltio.alt-plx.p-3 .x-pin { grid-template-columns: minmax(0, 1fr); }
+.eltio.alt-plx.p-3 .x-media, .eltio.alt-plx.p-3 .x-p:nth-child(even) .x-media { grid-column: 1; grid-row: 1; max-width: 760px; }
+.eltio.alt-plx.p-3 .x-txt, .eltio.alt-plx.p-3 .x-p:nth-child(even) .x-txt { grid-column: 1; grid-row: 2; }
+.eltio.alt-plx.p-3 .x-frame { aspect-ratio: 16 / 10; }
+.eltio.alt-plx.p-3 .x-frame .k-elliot-onl img { transform: scale(1.15); }
+
+/* p-4 drift: each name runs huge across the page and slides sideways with the scroll, the cover rides over it */
+.eltio.alt-plx.p-4 .x-p { margin: 0 0 18vh; }
+.eltio.alt-plx.p-4 .x-pin { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 8vh 0 0; }
+.eltio.alt-plx.p-4 .x-run { display: flex; gap: .5em; position: absolute; left: 0; top: 34%; white-space: nowrap; z-index: 0; pointer-events: none; will-change: transform; }
+.eltio.alt-plx.p-4 .x-run span { font-size: clamp(72px, 15vw, 240px) !important; line-height: 1 !important; letter-spacing: -.04em !important; color: var(--s1); }
+.eltio.alt-plx.p-4 .x-media { width: min(34vw, 460px); z-index: 1; }
+.eltio.alt-plx.p-4 .x-txt { text-align: center; justify-items: center; z-index: 1; background: var(--bg); padding: 8px 12px; }
+.eltio.alt-plx.p-4 .x-go { justify-self: center; }
+
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-hero p, .eltio.alt-plx .x-hero p .ln { font-size: 22px !important; }
+  .eltio.alt-plx .x-hero .ln { display: inline; }
+  .eltio.alt-plx .x-p { margin-bottom: 18vh; }
+  .eltio.alt-plx .x-pin { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .eltio.alt-plx .x-txt, .eltio.alt-plx .x-p:nth-child(even) .x-txt { grid-column: 1; grid-row: 2; }
+  .eltio.alt-plx .x-media, .eltio.alt-plx .x-p:nth-child(even) .x-media { grid-column: 1; grid-row: 1; width: 82%; justify-self: start; }
+  .eltio.alt-plx .x-p:nth-child(even) .x-media { justify-self: end; }
+  .eltio.alt-plx.p-2 .x-media, .eltio.alt-plx.p-2 .x-p:nth-child(even) .x-media { grid-column: 1; grid-row: 1; width: 44%; justify-self: end; align-self: end; }
+  .eltio.alt-plx.p-2 .x-txt, .eltio.alt-plx.p-2 .x-p:nth-child(even) .x-txt { grid-column: 1; grid-row: 2; align-self: start; }
+  .eltio.alt-plx.p-2 .x-pin { align-content: center; }
+  .eltio.alt-plx.p-3 .x-list { margin-left: 0; }
+  .eltio.alt-plx.p-3 .x-idx { top: auto; bottom: 12px; translate: none; right: 16px; background: var(--bg); padding: 8px 0 0; border-top: 1px solid var(--hr); }
+  .eltio.alt-plx.p-3 .x-idx ol { display: flex; gap: 1em; }
+  .eltio.alt-plx.p-3 .x-idx button:not(.on) .m ~ * { display: none; }
+  .eltio.alt-plx.p-3 .x-media, .eltio.alt-plx.p-3 .x-p:nth-child(even) .x-media { width: 100%; }
+  .eltio.alt-plx.p-4 .x-media { width: 70vw; }
+}
+
+/* project sheet, as on the ring */
+.eltio.alt-plx .x-sheet { position: fixed; inset: 0; z-index: 40; background: var(--bg); overflow-y: auto; overscroll-behavior: contain; transform: translateY(100%); transition: transform .7s cubic-bezier(.7,0,.2,1); }
+.eltio.alt-plx .x-sheet.open { transform: none; }
+.eltio.alt-plx .x-sheet-bar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; gap: 1em; padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--hr); }
+.eltio.alt-plx .x-nav { display: flex; gap: 1.4em; }
+.eltio.alt-plx .x-nav button { color: var(--s4); }
+.eltio.alt-plx .x-nav .x-close { color: var(--s1); }
+.eltio.alt-plx .x-sheet-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 16px; max-width: 1440px; margin: 0 auto; }
+.eltio.alt-plx .x-sheet .a-notes { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .eltio.alt-plx .x-sheet .a-notes { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .eltio.alt-plx .x-sheet { transition: none; } }
+
+/* cards v2: the project's logo in black on paper; hover (or, on phones, the card reaching the middle) draws a line wireframe of it */
+.eltio.alt-plx .x-frame { border: 0; overflow: visible; }
+/* no card: just the logo floating in the page; hover draws the product in lines in the same space */
+.eltio.alt-plx .x-frame .k2 { background: none; border: 0; box-shadow: none; transition: translate .6s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx .x-frame:hover .k2, .eltio.alt-plx .x-frame .k2.on { translate: 0 -6px; }
+.eltio .k2 { position: absolute; inset: 0; display: block; background: var(--bg); border: 1px solid var(--hr); color: #0B0B0A; container-type: inline-size; overflow: hidden; }
+.eltio .k2-rest { position: absolute; inset: 0; display: grid; place-items: center; transition: opacity .4s, transform .6s cubic-bezier(.6,0,.2,1), filter .4s; }
+.eltio .x-frame:hover .k2-rest, .eltio .k2.on .k2-rest { opacity: 0; transform: scale(.94); filter: blur(6px); }
+.eltio .k2-wf { position: absolute; inset: 5%; width: 90%; height: 90%; fill: none; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.eltio .k2-wf .w, .eltio .k2-wf .a { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .35s ease-in; }
+.eltio .k2-wf .w { stroke: #0B0B0A; }
+.eltio .k2-wf .a { stroke: var(--acc); }
+.eltio .k2-wf .f { fill: var(--acc); stroke: none; opacity: 0; transition: opacity .2s; }
+.eltio .x-frame:hover .k2-wf .w, .eltio .x-frame:hover .k2-wf .a, .eltio .k2.on .k2-wf .w, .eltio .k2.on .k2-wf .a { stroke-dashoffset: 0; transition: stroke-dashoffset 1s cubic-bezier(.6,0,.2,1) calc(.15s + var(--d)); }
+.eltio .x-frame:hover .k2-wf .f, .eltio .k2.on .k2-wf .f { opacity: 1; transition: opacity .6s calc(.7s + var(--d)); }
+.eltio .k2-tag { position: absolute; right: 10px; bottom: 8px; font-size: 10px !important; transition: opacity .3s; }
+.eltio .x-frame:hover .k2-tag, .eltio .k2.on .k2-tag { opacity: 0; }
+@media (hover: none) { .eltio .k2-tag { display: none; } }
+.eltio .k2 .lock { font-size: 9.5cqi !important; color: #0B0B0A; }
+.eltio .k2 .wm { font-size: 11.5cqi !important; color: #000; max-width: 84cqi; }
+.eltio .k2-grip .gp-wm2 { width: auto; height: 10cqi; }
+.eltio .k2-lw { display: grid; justify-items: center; gap: 7cqi; }
+.eltio .k2-lwm { width: 22cqi; height: auto; aspect-ratio: 568 / 880; fill: #0B0B0A; }
+.eltio .k2-lww { width: 48cqi; height: auto; aspect-ratio: 9020 / 1770; fill: #0B0B0A; }
+.eltio .k2-el { position: absolute; inset: 8%; display: flex; flex-direction: column; justify-content: space-between; font: 400 3.6cqi/1.35 var(--mono); text-align: left; }
+.eltio .k2-el i { font-style: normal; color: var(--s4); }
+.eltio .k2-ell { display: grid; gap: .25em; }
+.eltio .k2-ell span { display: grid; grid-template-columns: 2.4em minmax(0, 1fr) auto; border-top: 1px dotted var(--hr); padding-top: .25em; }
+/* the ink: a gooey drop that follows the pointer and inverts the intro where it passes */
+.eltio.alt-plx .x-hero { position: relative; }
+.eltio.alt-plx .x-ink { position: fixed; inset: 0; z-index: 30; pointer-events: none; mix-blend-mode: difference; }
+.eltio.alt-plx.sheet-open .x-ink { display: none; }
+.eltio.alt-plx.cur, .eltio.alt-plx.cur * { cursor: none !important; }
+.eltio.alt-plx.cur .x-sheet, .eltio.alt-plx.cur .x-sheet * { cursor: auto !important; }
+.eltio.alt-plx.cur .x-sheet button, .eltio.alt-plx.cur .x-sheet a { cursor: pointer !important; }
+.eltio.alt-plx .x-ink svg { display: block; }
+.eltio .k2 .lock .sd { translate: 0 var(--sun, 0); }
+.eltio .k2-grip .gp-wm2 { height: 11cqi; }
+.eltio .k2-se { width: 84%; height: auto; fill: #000; overflow: visible; }
+.eltio .k2-cue { animation: secue 5s steps(1) infinite; }
+@media (prefers-reduced-motion: reduce) { .eltio .k2-cue { animation: none; } }
+.eltio .k2-tag { display: none; }
+/* elliot.onl at rest: the film list rolls up like end credits */
+.eltio .k2-roll { position: relative; flex: 1 1 auto; min-height: 0; margin: 1.2em 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
+.eltio .k2-roll .k2-ell { animation: elroll 38s linear infinite; }
+.eltio .x-frame:hover .k2-roll .k2-ell { animation-play-state: paused; }
+.eltio .k2-elf { display: flex; justify-content: space-between; }
+@keyframes elroll { to { transform: translateY(-50%); } }
+@media (prefers-reduced-motion: reduce) { .eltio .k2-roll .k2-ell { animation: none; } }
+/* words inside the wireframes fade in after the lines */
+.eltio .k2-wf .t, .eltio .k2-wf .ta { stroke: none; fill: #0B0B0A; font-family: var(--mono); opacity: 0; transition: opacity .2s; }
+.eltio .k2-wf .ta { fill: var(--acc); }
+.eltio .x-frame:hover .k2-wf .t, .eltio .x-frame:hover .k2-wf .ta, .eltio .k2.on .k2-wf .t, .eltio .k2.on .k2-wf .ta { opacity: 1; transition: opacity .5s calc(.6s + var(--d)); }
+/* the scroll prompt: a hairline that drips down, and a click takes you to the work */
+.eltio.alt-plx .x-hero .x-cue { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; margin-top: 2.4em; font: 400 11px/1.2 var(--mono); }
+.eltio.alt-plx .x-cue span { color: var(--s4); }
+.eltio.alt-plx .x-down { display: inline-flex; flex-direction: column; align-items: center; gap: 8px; padding: 0; background: none; border: 0; font: inherit !important; font-size: 11px !important; color: var(--s1) !important; cursor: pointer; }
+.eltio.alt-plx .x-down i { position: relative; display: block; width: 1px; height: 44px; overflow: hidden; background: var(--hr); }
+.eltio.alt-plx .x-down i::after { content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: var(--s1); animation: xdrip 2.2s cubic-bezier(.6,0,.2,1) infinite; }
+@keyframes xdrip { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
+@media (prefers-reduced-motion: reduce) { .eltio.alt-plx .x-down i::after { animation: none; transform: none; } }
+@media (max-width: 760px) { .eltio.alt-plx .x-cue span { max-width: 22ch; } }
+/* the next-project nudge: a quiet line bottom right once you have lingered on a project */
+.eltio.alt-plx .x-nx { position: fixed; right: 16px; bottom: 16px; z-index: 25; display: inline-flex; align-items: center; gap: .6em; padding: 0; background: none; border: 0; font: 400 11px/1.2 var(--mono) !important; font-size: 11px !important; color: var(--s1) !important; cursor: pointer; opacity: 0; translate: 0 8px; pointer-events: none; transition: opacity .5s, translate .6s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx .x-nx.show { opacity: 1; translate: 0 0; pointer-events: auto; }
+.eltio.alt-plx .x-nx .x-nxl { color: var(--s4); }
+.eltio.alt-plx .x-nx i { position: relative; display: block; width: 28px; height: 1px; overflow: hidden; background: var(--hr); }
+.eltio.alt-plx .x-nx i::after { content: ""; position: absolute; inset: 0; background: var(--s1); transform-origin: 0 0; transform: scaleX(0); }
+.eltio.alt-plx .x-nx.run i::after { transform: scaleX(1); transition: transform var(--nxt, 5s) linear; }
+.eltio.alt-plx.sheet-open .x-nx { opacity: 0; pointer-events: none; }
+/* hello comes in straight after the last project, rising from behind it */
+.eltio.alt-plx .x-list { position: relative; z-index: 1; }
+.eltio.alt-plx .x-p:last-child { margin-bottom: 0; }
+.eltio.alt-plx.p-1 .x-p:last-child .x-frame .k2 { background: var(--bg); }
+.eltio.alt-plx.p-1 .x-end { position: relative; z-index: 0; min-height: 70svh; margin-top: -34svh; }
+.eltio.alt-plx .x-mail { display: inline-block; will-change: transform; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-mail { font-size: 8.6vw !important; letter-spacing: -.04em !important; }
+  .eltio.alt-plx.p-1 .x-end { min-height: 56svh; margin-top: -20svh; }
+  .eltio.alt-plx .x-nx { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); }
+}
+/* between projects: the scroll prompt sits in the gap, on the side the next project comes in from */
+.eltio.alt-plx .x-nx { display: none !important; }
+.eltio.alt-plx .x-p { margin-bottom: 0; }
+.eltio.alt-plx .x-gap { display: flex; flex-direction: column; gap: 8px; width: max-content; margin: 15vh 0 15vh auto; padding: 0; background: none; border: 0; font: 400 11px/1.2 var(--mono) !important; font-size: 11px !important; color: var(--s1) !important; text-align: right; align-items: flex-end; cursor: pointer; }
+.eltio.alt-plx .x-p:nth-child(even) .x-gap { margin-left: 0; margin-right: auto; text-align: left; align-items: flex-start; }
+.eltio.alt-plx .x-gap .x-gl { color: var(--s4); }
+.eltio.alt-plx .x-gap i { position: relative; display: block; width: 1px; height: 52px; overflow: hidden; background: var(--hr); }
+.eltio.alt-plx .x-gap i::after { content: ""; position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: var(--s1); animation: xdrip 2.2s cubic-bezier(.6,0,.2,1) infinite; }
+.eltio.alt-plx .x-p:last-child .x-gap { margin-bottom: 40vh; }
+.eltio.alt-plx:not(.p-1) .x-gap { display: none; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-gap { margin: 13vh 0 13vh auto; }
+  .eltio.alt-plx .x-p:last-child .x-gap { margin-bottom: 26vh; }
+}
+@media (prefers-reduced-motion: reduce) { .eltio.alt-plx .x-gap i::after { animation: none; } }
+
+/* ---- reading variants (preview Reading row, Depth only). s-0 = the logged design, exactly; the rest use the short copy ---- */
+.eltio.alt-plx .x-short, .eltio.alt-plx .x-ask { display: none; }
+.eltio.alt-plx:not(.s-0) .x-short { display: block; }
+.eltio.alt-plx:not(.s-0) .x-long { display: none; }
+.eltio.alt-plx:not(.s-0) .x-ask { display: block; margin: 0; color: var(--s4); }
+.eltio.alt-plx.p-1:not(.s-0) .x-txt { max-width: 36ch; }
+/* B. Tight: Logged's small size, short copy, Open as a small round pill */
+.eltio.alt-plx.p-1:not(.s-0) .x-go { padding: 6px 12px !important; border: 1px solid var(--s1) !important; border-radius: 999px; line-height: 1 !important; transition: background .25s, color .25s; }
+.eltio.alt-plx.p-1:not(.s-0) .x-go:hover { background: var(--s1); color: var(--bg) !important; }
+/* C. Caption: the words sit under the logo like a gallery label, nothing beside it */
+.eltio.alt-plx.p-1.s-2 .x-txt, .eltio.alt-plx.p-1.s-2 .x-p:nth-child(even) .x-txt { grid-row: 2; grid-column: 6 / span 4; max-width: none; grid-template-columns: auto minmax(0, 1fr); column-gap: 1.2em; row-gap: .4em; align-items: baseline; }
+.eltio.alt-plx.p-1.s-2 .x-p:nth-child(even) .x-txt { grid-column: 3 / span 4; }
+.eltio.alt-plx.p-1.s-2 .x-txt > * { grid-column: 2; }
+.eltio.alt-plx.p-1.s-2 .x-txt > .x-n { grid-column: 1; grid-row: 1; }
+.eltio.alt-plx.p-1.s-2 .x-name { grid-row: 1; }
+.eltio.alt-plx.p-1.s-2 .x-pin { row-gap: 18px; }
+/* D. Arrive: just the number and name sit beside the logo; the line and the button come up when the project reaches the middle (or you hover it) */
+.eltio.alt-plx.p-1.s-3 .x-txt > :not(.x-n):not(.x-name) { opacity: 0; translate: 0 14px; transition: opacity .5s, translate .7s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx.p-1.s-3 .x-p.here .x-txt > *, .eltio.alt-plx.p-1.s-3 .x-p:hover .x-txt > * { opacity: 1; translate: 0 0; }
+.eltio.alt-plx.p-1.s-3 .x-p.here .x-txt > :nth-child(4), .eltio.alt-plx.p-1.s-3 .x-p:hover .x-txt > :nth-child(4) { transition-delay: .08s; }
+.eltio.alt-plx.p-1.s-3 .x-p.here .x-txt > :nth-child(5), .eltio.alt-plx.p-1.s-3 .x-p.here .x-txt > :nth-child(6), .eltio.alt-plx.p-1.s-3 .x-p:hover .x-txt > :nth-child(6) { transition-delay: .16s; }
+.eltio.alt-plx.p-1.s-3 .x-p.here .x-txt > .x-go { transition-delay: .24s; }
+/* E. Big names: the name large in the intro type, the rest stays small */
+.eltio.alt-plx.p-1.s-4 .x-name, .eltio.alt-plx.p-1.s-5 .x-name { font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; text-transform: none; letter-spacing: -.03em !important; }
+.eltio.alt-plx.p-1.s-4 .x-name { font-size: clamp(36px, 4.4vw, 68px) !important; line-height: .95 !important; }
+.eltio.alt-plx.p-1.s-4 .x-txt { max-width: none; }
+.eltio.alt-plx.p-1.s-4 .x-txt > :not(.x-name) { max-width: 36ch; }
+/* F. Bigger read: name in the intro type, 15px copy, roomier button */
+.eltio.alt-plx.p-1.s-5 .x-name { font-size: clamp(24px, 2.2vw, 34px) !important; line-height: 1.05 !important; }
+.eltio.alt-plx.p-1.s-5 .x-kind { font-size: 13px !important; }
+.eltio.alt-plx.p-1.s-5 .x-d { font-size: 15px !important; line-height: 1.45 !important; color: var(--s1); }
+.eltio.alt-plx.p-1.s-5 .x-go { padding: 10px 16px !important; font-size: 13px !important; }
+.eltio.alt-plx.p-1.s-5 .x-gap, .eltio.alt-plx.p-1.s-5 .x-ask { font-size: 13px !important; }
+/* G. Just the line: no name (the logo says it, the sheet says the rest), Bigger read's 15px line, sat right beside the logo */
+.eltio.alt-plx.p-1.s-6 .x-name { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.eltio.alt-plx.p-1.s-6 .x-kind { display: none; }
+.eltio.alt-plx.p-1.s-6 .x-txt { gap: 12px; max-width: 30ch; }
+.eltio.alt-plx.p-1.s-6 .x-d { font-size: 15px !important; line-height: 1.45 !important; color: var(--s1); }
+.eltio.alt-plx.p-1.s-6 .x-go { padding: 9px 15px !important; font-size: 12px !important; }
+.eltio.alt-plx.p-1.s-6 .x-gap, .eltio.alt-plx.p-1.s-6 .x-ask { font-size: 13px !important; }
+@media (min-width: 761px) {
+  .eltio.alt-plx.p-1.s-6 .x-pin { column-gap: 40px; }
+  .eltio.alt-plx.p-1.s-6 .x-media { grid-column: 4 / span 4; grid-row: 1; }
+  .eltio.alt-plx.p-1.s-6 .x-txt { grid-column: 8 / span 4; grid-row: 1; }
+  .eltio.alt-plx.p-1.s-6 .x-p:nth-child(even) .x-media { grid-column: 6 / span 4; }
+  .eltio.alt-plx.p-1.s-6 .x-p:nth-child(even) .x-txt { grid-column: 2 / span 4; justify-self: end; text-align: left; justify-items: start; }
+  /* the logo leans toward its words at rest (the wireframe still fills the frame on hover) */
+  .eltio.alt-plx.p-1.s-6 .x-p:nth-child(odd) .k2-rest { justify-items: end; padding-right: 6%; }
+  .eltio.alt-plx.p-1.s-6 .x-p:nth-child(even) .k2-rest { justify-items: start; padding-left: 6%; }
+  .eltio.alt-plx.p-1.s-6 .k2-rest { transform-origin: 50% 50%; }
+}
+@media (max-width: 760px) { .eltio.alt-plx.p-1.s-6 .x-kind { display: block; font-size: 12px !important; } }
+@media (max-width: 760px) {
+  .eltio.alt-plx.p-1.s-2 .x-txt, .eltio.alt-plx.p-1.s-2 .x-p:nth-child(even) .x-txt { grid-column: 1; }
+  .eltio.alt-plx.p-1.s-4 .x-name { font-size: 11vw !important; }
+}
+@media (prefers-reduced-motion: reduce) { .eltio.alt-plx.p-1.s-3 .x-txt > * { opacity: 1 !important; translate: none !important; transition: none; } }
+
+/* ---- project sheet: room to breathe, a way on to the next project, an easy way out ---- */
+.eltio.alt-plx .x-sh-head { display: grid; gap: 14px; padding: 56px 16px 48px; max-width: 1440px; margin: 0 auto; }
+.eltio.alt-plx .x-sh-head p { margin: 0; }
+.eltio.alt-plx .x-sh-line { max-width: 26ch; font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; font-size: clamp(22px, 2.6vw, 38px) !important; line-height: 1.12 !important; letter-spacing: -.015em !important; color: var(--s1); }
+.eltio.alt-plx .x-sh-kind { color: var(--s4); }
+.eltio.alt-plx .x-sheet-body { gap: 64px; padding-bottom: 64px; }
+.eltio.alt-plx .x-sheet .a-notes { row-gap: 28px; }
+.eltio.alt-plx .x-sh-next { display: grid; justify-items: center; align-content: center; gap: 28px; width: 100%; min-height: 96svh; padding: 48px 16px 120px; background: none; border: 0; border-top: 1px solid var(--hr); color: var(--s1); font: inherit; text-align: center; cursor: pointer; }
+.eltio.alt-plx .x-shn-top { display: flex; align-items: center; gap: 12px; color: var(--s4); }
+.eltio.alt-plx .x-shn-top > span:first-child { color: var(--s1); }
+.eltio.alt-plx .x-shn-bar { position: relative; width: 64px; height: 1px; background: var(--hr); overflow: hidden; }
+.eltio.alt-plx .x-shn-bar i { position: absolute; inset: 0; background: var(--s1); transform-origin: 0 0; transform: scaleX(var(--np, 0)); }
+.eltio.alt-plx .x-shn-card { position: relative; display: block; width: min(64vw, 340px); aspect-ratio: 4 / 5; opacity: calc(.25 + var(--np, 0) * .75); scale: calc(.86 + var(--np, 0) * .14); }
+.eltio.alt-plx .x-shn-card .k2 { background: none; border: 0; }
+.eltio.alt-plx .x-shn-line { max-width: 32ch; font-size: 15px !important; line-height: 1.45 !important; opacity: calc(var(--np, 0) * 1.4 - .3); }
+.eltio.alt-plx .x-sh-x { display: none; }
+.eltio.alt-plx .x-sheet.flow { z-index: 41; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-sheet-bar .x-prev, .eltio.alt-plx .x-sheet-bar .x-next { display: none; }
+  .eltio.alt-plx .x-sh-head { padding: 40px 16px 40px; }
+  .eltio.alt-plx .x-sheet-body { gap: 56px; }
+  .eltio.alt-plx .x-sh-x { display: block; position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); z-index: 5; translate: -50% 0; padding: 11px 22px !important; border: 1px solid var(--s1) !important; border-radius: 999px; background: var(--bg); color: var(--s1) !important; font-size: 12px !important; line-height: 1 !important; }
+}
+
+/* ---- the project as a scroll of blocks: logo, the idea, the app in lines, how it works, the build, the identity, what was made ---- */
+.eltio.alt-plx .x-blk { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 16px; row-gap: 20px; align-items: start; max-width: 1440px; margin: 0 auto; padding: 16vh 16px; opacity: 0; translate: 0 48px; transition: opacity .9s, translate 1.1s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx .x-blk.vis { opacity: 1; translate: 0 0; }
+.eltio.alt-plx .x-blk > .m:first-child { grid-column: 1 / span 3; margin: 0; color: var(--s4); }
+.eltio.alt-plx .x-blk > :not(.m:first-child) { grid-column: 4 / span 8; }
+.eltio.alt-plx .x-blk p { margin: 0; }
+.eltio.alt-plx .x-big { max-width: 30ch; font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; font-size: clamp(22px, 2.6vw, 38px) !important; line-height: 1.15 !important; letter-spacing: -.015em !important; color: var(--s1); }
+.eltio.alt-plx .x-bcard { position: relative; display: block; aspect-ratio: 4 / 5; }
+.eltio.alt-plx .x-bcard .k2 { background: none; border: 0; }
+.eltio.alt-plx .x-b-logo { min-height: 86svh; align-content: center; padding-top: 6vh; }
+.eltio.alt-plx .x-b-logo .x-bcard { grid-column: 4 / span 6 !important; width: 100%; max-width: 420px; justify-self: center; }
+.eltio.alt-plx .x-b-wf { justify-items: center; }
+.eltio.alt-plx .x-b-wf .x-bcard { grid-column: 3 / span 8 !important; width: min(100%, 560px); grid-row: 1; }
+.eltio.alt-plx .x-b-wf > .m { grid-column: 1 / -1 !important; grid-row: 2; text-align: center; color: var(--s4); }
+.eltio.alt-plx .x-b-how ol { list-style: none; margin: 0; padding: 0; max-width: 60ch; }
+.eltio.alt-plx .x-b-how li { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); padding: 18px 0; border-top: 1px solid var(--hr); font-size: 16px !important; line-height: 1.45; }
+.eltio.alt-plx .x-b-how li .m { color: var(--s4); padding-top: .25em; }
+.eltio.alt-plx .x-b-how li > span:last-child { font-size: 16px !important; }
+.eltio.alt-plx .x-b-build .fit { border-radius: 10px; overflow: hidden; }
+.eltio.alt-plx .x-b-made .a-notes { margin-top: 40px; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-blk { grid-template-columns: minmax(0, 1fr); padding: 12vh 16px; }
+  .eltio.alt-plx .x-blk > .m:first-child, .eltio.alt-plx .x-blk > :not(.m:first-child) { grid-column: 1 !important; }
+  .eltio.alt-plx .x-b-logo .x-bcard { width: 78%; }
+  .eltio.alt-plx .x-b-wf .x-bcard { width: 100%; }
+  .eltio.alt-plx .x-big { font-size: 22px !important; }
+  .eltio.alt-plx .x-b-how li, .eltio.alt-plx .x-b-how li > span:last-child { font-size: 15px !important; }
+  .eltio.alt-plx .x-b-made .a-notes { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { .eltio.alt-plx .x-blk { opacity: 1; translate: none; transition: none; } }
+.eltio.alt-plx .x-meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--hr); color: var(--s4); }
+.eltio.alt-plx .x-sheet .wf-guides { display: none; }
+/* the last project ends on hello */
+.eltio.alt-plx .x-shn-mail { font-family: var(--big) !important; font-weight: 300 !important; font-size: clamp(30px, 6vw, 96px) !important; line-height: 1 !important; letter-spacing: -.035em !important; opacity: calc(.2 + var(--np, 0) * .8); translate: 0 calc((1 - var(--np, 0)) * 40px); }
+
+/* ---- identity as the products use it ---- */
+.eltio.alt-plx .x-idn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.eltio.alt-plx .x-idn figure { margin: 0; display: grid; gap: 10px; align-content: start; }
+.eltio.alt-plx .x-idn figcaption { color: var(--s4); }
+.eltio.alt-plx .x-id-t { position: relative; aspect-ratio: 1; border-radius: 18px; background: #F0F0EA; overflow: hidden; display: grid; place-items: center; container-type: inline-size; }
+/* (1) the app icon, with real depth: rounded like iOS, lit from the top, casting a soft shadow, tilting toward you */
+.eltio.alt-plx .x-id-home { background: radial-gradient(120% 90% at 30% 10%, #FAFAF6, #E6E6DF); align-content: center; gap: 18px; perspective: 900px; }
+.eltio.alt-plx .x-ic3 { position: relative; display: block; width: 38cqi; transform-style: preserve-3d; transform: rotateX(var(--rx, 12deg)) rotateY(var(--ry, -16deg)); transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx .x-ic { position: relative; display: block; aspect-ratio: 1; border-radius: 22.5%; overflow: hidden; background: var(--bgc); transform: translateZ(18px);
+  box-shadow: 0 1px 1px rgba(0,0,0,.1), 0 8px 14px -4px rgba(0,0,0,.25), 0 28px 44px -16px rgba(0,0,0,.45); }
+.eltio.alt-plx .x-ic svg { display: block; width: 100%; height: 100%; }
+.eltio.alt-plx .x-ic::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255,255,255,.3), rgba(255,255,255,.06) 38%, rgba(255,255,255,0) 55%, rgba(0,0,0,.28));
+  box-shadow: inset 0 1.5px 0 rgba(255,255,255,.35), inset 0 -3px 8px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.08); }
+.eltio.alt-plx .x-ic-sh { position: absolute; left: 8%; right: 8%; bottom: -16%; height: 14%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.28), rgba(0,0,0,0)); transform: translateZ(-30px); filter: blur(4px); }
+.eltio.alt-plx .x-ic-lb { font: 500 13px/1 -apple-system, "SF Pro Text", system-ui, sans-serif !important; color: #222; }
+.eltio.alt-plx .x-ic-lw { display: grid; place-items: center; width: 100%; height: 100%; }
+.eltio.alt-plx .x-ic-lw svg { width: 30%; height: auto; aspect-ratio: 568 / 880; fill: #EDEDEA; }
+/* (2) the splash screen in a phone, or the header in a browser window */
+.eltio.alt-plx .x-ph { position: relative; display: block; width: 46cqi; aspect-ratio: 9 / 19.5; border-radius: 8cqi; background: #111; padding: 1.6cqi; box-shadow: 0 30px 50px -24px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.12); }
+.eltio.alt-plx .x-ph-in { position: relative; display: block; width: 100%; height: 100%; border-radius: 6.6cqi; overflow: hidden; background: #fffff8; }
+.eltio.alt-plx .x-ph-isl { position: absolute; z-index: 2; top: 4cqi; left: 50%; width: 13cqi; height: 3.6cqi; translate: -50% 0; border-radius: 9px; background: #111; }
+.eltio.alt-plx .x-ph-in .k2, .eltio.alt-plx .x-win-in .k2 { background: none; border: 0; }
+.eltio.alt-plx .x-ph-in .k2-wf, .eltio.alt-plx .x-win-in .k2-wf { display: none; }
+.eltio.alt-plx .x-win { display: grid; grid-template-rows: auto 1fr; width: 84cqi; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: #fffff8; box-shadow: 0 30px 50px -24px rgba(0,0,0,.4), 0 0 0 1px rgba(0,0,0,.08); }
+.eltio.alt-plx .x-win-bar { display: flex; gap: 6px; padding: 10px 12px; background: #EBEBE5; }
+.eltio.alt-plx .x-win-bar i { width: 9px; height: 9px; border-radius: 50%; background: #CFCFC8; }
+.eltio.alt-plx .x-win-in { position: relative; display: block; }
+/* websites: a browser tab with the favicon */
+.eltio.alt-plx .x-id-tab { align-content: center; gap: 0; }
+.eltio.alt-plx .x-tab { display: flex; align-items: center; gap: 10px; width: 70cqi; padding: 12px 14px; border-radius: 12px 12px 0 0; background: #fff; box-shadow: 0 -1px 0 rgba(0,0,0,.05); font: 400 13px/1 system-ui, sans-serif !important; color: #222; }
+.eltio.alt-plx .x-tab i { margin-left: auto; font-style: normal; color: #999; }
+.eltio.alt-plx .x-tab-url { width: 70cqi; padding: 10px 14px; background: #fff; border-top: 1px solid #EEE; border-radius: 0 0 12px 12px; font: 400 12px/1 system-ui, sans-serif !important; color: #888; box-shadow: 0 24px 40px -22px rgba(0,0,0,.35); }
+.eltio.alt-plx .x-fav { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; overflow: hidden; background: var(--bgc); box-shadow: inset 0 0 0 1px rgba(0,0,0,.08); }
+.eltio.alt-plx .x-fav-se { position: relative; font: 800 14px/1 Syne, sans-serif !important; color: #fff; }
+.eltio.alt-plx .x-fav-se i { position: absolute; right: -4px; top: -1px; width: 3px; height: 3px; border-radius: 50%; background: #fff; }
+.eltio.alt-plx .x-fav-el { font: 400 14px/1 var(--mono) !important; color: #0B0B0A; }
+.eltio.alt-plx .x-id-type .x-fav-se, .eltio.alt-plx .x-id-type .x-fav-el { display: grid; place-items: center; width: 100%; height: 100%; }
+/* (3) the colour on actual controls */
+.eltio.alt-plx .x-id-ui { align-content: center; justify-items: center; gap: 7cqi; background: #fffff8; box-shadow: inset 0 0 0 1px var(--hr); }
+.eltio.alt-plx .x-ui-row { display: flex; align-items: center; gap: 5cqi; }
+.eltio.alt-plx .x-tog { position: relative; display: block; width: 15cqi; height: 9cqi; border-radius: 99px; background: var(--a); box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
+.eltio.alt-plx .x-tog i { position: absolute; right: .8cqi; top: .8cqi; width: 7.4cqi; height: 7.4cqi; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.25); }
+.eltio.alt-plx .x-ui-btn { padding: 3.4cqi 6cqi; border-radius: 99px; background: var(--a); color: var(--f, #fff) !important; font: 500 4.2cqi/1 system-ui, sans-serif !important; box-shadow: 0 8px 16px -8px var(--a), inset 0 1px 0 rgba(255,255,255,.25); }
+.eltio.alt-plx .x-sld { position: relative; display: block; width: 56cqi; height: 1.4cqi; border-radius: 9px; background: #E2E2DB; }
+.eltio.alt-plx .x-sld i { position: absolute; inset: 0 38% 0 0; border-radius: inherit; background: var(--a); }
+.eltio.alt-plx .x-sld b { position: absolute; left: 62%; top: 50%; width: 7cqi; height: 7cqi; translate: -50% -50%; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.04); }
+.eltio.alt-plx .x-ui-hex { display: flex; align-items: center; gap: 2cqi; font: 400 3.6cqi/1 var(--mono) !important; color: var(--s4); }
+.eltio.alt-plx .x-ui-hex i { width: 3.4cqi; height: 3.4cqi; border-radius: 50%; background: var(--a); }
+.eltio.alt-plx .x-chips { display: grid; grid-template-columns: repeat(6, 9cqi); gap: 2cqi; }
+.eltio.alt-plx .x-chips i { aspect-ratio: 1; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.1), 0 4px 8px -4px rgba(0,0,0,.4); }
+/* (4) the type in a notification, frosted, over a soft blur of the brand */
+.eltio.alt-plx .x-id-type { background: radial-gradient(70% 60% at 70% 30%, color-mix(in srgb, var(--acc) 55%, transparent), transparent 70%), var(--bgc); align-content: end; justify-items: start; padding: 6cqi; }
+.eltio.alt-plx .x-aa { position: absolute; left: 6cqi; top: 4cqi; font-size: 30cqi !important; line-height: 1 !important; color: rgba(255,255,255,.9); letter-spacing: -.03em; }
+.eltio.alt-plx .x-note { display: flex; gap: 3.4cqi; width: 100%; padding: 4cqi; border-radius: 6cqi; background: rgba(250,250,250,.72); -webkit-backdrop-filter: blur(14px) saturate(1.4); backdrop-filter: blur(14px) saturate(1.4); box-shadow: 0 10px 30px -12px rgba(0,0,0,.5); color: #111; }
+.eltio.alt-plx .x-note-ic { flex: 0 0 auto; width: 10cqi; height: 10cqi; border-radius: 2.4cqi; overflow: hidden; background: var(--bgc); }
+.eltio.alt-plx .x-note-ic svg { display: block; width: 100%; height: 100%; }
+.eltio.alt-plx .x-note-tx { display: grid; gap: .8cqi; min-width: 0; font-size: 3.8cqi !important; line-height: 1.25 !important; }
+.eltio.alt-plx .x-note-tx * { font-size: inherit !important; }
+.eltio.alt-plx .x-note-h { display: flex; justify-content: space-between; color: #666; }
+.eltio.alt-plx .x-note-h i { font-style: normal; }
+.eltio.alt-plx .x-note b { font-weight: 600; }
+.eltio.alt-plx .x-sheet[data-i="4"] .x-id-type .x-aa { color: rgba(11,11,10,.85); }
+@media (max-width: 760px) { .eltio.alt-plx .x-idn { gap: 10px; } .eltio.alt-plx .x-id-t { border-radius: 14px; } .eltio.alt-plx .x-ic-lb { font-size: 11px !important; } }
+
+/* ---- Spoolends shop, drawn for the page ---- */
+.eltio .x-se { --wh: #F6F4EF; background: #000; color: var(--wh); font: 400 14px/1.4 "Hanken Grotesk", system-ui, sans-serif; padding: 22px 26px 26px; border-radius: 10px; }
+.eltio .x-se * { font-family: inherit; }
+.eltio .x-se-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; }
+.eltio .x-se-wm { width: 150px; height: auto; fill: var(--wh); overflow: visible; }
+.eltio .x-se-cue { animation: secue 5s steps(1) infinite; }
+.eltio .x-se-nav { display: flex; gap: 22px; color: rgba(246,244,239,.6); }
+.eltio .x-se-cart { padding: 0; background: none; border: 0; color: var(--wh) !important; font: inherit !important; cursor: pointer; }
+.eltio .x-se-hero { position: relative; aspect-ratio: 2.39; overflow: hidden; background: radial-gradient(120% 140% at 20% 60%, color-mix(in srgb, var(--pc) 70%, #000), #0a0806 70%); }
+.eltio .x-se-leak { position: absolute; inset: -20%; background: radial-gradient(40% 50% at 15% 40%, rgba(255,170,90,.75), transparent 70%), radial-gradient(30% 60% at 90% 70%, rgba(255,90,40,.45), transparent 70%); mix-blend-mode: screen; animation: seleak 9s ease-in-out infinite alternate; }
+.eltio .x-se-gr { position: absolute; inset: -50%; opacity: .35; mix-blend-mode: overlay; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: segrain .5s steps(4) infinite; }
+@keyframes seleak { 0% { transform: translate(-6%, 2%) scale(1); opacity: .7; } 50% { opacity: 1; } 100% { transform: translate(8%, -4%) scale(1.15); opacity: .55; } }
+@keyframes segrain { 0% { transform: translate(0, 0); } 25% { transform: translate(-7%, 4%); } 50% { transform: translate(5%, -6%); } 75% { transform: translate(-3%, -2%); } }
+.eltio .x-se-tc { position: absolute; left: 18px; bottom: 14px; font: 400 12px/1 ui-monospace, Menlo, monospace !important; color: rgba(255,255,255,.85); letter-spacing: .04em; }
+.eltio .x-se-dot { position: absolute; right: 22px; top: 18px; width: 14px; height: 14px; border-radius: 50%; background: #fff; animation: secue 5s steps(1) infinite; }
+.eltio .x-se-h { position: absolute; left: 26px; top: 26px; margin: 0; font: 800 46px/.98 Syne, sans-serif !important; letter-spacing: -.04em; color: var(--wh); }
+.eltio .x-se-sub { position: absolute; left: 26px; top: 132px; color: rgba(246,244,239,.75); }
+.eltio .x-se-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px 16px; margin-top: 26px; }
+.eltio .x-se-fr { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: radial-gradient(110% 120% at 30% 40%, var(--pc), color-mix(in srgb, var(--pc) 30%, #000) 75%); }
+.eltio .x-se-fr .x-se-leak { opacity: 0; transition: opacity .6s; }
+.eltio .x-se-pk:hover .x-se-fr .x-se-leak { opacity: 1; }
+.eltio .x-se-n { position: absolute; left: 10px; top: 8px; font: 400 11px/1 ui-monospace, Menlo, monospace !important; color: rgba(255,255,255,.8); }
+.eltio .x-se-pr { display: grid; grid-template-columns: 1fr auto auto; gap: 14px; align-items: center; padding-top: 10px; border-top: 3px solid var(--pc); margin-top: 0; }
+.eltio .x-se-pr span:nth-child(2) { color: rgba(246,244,239,.6); }
+.eltio .x-se-add { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 1px solid rgba(246,244,239,.5); background: none; color: var(--wh) !important; font: 500 15px/1 "Hanken Grotesk", sans-serif !important; cursor: pointer; transition: background .2s, color .2s; }
+.eltio .x-se-add.in { background: var(--wh); color: #000 !important; }
+.eltio .x-se-foot { display: flex; justify-content: space-between; margin-top: 26px; padding: 16px 0 0; border-top: 1px solid rgba(246,244,239,.2); font: 800 22px/1 Syne, sans-serif !important; letter-spacing: -.03em; }
+.eltio .x-se-foot span { font: inherit !important; }
+@media (prefers-reduced-motion: reduce) { .eltio .x-se-leak, .eltio .x-se-gr { animation: none; } }
+/* photographs: full width, a slow push in as they arrive, the caption quiet underneath */
+.eltio.alt-plx .x-b-img { max-width: none; margin: 0; padding: 10vh 0; display: block; }
+.eltio.alt-plx .x-img { position: relative; display: block; height: 88svh; overflow: hidden; background: #1a1d24; }
+.eltio.alt-plx .x-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(var(--zm, 1.12)); transition: transform 2.4s cubic-bezier(.2,.7,.2,1); }
+.eltio.alt-plx .x-b-img.vis .x-img img { --zm: 1; }
+.eltio.alt-plx .x-img-line { position: absolute; left: 16px; right: 16px; bottom: 6vh; font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; font-size: clamp(26px, 4vw, 64px) !important; line-height: 1.05 !important; letter-spacing: -.02em !important; color: #0B0B0A; mix-blend-mode: multiply; }
+.eltio.alt-plx .x-b-img figcaption { padding: 12px 16px 0; color: var(--s4); }
+@media (max-width: 760px) { .eltio.alt-plx .x-img { height: 72svh; } }
+@media (max-width: 760px) {
+  .eltio .x-se { padding: 14px 14px 18px; font-size: 13px; }
+  .eltio .x-se-wm { width: 110px; }
+  .eltio .x-se-nav { gap: 12px; font-size: 12px; }
+  .eltio .x-se-hero { aspect-ratio: 4 / 3; }
+  .eltio .x-se-h { left: 16px; top: 16px; font-size: 28px !important; }
+  .eltio .x-se-sub { left: 16px; right: 16px; top: auto; bottom: 34px; font-size: 12px; }
+  .eltio .x-se-tc { left: 16px; bottom: 12px; font-size: 10px !important; }
+  .eltio .x-se-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 10px; margin-top: 16px; }
+  .eltio .x-se-pr { grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 12px; }
+  .eltio .x-se-pr span:first-child { grid-column: 1 / -1; }
+  .eltio .x-se-add { width: 22px; height: 22px; font-size: 13px !important; }
+  .eltio .x-se-foot { font-size: 17px !important; }
+}
+
+/* identity v2: nothing carded, everything floating on the page; a flat icon, phones with room around them, the controls on their own */
+.eltio.alt-plx .x-id-t { background: none !important; box-shadow: none !important; border-radius: 0; }
+.eltio.alt-plx .x-id-home { perspective: none; gap: 14px; }
+.eltio.alt-plx .x-id-home .x-ic { width: 30cqi; transform: none; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.eltio.alt-plx .x-id-home .x-ic::after { display: none; }
+.eltio.alt-plx .x-ph { width: 34cqi; box-shadow: 0 18px 30px -20px rgba(0,0,0,.45); }
+.eltio.alt-plx .x-id-app .x-ph, .eltio.alt-plx .x-id-app .x-win { width: 84cqi; aspect-ratio: 1; padding: 0; border-radius: 0; background: none; box-shadow: none; }
+.eltio.alt-plx .x-id-app .x-ph-isl, .eltio.alt-plx .x-id-app .x-win-bar { display: none; }
+.eltio.alt-plx .x-id-app .x-ph-in, .eltio.alt-plx .x-id-app .x-win-in { background: none; border-radius: 0; height: 100%; }
+.eltio.alt-plx .x-ph-wf .k2-rest { display: none; }
+.eltio.alt-plx .x-ph-wf .k2-wf { display: block !important; }
+.eltio.alt-plx .x-blk.vis .x-ph-wf .k2-wf .w, .eltio.alt-plx .x-blk.vis .x-ph-wf .k2-wf .a { stroke-dashoffset: 0; transition: stroke-dashoffset 1.2s cubic-bezier(.6,0,.2,1) calc(.6s + var(--d)); }
+.eltio.alt-plx .x-blk.vis .x-ph-wf .k2-wf .f, .eltio.alt-plx .x-blk.vis .x-ph-wf .k2-wf .t, .eltio.alt-plx .x-blk.vis .x-ph-wf .k2-wf .ta { opacity: 1; transition: opacity .6s calc(1.4s + var(--d)); }
+.eltio.alt-plx .x-win { width: 80cqi; box-shadow: 0 20px 36px -24px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.06); }
+.eltio.alt-plx .x-tab, .eltio.alt-plx .x-tab-url { background: #fff; }
+.eltio.alt-plx .x-tab-url { box-shadow: 0 18px 30px -22px rgba(0,0,0,.3); }
+.eltio.alt-plx .x-tab { box-shadow: 0 0 0 1px rgba(0,0,0,.05); }
+
+/* the last project hands you straight back to the page */
+.eltio.alt-plx .x-sh-out { min-height: 46svh; padding-bottom: 46px; }
+.eltio.alt-plx .x-sheet.leave-up { transform: translateY(-100%) !important; transition: transform .8s cubic-bezier(.7,0,.2,1); }
+
+/* Spoolends hero, variation: the gradient drifts through the packs' colours, and hovering a pack pulls it to that one */
+@property --pc { syntax: '<color>'; inherits: true; initial-value: #D9772F; }
+@property --c2 { syntax: '<color>'; inherits: false; initial-value: #B8412F; }
+.eltio .x-se-hero { transition: --pc 1.4s ease; }
+.eltio .x-se-g2 { position: absolute; inset: -30%; background: radial-gradient(45% 55% at 75% 35%, var(--c2), transparent 70%); mix-blend-mode: screen; opacity: .8; animation: sedrift 22s linear infinite, sewander 14s ease-in-out infinite alternate; }
+@keyframes sedrift { 0% { --c2: #B8412F; } 20% { --c2: #6F7C80; } 40% { --c2: #C4B79C; } 60% { --c2: #3F5A49; } 80% { --c2: #A89676; } 100% { --c2: #B8412F; } }
+@keyframes sewander { 0% { transform: translate(-10%, 6%) scale(1); } 100% { transform: translate(6%, -8%) scale(1.25); } }
+@media (prefers-reduced-motion: reduce) { .eltio .x-se-g2 { animation: none; } }
+.eltio.alt-plx .x-id-app .x-win, .eltio.alt-plx .x-id-app .x-ph { display: block; position: relative; }
+.eltio.alt-plx .x-id-app .x-win-in, .eltio.alt-plx .x-id-app .x-ph-in { position: absolute; inset: 0; }
+.eltio.alt-plx .x-win-in { position: relative; min-height: 0; }
+
+/* ---- sheets v3: fewer labels, the story told in big left-aligned lines, one thing at a time ---- */
+.eltio.alt-plx .x-blk .x-big { font-size: clamp(24px, 3.1vw, 48px) !important; line-height: 1.12 !important; max-width: 24ch; }
+.eltio.alt-plx .x-b-line { padding: 9vh 16px; }
+.eltio.alt-plx .x-b-line .x-big, .eltio.alt-plx .x-b-made > * { grid-column: 1 / span 9 !important; }
+.eltio.alt-plx .x-b-made .x-meta { max-width: 720px; }
+/* a feature: the line on the left, the real screen beside it */
+.eltio.alt-plx .x-b-feat { align-items: center; padding: 12vh 16px; }
+.eltio.alt-plx .x-b-feat .x-big { grid-column: 1 / span 4 !important; font-size: clamp(20px, 2vw, 30px) !important; max-width: 20ch; }
+.eltio.alt-plx .x-b-feat .x-feat-m { grid-column: 5 / span 7 !important; }
+.eltio.alt-plx .x-dev { position: relative; display: block; width: 100%; aspect-ratio: 844 / 390; border-radius: 40px; padding: 7px; background: #1d1d1b; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.08); }
+.eltio.alt-plx .x-dev iframe { display: block; width: 100%; height: 100%; border: 0; border-radius: 33px; background: #121211; }
+.eltio.alt-plx .x-oscard { padding: 0; background: none; }
+.eltio.alt-plx .x-oscard .fig.card { margin: 0; }
+/* identity, one item per scroll: the sentence, then the thing */
+.eltio.alt-plx .x-b-id { align-items: center; padding: 10vh 16px; }
+.eltio.alt-plx .x-b-id .x-big { grid-column: 1 / span 5 !important; font-size: clamp(22px, 2.4vw, 36px) !important; max-width: 22ch; }
+.eltio.alt-plx .x-b-id .x-id-one { grid-column: 7 / span 5 !important; width: 100%; max-width: 520px; }
+.eltio.alt-plx .x-b-id .x-id-t { width: 100%; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-blk .x-big { font-size: 24px !important; }
+  .eltio.alt-plx .x-b-feat .x-big, .eltio.alt-plx .x-b-id .x-big { font-size: 20px !important; }
+  .eltio.alt-plx .x-b-feat .x-feat-m, .eltio.alt-plx .x-b-id .x-id-one { grid-column: 1 !important; }
+  .eltio.alt-plx .x-dev { border-radius: 22px; padding: 4px; }
+  .eltio.alt-plx .x-dev iframe { border-radius: 18px; }
+  .eltio.alt-plx .x-b-line, .eltio.alt-plx .x-b-feat, .eltio.alt-plx .x-b-id { padding: 8vh 16px; }
+}
+@media (hover: none) { .eltio.alt-plx .x-dev iframe { pointer-events: none; } }
+/* Spoolends v3: the hero is a strip of film (sprockets, edge code), the packs run past as frames on the same strip */
+.eltio .x-se3 .x-se-hero { aspect-ratio: 2.1; }
+.eltio .x-se3 .x-se-sp { position: absolute; left: 0; right: 0; height: 26px; z-index: 2; background: #000 radial-gradient(circle, transparent 0) ; background-image: linear-gradient(90deg, transparent 0 12px, rgba(246,244,239,.9) 12px 30px, transparent 30px); background-size: 40px 12px; background-repeat: repeat-x; background-position: 0 50%; animation: sesp 2s linear infinite; }
+.eltio .x-se3 .x-se-sp::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #000 0 12px, transparent 12px 30px, #000 30px) 0 0 / 40px 100% repeat-x; mix-blend-mode: normal; opacity: 0; }
+.eltio .x-se3 .x-se-sp1 { top: 0; }
+.eltio .x-se3 .x-se-sp2 { bottom: 0; }
+@keyframes sesp { to { background-position: -40px 50%; } }
+.eltio .x-se3 .x-se-edge { position: absolute; z-index: 3; left: 18px; top: 32px; font: 400 10px/1 ui-monospace, Menlo, monospace !important; letter-spacing: .14em; color: rgba(255,190,120,.85); white-space: nowrap; }
+.eltio .x-se3 .x-se-h { top: auto; bottom: 48px; font-size: 54px !important; }
+.eltio .x-se3 .x-se-tc { bottom: 34px; left: auto; right: 22px; }
+.eltio .x-se3 .x-se-dot { top: 40px; }
+.eltio .x-se-strip { position: relative; overflow: hidden; margin-top: 18px; padding: 22px 0; background: #000; border-top: 1px solid rgba(246,244,239,.15); border-bottom: 1px solid rgba(246,244,239,.15); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.eltio .x-se-run { display: flex; gap: 12px; width: max-content; animation: serun 40s linear infinite; }
+.eltio .x-se-strip:hover .x-se-run { animation-play-state: paused; }
+@keyframes serun { to { transform: translateX(-50%); } }
+.eltio .x-se3 .x-se-pk { width: 230px; flex: 0 0 auto; }
+.eltio .x-se3 .x-se-fr { aspect-ratio: 4 / 3; border-radius: 4px; }
+.eltio .x-se3 .x-se-pn { position: absolute; left: 12px; bottom: 10px; font: 600 15px/1 "Hanken Grotesk", sans-serif !important; color: #fff; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.eltio .x-se3 .x-se-pp { position: absolute; right: 12px; bottom: 10px; font: 400 12px/1 ui-monospace, Menlo, monospace !important; color: rgba(255,255,255,.85); }
+@media (max-width: 760px) {
+  .eltio .x-se3 .x-se-hero { aspect-ratio: 4 / 5; }
+  .eltio .x-se3 .x-se-h { font-size: 30px !important; bottom: 44px; }
+  .eltio .x-se3 .x-se-edge { font-size: 8px !important; }
+  .eltio .x-se3 .x-se-pk { width: 150px; }
+  .eltio .x-se3 .x-se-pn { font-size: 12px !important; }
+}
+@media (prefers-reduced-motion: reduce) { .eltio .x-se-run, .eltio .x-se3 .x-se-sp { animation: none; } }
+
+/* ---- project text, four ways (preview "Project text" row) ---- */
+.eltio.alt-plx .x-stn { display: none; }
+/* w-1 Left: big lines on the left, as before but short */
+/* w-2 Centred: everything centred, the line sits under its screen */
+.eltio.alt-plx.w-2 .x-b-line { justify-items: center; text-align: center; }
+.eltio.alt-plx.w-2 .x-b-line .x-big { grid-column: 2 / span 10 !important; justify-self: center; margin: 0 auto; }
+.eltio.alt-plx.w-2 .x-b-made { justify-items: center; text-align: center; }
+.eltio.alt-plx.w-2 .x-b-made > * { grid-column: 2 / span 10 !important; justify-self: center; }
+.eltio.alt-plx.w-2 .x-b-feat, .eltio.alt-plx.w-2 .x-b-id { justify-items: center; text-align: center; row-gap: 28px; }
+.eltio.alt-plx.w-2 .x-b-feat .x-feat-m { grid-column: 3 / span 8 !important; grid-row: 1; }
+.eltio.alt-plx.w-2 .x-b-id .x-id-one { grid-column: 4 / span 6 !important; grid-row: 1; justify-self: center; }
+.eltio.alt-plx.w-2 .x-b-feat .x-big, .eltio.alt-plx.w-2 .x-b-id .x-big { grid-column: 3 / span 8 !important; grid-row: 2; justify-self: center; max-width: 26ch; font-size: clamp(18px, 1.6vw, 24px) !important; }
+/* w-3 Zigzag: text and screen swap sides every block, lines step across the page */
+.eltio.alt-plx.w-3 .x-b-step:nth-of-type(odd) .x-big { grid-column: 6 / span 7 !important; }
+.eltio.alt-plx.w-3 .x-b-feat:nth-of-type(even) .x-big, .eltio.alt-plx.w-3 .x-b-id:nth-of-type(even) .x-big { grid-column: 9 / span 4 !important; grid-row: 1; }
+.eltio.alt-plx.w-3 .x-b-feat:nth-of-type(even) .x-feat-m { grid-column: 1 / span 7 !important; grid-row: 1; }
+.eltio.alt-plx.w-3 .x-b-id:nth-of-type(even) .x-id-one { grid-column: 2 / span 5 !important; grid-row: 1; }
+/* w-4 Numbered: a big grey number leads each step, the words stay small beside it */
+.eltio.alt-plx.w-4 .x-b-step { align-items: baseline; }
+.eltio.alt-plx.w-4 .x-stn { display: block; grid-column: 1 / span 3; font-family: var(--big) !important; font-weight: 300 !important; font-size: clamp(64px, 9vw, 150px) !important; line-height: .9 !important; letter-spacing: -.05em; color: var(--s5, rgba(0,0,0,.2)); }
+.eltio.alt-plx.w-4 .x-b-step .x-big { grid-column: 4 / span 6 !important; font-size: clamp(20px, 2vw, 30px) !important; }
+.eltio.alt-plx.w-4 .x-b-feat .x-big, .eltio.alt-plx.w-4 .x-b-id .x-big { font-size: clamp(16px, 1.3vw, 20px) !important; }
+@media (max-width: 760px) {
+  .eltio.alt-plx[class*="w-"] .x-b-line .x-big, .eltio.alt-plx[class*="w-"] .x-b-made > *, .eltio.alt-plx[class*="w-"] .x-b-feat .x-big, .eltio.alt-plx[class*="w-"] .x-b-id .x-big, .eltio.alt-plx[class*="w-"] .x-b-feat .x-feat-m, .eltio.alt-plx[class*="w-"] .x-b-id .x-id-one { grid-column: 1 !important; }
+  /* phones: the words sit centred under the screen in every version */
+  .eltio.alt-plx .x-b-feat, .eltio.alt-plx .x-b-id { justify-items: center; text-align: center; }
+  .eltio.alt-plx .x-b-feat .x-feat-m, .eltio.alt-plx .x-b-id .x-id-one { grid-row: 1 !important; }
+  .eltio.alt-plx .x-b-feat .x-big, .eltio.alt-plx .x-b-id .x-big { grid-row: 2 !important; font-size: 18px !important; }
+  .eltio.alt-plx.w-2 .x-b-line { text-align: center; }
+  .eltio.alt-plx.w-4 .x-stn { font-size: 64px !important; }
+}
+.eltio.alt-plx .x-feat-m, .eltio.alt-plx .x-id-one { width: 100%; justify-self: stretch; }
+.eltio.alt-plx .x-blk .x-big { text-wrap: balance; }
+
+/* ---------- sheets v4 (8 Oct 14:22): one-line type, no captions, centred builds, more design ---------- */
+/* each line carries its length (--ch) and sizes itself to sit on one line */
+.eltio.alt-plx .x-blk .x-big.x-one { white-space: nowrap !important; max-width: none !important; text-wrap: nowrap; grid-column: 1 / -1 !important; justify-self: center; text-align: center;
+  font-size: min(48px, calc((min(100vw, 1440px) - 96px) / (var(--ch) * .6))) !important; letter-spacing: -.015em !important; }
+.eltio.alt-plx .x-b-step .x-big.x-one { font-size: min(34px, calc((min(100vw, 1440px) - 96px) / (var(--ch) * .6))) !important; }
+.eltio.alt-plx .x-b-step { padding: 6vh 16px; }
+.eltio.alt-plx .x-b-made { padding: 14vh 16px; }
+.eltio.alt-plx .x-b-made .x-big.x-one { font-size: min(30px, calc((min(100vw, 1440px) - 96px) / (var(--ch) * .6))) !important; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-blk .x-big.x-one { font-size: min(22px, calc((100vw - 40px) / (var(--ch) * .6))) !important; }
+  .eltio.alt-plx .x-b-step .x-big.x-one { font-size: min(14px, calc((100vw - 40px) / (var(--ch) * .6))) !important; }
+  .eltio.alt-plx .x-b-made .x-big.x-one { font-size: min(15px, calc((100vw - 40px) / (var(--ch) * .6))) !important; }
+  .eltio.alt-plx .x-b-step { padding: 3.5vh 16px; }
+}
+/* features and identity items stand alone, centred, no words */
+.eltio.alt-plx .x-b-feat .x-feat-m, .eltio.alt-plx.w-2 .x-b-feat .x-feat-m, .eltio.alt-plx.w-3 .x-b-feat .x-feat-m { grid-column: 3 / span 8 !important; grid-row: 1 !important; justify-self: stretch; width: 100%; }
+.eltio.alt-plx .x-b-id .x-id-one, .eltio.alt-plx.w-2 .x-b-id .x-id-one, .eltio.alt-plx.w-3 .x-b-id .x-id-one { grid-column: 4 / span 6 !important; grid-row: 1 !important; justify-self: stretch; width: 100%; }
+.eltio.alt-plx .x-b-feat, .eltio.alt-plx .x-b-id { justify-items: stretch; }
+/* the builds sit in the middle */
+.eltio.alt-plx .x-b-build { justify-items: center; }
+.eltio.alt-plx .x-b-build .fit { grid-column: 2 / span 10 !important; justify-self: center; width: 100%; }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-b-feat .x-feat-m, .eltio.alt-plx .x-b-id .x-id-one, .eltio.alt-plx .x-b-build .fit { grid-column: 1 !important; }
+}
+/* the Lampwerk mark: ink, not grey */
+.eltio.alt-plx .x-b-id .x-ic { background: var(--bgc); }
+.eltio.alt-plx .x-ic-lw svg { fill: #F3F3F0; width: 26%; }
+/* Spoolends v4: covers do the shouting, the shop stays tiny */
+.eltio .x-se4 { padding: 18px 22px 22px; }
+.eltio .x-s4-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding-bottom: 26px; font-size: 13px; }
+.eltio .x-s4-top .x-se-nav:last-child { justify-content: flex-end; }
+.eltio .x-se4 .x-se-wm { width: 170px; }
+.eltio .x-s4-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+.eltio .x-s4-film { position: relative; display: grid; grid-template-columns: 9% 1fr 9%; grid-template-rows: repeat(3, 1fr); row-gap: 5px; aspect-ratio: 1 / 2.15; background: #14110e; padding: 5px 0; border-radius: 2px; overflow: hidden; }
+.eltio .x-s4-sp { grid-row: 1 / -1; background: linear-gradient(180deg, rgba(246,244,239,.8) 0 6px, transparent 6px) 50% 3px / 46% 12px repeat-y; opacity: .7; }
+.eltio .x-s4-l { grid-column: 1; } .eltio .x-s4-r { grid-column: 3; }
+.eltio .x-s4-f { grid-column: 2; position: relative; overflow: hidden; border-radius: 2px;
+  background: radial-gradient(120% 90% at calc(30% + var(--d) * 20%) 40%, var(--pc), color-mix(in srgb, var(--pc) 28%, #000) 80%); }
+.eltio .x-s4-f[style*="row:2"] { filter: brightness(1.15) saturate(1.1); }
+.eltio .x-s4-f[style*="row:3"] { filter: brightness(.85); }
+.eltio .x-s4-f .x-se-leak { opacity: .55; animation-delay: calc(var(--d) * -3s); }
+.eltio .x-s4-pk:hover .x-s4-f .x-se-leak { opacity: 1; }
+.eltio .x-s4-ec { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-90deg); white-space: nowrap; font: 400 7px/1 ui-monospace, Menlo, monospace !important; letter-spacing: .14em; color: rgba(255,190,120,.8); mix-blend-mode: screen; width: max-content; pointer-events: none; opacity: 0; }
+.eltio .x-s4-pr { display: flex; justify-content: space-between; gap: 6px; padding-top: 10px; font-size: 12px; }
+.eltio .x-s4-pr span:last-child { color: rgba(246,244,239,.55); }
+.eltio .x-s4-foot { display: flex; justify-content: space-between; margin-top: 28px; padding-top: 14px; border-top: 1px solid rgba(246,244,239,.2); font-size: 13px; }
+.eltio .x-s4-foot span:first-child { color: rgba(246,244,239,.6); }
+@media (max-width: 760px) {
+  .eltio .x-se4 { padding: 14px; }
+  .eltio .x-s4-top { grid-template-columns: auto 1fr; } .eltio .x-s4-top .x-se-nav:first-child { display: none; }
+  .eltio .x-se4 .x-se-wm { width: 110px; }
+  .eltio .x-s4-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 10px; }
+  .eltio .x-s4-foot { flex-direction: column; gap: 6px; font-size: 12px; }
+}
+@media (max-width: 760px) {
+  .eltio.alt-plx[class] .x-sheet .x-b-feat .x-feat-m, .eltio.alt-plx[class] .x-sheet .x-b-id .x-id-one, .eltio.alt-plx[class] .x-sheet .x-b-build .fit { grid-column: 1 / -1 !important; }
+}
+/* grow from click: opened from the list, the project opens as a circle from the pointer and closes back into it */
+.eltio.alt-plx .x-sheet.grow { transform: none; clip-path: circle(0px at var(--gx, 50%) var(--gy, 50%)); transition: clip-path .85s cubic-bezier(.7,0,.2,1); }
+.eltio.alt-plx .x-sheet.grow.open { clip-path: circle(150vmax at var(--gx, 50%) var(--gy, 50%)); }
+.eltio.alt-plx .x-sheet.grow > * { transition: opacity .5s .25s; }
+.eltio.alt-plx .x-sheet.grow:not(.open) > * { opacity: 0; transition-delay: 0s; }
+.eltio.alt-plx .x-sheet.grow { background: #0B0B0A; transition: clip-path .85s cubic-bezier(.7,0,.2,1), background-color .45s ease .2s; }
+.eltio.alt-plx .x-sheet.grow.open { background: var(--bg); transition: clip-path .85s cubic-bezier(.7,0,.2,1), background-color .5s ease .55s; }
+.eltio.alt-plx .x-sheet.grow > * { transition: opacity .5s .7s; }
+/* 18:38 Elliot: bring Grip closer on the landing (the wordmark read far away next to the others) */
+.eltio.alt-plx .k2-grip .gp-wm2 { height: 22cqi; }
+/* while the intro ink is the pointer, the site cursor waits */
+html.plx-ink .mo-cur { visibility: hidden; }
+
+/* 19:48 Elliot: a simpler landing on phones (only on the landing in the project-pages artifact, which adds .lp).
+   Each project is one compact card like the project pages: its cover on the grey tile, then a two-column caption.
+   No parallax, no wireframes, no Scroll prompts; tap anywhere on a card to open the project. */
+@media (max-width: 760px) {
+  .eltio.alt-plx.lp .x-hero { min-height: 0; padding: 112px 16px 36px; }
+  .eltio.alt-plx.lp .x-hero .x-down { display: none; }
+  .eltio.alt-plx.lp .x-list { display: grid; gap: 40px; padding: 0 16px 96px; }
+  .eltio.alt-plx.lp .x-p { margin: 0 !important; height: auto !important; cursor: pointer; }
+  .eltio.alt-plx.lp .x-pin { display: block !important; position: static !important; height: auto !important; padding: 0 !important; margin: 0 !important; overflow: visible !important; opacity: 1 !important; transform: none !important; }
+  .eltio.alt-plx.lp .x-media, .eltio.alt-plx.lp .x-p:nth-child(even) .x-media { width: 100% !important; margin: 0 0 12px !important; transform: none !important; }
+  .eltio.alt-plx.lp .x-frame { display: block; position: relative; width: 100%; aspect-ratio: 3 / 2 !important; transform: none !important; clip-path: none !important; background: #F1F1EC; }
+  .eltio.alt-plx.lp .x-frame .k2, .eltio.alt-plx.lp .x-frame .k2.on { inset: 0; background: none; border: 0; translate: none; }
+  .eltio.alt-plx.lp .k2-wf, .eltio.alt-plx.lp .k2-tag, .eltio.alt-plx.lp .x-run, .eltio.alt-plx.lp .x-gap { display: none !important; }
+  .eltio.alt-plx.lp .k2.on .k2-rest, .eltio.alt-plx.lp .x-frame:hover .k2-rest { opacity: 1; transform: none; filter: none; }
+  .eltio.alt-plx.lp .k2-cov, .eltio.alt-plx.lp .k-cov { transform: none !important; }
+  .eltio.alt-plx.lp .x-txt, .eltio.alt-plx.lp .x-p:nth-child(even) .x-txt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 2px 16px; align-items: start; transform: none !important; opacity: 1 !important; text-align: left; padding: 0; background: none; }
+  .eltio.alt-plx.lp .x-txt > * { margin: 0 !important; }
+  .eltio.alt-plx.lp .x-name { grid-column: 1; grid-row: 1; }
+  .eltio.alt-plx.lp .x-n { grid-column: 1; grid-row: 2; color: var(--s4); }
+  .eltio.alt-plx.lp .x-short { display: block !important; grid-column: 2; grid-row: 1 / span 2; color: var(--s4); }
+  .eltio.alt-plx.lp .x-long, .eltio.alt-plx.lp .x-kind, .eltio.alt-plx.lp .x-go { display: none !important; }
+}
+@media (max-width: 760px) {
+  .eltio.alt-plx.lp .x-pin { display: flex !important; flex-direction: column; }
+  .eltio.alt-plx.lp .x-media { order: -1; }
+  .eltio.alt-plx.lp .x-ink { display: none !important; }
+}
+@media (max-width: 760px) {
+  .eltio.alt-plx.lp .x-txt, .eltio.alt-plx.lp .x-p:nth-child(even) .x-txt { padding: 0 !important; margin: 0 !important; width: 100% !important; translate: none !important; }
+  .eltio.alt-plx.lp .x-frame .k2 { background: none !important; }
+}
+@media (max-width: 760px) {
+  .eltio.alt-plx.lp .x-pin { align-items: stretch !important; }
+  .eltio.alt-plx.lp .x-txt { max-width: none !important; align-self: stretch !important; justify-self: stretch !important; }
+  .eltio.alt-plx.lp .x-short { max-width: none !important; }
+}
+/* 13 Oct Elliot: phone landing felt messy. Calmer hero, one tidy caption shape per card, a clean ending. */
+@media (max-width: 760px) {
+  .eltio.alt-plx.lp .x-hero { padding: 96px 16px 48px; gap: 0; }
+  .eltio.alt-plx.lp .x-hero p, .eltio.alt-plx.lp .x-hero p .ln { font-size: 19px !important; line-height: 1.18 !important; }
+  .eltio.alt-plx.lp .x-hero .x-l2 { margin-top: .6em !important; }
+  .eltio.alt-plx.lp .x-hero .x-cue { margin-top: 32px; }
+  .eltio.alt-plx.lp .x-hero .x-cue span { max-width: none; }
+  .eltio.alt-plx.lp .x-list { gap: 48px; }
+  .eltio.alt-plx.lp .x-media, .eltio.alt-plx.lp .x-p:nth-child(even) .x-media { margin-bottom: 10px !important; }
+  .eltio.alt-plx.lp .x-txt, .eltio.alt-plx.lp .x-p:nth-child(even) .x-txt { grid-template-rows: auto 1fr; gap: 4px 16px; font: 400 11px/1.3 var(--mono) !important; }
+  .eltio.alt-plx.lp .x-txt > * { font: inherit !important; }
+  .eltio.alt-plx.p-1.lp .x-end, .eltio.alt-plx.lp .x-end { min-height: 0; margin-top: 0; padding: 24px 16px max(24px, env(safe-area-inset-bottom)); gap: 40px; border-top: 1px solid var(--hr, var(--s6)); }
+  .eltio.alt-plx.lp .x-end .x-n { display: none; }
+  .eltio.alt-plx.lp .x-end .x-mail { order: -1; transform: none !important; }
+}

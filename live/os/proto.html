@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Out &amp; Scout outline prototype</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Outline look, round 2 (8 Oct): hairline rounded cards and pills, hover rings, white frame window, big mm you drag to change lens */
+:root{--ink:#121211;--paper:#ecebe6;--grey:#8c8a83;--line:rgba(236,235,230,.42);--hair:#2a2926;--card:#1a1a19;--sun:#FF5A1F;
+--sans:'Geist',system-ui,sans-serif;--mono:'Geist Mono',ui-monospace,monospace}
+html,body{margin:0;height:100%;background:var(--ink);overflow:hidden}
+#fit{position:relative;width:844px;height:390px;transform-origin:0 0;overflow:hidden;background:var(--ink);color:var(--paper);font:10px/1.3 var(--mono);letter-spacing:.06em;user-select:none;touch-action:none}
+#fit.p{width:390px;height:844px}
+#fit>div,.abs{position:absolute}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;letter-spacing:inherit}
+button:focus-visible{outline:1px solid var(--sun);outline-offset:3px}
+.up{text-transform:uppercase}
+.g{color:var(--grey)}
+.sans{font-family:var(--sans);letter-spacing:0}
+.wm{font:400 30px/1 var(--sans);letter-spacing:-.03em;word-spacing:.3em;white-space:nowrap}
+.wm i{display:inline-block;width:.22em;height:.22em;border-radius:50%;background:var(--sun);vertical-align:.55em;margin:0 .5em 0 .45em}
+.card{border:1.5px solid var(--line);border-radius:14px;text-align:left;padding:12px 16px;box-sizing:border-box;transition:border-color .2s,box-shadow .2s}
+.card:hover,.card.on{border-color:var(--paper)}
+.card:hover{box-shadow:0 0 0 4px rgba(236,235,230,.12)}
+.card b{display:block;color:var(--paper);font:400 15px/1.2 var(--sans);letter-spacing:0}
+.card span{display:block;margin-top:5px;color:var(--grey);font-size:9px}
+.pill{border:1px solid var(--line);border-radius:99px;min-width:38px;height:26px;padding:0 11px;box-sizing:border-box;font-size:10px;letter-spacing:.03em;transition:box-shadow .15s,border-color .15s;white-space:nowrap}
+.pill:hover{border-color:var(--paper);box-shadow:0 0 0 3px rgba(236,235,230,.16)}
+.pill.on{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.pill.big{height:34px;padding:0 18px;font-size:11px}
+.pill.sm{height:22px;min-width:34px;padding:0 8px}
+.side button{display:block;text-align:left;min-height:24px;font-size:10px}
+.win{border:2px solid var(--paper);box-sizing:border-box;overflow:hidden;background:#000;position:absolute}
+.win img{position:absolute;left:50%;top:50%}
+.shut{width:56px;height:56px;border-radius:50%;border:2px solid var(--paper);display:flex;align-items:center;justify-content:center;box-sizing:border-box;transition:box-shadow .15s}
+.shut:hover{box-shadow:0 0 0 4px rgba(236,235,230,.14)}
+.shut span{width:44px;height:44px;border-radius:50%;background:#c9c8c3;display:block;transition:transform .1s}
+.shut:active span{transform:scale(.9)}
+#flash{inset:0;background:var(--paper);opacity:0;pointer-events:none;transition:opacity .25s}
+input,.ed{font:400 22px/1 var(--sans);color:var(--paper);background:none;border:0;outline:0;letter-spacing:-.01em;caret-color:var(--paper)}
+.ed{border-bottom:1px dashed transparent;cursor:text;transition:border-color .15s;min-width:20px;display:inline-block}
+.ed:hover{border-color:var(--grey)}
+.ed:focus{border-bottom:1px solid var(--paper)}
+.paper .ed:hover{border-color:#8c8a83}.paper .ed:focus{border-color:#121211}
+.row{display:flex;align-items:center;gap:12px;border-top:1px solid var(--hair);padding:7px 0}
+.sheet{background:var(--card);border:1.5px solid var(--line);border-radius:18px;box-sizing:border-box}
+.scrim{inset:0;background:rgba(10,10,9,.72)}
+.tick{display:inline-block;width:10px;height:10px;border:1px solid var(--line);border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tick.on{background:var(--paper);border-color:var(--paper)}
+.paper{background:#f3f3f0;color:#121211;border-radius:3px;box-shadow:0 6px 30px rgba(0,0,0,.5)}
+.chip{background:rgba(18,18,17,.82);border:1px solid var(--line);border-radius:99px;padding:5px 10px;white-space:nowrap}
+</style></head><body>
+<div id="fit"></div>
+<script>
+var $=function(id){return document.getElementById(id)};
+var RISE=426,SET=1118,GH=1078,NOW=668;
+var KIT={cam:'ALEXA 35',set:'Primes',lenses:[14,18,24,32,35,40,50,65,85]};
+var CAMS=['iPhone (no cinema camera)','ALEXA 35','ALEXA Mini LF','Sony FX3','Sony Venice 2','RED Komodo','Canon C70','Blackmagic 6K'];
+var SETS=['Primes','Zoom 24–70','Anamorphic 2×','Your own lenses'];
+var PJ=[{n:'Second Recce',date:'8 Oct 2026',crew:'',sc:[{n:'Scene 1',img:'img/knole.jpg'}],shots:[]},
+ {n:'First Recce',date:'4 Oct 2026',crew:'Dir. Charlie · DP Elliot',shoot:'Thu 9 Oct',wx:{sky:'Sunny spells',hi:16,lo:9,rain:5,wind:12,cloud:20},sc:[{n:'Camberwell Church St',img:'img/8a.jpg',where:'Camberwell, London',pc:'SE5 8QZ',park:'Pay and display on Grove Lane',walk:'2 min',kind:'street'},{n:'Scene 6',img:'img/6a.jpg',where:'Kennington, London',pc:'SE11 4AN',park:'Residents only, use Kennington Park Road',walk:'5 min',kind:'street'},{n:'Knole Park',img:'img/knole.jpg',where:'Sevenoaks, Kent',pc:'TN15 0RP',park:'National Trust car park, shuts 18:00',walk:'12 min',kind:'park'}],shots:[
+ {id:'1A',img:'img/8a.jpg',sc:0,mm:32,r:'16:9',t:482,h:70,cap:'Medium wide, person by the plant',notes:'Bench is council owned. Quiet before 9.'},
+ {id:'2A',img:'img/6a.jpg',sc:1,mm:18,r:'16:9',t:679,h:165,cap:'Wide, street under the trees',notes:''},
+ {id:'2B',img:'img/18a.jpg',sc:1,mm:40,r:'16:9',t:683,h:20,cap:'Mid, lamppost in dappled shade',notes:''},
+ {id:'3A',img:'img/knole.jpg',sc:2,mm:32,r:'16:9',t:957,h:65,cap:'Wide, lone tree on the ridge',notes:'Car park closes 18:00. Deer about.'},
+ {id:'1B',img:'img/8a.jpg',sc:0,mm:50,r:'16:9',t:490,h:100,cap:'Close, hands on the bench',notes:''},
+ {id:'1C',img:'img/18a.jpg',sc:0,mm:24,r:'2.39',t:500,h:250,cap:'Wide, the street behind her',notes:'Bus stop in frame, lose it on 32'},
+ {id:'2C',img:'img/6a.jpg',sc:1,mm:32,r:'16:9',t:690,h:200,cap:'Mid, car door, kerb side',notes:''},
+ {id:'2D',img:'img/18a.jpg',sc:1,mm:65,r:'16:9',t:700,h:300,cap:'Close, lamp head against the leaves',notes:''},
+ {id:'3B',img:'img/knole.jpg',sc:2,mm:85,r:'2.39',t:965,h:230,cap:'Long lens, the two of them on the ridge',notes:''},
+ {id:'3C',img:'img/knole.jpg',sc:2,mm:18,r:'2.39',t:1085,h:260,cap:'Wide, the tree at golden hour',notes:'Be set up by 17:30'},
+ {id:'3D',img:'img/knole.jpg',sc:2,mm:50,r:'2.39',t:1100,h:280,cap:'Silhouette, sun behind the tree',notes:''}]},
+ {n:'Night Shift',date:'2 Oct 2026',crew:'',sc:[{n:'Brick Lane',img:'img/18a.jpg'},{n:'Arches',img:'img/6a.jpg'}],shots:[{id:'1A',img:'img/18a.jpg',sc:0,mm:35,r:'2.39',t:1110,h:250,cap:'Mid, lamp on the wall',notes:'Shop lights on at 18:00'},{id:'2A',img:'img/6a.jpg',sc:1,mm:24,r:'2.39',t:1115,h:120,cap:'Wide, the arches',notes:''}]}];
+var S={scr:'start',sv:'b2',sel:null,newp:false,p:0,sc:0,mm:24,r:'2.39',t:NOW,head:247,shot:-1,filt:-1,path:true,grid:false,level:false,o:'l',sheet:'',addsc:false,chip:'',
+ ex:{zoom:.32,scope:'all',tier:'detailed',frames:true,sun:true,notes:true,file:'',state:'',page:0},wx:false};
+function hm(m){m=Math.round(m);return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function sunAz(m){return 98+(Math.max(RISE,Math.min(SET,m))-RISE)/(SET-RISE)*164}
+function sunEl(m){return 29*Math.sin(Math.PI*Math.max(0,Math.min(1,(m-RISE)/(SET-RISE))))}
+function rel(az,h){return ((az-h)%360+540)%360-180}
+var CL=['Backlit','¾ backlit','Side lit','¾ front lit','Front lit'];
+function cls(r){var a=Math.abs(r);return a<=30?0:a<=75?1:a<=105?2:a<=150?3:4}
+function light(m,h,long){if(m<RISE||m>SET)return 'Sun down';var r=rel(sunAz(m),h),s=Math.abs(r)>8&&Math.abs(r)<172?(r>0?(long?', sun on the right':' · right'):(long?', sun on the left':' · left')):'';return CL[cls(r)]+s}
+function facing(h){return ['north','north-east','east','south-east','south','south-west','west','north-west'][Math.round(h/45)%8]}
+function best(h){var g=cls(rel(sunAz(1098),h));if(g<=2)return 'Golden hour, '+hm(GH)+'–'+hm(SET);for(var m=RISE;m<SET;m+=5)if(cls(rel(sunAz(m),h))<=1&&sunEl(m)>=6)return hm(m)+'–'+hm(Math.min(SET,m+60))+', '+CL[cls(rel(sunAz(m),h))].toLowerCase();return 'Golden hour, '+hm(GH)+'–'+hm(SET)}
+function wm(px){return '<span class="wm" style="font-size:'+px+'px">Out &amp; Sc<i></i>out</span>'}
+PJ.forEach(function(p){p.shots.sort(function(a,b){return a.sc-b.sc||a.id.localeCompare(b.id)})});
+function pj(){return PJ[S.p]}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function ed(key,val,style,ph){return '<span class="ed" contenteditable="true" spellcheck="false" data-ed="'+key+'" data-ph="'+(ph||'')+'" style="'+(style||'')+'">'+esc(val)+'</span>'}
+function img(src,w,h,extra){return '<span class="abs" style="'+(extra||'')+'width:'+w+'px;height:'+h+'px;background:#222 url('+src+') center/cover"></span>'}
+
+/* ---------- start screen: four layouts ---------- */
+function others(){return PJ.map(function(x,i){return i}).filter(function(i){return i!==S.p})}
+function newField(x,y,w){return '<div style="left:'+x+'px;width:'+w+'px;top:'+y+'px"><div class="g up" style="font-size:8px">Project name</div><div style="display:flex;align-items:center;border-bottom:1.5px solid var(--line);padding:6px 0 8px"><input id="pn" placeholder="Untitled" style="flex:1"><button data-create class="pill up">Start</button></div></div>'}
+function startA(){var c=pj();
+  return '<div style="left:0;right:0;top:58px;text-align:center">'+wm(30)+'</div>'
+   +'<div style="left:212px;top:118px;display:flex;gap:20px">'
+   +'<button data-go="cam" class="card" style="width:200px;height:66px"><b>Continue</b><span class="up">'+c.n+' · '+c.sc.length+' scene'+(c.sc.length>1?'s':'')+'</span></button>'
+   +'<button data-newp class="card'+(S.newp?' on':'')+'" style="width:200px;height:66px"><b>New project</b><span class="up">Straight to the camera</span></button></div>'
+   +(S.newp?newField(212,236,420):'<div style="left:212px;width:420px;top:226px"><div class="g up" style="font-size:8px;margin-bottom:4px">All projects</div>'+others().map(function(i){var x=PJ[i];return '<button data-pj="'+i+'" class="row" style="width:100%;justify-content:space-between"><span class="sans" style="font-size:13px">'+x.n+'</span><span class="g up">'+x.sc.length+' scenes · '+x.shots.length+' shots</span></button>'}).join('')+'</div>')}
+function lastImg(x){return (x.shots[x.shots.length-1]||{}).img||x.sc[0].img}
+function newCard(h){return S.newp?'<div class="sheet" style="padding:14px"><div class="g up" style="font-size:8px">Project name</div><input id="pn" placeholder="Untitled" style="width:100%;font-size:18px;margin:8px 0 12px;border-bottom:1.5px solid var(--line);padding-bottom:6px"><div style="display:flex;gap:6px"><button data-newp class="pill up" style="flex:1">Cancel</button><button data-create class="pill on up" style="flex:1">Start</button></div></div>'
+  :'<button data-newp class="card" style="width:100%;height:'+h+'px;display:flex;flex-direction:column;justify-content:flex-end"><b style="font-size:26px;line-height:1;margin-bottom:auto">+</b><b>New project</b><span class="up">Straight to the camera</span></button>'}
+function startB(){ // B1: every recce is a row with its last frame; tap opens it
+  var rows=PJ.map(function(x,i){return '<button data-pj="'+i+'" class="card" style="display:flex;align-items:center;gap:14px;width:100%;height:58px;padding:8px 14px;margin-bottom:8px;'+(i===S.p?'border-color:var(--paper)':'')+'"><span style="position:relative;width:64px;height:36px;flex:none;border-radius:6px;overflow:hidden">'+img(lastImg(x),64,36,'left:0;top:0;')+'</span><span style="flex:1"><b>'+x.n+'</b><span class="up">'+x.date+' · '+x.sc.length+' scenes · '+x.shots.length+' shots</span></span>'+(i===S.p?'<span class="up" style="margin:0;color:var(--paper)">Continue →</span>':'')+'</button>'}).join('');
+  return '<div style="left:40px;top:34px">'+wm(22)+'</div><div class="up g" style="left:40px;top:70px">Your recces</div>'
+   +'<div style="left:40px;top:92px;width:520px;height:290px;overflow:auto">'+rows+'</div><div style="left:600px;top:92px;width:204px">'+newCard(120)+'</div>'}
+function startB2(){ // B2: list on the left, the picked recce previewed on the right before you open it
+  var sel=S.sel==null?S.p:S.sel,x=PJ[sel],nx=x.shots.length,sh=x.shots.slice(-3);
+  var rows='<button data-newp class="row up" style="width:100%;gap:10px;border-top:0;color:var(--paper);min-height:40px"><span class="pill sm" style="display:inline-flex;align-items:center;justify-content:center;min-width:26px;padding:0">+</span>New project</button>'
+   +(S.newp?'<div style="padding:4px 0 10px;display:flex;gap:8px;align-items:center"><input id="pn" placeholder="Name this recce" style="flex:1;font-size:16px;border-bottom:1.5px solid var(--line);padding-bottom:4px"><button data-create class="pill on up sm">Start</button></div>':'')
+   +PJ.map(function(p,i){var on=i===sel;return '<button data-sel="'+i+'" class="row" style="width:100%;gap:12px;padding:8px 10px;margin:0 -10px;border-radius:10px;border-top:1px solid '+(on?'transparent':'var(--hair)')+';background:'+(on?'rgba(236,235,230,.07)':'none')+'"><span style="position:relative;width:48px;height:27px;flex:none;border-radius:4px;overflow:hidden">'+img(lastImg(p),48,27,'left:0;top:0;')+'</span><span style="flex:1;text-align:left"><span class="sans" style="font-size:13px;display:block">'+p.n+'</span><span class="up g" style="font-size:8px">'+p.date+'</span></span><span class="g up" style="font-size:9px">'+p.shots.length+'</span></button>'}).join('');
+  return '<div style="left:36px;top:30px">'+wm(20)+'</div>'
+   +'<div style="left:36px;top:66px;width:270px;height:310px;overflow:auto;padding:0 10px;box-sizing:border-box">'+rows+'</div>'
+   +'<div class="sheet" style="left:330px;top:26px;right:26px;bottom:26px;padding:16px;display:flex;gap:16px">'
+   +'<span style="position:relative;width:250px;height:'+Math.round(250*9/16)+'px;flex:none;border-radius:10px;overflow:hidden">'+img(lastImg(x),250,141,'left:0;top:0;')+'</span>'
+   +'<div style="flex:1;display:flex;flex-direction:column;min-width:0"><div class="sans" style="font-size:20px">'+x.n+'</div><div class="up g" style="margin-top:4px">'+x.date+(x.crew?' · '+x.crew:'')+'</div>'
+   +'<div class="up g" style="margin-top:12px;font-size:8px">Scenes</div><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:5px">'+x.sc.map(function(s,i){return '<button class="pill sm" data-open="'+sel+'" data-osc="'+i+'">'+s.n+'</button>'}).join('')+'</div>'
+   +'<div class="up g" style="margin-top:12px;font-size:8px">Next good light</div><div class="sans" style="margin-top:3px;font-size:12px">'+(nx?x.shots[nx-1].id+' · '+best(x.shots[nx-1].h):'Golden hour '+hm(GH)+'–'+hm(SET))+'</div>'
+   +'<div style="margin-top:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="pill on up" data-open="'+sel+'">Open camera</button><button class="pill up" data-open="'+sel+'" data-to="list">Shots · '+nx+'</button>'+(nx?'<button class="pill up" data-open="'+sel+'" data-to="export">Export</button>':'')+'</div></div>'
+   +(sh.length?'<div style="position:absolute;left:16px;bottom:16px;display:flex;gap:6px">'+sh.map(function(s){return '<span style="position:relative;width:79px;height:44px;border-radius:5px;overflow:hidden;display:block">'+img(s.img,79,44,'left:0;top:0;')+'</span>'}).join('')+'</div>':'')+'</div>'}
+function startB3(){ // B3: one wide row per recce, its frames as a strip, and the three things you do with it
+  var groups=[['This week',PJ.filter(function(p){return /Oct/.test(p.date)&&parseInt(p.date)>=5})],['Earlier',PJ.filter(function(p){return !(/Oct/.test(p.date)&&parseInt(p.date)>=5)})]];
+  var body=groups.filter(function(g){return g[1].length}).map(function(g){return '<div class="up g" style="font-size:8px;margin:10px 0 6px">'+g[0]+'</div>'+g[1].map(function(p){var i=PJ.indexOf(p),fr=p.shots.slice(0,4);
+    return '<div class="card" style="display:flex;align-items:center;gap:14px;padding:10px 12px;margin-bottom:8px;'+(i===S.p?'border-color:var(--paper)':'')+'"><button data-pj="'+i+'" style="flex:1;display:flex;align-items:center;gap:14px;text-align:left;min-width:0"><span style="display:flex;gap:3px;width:200px;flex:none">'+(fr.length?fr.map(function(s){return '<span style="position:relative;width:48px;height:30px;border-radius:3px;overflow:hidden;display:block">'+img(s.img,48,30,'left:0;top:0;')+'</span>'}).join(''):'<span style="position:relative;width:48px;height:30px;border-radius:3px;overflow:hidden;display:block;opacity:.6">'+img(p.sc[0].img,48,30,'left:0;top:0;')+'</span><span class="g up" style="font-size:8px;align-self:center;margin-left:6px">No shots yet</span>')+'</span>'
+     +'<span style="min-width:0"><b>'+p.n+'</b><span class="up">'+p.date+' · '+p.sc.length+' scenes · '+p.shots.length+' shots</span></span></button>'
+     +'<span style="display:flex;gap:6px;flex:none"><button class="pill sm up on" data-open="'+i+'">Camera</button><button class="pill sm up" data-open="'+i+'" data-to="list">Shots</button>'+(p.shots.length?'<button class="pill sm up" data-open="'+i+'" data-to="export">Export</button>':'')+'</span></div>'}).join('')}).join('');
+  return '<div style="left:40px;top:28px">'+wm(20)+'</div>'
+   +'<div style="right:40px;top:22px;display:flex;gap:8px">'+(S.newp?'<input id="pn" placeholder="Name this recce" style="width:200px;font-size:15px;border-bottom:1.5px solid var(--line)"><button data-create class="pill on up">Start</button><button data-newp class="pill up">Cancel</button>':'<button data-newp class="pill on up">+ New project</button>')+'</div>'
+   +'<div style="left:40px;right:40px;top:52px;bottom:10px;overflow:auto">'+body+'</div>'}
+function startC(){ // today: the day's light leads, then one big continue
+  var W=420,X=function(m){return (m-RISE)/(SET-RISE)*W},d='';for(var m=RISE;m<=SET;m+=6)d+=(d?'L':'M')+X(m).toFixed(1)+' '+(70-sunEl(m)*2).toFixed(1);var g='';for(var m2=GH;m2<=SET;m2+=4)g+=(g?'L':'M')+X(m2).toFixed(1)+' '+(70-sunEl(m2)*2).toFixed(1);
+  var c=pj();
+  return '<div style="left:0;right:0;top:30px;text-align:center">'+wm(24)+'</div>'
+   +'<div style="left:212px;top:70px;width:'+W+'px"><svg width="'+W+'" height="80" style="overflow:visible"><line x1="0" y1="70" x2="'+W+'" y2="70" stroke="rgba(236,235,230,.3)"/><path d="'+d+'" fill="none" stroke="rgba(236,235,230,.55)" stroke-dasharray="2 3"/><path d="'+g+'" fill="none" stroke="#FF5A1F" stroke-width="2"/><circle cx="'+X(NOW)+'" cy="'+(70-sunEl(NOW)*2)+'" r="6" fill="#FF5A1F"/></svg>'
+   +'<div class="up" style="display:flex;justify-content:space-between;margin-top:4px"><span class="g">Sunrise '+hm(RISE)+'</span><span>Today · London</span><span class="g">Golden '+hm(GH)+'</span><span class="g">Sunset '+hm(SET)+'</span></div></div>'
+   +'<div style="left:212px;top:192px;display:flex;gap:14px">'
+   +'<button data-go="cam" class="card" style="width:270px;height:96px;display:flex;gap:14px;align-items:center;padding:10px"><span style="position:relative;width:96px;height:74px;flex:none;border-radius:8px;overflow:hidden">'+img(c.sc[0].img,96,74,'left:0;top:0;')+'</span><span><b>Continue</b><span class="up">'+c.n+'</span><span class="up">'+c.sc.length+' scenes · '+c.shots.length+' shots</span></span></button>'
+   +'<button data-newp class="card'+(S.newp?' on':'')+'" style="width:136px;height:96px;display:flex;flex-direction:column;justify-content:flex-end"><b>New</b><span class="up">project</span></button></div>'
+   +(S.newp?newField(212,306,420):'<div class="up" style="left:212px;top:306px;display:flex;gap:16px">'+others().map(function(i){return '<button data-pj="'+i+'" class="g" style="border-bottom:1px solid var(--hair)">'+PJ[i].n+'</button>'}).join('')+'</div>')}
+function startD(){ // camera first: the live picture is already behind the start screen
+  var c=pj();
+  return '<div style="inset:0">'+img('img/knole.jpg',844,390,'left:0;top:0;filter:brightness(.55) saturate(.8);')+'</div>'
+   +'<div style="left:40px;top:34px">'+wm(26)+'</div>'
+   +'<div class="up" style="left:40px;top:72px">Facing south-west · '+light(NOW,S.head)+'</div>'
+   +'<div style="left:40px;bottom:36px;display:flex;gap:10px;align-items:center">'
+   +(S.newp?'<div style="display:flex;align-items:center;gap:10px;border-bottom:1.5px solid var(--paper);padding-bottom:6px;width:380px"><input id="pn" placeholder="Name this recce" style="flex:1;font-size:20px"><button data-create class="pill on up big">Start</button></div>'
+     :'<button data-go="cam" class="pill on big up">Continue · '+c.n+'</button><button data-newp class="pill big up" style="background:rgba(18,18,17,.4)">New project</button>')+'</div>'
+   +'<div class="up" style="right:40px;bottom:44px;text-align:right">'+others().map(function(i){return '<button data-pj="'+i+'" style="display:block;margin-left:auto;min-height:22px;color:rgba(236,235,230,.75)">'+PJ[i].n+'</button>'}).join('')+'</div>'}
+
+/* ---------- viewfinder, landscape ---------- */
+function topbar(mid,right){
+  return '<div class="up" style="left:30px;right:30px;top:22px;display:flex;justify-content:space-between;align-items:center"><button data-go="start">Projects</button><span class="g">'+mid+'</span>'+(right||'<span style="display:flex;gap:16px;align-items:center"><button data-sheet="kit" class="g" style="border-bottom:1px solid var(--hair)">'+KIT.cam+' · '+KIT.set+'</button><span class="g">'+hm(NOW)+'</span></span>')+'</div>'}
+function scenes(){var c=pj();
+  return '<div class="side up" style="left:30px;top:60px;width:110px"><div class="g" style="margin-bottom:4px">Scenes</div>'
+   +c.sc.map(function(s,i){return '<button data-sc="'+i+'" style="color:'+(i===S.sc?'var(--paper)':'var(--grey)')+';max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.n+'</button>'}).join('')
+   +'<button data-addsc class="g">+ Scene</button></div>'}
+function toggles(){return '<div class="side up" style="left:30px;top:186px">'+[['path','Sun path'],['grid','Grid'],['level','Level']].map(function(t){return '<button data-tog="'+t[0]+'" style="color:'+(S[t[0]]?'var(--paper)':'var(--grey)')+'"><span class="tick'+(S[t[0]]?' on':'')+'"></span>'+t[1]+'</button>'}).join('')+'<button data-orient="p" class="g" style="margin-top:4px">↻ Portrait</button></div>'}
+function stack(x,y){var c=pj(),last=c.shots[c.shots.length-1];
+  return '<div style="left:'+x+'px;top:'+y+'px"><button data-go="list" style="display:flex;align-items:center;gap:8px" class="up"><span style="position:relative;width:40px;height:26px;border:1px solid var(--line);border-radius:5px;overflow:hidden;display:block">'+(last?img(last.img,40,26,'left:0;top:0;'):'')+'</span><span style="border-bottom:1px solid var(--paper)">Shots · '+c.shots.length+'</span></button></div>'}
+function ratio(r){return r==='16:9'?16/9:r==='4:3'?4/3:r==='9:16'?9/16:r==='4:5'?.8:r==='1:1'?1:parseFloat(r)}
+function frame(F){var a=ratio(S.r),w=F.w,h=w/a;if(h>F.h){h=F.h;w=h*a}return {x:F.x+(F.w-w)/2,y:F.y+(F.h-h)/2,w:w,h:h}}
+function scene(f){ // the picture inside the white window, with sun, grid and level drawn on it
+  var c=pj(),src=c.sc[S.sc].img,z=S.mm/24,iw=Math.max(f.w,f.h*16/9)*z*1.05,ih=iw*9/16;
+  var hf=2*Math.atan(24.88/(2*S.mm))*180/Math.PI,r=rel(sunAz(S.t),S.head),sx=f.w/2+r/hf*f.w,sy=f.h*.55-sunEl(S.t)/(hf/2.4)*f.h*.5,up=S.t>=RISE&&S.t<=SET;
+  var inF=up&&sx>6&&sx<f.w-6&&sy>6&&sy<f.h-6,h='<div class="win" style="left:'+f.x+'px;top:'+f.y+'px;width:'+f.w+'px;height:'+f.h+'px"><img src="'+src+'" alt="" style="width:'+iw+'px;height:'+ih+'px;margin:-'+ih/2+'px 0 0 -'+iw/2+'px;object-fit:cover">';
+  if(S.grid)h+='<div class="abs" style="inset:0;background:linear-gradient(90deg,transparent 33.2%,rgba(236,235,230,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(236,235,230,.35) 66.6%,transparent 66.8%),linear-gradient(180deg,transparent 33.2%,rgba(236,235,230,.35) 33.3%,transparent 33.5%,transparent 66.5%,rgba(236,235,230,.35) 66.6%,transparent 66.8%)"></div>';
+  if(S.level)h+='<div class="abs" style="left:30%;right:30%;top:50%;height:1px;background:var(--paper);transform:rotate(-1.2deg)"></div><div class="abs" style="left:calc(30% - 14px);width:10px;top:50%;height:1px;background:var(--paper)"></div><div class="abs" style="right:calc(30% - 14px);width:10px;top:50%;height:1px;background:var(--paper)"></div>';
+  if(S.path&&up){if(inF)h+='<div class="abs" style="left:'+sx+'px;top:'+sy+'px;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--sun)"></div>';
+    else h+='<div class="abs up" style="'+(sx<f.w/2?'left:6px':'right:6px')+';top:'+Math.max(14,Math.min(f.h-14,sy))+'px;transform:translateY(-50%);color:var(--sun);font-size:9px">'+(sx<f.w/2?'← sun':'sun →')+'</div>'}
+  h+='<div class="abs up chip" style="left:8px;bottom:8px;font-size:9px">'+light(S.t,S.head,true)+'</div>';
+  return h+'</div>'}
+function timeline(x,y,w){ // the day as one line: sunrise to sunset, golden hour, a fixed NOW tick, and the orange sun you drag
+  var T=function(m){return (m-RISE+60)/(SET-RISE+120)*100},moved=S.t!==NOW,lab='position:absolute;top:22px;font-size:8px;color:var(--grey);white-space:nowrap';
+  return '<div data-tl style="left:'+x+'px;width:'+w+'px;top:'+y+'px;height:36px;cursor:ew-resize">'
+   +'<div class="abs" style="left:0;right:0;top:12px;height:1px;background:var(--line)"></div>'
+   +'<div class="abs" style="left:'+T(GH)+'%;width:'+(T(SET)-T(GH))+'%;top:11px;height:3px;background:var(--sun);opacity:.55"></div>'
+   +'<div class="abs" style="left:'+T(RISE)+'%;top:8px;width:1px;height:9px;background:var(--line)"></div><div class="abs" style="left:'+T(SET)+'%;top:8px;width:1px;height:9px;background:var(--line)"></div>'
+   +'<span class="up" style="'+lab+';left:'+T(RISE)+'%;transform:translateX(-50%)">'+hm(RISE)+'</span><span class="up" style="'+lab+';left:'+T(SET)+'%;transform:translateX(-50%)">'+hm(SET)+'</span>'
+   +'<div class="abs" style="left:'+T(NOW)+'%;top:4px;width:1.5px;height:17px;margin-left:-.75px;background:var(--paper)"></div><span class="up" style="'+lab+';left:'+T(NOW)+'%;transform:translateX(-50%);color:var(--paper)">Now '+hm(NOW)+'</span>'
+   +'<div class="abs" style="left:'+T(S.t)+'%;top:5px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px rgba(255,90,31,.18)"></div>'
+   +(moved?'<span class="up" style="position:absolute;top:-11px;left:'+T(S.t)+'%;transform:translateX(-50%);font-size:9px;color:var(--sun)">'+hm(S.t)+'</span>':'')+'</div>'}
+function lensWindow(){var L=KIT.lenses,i=L.indexOf(S.mm);if(i<0)i=2;var a=Math.max(0,Math.min(L.length-5,i-2));return L.slice(a,a+5)}
+function cam(){
+  var c=pj(),F={x:150,y:56,w:520,h:212},f=frame(F),RAT=['2.39','1.85','16:9','9:16'];
+  return topbar(c.n+' / '+c.sc[S.sc].n+' · facing '+facing(S.head))+scenes()+toggles()+scene(f)
+   +'<div style="left:'+F.x+'px;top:'+(F.y+F.h+12)+'px;display:flex;gap:8px">'+RAT.map(function(x){return '<button data-r="'+x+'" class="pill'+(x===S.r?' on':'')+'">'+x+'</button>'}).join('')+'<button data-r="4:3" class="pill'+(S.r==='4:3'?' on':'')+'" title="More shapes">+</button></div>'
+   +'<div class="up" style="left:'+(F.x+F.w-250)+'px;width:250px;top:'+(F.y+F.h+19)+'px;text-align:right;display:flex;justify-content:flex-end;gap:10px"><span style="color:'+(S.t>=GH&&S.t<=SET?'var(--sun)':'var(--paper)')+'">'+(S.t===NOW?'Now':'At '+hm(S.t))+' · '+light(S.t,S.head)+'</span>'+(S.t!==NOW?'<button data-now class="g" style="border-bottom:1px solid var(--hair)">↺ Now</button>':'')+'</div>'
+   +timeline(F.x,F.y+F.h+54,F.w)
+   +'<div data-mmdrag style="right:24px;top:'+(F.y-6)+'px;width:110px;text-align:right;cursor:ns-resize;padding:2px 6px 6px 0" title="Drag up or down to change lens"><div style="font:400 46px/1 var(--sans);letter-spacing:-.03em">'+S.mm+'</div><div class="g up" style="font-size:12px;margin-top:2px">mm</div></div>'
+   +'<div data-mmdrag style="right:36px;top:'+(F.y+72)+'px;display:flex;flex-direction:column;gap:5px;align-items:flex-end;cursor:ns-resize">'+lensWindow().map(function(x){return '<button data-mm="'+x+'" class="pill sm'+(x===S.mm?' on':'')+'">'+x+'</button>'}).join('')+'</div>'
+   +'<div style="right:30px;top:'+(F.y+F.h+16)+'px"><button data-shoot class="shut" aria-label="Take shot"><span></span></button></div>'
+   +thumb(102,F.y+F.h+26)+chipAndAdd()+'<div id="flash"></div>'}
+function thumb(r,y){var c=pj(),last=c.shots[c.shots.length-1];return '<div style="right:'+r+'px;top:'+y+'px"><button data-go="list" class="up" style="display:flex;flex-direction:column;align-items:center;gap:4px" aria-label="Shot list"><span style="position:relative;width:44px;height:30px;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:block">'+(last?img(last.img,44,30,'left:0;top:0;'):'')+'</span><span style="font-size:8px">Shots '+c.shots.length+'</span></button></div>'}
+function chipAndAdd(){var h='';
+  if(S.chip){var s=pj().shots[pj().shots.length-1];h+='<div class="chip up" style="left:50%;top:'+(S.o==='p'?128:64)+'px;transform:translateX(-50%);display:flex;gap:10px;align-items:center"><span>'+s.id+'</span><span class="sans" style="text-transform:none;font-size:11px">'+ed('cap:'+(pj().shots.length-1),s.cap,'font-size:11px')+'</span><span class="g">tap to edit</span></div>'}
+  if(S.addsc)h+='<div class="scrim" data-close></div><div class="sheet" style="left:50%;top:50%;transform:translate(-50%,-50%);width:360px;padding:18px"><div class="g up" style="font-size:8px">New scene</div><input id="sn" placeholder="Scene name" style="width:100%;margin:8px 0 12px;border-bottom:1.5px solid var(--line);padding-bottom:6px;font-size:18px"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">'+['Knole Park','Car park','Interior','Studio'].map(function(n){return '<button class="pill sm" data-sug="'+n+'">'+n+'</button>'}).join('')+'</div><div style="display:flex;gap:8px;justify-content:flex-end"><button class="pill up" data-close>Cancel</button><button class="pill on up" data-keepsc>Add scene</button></div></div>';
+  if(S.sheet==='kit')h+=kitSheet();
+  return h}
+function kitSheet(){return '<div class="scrim" data-close></div><div class="sheet" style="left:50%;top:50%;transform:translate(-50%,-50%);width:'+(S.o==='p'?340:560)+'px;padding:18px 20px">'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="sans" style="font-size:16px">Your kit</span><button class="pill up" data-close>Done</button></div>'
+  +'<div class="g up" style="margin:14px 0 6px">Camera</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+CAMS.map(function(x){return '<button class="pill'+(x===KIT.cam?' on':'')+'" data-cam="'+x+'">'+x+'</button>'}).join('')+'</div>'
+  +'<div class="g up" style="margin:14px 0 6px">Lenses</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+SETS.map(function(x){return '<button class="pill'+(x===KIT.set?' on':'')+'" data-set="'+x+'">'+x+'</button>'}).join('')+'</div>'
+  +'<div class="g up" style="margin-top:14px;font-size:9px">Frame lines and field of view follow this kit. Sensor modes live under More.</div></div>'}
+
+/* ---------- viewfinder, portrait ---------- */
+function camP(){
+  var c=pj(),F={x:20,y:118,w:350,h:400},f=frame(F),RAT=['9:16','4:5','1:1','16:9'];
+  return '<div class="up" style="left:20px;right:20px;top:24px;display:flex;justify-content:space-between"><button data-go="start">Projects</button><button data-now style="color:'+(S.t===NOW?'var(--grey)':'var(--sun)')+'">'+(S.t===NOW?'11:08':'→ '+hm(S.t))+'</button></div>'
+   +'<div class="up" style="left:20px;right:20px;top:50px;display:flex;justify-content:space-between"><span class="g">'+c.sc[S.sc].n+' · facing '+facing(S.head)+'</span><button data-orient="l" class="g">↻ Landscape</button></div>'
+   +'<div class="up" style="left:20px;right:20px;top:80px;display:flex;gap:8px;overflow:hidden">'+c.sc.map(function(s,i){return '<button data-sc="'+i+'" class="pill sm'+(i===S.sc?' on':'')+'">'+s.n+'</button>'}).join('')+'<button data-addsc class="pill sm">+</button></div>'
+   +scene(f)
+   +'<div style="left:20px;top:534px;display:flex;gap:8px">'+RAT.map(function(x){return '<button data-r="'+x+'" class="pill'+(x===S.r?' on':'')+'">'+x+'</button>'}).join('')+'</div>'
+   +'<div class="up" style="left:20px;right:20px;top:574px;display:flex;justify-content:space-between"><span style="color:'+(S.t>=GH&&S.t<=SET?'var(--sun)':'var(--grey)')+'">'+hm(S.t)+' · '+light(S.t,S.head)+'</span><span>'+[['path','Sun'],['grid','Grid'],['level','Level']].map(function(t){return '<button data-tog="'+t[0]+'" style="margin-left:12px;color:'+(S[t[0]]?'var(--paper)':'var(--grey)')+'">'+t[1]+'</button>'}).join('')+'</span></div>'
+   +timeline(20,596,350)
+   +'<div data-mmdragx style="left:20px;right:20px;top:650px;display:flex;justify-content:center;align-items:baseline;gap:6px;cursor:ew-resize" title="Swipe left or right to change lens"><span style="font:400 40px/1 var(--sans);letter-spacing:-.03em">'+S.mm+'</span><span class="g up" style="font-size:12px">mm</span></div>'
+   +'<div data-mmdragx style="left:20px;right:20px;top:700px;display:flex;justify-content:center;gap:6px;cursor:ew-resize">'+lensWindow().map(function(x){return '<button data-mm="'+x+'" class="pill sm'+(x===S.mm?' on':'')+'">'+x+'</button>'}).join('')+'</div>'
+   +stack(20,770)
+   +'<div style="left:167px;top:756px"><button data-shoot class="shut" aria-label="Take shot"><span></span></button></div>'
+   +'<div class="up g" style="right:20px;top:776px"><button data-sheet="kit">'+KIT.cam+'</button></div>'
+   +chipAndAdd()+'<div id="flash"></div>'}
+
+/* ---------- shot list: a thin sun path on top, calm rows below; tap a shot to open it, tap again to close ---------- */
+function list(){
+  var c=pj(),W=520,X=function(m){return 30+(m-RISE)/(SET-RISE)*(W-60)},Y=function(m){return 30-sunEl(m)*.85},vis=c.shots.map(function(s,i){return i}).filter(function(i){return S.filt<0||c.shots[i].sc===S.filt});
+  var d='',g='';for(var m=RISE;m<=SET;m+=6)d+=(d?'L':'M')+X(m).toFixed(1)+' '+Y(m).toFixed(1);for(var m2=GH;m2<=SET;m2+=4)g+=(g?'L':'M')+X(m2).toFixed(1)+' '+Y(m2).toFixed(1);
+  var arc='<svg width="'+W+'" height="36" style="display:block;overflow:visible"><line x1="30" y1="30" x2="'+(W-30)+'" y2="30" stroke="rgba(236,235,230,.2)"/><path d="'+d+'" fill="none" stroke="rgba(236,235,230,.4)" stroke-dasharray="2 3"/><path d="'+g+'" fill="none" stroke="#FF5A1F" stroke-width="2"/>'
+   +'<text x="0" y="33" font-family="Geist Mono" font-size="8" fill="#8c8a83">'+hm(RISE)+'</text><text x="'+W+'" y="33" text-anchor="end" font-family="Geist Mono" font-size="8" fill="#8c8a83">'+hm(SET)+'</text>';
+  vis.forEach(function(i){var s=c.shots[i],on=i===S.shot;arc+='<circle data-shot="'+i+'" style="cursor:pointer" cx="'+X(s.t)+'" cy="'+Y(s.t)+'" r="'+(on?5:2.6)+'" fill="'+(on?'#FF5A1F':'rgba(236,235,230,.85)')+'"/>'+(on?'<text x="'+X(s.t)+'" y="'+(Y(s.t)-9)+'" text-anchor="middle" font-family="Geist Mono" font-size="8" fill="#ecebe6">'+s.id+' · '+hm(s.t)+'</text>':'')});
+  arc+='</svg>';
+  var rows=vis.length?vis.map(function(i){var s=c.shots[i],on=i===S.shot;
+    return '<div data-shot="'+i+'" class="row" style="cursor:pointer;align-items:flex-start;gap:14px;padding:8px 0 8px 2px;color:'+(on?'var(--paper)':'var(--grey)')+'">'
+     +'<span style="position:relative;width:'+(on?128:52)+'px;height:'+(on?72:30)+'px;flex:none;border-radius:4px;overflow:hidden;box-shadow:inset 0 0 0 1px '+(on?'var(--paper)':'var(--hair)')+';transition:width .2s,height .2s">'+img(s.img,on?128:52,on?72:30,'left:0;top:0;')+'</span>'
+     +'<span style="width:24px;color:var(--paper);padding-top:3px">'+s.id+'</span>'
+     +'<span style="flex:1;min-width:0;padding-top:1px"><span class="sans" style="font-size:12px;color:var(--paper)">'+(on?ed('cap:'+i,s.cap,'font-size:12px'):esc(s.cap))+'</span>'
+     +'<span class="up" style="display:block;margin-top:3px;font-size:9px">'+c.sc[s.sc].n+' · '+s.mm+'mm</span>'
+     +(on?'<span class="sans" style="display:block;margin-top:8px;font-size:12px;color:var(--paper)">'+light(s.t,s.h,true)+'</span><span class="up" style="display:block;margin-top:3px;font-size:9px">Best time · '+best(s.h)+'</span><span class="sans" style="display:block;margin-top:8px;font-size:11px;color:var(--grey)">Notes '+ed('notes:'+i,s.notes,'font-size:11px;color:var(--paper);min-width:120px','Access, power, parking')+'</span>':'')
+     +'</span><span class="up" style="width:42px;padding-top:3px">'+hm(s.t)+'</span><span class="up" style="width:128px;padding-top:3px;color:var(--paper)">'+light(s.t,s.h)+'</span>'
+     +'<span class="g" style="width:12px;padding-top:2px;font-size:12px">'+(on?'–':'+')+'</span></div>'}).join('')
+   :'<div class="g up" style="padding:14px 0">No shots yet. Press the shutter on the camera.</div>';
+  return topbar('<span style="color:var(--paper)">'+ed('pname',c.n,'font:400 11px var(--mono);letter-spacing:.06em;text-transform:uppercase')+'</span> / shot list','<span style="display:flex;gap:8px"><button class="pill up" data-wx>Weather</button><button class="pill on up" data-sheet="export">Export</button></span>')
+   +'<div class="side up" style="left:30px;top:60px;width:110px"><div class="g" style="margin-bottom:4px">Scenes</div><button data-filt="-1" style="color:'+(S.filt<0?'var(--paper)':'var(--grey)')+'">All · '+c.shots.length+'</button>'+c.sc.map(function(s,i){var n=c.shots.filter(function(x){return x.sc===i}).length;return '<button data-filt="'+i+'" style="color:'+(S.filt===i?'var(--paper)':'var(--grey)')+';max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+s.n+' · '+n+'</button>'}).join('')+'</div>'
+   +'<div class="side up" style="left:30px;bottom:26px"><button data-go="cam" style="border-bottom:1px solid var(--paper)">← Camera</button></div>'
+   +'<div style="left:160px;top:58px;width:'+W+'px">'+arc+'</div>'
+   +'<div class="up g" style="left:160px;right:30px;top:108px;display:flex;justify-content:space-between;font-size:9px"><span>'+vis.length+' shots</span><span>Tap a shot to open · again to close</span></div>'
+   +'<div style="left:158px;top:124px;width:656px;height:258px;overflow:auto;scroll-behavior:smooth;-webkit-mask-image:linear-gradient(180deg,#000 88%,transparent)">'+rows+'<div style="height:30px"></div></div>'
+   +(S.wx?wxCard():'')+(S.sheet==='export'?exportSheet():'')}
+function wxCard(){var D=[['Thu','☀','17°','0%'],['Fri','☁','15°','20%'],['Sat','☀','16°','5%'],['Sun','☂','13°','70%'],['Mon','☁','14°','30%']];
+  return '<div class="sheet" style="right:30px;top:52px;width:290px;padding:12px 14px;z-index:3"><div style="display:flex;justify-content:space-between" class="up"><span>Next five days</span><button data-wx class="g">Close</button></div><div style="display:flex;justify-content:space-between;margin-top:10px">'+D.map(function(d){return '<div style="text-align:center"><div class="g up">'+d[0]+'</div><div class="sans" style="font-size:18px;margin:4px 0">'+d[1]+'</div><div>'+d[2]+'</div><div class="g">'+d[3]+'</div></div>'}).join('')+'</div><div class="g up" style="margin-top:8px;font-size:8px">Cloud at your shot times · Sat is clearest</div></div>'}
+
+/* ---------- export sheet: choose a tier, read and edit the real A4 pages, send ---------- */
+function exportSheet(){
+  var c=pj(),E=S.ex,file=E.file||c.n.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'-shot-list.pdf',tiers=[['detailed','Detailed','Shot cards: light, sun, best time'],['summary','Summary','One line per shot'],['photos','Photos only','Just the frames']];
+  var left='<div class="sans" style="font-size:18px">Export</div><div style="display:flex;gap:6px;margin:12px 0 14px">'+[['scene','This scene'],['all','All scenes']].map(function(x){return '<button class="pill sm'+(E.scope===x[0]?' on':'')+'" data-scope="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'
+   +tiers.map(function(t){return '<button class="card'+(E.tier===t[0]?' on':'')+'" data-tier="'+t[0]+'" style="width:100%;margin-bottom:6px;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px;'+(E.tier===t[0]?'box-shadow:0 0 0 3px rgba(236,235,230,.12)':'')+'"><span><b style="font-size:13px">'+t[1]+'</b><span style="margin-top:3px">'+t[2]+'</span></span><span class="tick'+(E.tier===t[0]?' on':'')+'" style="border-radius:50%;flex:none;margin:0"></span></button>'}).join('')
+   +'<div class="up" style="margin-top:6px;display:flex;gap:12px">'+[['frames','Frames'],['sun','Sun'],['notes','Notes']].map(function(x){return '<button data-ext="'+x[0]+'" style="min-height:22px;color:'+(E[x[0]]?'var(--paper)':'var(--grey)')+'"><span class="tick'+(E[x[0]]?' on':'')+'"></span>'+x[1]+'</button>'}).join('')+'</div>'
+   +'<div class="g up" style="margin-top:6px;font-size:8px">Also: <button style="border-bottom:1px solid var(--hair)">Spreadsheet</button> · <button style="border-bottom:1px solid var(--hair)">Photos app</button></div>';
+  var P=pagesFor(),z=E.zoom||.32,body;
+  if(E.state==='done')body=doneView(file);
+  else body='<div style="display:flex;gap:16px;height:100%"><div style="flex:1;min-width:0;display:flex;flex-direction:column"><div class="g up" style="font-size:8px;margin-bottom:6px">Tap any words on the page to change them</div>'
+     +'<div id="pv" style="flex:1;overflow:auto;border-radius:6px;background:#0c0c0b;padding:10px;box-sizing:border-box"><div>'+P.map(function(l,i){return '<div style="width:'+794*z+'px;height:'+1123*z+'px;margin:0 auto 10px;position:relative"><div class="paper" style="position:absolute;left:0;top:0;width:794px;height:1123px;transform:scale('+z+');transform-origin:0 0">'+a4(l,i,P.length)+'</div></div>'}).join('')+'</div></div></div>'
+     +'<div style="width:132px;flex:none;display:flex;flex-direction:column;gap:6px;padding-top:16px">'
+     +'<div class="g up" style="font-size:8px">File</div><div class="sans" style="font-size:11px;word-break:break-all">'+ed('file',file,'font-size:11px')+'</div>'
+     +'<div class="g up" style="font-size:8px;margin-top:10px">'+P.length+' page'+(P.length>1?'s':'')+' · zoom</div><div style="display:flex;gap:6px">'+[[.32,'Fit'],[.5,'50%'],[.75,'75%']].map(function(q){return '<button class="pill sm'+(Math.abs(z-q[0])<.01?' on':'')+'" data-zoom="'+q[0]+'">'+q[1]+'</button>'}).join('')+'</div>'
+     +'<div style="margin-top:auto;display:flex;flex-direction:column;gap:8px"><button class="pill big up" data-close>Cancel</button><button class="pill on big up" data-export>'+(E.state==='busy'?'Making…':'Export PDF')+'</button></div></div></div>';
+  return '<div class="scrim" data-close></div><div class="sheet" style="left:18px;right:18px;top:14px;bottom:14px;padding:16px 18px;display:flex;gap:20px;z-index:4"><div style="width:200px;flex:none">'+left+'</div><div style="flex:1;border-left:1px solid var(--hair);padding-left:18px;min-width:0">'+body+'</div></div>'}
+function shotsFor(){var c=pj();return c.shots.map(function(s,i){return i}).filter(function(i){return S.ex.scope==='all'||c.shots[i].sc===S.sc})}
+function pagesFor(){var v=shotsFor(),t=S.ex.tier,per=t==='detailed'?2:t==='summary'?11:8,first=t==='detailed'?0:t==='summary'?5:4,out=[{cover:1,list:v.slice(0,first)}];for(var i=first;i<v.length;i+=per)out.push({list:v.slice(i,i+per)});return out}
+/* real A4 at 794 x 1123, the same build as the app's PDF */
+var K='font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8c8a83';
+function segsFor(h){var segs=[],cur=null;for(var m=RISE;m<=SET;m+=2){var k=cls(rel(sunAz(m),h));if(!cur||cur.k!==k){cur={k:k,a:m,b:m};segs.push(cur)}cur.b=m}return segs}
+function win(h,k){var w=segsFor(h).filter(function(s){return s.k===k&&s.b-s.a>=10});return w.length?w.map(function(s){return hm(s.a)+'–'+hm(s.b)}).join(', '):'<span style="color:#8c8a83">not from here today</span>'}
+function planSvg(s){var r=rel(sunAz(s.t),s.h),R=40,c=48,f=Math.atan(24.88/(2*s.mm)),a=r*Math.PI/180,sx=c+R*Math.sin(a),sy=c-R*Math.cos(a);
+  return '<svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="#d6d5cf"/><path d="M48 48 L'+(c+R*Math.sin(-f)).toFixed(1)+' '+(c-R*Math.cos(-f)).toFixed(1)+' A40 40 0 0 1 '+(c+R*Math.sin(f)).toFixed(1)+' '+(c-R*Math.cos(f)).toFixed(1)+' Z" fill="rgba(18,18,17,.08)" stroke="rgba(18,18,17,.5)" stroke-width=".7"/><rect x="43" y="45" width="10" height="7" fill="#121211"/><path d="M45 45 L48 40 L51 45 Z" fill="#121211"/><line x1="48" y1="48" x2="'+(2*c-sx).toFixed(1)+'" y2="'+(2*c-sy).toFixed(1)+'" stroke="rgba(18,18,17,.35)" stroke-dasharray="2 2"/><circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="5" fill="#FF5A1F"/><text x="48" y="7" text-anchor="middle" font-family="Geist Mono" font-size="6.5" fill="#8c8a83">LENS</text></svg>'}
+function daySvg(s,W){var segs=segsFor(s.h),X=function(m){return (m-RISE)/(SET-RISE)*W},shade=['.82','.55','.32','.16','.06'],L=['B','¾B','S','¾F','F'],o='<svg width="'+W+'" height="40">';
+  segs.forEach(function(g){var w=X(g.b)-X(g.a);o+='<rect x="'+X(g.a).toFixed(1)+'" y="8" width="'+Math.max(1,w).toFixed(1)+'" height="14" fill="rgba(18,18,17,'+shade[g.k]+')"/>'+(w>24?'<text x="'+(X(g.a)+4).toFixed(1)+'" y="18.5" font-family="Geist Mono" font-size="7.5" fill="'+(g.k<2?'#f3f3f0':'#121211')+'">'+L[g.k]+'</text>':'')});
+  o+='<rect x="'+X(GH).toFixed(1)+'" y="4" width="'+(X(SET)-X(GH)).toFixed(1)+'" height="2" fill="#FF5A1F"/><line x1="'+X(s.t)+'" y1="2" x2="'+X(s.t)+'" y2="26" stroke="#FF5A1F" stroke-width="1.4"/>';
+  [[RISE,hm(RISE)],[540,'09'],[720,'12'],[900,'15'],[SET,hm(SET)]].forEach(function(p,i){o+='<text x="'+X(p[0])+'" y="36" font-family="Geist Mono" font-size="7.5" fill="#8c8a83" text-anchor="'+(i==0?'start':i==4?'end':'middle')+'">'+p[1]+'</text>'});return o+'</svg>'}
+/* the shoot day: weather, a plan in the order the light comes round, and a smart map for each place */
+function bestWin(h){var g=cls(rel(sunAz(1098),h));if(g<=2)return {a:GH,b:SET,k:g};for(var m=RISE;m<SET;m+=5)if(cls(rel(sunAz(m),h))<=1&&sunEl(m)>=6)return {a:m,b:Math.min(SET,m+60),k:cls(rel(sunAz(m),h))};return {a:GH,b:SET,k:g}}
+function sceneHead(c,i){var s=c.shots.filter(function(x){return x.sc===i})[0];return s?s.h:S.head}
+function goodWins(h){var out=[];segsFor(h).forEach(function(g){if(g.k>1)return;var a=g.a;while(a<g.b&&sunEl(a)<6)a+=2;if(g.b-a>=30)out.push({a:a,b:g.b,k:g.k,h:h})});var gk=cls(rel(sunAz(1098),h));if(gk<=2)out.push({a:GH,b:SET,k:gk,h:h});return out.sort(function(x,y){return x.a-y.a})}
+function plan(c){ // one place at a time: each scene gets its earliest good light that still fits after the last one and the drive
+  var v=shotsFor(),list=c.sc.map(function(sc,i){var ids=v.filter(function(k){return c.shots[k].sc===i});if(!ids.length)return null;var h=c.shots[ids[0]].h,W=[];ids.forEach(function(k){W=W.concat(goodWins(c.shots[k].h))});W.sort(function(x,y){return x.a-y.a});return {i:i,sc:sc,ids:ids,W:W.length?W:[{a:GH,b:SET,k:cls(rel(sunAz(1098),h)),h:h}]}}).filter(Boolean);
+  list.sort(function(a,b){return a.W[0].a-b.W[0].a});var cur=RISE,prev=null,out=[];
+  while(list.length){var pick=null,pi=-1;list.forEach(function(p,n){var drive=prev?(prev.sc.kind==='park'||p.sc.kind==='park'?50:15):0;p.W.forEach(function(w){var a=Math.max(w.a,cur+drive);if(w.b-a>=30&&(!pick||a<pick.a))pick={p:p,a:a,b:Math.min(w.b,a+60),k:w.k,h:w.h},pi=n})});
+    if(!pick){var p0=list[0];pick={p:p0,a:Math.max(cur,GH),b:SET,k:p0.W[0].k,h:p0.W[0].h};pi=0}
+    out.push({i:pick.p.i,sc:pick.p.sc,ids:pick.p.ids,w:{a:pick.a,b:pick.b,k:pick.k,h:pick.h}});cur=pick.b;prev=pick.p;list.splice(pi,1)}
+  return out}
+function wxRow(c){var W=c.wx||{sky:'Clear',hi:15,lo:8,rain:0,wind:8,cloud:10};
+  return '<div style="display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #121211;margin-top:14px">'+[['Shoot day',ed('shoot',c.shoot||'Pick a day','font:400 14px var(--sans);color:#121211')],['Sky',W.sky],['High / low',W.hi+'° / '+W.lo+'°'],['Rain',W.rain+'%'],['Cloud at golden hour',W.cloud+'%']].map(function(x){return '<div style="padding:8px 0"><div style="'+K+'">'+x[0]+'</div><div class="sans" style="font-size:14px;margin-top:3px">'+x[1]+'</div></div>'}).join('')+'</div>'}
+function miniMap(c,i,w,h){ // drawn, not a tile: where to stand, which way to point, where the sun will be at the best time, and the walk from parking
+  var sc=c.sc[i],pl=plan(c).filter(function(p){return p.i===i})[0],hd=pl&&pl.w.h!=null?pl.w.h:sceneHead(c,i),t=pl?pl.w.a:GH,az=sunAz(t),cx=w*.55,cy=h*.55,R=Math.min(w,h)*.42,o='<svg width="'+w+'" height="'+h+'" style="display:block;background:#ebeae5;border-radius:4px">';
+  var seed=i*37+5,rnd=function(){seed=(seed*9301+49297)%233280;return seed/233280};
+  if(sc.kind==='park'){o+='<path d="M'+w*.08+' '+h*.2+' Q'+w*.4+' '+h*.02+' '+w*.85+' '+h*.15+' L'+w*.95+' '+h*.85+' Q'+w*.5+' '+h*.98+' '+w*.1+' '+h*.88 +' Z" fill="#dedcd4"/>';for(var k=0;k<14;k++)o+='<circle cx="'+(w*.12+rnd()*w*.78).toFixed(1)+'" cy="'+(h*.22+rnd()*h*.6).toFixed(1)+'" r="'+(2+rnd()*3).toFixed(1)+'" fill="#cfcdc4"/>';o+='<path d="M0 '+h*.92+' C'+w*.3+' '+h*.7+' '+w*.6+' '+h*.95+' '+w+' '+h*.75+'" stroke="#fff" stroke-width="6" fill="none"/>'}
+  else{for(var r=0;r<4;r++){var a=rnd()*180,x1=rnd()*w,y1=rnd()*h,L=w*1.2,dx=Math.cos(a*Math.PI/180)*L,dy=Math.sin(a*Math.PI/180)*L;o+='<line x1="'+(x1-dx)+'" y1="'+(y1-dy)+'" x2="'+(x1+dx)+'" y2="'+(y1+dy)+'" stroke="#fff" stroke-width="'+(r?6:10)+'"/>'}
+    o+='<line x1="0" y1="'+cy+'" x2="'+w+'" y2="'+(cy-h*.08)+'" stroke="#fff" stroke-width="10"/>'}
+  var px=w*.14,py=h*.82;o+='<path d="M'+px+' '+py+' Q'+(px+cx)/2+' '+(cy+h*.3)+' '+cx+' '+cy+'" stroke="#8c8a83" stroke-dasharray="2 3" fill="none"/><rect x="'+(px-7)+'" y="'+(py-7)+'" width="14" height="14" rx="3" fill="#121211"/><text x="'+px+'" y="'+(py+3.5)+'" text-anchor="middle" font-family="Geist Mono" font-size="9" fill="#f3f3f0">P</text>';
+  var f=Math.atan(24.88/(2*32)),ha=hd*Math.PI/180;o+='<path d="M'+cx+' '+cy+' L'+(cx+R*Math.sin(ha-f)).toFixed(1)+' '+(cy-R*Math.cos(ha-f)).toFixed(1)+' A'+R+' '+R+' 0 0 1 '+(cx+R*Math.sin(ha+f)).toFixed(1)+' '+(cy-R*Math.cos(ha+f)).toFixed(1)+' Z" fill="rgba(18,18,17,.12)" stroke="rgba(18,18,17,.55)" stroke-width=".8"/>';
+  var sa=az*Math.PI/180,sx=cx+R*1.05*Math.sin(sa),sy=cy-R*1.05*Math.cos(sa);o+='<line x1="'+cx+'" y1="'+cy+'" x2="'+sx.toFixed(1)+'" y2="'+sy.toFixed(1)+'" stroke="#FF5A1F" stroke-width=".8" stroke-dasharray="2 2"/><circle cx="'+sx.toFixed(1)+'" cy="'+sy.toFixed(1)+'" r="5" fill="#FF5A1F"/><text x="'+(sx+8).toFixed(1)+'" y="'+(sy+3).toFixed(1)+'" font-family="Geist Mono" font-size="7.5" fill="#121211">'+hm(t)+'</text>';
+  o+='<circle cx="'+cx+'" cy="'+cy+'" r="4.5" fill="#121211"/><text x="'+(w-10)+'" y="16" text-anchor="middle" font-family="Geist Mono" font-size="9" fill="#121211">N</text><path d="M'+(w-10)+' 20 L'+(w-13)+' 28 L'+(w-7)+' 28 Z" fill="#121211"/>';
+  o+='<line x1="10" y1="'+(h-8)+'" x2="40" y2="'+(h-8)+'" stroke="#121211"/><text x="44" y="'+(h-5)+'" font-family="Geist Mono" font-size="7" fill="#8c8a83">50 M</text>';
+  return o+'</svg>'}
+function coverFull(c){ // page 1 of Detailed
+  var P=plan(c),o=wxRow(c)
+   +'<div style="'+K+';margin:18px 0 6px">Plan for the day · in the order the light comes round</div>'
+   +P.map(function(p,n){var nx=P[n+1];return '<div style="display:grid;grid-template-columns:104px 1fr 96px 250px;gap:12px;border-top:1px solid #d6d5cf;padding:7px 0;align-items:baseline"><span style="font-size:13px">'+hm(p.w.a)+'–'+hm(p.w.b)+'</span><span class="sans" style="font-size:14px">'+p.sc.n+'</span><span>'+p.ids.map(function(k){return c.shots[k].id}).join(' ')+'</span><span style="color:#8c8a83">'+CL[p.w.k].toLowerCase()+(nx?' · '+(p.sc.kind==='park'||nx.sc.kind==='park'?'50':'15')+' min drive next':'')+'</span></div>'}).join('')
+   +'<div style="'+K+';margin:18px 0 6px">Locations</div>'
+   +P.map(function(p){var sc=p.sc;return '<div style="display:flex;gap:16px;border-top:1px solid #d6d5cf;padding:10px 0">'+miniMap(c,p.i,210,118)+'<div style="flex:1"><div class="sans" style="font-size:16px">'+sc.n+'</div><div style="color:#8c8a83;margin-top:2px">'+(sc.where||'')+' · '+(sc.pc||'')+'</div>'
+     +'<div style="margin-top:8px"><span style="'+K+'">Parking </span>'+(sc.park||'–')+'</div><div><span style="'+K+'">Walk </span>'+(sc.walk||'–')+' from the car</div>'
+     +'<div><span style="'+K+'">Weather at '+hm(p.w.a)+' </span>'+((c.wx||{}).hi||15)+'° · '+(p.w.a>=GH?'low sun, '+((c.wx||{}).cloud||10)+'% cloud':'sunny spells')+'</div>'
+     +'<div style="margin-top:6px;'+K+';color:#121211">Open in Maps ↗ <span style="color:#8c8a83">· pin, facing '+facing(p.w.h!=null?p.w.h:sceneHead(c,p.i))+'</span></div></div></div>'}).join('');
+  return o}
+function coverShort(c,maps){var P=plan(c);return wxRow(c)+(maps?'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">'+P.slice(0,3).map(function(p){return '<div>'+miniMap(c,p.i,222,96)+'<div style="display:flex;justify-content:space-between;margin-top:4px"><span class="sans" style="font-size:12px">'+p.sc.n+'</span><span style="color:#8c8a83">'+hm(p.w.a)+'</span></div><div style="color:#8c8a83;font-size:9px">'+(p.sc.pc||'')+' · P '+(p.sc.walk||'')+'</div></div>'}).join('')+'</div>':'')}
+function a4(pg,n,total){
+  var list=pg.list,c=pj(),E=S.ex,o='<div style="padding:44px 48px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;font:11px/1.45 var(--mono);color:#121211">'
+   +'<div style="display:flex;justify-content:space-between;align-items:baseline"><span class="sans" style="font-size:14px;letter-spacing:-.03em;word-spacing:.3em">Out &amp; Sc<i style="display:inline-block;width:.22em;height:.22em;border-radius:50%;background:#FF5A1F;vertical-align:.55em;margin:0 .5em 0 .45em"></i>out</span><span style="'+K+'">'+esc(c.n)+' · '+E.tier+'</span></div>';
+  if(n===0)o+='<div style="margin:22px 0 6px;border-top:1px solid #121211;padding-top:14px;display:flex;justify-content:space-between;align-items:flex-end"><div>'+ed('pname',c.n,'font:400 34px/1 var(--sans);letter-spacing:-.03em;color:#121211')+'<div style="'+K+';margin-top:8px">'+ed('date',c.date,'font:9px var(--mono);color:#121211')+' · '+ed('crew',c.crew,'font:9px var(--mono);color:#121211','Add crew')+' · '+shotsFor().length+' shots</div></div>'
+     +(E.sun?'<div style="text-align:right;'+K+'">Sunrise '+hm(RISE)+' · <span style="color:#FF5A1F">Golden '+hm(GH)+'–'+hm(SET)+'</span> · Sunset '+hm(SET)+'</div>':'')+'</div>';
+  if(pg.cover)o+=E.tier==='detailed'?coverFull(c):coverShort(c,E.tier==='summary');
+  if(!list.length&&!(pg.cover&&E.tier==='detailed'))o+='<div style="'+K+';margin-top:40px">No shots in this scene yet</div>';
+  if(E.tier==='detailed')o+=list.map(function(i){var s=c.shots[i],r=rel(sunAz(s.t),s.h),el=sunEl(s.t),fw=E.frames?360:0;
+    var spec=[['Camera',KIT.cam],['Lens',s.mm+'mm · '+KIT.set],['Field of view',Math.round(2*Math.atan(24.88/(2*s.mm))*180/Math.PI)+'° wide'],['Frame',s.r],['Facing',facing(s.h)],['Sun',el<10?'Low, '+Math.round(el)+'° up':el<22?'Mid, '+Math.round(el)+'° up':'High, '+Math.round(el)+'° up'],['Shadows',el>0?(el<10?'Long':'Medium')+', '+(1/Math.tan(el*Math.PI/180)).toFixed(1)+'× height':'None'],['Scene',c.sc[s.sc].n]];
+    return '<div style="border-top:1px solid #121211;padding:12px 0 10px;margin-top:10px">'
+     +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><span><span style="font-size:22px;letter-spacing:-.02em;margin-right:12px">'+s.id+'</span>'+ed('cap:'+i,s.cap,'font:400 13px var(--sans);color:#121211')+'</span><span style="'+K+'">'+(c.sc[s.sc].pc?c.sc[s.sc].pc+' · ':'')+'Recce '+hm(s.t)+'</span></div>'
+     +'<div style="display:flex;gap:18px">'+(E.frames?'<span style="position:relative;display:block;width:'+fw+'px;height:'+fw*9/16+'px;flex:none">'+img(s.img,fw,fw*9/16,'left:0;top:0;')+'</span>':'')
+     +'<div style="flex:1;display:flex;flex-direction:column"><div style="display:flex;gap:10px;align-items:flex-start"><div style="flex:1"><div style="'+K+'">Light</div><div class="sans" style="font-size:16px;margin-top:2px">'+CL[cls(r)]+'</div><div style="color:#8c8a83;margin-top:2px">'+(Math.abs(r)<8||Math.abs(r)>172?'sun straight '+(Math.abs(r)<8?'behind them':'behind you'):'sun on the '+(r>0?'right':'left'))+'</div></div>'+planSvg(s)+'</div>'
+     +'<div style="'+K+';margin-top:8px">When to be there</div>'
+     +[['Best',best(s.h)],['Backlit',win(s.h,0)],['Side lit',win(s.h,2)],['Golden',hm(GH)+'–'+hm(SET)+' · '+CL[cls(rel(sunAz(1098),s.h))].toLowerCase()]].map(function(x,k){return '<div style="display:flex;gap:8px;border-top:1px solid #d6d5cf;padding:3px 0'+(k===0?';font-size:12px':'')+'"><span style="width:64px;flex:none;color:'+(k?'#8c8a83':'#121211')+'">'+x[0]+'</span><span>'+x[1]+'</span></div>'}).join('')+'</div></div>'
+     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px;margin-top:10px">'+spec.map(function(p){return '<div><div style="'+K+'">'+p[0]+'</div>'+p[1]+'</div>'}).join('')+'</div>'
+     +(E.sun?'<div style="margin-top:8px"><span style="'+K+'">Through the day from here</span>'+daySvg(s,698)+'</div>':'')
+     +(E.notes?'<div style="margin-top:4px"><span style="'+K+'">Notes </span>'+ed('notes:'+i,s.notes,'font:400 12px var(--sans);color:#121211','Access, power, parking')+'</div>':'')+'</div>'}).join('');
+  else if(E.tier==='summary')o+='<div style="display:grid;grid-template-columns:30px '+(E.frames?'120px ':'')+'1fr 50px 50px 120px;gap:12px;margin-top:16px;'+K+'"><span>Shot</span>'+(E.frames?'<span>Frame</span>':'')+'<span>Caption</span><span>Lens</span><span>Time</span><span>Light · best</span></div>'
+     +list.map(function(i){var s=c.shots[i];return '<div style="display:grid;grid-template-columns:30px '+(E.frames?'120px ':'')+'1fr 50px 50px 120px;gap:12px;border-top:1px solid #d6d5cf;padding:8px 0;align-items:start"><span style="font-size:14px">'+s.id+'</span>'+(E.frames?'<span style="position:relative;display:block;width:120px;height:67px">'+img(s.img,120,67,'left:0;top:0;')+'</span>':'')+'<span>'+ed('cap:'+i,s.cap,'font:400 12px var(--sans);color:#121211')+'<br><span style="color:#8c8a83">'+c.sc[s.sc].n+'</span>'+(E.notes&&s.notes?'<br><span style="color:#8c8a83">'+esc(s.notes)+'</span>':'')+'</span><span>'+s.mm+'mm</span><span>'+hm(s.t)+'</span><span>'+light(s.t,s.h)+'<br><span style="color:#8c8a83">'+best(s.h)+'</span></span></div>'}).join('');
+  else o+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px 16px;margin-top:18px">'+list.map(function(i){var s=c.shots[i];return '<div><span style="position:relative;display:block;width:341px;height:192px">'+img(s.img,341,192,'left:0;top:0;')+'</span><div style="display:flex;justify-content:space-between;margin-top:5px"><span>'+s.id+'</span><span style="color:#8c8a83">'+c.sc[s.sc].n+'</span></div></div>'}).join('')+'</div>';
+  return o+'<div style="margin-top:auto;display:flex;justify-content:space-between;'+K+'"><span>'+(E.tier==='detailed'?'B backlit · ¾B · S side · ¾F · F front lit · orange: golden hour and recce time':'Exported from Out & Scout')+'</span><span>'+(n+1)+' / '+total+'</span></div></div>'}
+function doneView(file){return '<div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding-top:30px"><div class="g up">Ready</div><div class="sans" style="font-size:22px">'+esc(file)+'</div><div class="g up">'+pagesFor().length+' page'+(pagesFor().length>1?'s':'')+' · '+shotsFor().length+' shots · '+S.ex.tier+'</div>'
+  +'<div style="display:flex;gap:8px;margin-top:14px">'+['AirDrop','Mail','Messages','Save to Files'].map(function(x){return '<button class="pill big">'+x+'</button>'}).join('')+'</div>'
+  +'<div style="display:flex;gap:8px;margin-top:40px"><button class="pill up" data-again>Edit again</button><button class="pill on up" data-close>Done</button></div></div>'}
+
+/* ---------- render and input ---------- */
+function render(){var f=$('fit');f.className=S.o==='p'&&S.scr==='cam'?'p':'';
+  f.innerHTML=S.scr==='start'?({a:startA,b:startB,b2:startB2,b3:startB3,c:startC,d:startD}[S.sv])():S.scr==='list'?list():S.o==='p'?camP():cam();
+  var p=$('pn')||$('sn');if(p)p.focus();fit();try{parent.postMessage({orient:f.className==='p'?'p':'l'},'*')}catch(e){}}
+function save(el){var k=el.dataset.ed,v=el.textContent.trim(),c=pj();if(!k)return;
+  if(k==='pname')c.n=v||c.n;else if(k==='date')c.date=v;else if(k==='crew')c.crew=v;else if(k==='shoot')c.shoot=v;else if(k==='file')S.ex.file=v;
+  else{var a=k.split(':');c.shots[+a[1]][a[0]==='cap'?'cap':'notes']=v}}
+document.addEventListener('focusout',function(e){if(e.target.dataset&&e.target.dataset.ed)save(e.target)});
+document.addEventListener('keydown',function(e){if(e.target.dataset&&e.target.dataset.ed&&e.key==='Enter'){e.preventDefault();e.target.blur()}
+  if(e.key==='Enter'&&e.target.id==='pn')document.querySelector('[data-create]').click();if(e.key==='Enter'&&e.target.id==='sn')document.querySelector('[data-keepsc]').click()});
+document.addEventListener('click',function(e){if(e.target.closest('[data-ed]'))return;var b=e.target.closest('button,[data-shot],[data-close]');if(!b)return;var d=b.dataset,c=pj();
+ if(d.go){S.scr=d.go;S.newp=false;S.sheet='';S.chip='';S.wx=false;if(d.go==='list'&&S.shot<0&&c.shots.length)S.shot=c.shots.length-1}
+ else if(d.newp!==undefined)S.newp=!S.newp;
+ else if(d.create!==undefined){var n=($('pn').value||'Untitled').trim();PJ.unshift({n:n,date:'8 Oct 2026',crew:'',sc:[{n:'Scene 1',img:'img/knole.jpg'}],shots:[]});S.p=0;S.sc=0;S.scr='cam';S.newp=false;S.shot=-1}
+ else if(d.pj){S.p=+d.pj;S.sc=0;S.shot=-1;S.filt=-1;S.scr='cam'}
+ else if(d.sc)S.sc=+d.sc;
+ else if(d.addsc!==undefined)S.addsc=true;
+ else if(d.sug){$('sn').value=d.sug;return}
+ else if(d.keepsc!==undefined){c.sc.push({n:($('sn').value||'Scene '+(c.sc.length+1)).trim(),img:'img/6a.jpg'});S.sc=c.sc.length-1;S.addsc=false}
+ else if(d.close!==undefined){S.addsc=false;S.sheet='';S.ex.state=''}
+ else if(d.tog)S[d.tog]=!S[d.tog];
+ else if(d.orient){S.o=d.orient;S.r=d.orient==='p'?'9:16':'2.39'}
+ else if(d.r)S.r=d.r;
+ else if(d.mm)S.mm=+d.mm;
+ else if(d.now!==undefined)S.t=NOW;
+ else if(d.sheet){S.sheet=d.sheet;S.ex.state='';S.ex.page=0;S.wx=false}
+ else if(d.cam)KIT.cam=d.cam;else if(d.set)KIT.set=d.set;
+ else if(d.shot){S.shot=S.shot===+d.shot?-1:+d.shot}
+ else if(d.sel){S.sel=+d.sel}
+ else if(d.open){S.p=+d.open;S.sc=d.osc?+d.osc:0;S.filt=-1;S.shot=-1;S.sel=null;S.scr=d.to==='export'||d.to==='list'?'list':'cam';S.sheet=d.to==='export'?'export':'';S.ex.state='';S.ex.page=0}
+ else if(d.zoom){S.ex.zoom=+d.zoom}
+ else if(d.filt){S.filt=+d.filt}
+ else if(d.wx!==undefined)S.wx=!S.wx;
+ else if(d.scope){S.ex.scope=d.scope;S.ex.page=0}else if(d.tier){S.ex.tier=d.tier;S.ex.page=0}else if(d.ext)S.ex[d.ext]=!S.ex[d.ext];else if(d.pg)S.ex.page=+d.pg;
+ else if(d.export!==undefined){S.ex.state='busy';render();setTimeout(function(){S.ex.state='done';render()},700);return}
+ else if(d.again!==undefined)S.ex.state='';
+ else if(d.shoot!==undefined){var n2=c.shots.filter(function(s){return s.sc===S.sc}).length,cap=['Wide','Mid','Close'][n2%3]+', '+(S.mm<=24?'the whole place':S.mm<=40?'the tree and the two of them':'faces against the sky');
+   c.shots.push({id:(S.sc+1)+String.fromCharCode(65+n2),img:c.sc[S.sc].img,sc:S.sc,mm:S.mm,r:S.r,t:S.t,h:S.head,cap:cap,notes:''});S.chip='1';
+   var f=$('flash');f.style.transition='none';f.style.opacity=.8;requestAnimationFrame(function(){f.style.transition='opacity .25s';f.style.opacity=0});setTimeout(render,260);clearTimeout(S.ct);S.ct=setTimeout(function(){S.chip='';if(S.scr==='cam'&&!document.activeElement.dataset.ed)render()},5000);return}
+ else return;render()});
+// lens: drag the big number up or down (or left/right in portrait), or use the scroll wheel
+var drag=null;
+function stepLens(n){var L=KIT.lenses,i=L.indexOf(S.mm);i=Math.max(0,Math.min(L.length-1,(i<0?2:i)+n));if(L[i]!==S.mm){S.mm=L[i];render()}}
+function setT(e){var b=document.querySelector('[data-tl]');if(!b)return;var r=b.getBoundingClientRect(),f=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));S.t=Math.round((RISE-60+f*(SET-RISE+120))/5)*5;render()}
+document.addEventListener('pointerdown',function(e){if(e.target.closest('[data-tl]')){drag={k:'t'};setT(e)}else if(e.target.closest('[data-mmdrag]')){drag={k:'y',v:e.clientY}}else if(e.target.closest('[data-mmdragx]')){drag={k:'x',v:e.clientX}}});
+document.addEventListener('pointermove',function(e){if(!drag)return;if(drag.k==='t')return setT(e);var s=parseFloat($('fit').style.transform.replace(/[^0-9.]/g,''))||1,dv=(drag.k==='y'?drag.v-e.clientY:drag.v-e.clientX)/s;if(Math.abs(dv)>=22){stepLens(dv>0?1:-1);drag.v=drag.k==='y'?e.clientY:e.clientX;drag.moved=1}});
+document.addEventListener('pointerup',function(){if(drag&&drag.moved){var t=Date.now();document.addEventListener('click',function k(ev){if(Date.now()-t<50){ev.stopPropagation();ev.preventDefault()}document.removeEventListener('click',k,true)},true)}drag=null});
+document.addEventListener('wheel',function(e){if(e.target.closest('[data-mmdrag],[data-mmdragx]')){e.preventDefault();clearTimeout(S.wt);if(!S.wl){stepLens(e.deltaY<0?1:-1);S.wl=1;S.wt=setTimeout(function(){S.wl=0},120)}}},{passive:false});
+addEventListener('message',function(e){var m=e.data||{};if(m.s){S.scr=m.s;S.sheet='';S.o=m.o||'l';S.r=S.o==='p'?'9:16':'2.39';if(m.s!=='start'&&m.demo){S.p=PJ.findIndex(function(x){return x.n==='First Recce'});S.sc=2;S.shot=3}if(m.sheet)S.sheet=m.sheet;render()}if(m.sv){S.sv=m.sv;S.sel=null;S.scr='start';S.newp=false;S.o='l';render()}});
+var hs=location.hash;if(/sv=(\w+)/.test(hs))S.sv=RegExp.$1;
+function fit(){var f=$('fit'),p=f.className==='p',w=p?390:844,h=p?844:390;f.style.transform='scale('+Math.min(innerWidth/w,innerHeight/h)+')';if(p)f.style.left=Math.max(0,(innerWidth-w*Math.min(innerWidth/w,innerHeight/h))/2)+'px';else f.style.left='0'}
+addEventListener('resize',fit);render();
+(function(){var q={};location.hash.slice(1).split('&').forEach(function(kv){var a=kv.split('=');if(a[0])q[a[0]]=a[1]});if(q.s){dispatchEvent(new MessageEvent('message',{data:{s:q.s,o:q.o||'l',demo:q.s!=='start',sheet:q.sheet}}));if(q.r||q.mm||q.y){if(q.r)S.r=decodeURIComponent(q.r);if(q.mm)S.mm=+q.mm;if(q.y){var st=document.createElement('style');st.textContent='.win img{translate:'+(q.x||0)+'px '+q.y+'px}';document.head.appendChild(st)}render()}}})();
+</script></body></html>

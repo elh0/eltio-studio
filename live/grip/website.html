@@ -1,0 +1,1092 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Grip: website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400&family=DM+Mono:wght@400&display=swap">
+<style>
+/* shared by every grip site variant: identity v11 tokens and parts */
+:root {
+  --black: #000; --tile: #0D0E0D; --white: #F3F3F0; --line: #4A74FF;
+  --text: rgba(243,243,240,.95); --quiet: rgba(243,243,240,.55); --faint: rgba(243,243,240,.3); --rule: rgba(243,243,240,.16);
+  --sans: "Host Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--black); color: var(--text); font: 400 18px/1.4 var(--sans); margin: 0; letter-spacing: -.01em; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+.wrap { padding-inline: 28px; max-width: 1600px; margin: 0 auto; }
+@media (max-width: 600px) { .wrap { padding-inline: 16px; } body { font-size: 16px; } }
+.m { font: 400 12px/1.3 var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.q { color: var(--quiet); }
+h1, h2, h3, h4 { font-weight: 400; margin: 0; letter-spacing: -.025em; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid var(--white); outline-offset: 4px; }
+.logo { display: block; height: 20px; color: var(--line); justify-self: start; align-self: center; }
+.logo svg { display: block; height: 100%; width: auto; }
+.tog { display: flex; gap: 18px; }
+.tog button { opacity: .45; } .tog button[aria-pressed="true"] { opacity: 1; text-decoration: underline; text-underline-offset: 5px; }
+.stage { position: relative; background: var(--tile); border-radius: 6px; overflow: hidden; max-width: 100%; }
+.stage svg { display: block; width: 100%; height: 100%; }
+.stage .tl, .stage .tr, .stage .bl, .stage .br { position: absolute; }
+.stage .tl { top: 14px; left: 16px; } .stage .tr { top: 14px; right: 16px; }
+.stage .bl { bottom: 14px; left: 16px; } .stage .br { bottom: 14px; right: 16px; text-align: right; }
+.sr { position: absolute; left: -9999px; }
+.form { display: flex; gap: 8px; flex-wrap: wrap; }
+.form input { flex: 1 1 220px; min-width: 0; height: 48px; font: inherit; color: var(--text); background: var(--black); border: 1px solid var(--rule); border-radius: 4px; padding-inline: 14px; }
+.form input::placeholder { color: var(--faint); }
+.form input:focus { border-color: var(--white); outline: none; }
+.form button { height: 48px; padding-inline: 18px; background: var(--white); color: #000; border-radius: 4px; }
+.foot { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-block: 80px 30px; }
+
+/* grip website v2 (5 Oct 2026): layout C "review first" picked by Elliot, plus the features rivals don't have:
+   try a clip, where to put your phone, Grip next to a real coach, three notes not a score, cue cards.
+   Blue only for the wordmark and the tracked body. Everything marked "Example" is placeholder. */
+html { scroll-behavior: smooth; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 24px; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--black); z-index: 5; }
+.top nav { display: flex; gap: 22px; }
+.top nav a { text-decoration: none; }
+.top nav a:hover { text-decoration: underline; text-underline-offset: 5px; }
+@media (max-width: 760px) { .top nav a:not(:last-child) { display: none; } }
+.intro { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 32px; align-items: end; padding-block: 32px 24px; }
+.intro h1 { font-size: clamp(34px, 3.6vw, 52px); line-height: 1.04; max-width: 16ch; }
+.intro p { color: var(--quiet); max-width: 40ch; justify-self: end; }
+@media (max-width: 860px) { .intro { grid-template-columns: 1fr; } .intro p { justify-self: start; } }
+
+section { padding-top: 120px; scroll-margin-top: 64px; }
+@media (max-width: 600px) { section { padding-top: 88px; } }
+.head { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 32px; align-items: end; margin-bottom: 24px; }
+.head h2 { font-size: clamp(34px, 3.6vw, 52px); line-height: 1.04; max-width: 16ch; }
+.head p { color: var(--quiet); max-width: 44ch; justify-self: end; }
+@media (max-width: 860px) { .head { grid-template-columns: 1fr; } .head p { justify-self: start; } }
+.card { background: var(--tile); border-radius: 6px; padding: 18px; min-width: 0; }
+.note { display: block; margin-top: 10px; min-height: 1.3em; }
+
+/* 1. try a clip: player left, notes right; notes light up at their moment and jump the clip when picked */
+.prod { display: grid; grid-template-columns: minmax(0,1.15fr) minmax(0,1fr); gap: 8px; }
+.player { display: grid; gap: 8px; min-width: 0; }
+.player .stage { aspect-ratio: 4 / 5; max-height: 74vh; width: 100%; }
+.ctrl { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 14px; align-items: center; }
+.ctrl .play { width: 7ch; text-align: left; }
+.scrub { position: relative; height: 28px; }
+.scrub input { position: absolute; inset: 0; width: 100%; margin: 0; accent-color: var(--white); background: transparent; cursor: pointer; }
+.scrub i { position: absolute; top: 0; width: 1px; height: 7px; background: var(--white); opacity: .6; pointer-events: none; }
+.side { display: grid; grid-template-rows: auto 1fr auto; gap: 8px; min-width: 0; }
+.meta { display: flex; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; align-items: center; }
+.notes { list-style: none; margin: 0; padding: 0 18px; background: var(--tile); border-radius: 6px; }
+.notes li { border-bottom: 1px solid var(--rule); }
+.notes li:last-child { border-bottom: 0; }
+.notes button { display: grid; grid-template-columns: 6ch minmax(0,1fr); gap: 14px; padding-block: 20px; width: 100%; text-align: left; opacity: .5; transition: opacity .3s; }
+.notes button:hover, .notes li.on button { opacity: 1; }
+.notes h3 { font-size: clamp(22px, 2vw, 28px); line-height: 1.15; margin-bottom: 6px; }
+.notes p { color: var(--quiet); max-width: 44ch; }
+.notes .cue { margin-top: 10px; color: var(--text); }
+@media (max-width: 860px) { .prod { grid-template-columns: 1fr; } .player .stage { aspect-ratio: 1 / 1; } }
+
+/* wall and mat, text only */
+.duo { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 28px; }
+.duo > div { border-top: 1px solid var(--rule); padding-top: 14px; display: grid; gap: 12px; align-content: start; }
+.duo h3 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.1; }
+.duo p { color: var(--quiet); max-width: 44ch; }
+.duo .terms { color: var(--text); }
+@media (max-width: 760px) { .duo { grid-template-columns: 1fr; gap: 36px; } }
+
+/* 2. where to put your phone */
+.phone { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: 8px; }
+.phone .stage { aspect-ratio: 16 / 10; touch-action: none; cursor: grab; }
+.phone .stage.drag { cursor: grabbing; }
+.reads { display: flex; flex-direction: column; gap: 0; }
+.reads .row { display: flex; justify-content: space-between; gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--rule); }
+.reads .row b { font-weight: 400; }
+.reads .row .lost { color: var(--faint); text-decoration: line-through; }
+.verdict { font-size: clamp(22px, 2vw, 28px); line-height: 1.15; letter-spacing: -.02em; margin: 14px 0 6px; }
+.reads input { width: 100%; accent-color: var(--white); margin: 14px 0 4px; }
+.reads .foot2 { margin-top: auto; padding-top: 14px; }
+@media (max-width: 860px) { .phone { grid-template-columns: 1fr; } .phone .stage { aspect-ratio: 4 / 3; } }
+
+.cmpw { aspect-ratio: 2 / 1; }
+@media (max-width: 700px) { .cmpw { aspect-ratio: 1 / 1; } }
+.readout { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 8px; }
+.readout div { background: var(--tile); border-radius: 6px; padding: 16px; display: grid; gap: 6px; }
+.readout b { font-weight: 400; font-size: clamp(26px, 2.6vw, 38px); letter-spacing: -.03em; line-height: 1; }
+@media (max-width: 700px) { .readout { grid-template-columns: 1fr; } }
+
+/* 3. Grip next to a real coach: one row per moment */
+.vs { background: var(--tile); border-radius: 6px; padding: 0 18px; overflow-x: auto; }
+.vs .r { display: grid; grid-template-columns: 6ch minmax(0,1fr) minmax(0,1fr) 11ch; gap: 20px; padding-block: 16px; border-bottom: 1px solid var(--rule); align-items: baseline; min-width: 620px; }
+.vs .r:last-child { border-bottom: 0; }
+.vs .r.h { padding-block: 14px 10px; }
+.vs .r span:nth-child(4) { text-align: right; }
+.vs .none { color: var(--faint); }
+
+/* 4. three notes, not a score */
+.ns { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.ns .card { display: grid; gap: 14px; align-content: start; }
+.ns .them b { font-weight: 400; display: block; font-size: clamp(26px, 2.6vw, 38px); letter-spacing: -.03em; line-height: 1.1; color: var(--faint); }
+.ns .us p { display: grid; grid-template-columns: 6ch minmax(0,1fr); gap: 14px; font-size: clamp(20px, 1.8vw, 26px); line-height: 1.2; letter-spacing: -.02em; padding-block: 8px; border-bottom: 1px solid var(--rule); }
+.ns .us p:last-child { border-bottom: 0; }
+.ns .us p span { padding-top: 6px; }
+@media (max-width: 760px) { .ns { grid-template-columns: 1fr; } }
+
+/* 6. cue cards */
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.cue-card { background: var(--tile); border-radius: 6px; aspect-ratio: 4 / 5; display: grid; grid-template-rows: minmax(0,1fr) auto; overflow: hidden; }
+.cue-card svg.fr { width: 100%; height: 100%; display: block; }
+.cue-card .txt { padding: 16px; display: grid; gap: 6px; border-top: 1px solid var(--rule); }
+.cue-card .txt b { font-weight: 400; font-size: clamp(20px, 1.8vw, 26px); line-height: 1.15; letter-spacing: -.02em; }
+.cue-card .row2 { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.cue-card .logo { height: 14px; }
+@media (max-width: 860px) { .cards { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .cards { grid-template-columns: 1fr; } }
+
+.faq { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0 28px; }
+.faq div { border-top: 1px solid var(--rule); padding: 14px 0 28px; }
+.faq h3 { font-size: 20px; line-height: 1.2; margin-bottom: 8px; }
+.faq p { color: var(--quiet); max-width: 44ch; }
+@media (max-width: 960px) { .faq { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .faq { grid-template-columns: 1fr; } }
+.closer { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 32px; align-items: end; }
+.closer h2 { font-size: clamp(34px, 3.6vw, 52px); line-height: 1.04; }
+@media (max-width: 860px) { .closer { grid-template-columns: 1fr; } }
+
+/* built round your body: three body sizes on the same holds, then two cards */
+.bodies { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.bodies .stage { aspect-ratio: 3 / 4; }
+.bodies .cap { padding: 12px 2px 0; display: grid; gap: 6px; }
+.bodies .cap p { color: var(--quiet); max-width: 40ch; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-top: 28px; }
+.two .card { display: grid; gap: 12px; align-content: start; }
+.two h3 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.1; }
+.two p { color: var(--quiet); max-width: 46ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.lines .row { display: flex; justify-content: space-between; gap: 16px; padding-block: 10px; border-top: 1px solid var(--rule); }
+.lines .row span:last-child { text-align: right; }
+@media (max-width: 760px) { .bodies { grid-template-columns: 1fr; } .bodies .stage { aspect-ratio: 4 / 3; } .two { grid-template-columns: 1fr; } }
+
+/* for coaches: approve Grip's drafts, then the roster */
+.coach { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.4fr); gap: 8px; }
+.drafts { list-style: none; margin: 0; padding: 0; }
+.drafts li { display: grid; gap: 10px; padding-block: 14px; border-top: 1px solid var(--rule); }
+.drafts .txt { font-size: 20px; letter-spacing: -.02em; line-height: 1.2; }
+.drafts .acts { display: flex; gap: 18px; align-items: center; }
+.drafts .acts button { text-decoration: underline; text-underline-offset: 5px; }
+.drafts input { width: 100%; height: 40px; font: inherit; color: var(--text); background: var(--black); border: 1px solid var(--rule); border-radius: 4px; padding-inline: 10px; }
+.drafts input:focus { border-color: var(--white); outline: none; }
+.roster { overflow-x: auto; padding: 0 18px; }
+.roster .r { display: grid; grid-template-columns: 9ch 7ch minmax(0,1.6fr) 88px 9ch; gap: 16px; padding-block: 14px; border-bottom: 1px solid var(--rule); align-items: center; min-width: 600px; }
+.roster .r:last-child { border-bottom: 0; }
+.roster .r.h { padding-block: 16px 10px; }
+.roster .f { font-size: 16px; }
+.roster .f span { display: block; color: var(--quiet); font-size: 14px; }
+.roster svg { display: block; width: 88px; height: 24px; }
+@media (max-width: 960px) { .coach { grid-template-columns: 1fr; } }
+
+/* on the bar: calisthenics, drawn side-on; the referee calls each rep */
+.cali { display: grid; grid-template-columns: minmax(0,1.6fr) minmax(0,1fr); gap: 8px; }
+.cali .left { display: grid; gap: 8px; min-width: 0; }
+.cali .stage { aspect-ratio: 16 / 10; }
+.strip { background: var(--tile); border-radius: 6px; padding: 14px 16px; }
+.strip svg { display: block; width: 100%; height: auto; }
+.ro { display: flex; flex-direction: column; gap: 0; }
+.ro .row { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--rule); }
+.ro .row b { font-weight: 400; font-size: clamp(24px, 2.2vw, 32px); letter-spacing: -.03em; line-height: 1; text-align: right; }
+.ro ul { list-style: none; margin: 18px 0 0; padding: 0; }
+.ro li { display: grid; grid-template-columns: 7ch minmax(0,1fr); gap: 12px; padding-block: 10px; border-top: 1px solid var(--rule); opacity: .45; transition: opacity .3s; }
+.ro li.on { opacity: 1; }
+.ro li p { color: var(--quiet); font-size: 15px; }
+.ro li b { font-weight: 400; display: block; color: var(--text); font-size: 18px; }
+.call { position: absolute; right: 16px; top: 44px; text-align: right; }
+.call b { font-weight: 400; display: block; font-size: clamp(28px, 3vw, 44px); letter-spacing: -.03em; line-height: 1; }
+@media (max-width: 860px) { .cali { grid-template-columns: 1fr; } .cali .stage { aspect-ratio: 4 / 3; } }
+.duo.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+@media (max-width: 900px) { .duo.three { grid-template-columns: 1fr; gap: 36px; } }
+
+/* every level: plateau finder and form drop-off, both charts drawn to scale */
+.lvl { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; }
+.lvl .card { display: grid; gap: 12px; align-content: start; }
+.lvl h3, .comm h3 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.1; }
+.lvl p, .comm p { color: var(--quiet); max-width: 46ch; }
+.lvl svg { display: block; width: 100%; height: auto; }
+@media (max-width: 860px) { .lvl { grid-template-columns: 1fr; } }
+/* community */
+.comm { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: 8px; }
+.cues { display: grid; gap: 0; }
+.cues .c { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 6px 16px; padding-block: 14px; border-top: 1px solid var(--rule); }
+.cues .c b { font-weight: 400; font-size: 20px; letter-spacing: -.02em; line-height: 1.2; grid-column: 1 / -1; }
+.flag .nt { border: 1px solid var(--rule); border-radius: 4px; padding: 14px; display: grid; gap: 6px; }
+.flag .nt b { font-weight: 400; font-size: 20px; letter-spacing: -.02em; }
+.flag .acts { display: flex; gap: 18px; flex-wrap: wrap; }
+.flag .acts button { text-decoration: underline; text-underline-offset: 5px; }
+.flag .score b { font-weight: 400; font-size: clamp(34px, 3.4vw, 48px); letter-spacing: -.03em; line-height: 1; display: block; }
+@media (max-width: 860px) { .comm { grid-template-columns: 1fr; } }
+/* what it can't do */
+.cant { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0 28px; }
+.cant div { border-top: 1px solid var(--rule); padding: 14px 0 28px; display: grid; gap: 8px; align-content: start; }
+.cant h3 { font-size: 20px; line-height: 1.2; }
+.cant p { color: var(--quiet); max-width: 42ch; }
+@media (max-width: 960px) { .cant { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .cant { grid-template-columns: 1fr; } }
+</style>
+
+<div class="wrap">
+  <header class="top m">
+    <a class="logo" href="#top" aria-label="grip, back to top"><svg xmlns="http://www.w3.org/2000/svg" viewBox="32 -787 1660 1019" role="img" aria-label="grip"><path fill="currentColor" d="M304 232Q239 232 185.0 209.5Q131 187 94.5 144.5Q58 102 48 41H137Q151 91 196.5 122.5Q242 154 303 154Q351 154 389.0 133.5Q427 113 449.5 72.5Q472 32 472 -27V-98Q456 -71 429.5 -46.5Q403 -22 366.5 -6.5Q330 9 282 9Q212 9 155.0 -25.0Q98 -59 65.0 -117.5Q32 -176 32 -250Q32 -325 65.0 -383.0Q98 -441 155.0 -474.5Q212 -508 282 -508Q347 -508 396.5 -479.0Q446 -450 472 -410V-496H562V-30Q562 52 528.5 110.5Q495 169 436.5 200.5Q378 232 304 232ZM296 -69Q346 -69 385.0 -92.0Q424 -115 446.0 -156.0Q468 -197 468 -250Q468 -304 446.0 -344.5Q424 -385 385.0 -407.5Q346 -430 296 -430Q247 -430 208.0 -407.5Q169 -385 146.5 -344.5Q124 -304 124 -250Q124 -198 146.5 -156.5Q169 -115 208.0 -92.0Q247 -69 296 -69ZM650 0V-496H740V-418Q757 -457 786.0 -478.5Q815 -500 857 -500H931V-416H848Q816 -416 791.5 -398.0Q767 -380 753.5 -340.5Q740 -301 740 -236V0ZM1001 0V-496H1091V0ZM1177 220V-496H1267V-415Q1291 -451 1335.0 -479.5Q1379 -508 1447 -508Q1520 -508 1575.0 -474.0Q1630 -440 1661.0 -381.0Q1692 -322 1692 -247Q1692 -172 1661.0 -113.5Q1630 -55 1575.0 -21.5Q1520 12 1446 12Q1385 12 1339.0 -12.5Q1293 -37 1267 -81V220ZM1434 -66Q1483 -66 1520.5 -89.0Q1558 -112 1579.5 -153.0Q1601 -194 1601 -248Q1601 -302 1579.5 -343.0Q1558 -384 1520.5 -407.0Q1483 -430 1434 -430Q1386 -430 1348.5 -407.0Q1311 -384 1290.0 -343.0Q1269 -302 1269 -248Q1269 -194 1290.0 -153.0Q1311 -112 1348.5 -89.0Q1386 -66 1434 -66Z"/><path fill="none" stroke="currentColor" stroke-width="90" stroke-linecap="round" d="M962 -636.0V-658.0a84 84 0 0 1 168 0V-636.0"/></svg></a>
+    <nav><a href="#bar">On the bar</a><a href="#phone">Where to film</a><a href="#levels">Every level</a><a href="#community">Community</a><a href="#coaches">For coaches</a><a href="#join">Join the beta</a></nav>
+  </header>
+
+  <div class="intro" id="top">
+    <h1>A coach who's rewatched your tape.</h1>
+    <p>Film a board session, a roll or a set on the bar. Grip tracks fifteen points on your body and sends back three notes, each pinned to a moment, with a cue for the next go. Try it on a clip below.</p>
+  </div>
+
+  <div class="prod">
+    <div class="player">
+      <div class="stage">
+        <svg id="clip" aria-label="An example clip with Grip's tracking and notes drawn over it"></svg>
+        <span class="tl m q" id="c-lab">Board / 40° / V6 project</span>
+        <span class="tr m q" id="c-tc">0:00</span>
+        <span class="bl m q">Example clip</span>
+        <span class="br m q" id="c-rate">0.5×</span>
+      </div>
+      <div class="card ctrl m">
+        <button type="button" class="play" id="play" aria-pressed="true">Pause</button>
+        <div class="scrub" id="ticks"><label for="seek" class="sr">Clip position</label><input id="seek" type="range" min="0" max="22" step="0.05" value="0"></div>
+        <span class="q" id="c-len">0:22</span>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card meta m">
+        <div class="tog" role="group" aria-label="Clip"><button type="button" data-clip="climb" aria-pressed="true">Board</button><span class="q">/</span><button type="button" data-clip="roll" aria-pressed="false">Roll</button></div>
+        <span class="q" id="c-meta">Session 09 / 4 attempts</span>
+      </div>
+      <ul class="notes" id="notes"></ul>
+      <div class="card" id="join">
+        <form class="form" novalidate><label for="e1" class="sr">Email</label><input id="e1" type="email" placeholder="you@email.com" autocomplete="email" required><button type="submit" class="m">Join the beta</button></form>
+        <span class="note m q" aria-live="polite">Demo form, nothing is saved yet</span>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <div class="head"><h2>The wall, the mat and the bar</h2><p>Board climbing first, then jiu-jitsu and calisthenics. Anything you hold on to. Grip speaks each one, and won't explain the words you use every day.</p></div>
+    <div class="duo three">
+      <div>
+        <span class="m q">Climbing</span>
+        <h3>Board sessions and projects</h3>
+        <p>Built for Kilter, Moon and Tension sessions first: short, repeatable, filmed from the same spot every time. Hip position, foot cuts, straight arms and wasted readjusts.</p>
+        <p class="terms m">Drop-knee / flag / deadpoint / heel hook / lock-off / beta</p>
+      </div>
+      <div>
+        <span class="m q">Jiu-jitsu</span>
+        <h3>Rolls and drilling, gi or no-gi</h3>
+        <p>Base, posture, grips and the arm you forgot to wrap. Say "I'm in the blue gi" and only your side of the roll gets notes.</p>
+        <p class="terms m">Underhook / frames / overhook / base / knee shield / posture</p>
+      </div>
+      <div>
+        <span class="m q">Calisthenics</span>
+        <h3>The bar, the rings, the floor</h3>
+        <p>Strict reps counted and judged, holds timed, and your body line measured in degrees and centimetres.</p>
+        <p class="terms m">Strict / kip / hollow / scap pull / tuck / straddle / stack</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="bar">
+    <div class="head"><h2>On the bar</h2><p>Pull-ups, front lever, handstands. Grip counts your reps, times your holds and measures your line, and it calls a kip or a half rep the way a judge would.</p></div>
+    <div class="cali">
+      <div class="left">
+        <div class="stage">
+          <svg id="cali" aria-label="A side-on wireframe doing calisthenics, with reps, holds and body line measured"></svg>
+          <div class="tl m tog" role="group" aria-label="Skill"><button type="button" data-skill="pull" aria-pressed="true">Pull-ups</button><span class="q">/</span><button type="button" data-skill="lever" aria-pressed="false">Front lever</button><span class="q">/</span><button type="button" data-skill="hand" aria-pressed="false">Handstand</button></div>
+          <div class="call m"><span class="q" id="k-callt">Rep</span><b id="k-call">1</b></div>
+          <span class="bl m" id="k-bl">Strict pull-ups / 6 reps</span>
+          <span class="br m q">Example</span>
+        </div>
+        <div class="strip"><svg id="k-strip" viewBox="0 0 600 90" aria-label="Each rep or the hold, measured over time"></svg></div>
+      </div>
+      <div class="card ro">
+        <span class="m q" id="k-title">Strict set</span>
+        <div id="k-rows"></div>
+        <ul id="k-notes"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="phone">
+    <div class="head"><h2>Where to put your phone</h2><p>Most bad feedback starts with a bad angle. Drag the phone round and see what Grip can read from there.</p></div>
+    <div class="phone">
+      <div class="stage" id="ph-stage">
+        <svg id="ph" viewBox="0 0 400 250" aria-label="Top-down view of a phone around a climber at the wall. Drag the phone to change the angle."></svg>
+        <div class="tl m tog" role="group" aria-label="Sport"><button type="button" data-ph="wall" aria-pressed="true">Wall</button><span class="q">/</span><button type="button" data-ph="mat" aria-pressed="false">Mat</button></div>
+        <span class="tr m q">Seen from above</span>
+        <span class="bl m q">Drag the phone</span>
+      </div>
+      <div class="card reads">
+        <span class="m q" id="ph-ang">45° from behind</span>
+        <p class="verdict" id="ph-v">Good angle</p>
+        <label for="ph-r" class="sr">Phone angle</label>
+        <input id="ph-r" type="range" min="-90" max="90" step="1" value="45">
+        <div id="ph-rows"></div>
+        <span class="foot2 m q">Rule of thumb, not a guarantee</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="head"><h2>Against a friend, or from the side</h2><p>Film a friend on the same problem and Grip lays one body over the other. Film from two angles and it shows the move both ways.</p></div>
+    <div class="stage cmpw">
+      <svg id="cmp" aria-label="Your wireframe compared with a friend's on the same holds"></svg>
+      <div class="tl m tog" role="group" aria-label="Compare"><button type="button" data-cmp="friend" aria-pressed="true">A friend</button><span class="q">/</span><button type="button" data-cmp="side" aria-pressed="false">Side view</button></div>
+      <span class="bl m" id="cmp-bl"><span style="color:var(--line)">——</span> You &nbsp; <span class="q">- - - Sam</span></span>
+      <span class="br m q">Example</span>
+    </div>
+    <div class="readout" id="cmp-read"></div>
+  </section>
+
+  <section id="coach">
+    <div class="head"><h2>Grip next to a real coach</h2><p>We're collecting clips reviewed by climbing and jiu-jitsu coaches, and publishing how Grip's notes line up with theirs. This is the format.</p></div>
+    <div class="vs" id="vs"></div>
+    <p class="m q" style="margin-top:12px" id="vs-cap">Example / board clip above / coach notes are placeholder</p>
+  </section>
+
+  <section>
+    <div class="head"><h2>Three notes, not a score</h2><p>No marks out of a hundred, no streaks, no twenty corrections you'll never remember. The three things that matter, most important first.</p></div>
+    <div class="ns">
+      <div class="card them"><span class="m q">A typical app</span><b>87 / 100</b><b>12-day streak</b><b>+40 XP</b><b>23 corrections</b></div>
+      <div class="card us"><span class="m q">Grip</span><div id="ns-us"></div></div>
+    </div>
+  </section>
+
+  <section id="levels">
+    <div class="head"><h2>For every level</h2><p>Beginners get the basics. If you've climbed or rolled for years, the useful part is what Grip sees across months of clips that you can't see in one session.</p></div>
+    <div class="lvl">
+      <div class="card">
+        <span class="m q">Plateau finder</span>
+        <h3>The one fault that won't leave</h3>
+        <p>Most faults fade once you work on them. Grip looks across every clip for the one that keeps coming back, and when.</p>
+        <svg id="plat" viewBox="0 0 560 230" role="img" aria-label="Example: five faults over twelve weeks. Four fade out; left hip on steep moves stays every week."></svg>
+        <span class="m q">Example / 12 weeks of board sessions</span>
+      </div>
+      <div class="card">
+        <span class="m q">Form drop-off</span>
+        <h3>Know when to stop</h3>
+        <p>Grip marks the attempt where your technique started to slip, so you train the good attempts, not the tired ones.</p>
+        <svg id="drop" viewBox="0 0 560 230" role="img" aria-label="Example: hip distance from the wall over ten attempts. It holds near 10 cm for six attempts, then climbs to 24 cm."></svg>
+        <span class="m q">Example / hips off the wall per attempt, cm</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="body">
+    <div class="head"><h2>Built round your body</h2><p>Grip measures your height, reach and limb lengths, so notes fit the body you climb and roll in. It never tells a shorter climber to make a move that only works at six foot.</p></div>
+    <div class="bodies">
+      <div><div class="stage"><svg id="bd0" aria-label="A shorter climber on the same holds"></svg><span class="tl m q">Reach 158 cm</span></div>
+        <div class="cap"><span class="m q">0:13 / Left hand</span><p>The long move is out of reach. Use the intermediate and step through with the right foot.</p></div></div>
+      <div><div class="stage"><svg id="bd1" aria-label="A climber of average height on the same holds"></svg><span class="tl m q">Reach 176 cm</span></div>
+        <div class="cap"><span class="m q">0:13 / Left hip</span><p>Turn the hip in and the hold comes to you. No need to jump it.</p></div></div>
+      <div><div class="stage"><svg id="bd2" aria-label="A taller climber on the same holds"></svg><span class="tl m q">Reach 194 cm</span></div>
+        <div class="cap"><span class="m q">0:13 / Feet</span><p>You're cramped, not stretched. Skip the high foot and keep your hips away from the wall.</p></div></div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <span class="m q">Injury-aware</span>
+        <h3>Tell it what hurts</h3>
+        <p>Add an injury, a prosthetic or a one-arm setup and every note respects it. Grip never cues through pain, and offers easier versions of a move while you build back.</p>
+        <div class="lines m"><div class="row"><span class="q">Left shoulder</span><span>Recovering / week 6</span></div><div class="row"><span class="q">Note changed to</span><span>Static on the left, no deadpoints</span></div><div class="row"><span class="q">Regression</span><span>Same problem, feet on the kicker</span></div></div>
+        <span class="m q">Example</span>
+      </div>
+      <div class="card">
+        <span class="m q">Private by default</span>
+        <h3>Share the wireframe, not the video</h3>
+        <p>Send a coach or a friend just the tracked skeleton and the notes. No face, no body, no gym in the background. Useful for anyone who doesn't want to be filmed, or doesn't want the clip going round.</p>
+        <div class="lines m"><div class="row"><span class="q">Video</span><span>Stays on your phone</span></div><div class="row"><span class="q">Shared</span><span>Wireframe, time, three notes</span></div><div class="row"><span class="q">Link</span><span>Expires after 7 days</span></div></div>
+        <span class="m q">Example settings</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="coaches">
+    <div class="head"><h2>For coaches and PTs</h2><p>Your clients film between sessions. Grip drafts the notes, you check them, and you see who's improving without rewatching every clip.</p></div>
+    <div class="coach">
+      <div class="card">
+        <div class="meta m" style="margin-bottom:6px"><span>Waiting for you / 3</span><button type="button" class="q" id="dr-reset">Reset demo</button></div>
+        <ul class="drafts" id="drafts"></ul>
+        <span class="m q" style="display:block;margin-top:12px">Grip drafts, you approve. Nothing reaches the client until you do.</span>
+      </div>
+      <div class="card roster" style="padding-inline:18px">
+        <div class="r h m q"><span>Client</span><span>Sport</span><span>Keeps coming back</span><span>8 sessions</span><span>Cue</span></div>
+        <div id="roster"></div>
+      </div>
+    </div>
+    <p class="m q" style="margin-top:12px">Example clients and data</p>
+  </section>
+
+  <section id="community">
+    <div class="head"><h2>Built with the community</h2><p>Grip's cues come from coaches who teach on real walls and mats, and they're credited every time they're used. When Grip gets something wrong, you can say so and a coach checks it.</p></div>
+    <div class="comm">
+      <div class="card">
+        <span class="m q">Cue library</span>
+        <div class="cues">
+          <div class="c"><b>"Push the wall away with your feet, not your hands."</b><span class="m q">Climbing coach / example gym, Sheffield</span><span class="m">Used in 1,240 notes</span></div>
+          <div class="c"><b>"Elbows to your knees before anything else."</b><span class="m q">BJJ black belt / example academy, Bristol</span><span class="m">Used in 860 notes</span></div>
+          <div class="c"><b>"Ribs down, then reach."</b><span class="m q">Calisthenics coach / example park crew, London</span><span class="m">Used in 410 notes</span></div>
+        </div>
+        <span class="m q" style="margin-top:12px;display:block">Example coaches and counts / coaches are paid per cue used</span>
+      </div>
+      <div class="card flag">
+        <span class="m q">Correct Grip</span>
+        <h3 style="margin:8px 0 14px">Tell it when it's wrong</h3>
+        <div class="nt"><span class="m q">0:13 / Left hip</span><b>Turn it in</b><span class="m q" id="fl-st">Is this note right?</span><div class="acts m" id="fl-acts"><button type="button" data-fl="ok">Looks right</button><button type="button" data-fl="no">This is wrong</button></div></div>
+        <div class="score" style="margin-top:18px"><span class="m q">Grip agrees with coaches on</span><b id="fl-pc">84.0%</b><span class="m q" id="fl-n">of 212 notes checked / example</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cards">
+    <div class="head"><h2>Cue cards</h2><p>Any note becomes a card: the frame, the line and the cue. Keep it on your lock screen for the next session, or send it to the friend who keeps giving you beta.</p></div>
+    <div class="cards" id="cue-cards"></div>
+    <p class="m q" style="margin-top:12px">Example cards from the board clip / on the live site they save as images</p>
+  </section>
+
+  <section id="limits">
+    <div class="head"><h2>What Grip can't do</h2><p>Some of these are "yet". We'd rather tell you here than in your first review.</p></div>
+    <div class="cant">
+      <div><span class="m q">Angle</span><h3>See your hips from straight behind</h3><p>The camera can't see how far you are from the wall. Film side-on or at 45°.</p></div>
+      <div><span class="m q">Scrambles</span><h3>Always tell two bodies apart</h3><p>In a tight scramble it can lose track of who's who. Tell it what you're wearing and it gets much better.</p></div>
+      <div><span class="m q">Speed</span><h3>Catch every grip change</h3><p>Fast hand fighting falls between frames. Mark a window, "watch 0:12 to 0:18", and it looks closer.</p></div>
+      <div><span class="m q">Injury</span><h3>Diagnose anything</h3><p>It isn't a physio. It can respect an injury you tell it about, but it can't find one.</p></div>
+      <div><span class="m q">Intent</span><h3>Know what you were trying</h3><p>A deliberate drop-knee and a slip look alike. Say what you were working on.</p></div>
+      <div><span class="m q">Coaching</span><h3>Replace a coach in the room</h3><p>It covers the sessions nobody watches. Your coach still sees what a camera can't.</p></div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="head"><h2>Questions</h2><p></p></div>
+    <div class="faq">
+      <div><h3>Where should my phone go?</h3><p>Use the diagram above. For the board, side-on to 45°, so your hips show against the wall. For a roll, the side of the mat, about three metres back.</p></div>
+      <div><h3>Does it replace my coach?</h3><p>No. It covers the sessions your coach can't watch, and gives you something specific to bring to your next class.</p></div>
+      <div><h3>How does it know which one is me?</h3><p>Tell it before it watches: "I'm in the blue gi". Your partner's movement is used for context and never gets notes.</p></div>
+      <div><h3>Who sees my clips?</h3><p>Only you. Clips stay private unless you share a review or a cue card.</p></div>
+      <div><h3>Is it for beginners?</h3><p>It's built for people who train three or more times a week, already film themselves, and want the fix rather than motivation.</p></div>
+      <div><h3>I'm a coach. Can I use it with clients?</h3><p>Yes. Clients share clips to you, Grip drafts the notes, and you approve or edit them before they go out. Coach accounts open with the beta.</p></div>
+      <div><h3>When can I use it?</h3><p>The beta opens to small groups first. Join the list and we'll email you when your spot opens.</p></div>
+    </div>
+  </section>
+
+  <section class="closer">
+    <h2>Watch the tape. Fix one thing.</h2>
+    <div>
+      <form class="form" novalidate><label for="e2" class="sr">Email</label><input id="e2" type="email" placeholder="you@email.com" autocomplete="email" required><button type="submit" class="m">Join the beta</button></form>
+      <span class="note m q" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <span id="an-note" hidden></span>
+  <footer class="foot m q"><span>© 2026 / g-r-i-p.com</span><span>For climbers and grapplers who film their training anyway</span></footer>
+</div>
+
+<script>
+(function () {
+
+  var MINT = '#4A74FF', WHITE = '#F3F3F0';
+  var NS = 'http://www.w3.org/2000/svg';
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function hash(a, b) { var x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); }
+  function f(n) { return n.toFixed(2); }
+  function tc(t) { var s = Math.floor(t); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  /* ---- climber: four limbs move up one hold at a time, the body follows by two-bone IK ---- */
+  var D = 8, ARM = 10, LEG = 11, PH = 1.15;
+  var BASE = { hL: [-9, 40], hR: [8, 44], fL: [-6, 0], fR: [6, 4] };
+  var ORDER = ['hR', 'fL', 'hL', 'fR'];
+  var NOTES = { hR: ['Right arm', 'stay straight'], fL: ['Left foot', 'place it quietly'], hL: ['Left hip', 'turn it in'], fR: ['Head', 'look before you reach'] };
+  function limbs(t) {
+    var s = Math.max(0, t) / PH, n = Math.floor(s / 4), k = Math.floor(s) % 4, p = ease(Math.min(1, (s % 1) * 1.3)), o = {};
+    ORDER.forEach(function (nm, i) {
+      var moves = n + (i < k ? 1 : 0), pr = i === k ? p : 0, b = BASE[nm];
+      var bulge = Math.sin(Math.PI * pr) * (nm[0] === 'h' ? 2.6 : 1.6) * (nm[1] === 'L' ? -1 : 1);
+      o[nm] = [b[0] + bulge, b[1] + D * (moves + pr), pr];
+    });
+    o.active = ORDER[k]; o.prog = p;
+    return o;
+  }
+  function ik(a, b, l1, l2, sg) {
+    var dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy), mx = l1 + l2 - .01, bx = b[0], by = b[1];
+    if (d > mx) { bx = a[0] + dx / d * mx; by = a[1] + dy / d * mx; d = mx; }
+    var an = Math.atan2(by - a[1], bx - a[0]), c = (l1 * l1 + d * d - l2 * l2) / (2 * l1 * d), off = Math.acos(Math.max(-1, Math.min(1, c)));
+    return [[a[0] + l1 * Math.cos(an + sg * off), a[1] + l1 * Math.sin(an + sg * off)], [bx, by]];
+  }
+  function body(L, o) {
+    o = o || {};
+    var fy = (L.fL[1] + L.fR[1]) / 2, hy = (L.hL[1] + L.hR[1]) / 2, fx = (L.fL[0] + L.fR[0]) / 2, hx = (L.hL[0] + L.hR[0]) / 2;
+    var P = [(fx + hx) / 2 * .8 + (o.shift || 0), (fy + hy) / 2 - 7 - (o.sag || 0)];
+    var S = [P[0] * .5 + hx * .3, P[1] + 16];
+    var J = { P: P, S: S, shL: [S[0] - 5, S[1]], shR: [S[0] + 5, S[1]], hiL: [P[0] - 3.5, P[1]], hiR: [P[0] + 3.5, P[1]], neck: [S[0], S[1] + 2], head: [S[0], S[1] + 6] };
+    var a = ik(J.shL, L.hL, ARM, ARM, 1); J.elL = a[0]; J.haL = a[1];
+    a = ik(J.shR, L.hR, ARM, ARM, -1); J.elR = a[0]; J.haR = a[1];
+    a = ik(J.hiL, L.fL, LEG, LEG, -1); J.knL = a[0]; J.ftL = a[1];
+    a = ik(J.hiR, L.fR, LEG, LEG, 1); J.knR = a[0]; J.ftR = a[1];
+    J.com = [P[0] * .5 + S[0] * .3 + (J.haL[0] + J.haR[0] + J.ftL[0] + J.ftR[0]) * .05, P[1] * .5 + S[1] * .3 + (J.haL[1] + J.haR[1] + J.ftL[1] + J.ftR[1]) * .05];
+    return J;
+  }
+  var BONES = [['shL', 'shR'], ['hiL', 'hiR'], ['shL', 'hiL'], ['shR', 'hiR'], ['shL', 'elL'], ['elL', 'haL'], ['shR', 'elR'], ['elR', 'haR'], ['hiL', 'knL'], ['knL', 'ftL'], ['hiR', 'knR'], ['knR', 'ftR'], ['S', 'neck']];
+  var MESH = [['shL', 'hiR'], ['shR', 'hiL'], ['elL', 'hiL'], ['elR', 'hiR']];
+  var DOTS = ['shL', 'shR', 'elL', 'elR', 'haL', 'haR', 'hiL', 'hiR', 'knL', 'knR', 'ftL', 'ftR', 'neck', 'S', 'P'];
+
+  function figure(J, X, Y, col, dash, op) {
+    var s = '', d = dash ? ' stroke-dasharray="3 3"' : '';
+    BONES.forEach(function (b) { s += '<line x1="' + f(X(J[b[0]])) + '" y1="' + f(Y(J[b[0]])) + '" x2="' + f(X(J[b[1]])) + '" y2="' + f(Y(J[b[1]])) + '"' + d + '/>'; });
+    var mesh = '';
+    MESH.forEach(function (b) { mesh += '<line x1="' + f(X(J[b[0]])) + '" y1="' + f(Y(J[b[0]])) + '" x2="' + f(X(J[b[1]])) + '" y2="' + f(Y(J[b[1]])) + '"/>'; });
+    var dots = '';
+    if (!dash) DOTS.forEach(function (k) { dots += '<circle cx="' + f(X(J[k])) + '" cy="' + f(Y(J[k])) + '" r=".75"/>'; });
+    var hd = '<circle cx="' + f(X(J.head)) + '" cy="' + f(Y(J.head)) + '" r="2.7" fill="none"' + d + '/>';
+    return '<g stroke="' + col + '" stroke-width="1.4" vector-effect="non-scaling-stroke" fill="none" opacity="' + (op || 1) + '" stroke-linecap="round">' +
+      '<g vector-effect="non-scaling-stroke">' + s + hd + '</g>' +
+      '<g opacity=".35">' + mesh + '</g>' +
+      '<g fill="#0D0E0D">' + dots + '</g></g>';
+  }
+  function fixStroke(svg) { svg.querySelectorAll('line,circle,path,polyline,polygon').forEach(function (e) { e.setAttribute('vector-effect', 'non-scaling-stroke'); }); }
+
+  function wall(x0, x1, y0, y1, X, Y, holds) {
+    var s = '<g stroke="' + WHITE + '" stroke-opacity=".07" stroke-width="1">';
+    for (var gx = Math.ceil(x0 / 8) * 8; gx <= x1; gx += 8) s += '<line x1="' + f(X([gx, 0])) + '" y1="' + f(Y([0, y0])) + '" x2="' + f(X([gx, 0])) + '" y2="' + f(Y([0, y1])) + '"/>';
+    for (var gy = Math.ceil(y0 / 8) * 8; gy <= y1; gy += 8) s += '<line x1="' + f(X([x0, 0])) + '" y1="' + f(Y([0, gy])) + '" x2="' + f(X([x1, 0])) + '" y2="' + f(Y([0, gy])) + '"/>';
+    s += '</g>';
+    if (!holds) return s;
+    s += '<g stroke="' + WHITE + '" stroke-opacity=".38" stroke-width="1" fill="none">';
+    var r0 = Math.floor(y0 / D) - 1, r1 = Math.ceil(y1 / D) + 1, r, i;
+    function hold(cx, cy, seed, sz) {
+      var pts = [], n = 5;
+      for (var v = 0; v < n; v++) { var an = v / n * Math.PI * 2 + seed * 3, rr = sz * (.7 + .5 * hash(seed, v)); pts.push(f(X([cx + Math.cos(an) * rr, 0])) + ',' + f(Y([0, cy + Math.sin(an) * rr * .8]))); }
+      return '<polygon points="' + pts.join(' ') + '"/>';
+    }
+    for (r = r0; r <= r1; r++) {
+      ORDER.forEach(function (nm, j) { var b = BASE[nm]; var y = b[1] + D * r; if (y > y0 - 4 && y < y1 + 4) s += hold(b[0], y - (nm[0] === 'h' ? 1 : 1.2), r * 4 + j, nm[0] === 'h' ? 1.6 : 1.3); });
+      for (i = 0; i < 3; i++) { var hx = -70 + hash(r, i + 9) * 140; if (Math.abs(hx) < 13) continue; s += hold(hx, D * r + hash(r, i + 3) * 8, r * 7 + i, .9 + hash(i, r) * 1.4); }
+    }
+    return s + '</g>';
+  }
+
+  /* ---- rolling: two bodies swap between closed guard and mount ---- */
+  var KA = { head: [38, 93], neck: [48, 95], elN: [62, 82], haN: [80, 66], elF: [64, 90], haF: [84, 78], hip: [84, 96], knN: [100, 78], ftN: [122, 84], knF: [102, 86], ftF: [124, 92] };
+  var KB = { head: [96, 40], neck: [100, 50], elN: [92, 64], haN: [82, 86], elF: [104, 66], haF: [90, 90], hip: [116, 80], knN: [108, 99], ftN: [140, 99], knF: [116, 99], ftF: [144, 99] };
+  var RB = [['neck', 'hip'], ['neck', 'elN'], ['elN', 'haN'], ['neck', 'elF'], ['elF', 'haF'], ['hip', 'knN'], ['knN', 'ftN'], ['hip', 'knF'], ['knF', 'ftF']];
+  function blend(a, b, u, lift) {
+    var o = {}; Object.keys(a).forEach(function (k) { o[k] = [lerp(a[k][0], b[k][0], u), lerp(a[k][1], b[k][1], u) - Math.sin(Math.PI * u) * lift]; }); return o;
+  }
+  function rollU(t) { var c = 5.4, s = (t % c + c) % c; if (s < 1.1) return [0, 0]; if (s < 2.7) return [ease((s - 1.1) / 1.6), 1]; if (s < 3.8) return [1, 1]; return [1 - ease((s - 3.8) / 1.6), 2]; }
+  function sideFig(K, col, op) {
+    var s = '<g stroke="' + col + '" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="' + op + '">';
+    RB.forEach(function (b) { var far = b[0].slice(-1) === 'F' || b[1].slice(-1) === 'F'; s += '<line x1="' + f(K[b[0]][0]) + '" y1="' + f(K[b[0]][1]) + '" x2="' + f(K[b[1]][0]) + '" y2="' + f(K[b[1]][1]) + '"' + (far ? ' stroke-opacity=".4"' : '') + '/>'; });
+    s += '<line x1="' + f(K.neck[0]) + '" y1="' + f(K.neck[1]) + '" x2="' + f(K.knN[0]) + '" y2="' + f(K.knN[1]) + '" stroke-opacity=".25"/>';
+    var tx = K.neck[0] - K.hip[0], ty = K.neck[1] - K.hip[1], tl = Math.hypot(tx, ty) || 1, hx = K.neck[0] + tx / tl * 5.4, hy = K.neck[1] + ty / tl * 5.4;
+    s += '<circle cx="' + f(hx) + '" cy="' + f(hy) + '" r="4.4"/><g fill="#0D0E0D">';
+    Object.keys(K).forEach(function (k) { if (k !== 'head') s += '<circle cx="' + f(K[k][0]) + '" cy="' + f(K[k][1]) + '" r="1"/>'; });
+    return s + '</g></g>';
+  }
+  var trail = [];
+  function drawRoll(svg, t) {
+    var uu = rollU(t), u = uu[0];
+    var A = blend(KA, KB, u, 14), B = blend(KB, KA, u, 5);
+    svg.setAttribute('viewBox', '0 22 184 92');
+    var s = '<g stroke="' + WHITE + '" stroke-opacity=".08">';
+    for (var x = 0; x <= 184; x += 16) s += '<line x1="' + x + '" y1="100" x2="' + (92 + (x - 92) * 1.6) + '" y2="114"/>';
+    s += '<line x1="0" y1="100" x2="184" y2="100" stroke-opacity=".3"/><line x1="0" y1="106" x2="184" y2="106"/></g>';
+    trail.push([A.hip[0], A.hip[1]]); if (trail.length > 70) trail.shift();
+    s += '<polyline fill="none" stroke="' + WHITE + '" stroke-opacity=".35" stroke-dasharray="1 2" points="' + trail.map(function (p) { return f(p[0]) + ',' + f(p[1]); }).join(' ') + '"/>';
+    s += sideFig(B, MINT, .6) + sideFig(A, MINT, 1);
+    svg.innerHTML = s; fixStroke(svg);
+    var lab = u < .08 ? 'Closed guard' : u > .92 ? 'Mount' : 'Sweep';
+    return lab;
+  }
+
+  /* ---- scenes ---- */
+  var cam = { hero: null, an: null, cmp: null }, comTrail = [];
+  function drawClimb(svg, t, mode, key) {
+    var L = limbs(t), J = body(L), h = mode === 'an' ? 84 : 100, asp = svg.clientWidth / Math.max(1, svg.clientHeight), w = h * (isFinite(asp) && asp > .3 ? asp : 2);
+    var target = J.P[1] + 7;
+    cam[key] = cam[key] == null ? target : cam[key] + (target - cam[key]) * .08;
+    var cy = cam[key];
+    svg.setAttribute('viewBox', (-w / 2) + ' ' + (-h / 2) + ' ' + w + ' ' + h);
+    var ox = mode === 'side' ? -w * .2 : 0;
+    var X = function (p) { return p[0] + ox; }, Y = function (p) { return -(p[1] - cy); };
+    var s = wall(-w / 2 - ox, mode === 'side' ? 4 - ox : w / 2, cy - h / 2 - 2, cy + h / 2 + 2, X, Y, true);
+
+    if (mode === 'friend') {
+      var Lf = limbs(t - .35), Jf = body(Lf, { sag: 3, shift: 1.6 });
+      s += figure(Jf, X, Y, WHITE, true, .7);
+    }
+    s += figure(J, X, Y, MINT, false, 1);
+
+    if (mode === 'an') {
+      comTrail.push([J.com[0], J.com[1]]); if (comTrail.length > 120) comTrail.shift();
+      s += '<polyline fill="none" stroke="' + WHITE + '" stroke-opacity=".45" stroke-dasharray="1 1.5" points="' + comTrail.map(function (p) { return f(X(p)) + ',' + f(Y(p)); }).join(' ') + '"/>';
+      var fl = Math.min(J.ftL[1], J.ftR[1]) - 3;
+      s += '<line x1="' + f(X(J.com)) + '" y1="' + f(Y(J.com)) + '" x2="' + f(X(J.com)) + '" y2="' + f(Y([0, fl])) + '" stroke="' + MINT + '" stroke-dasharray="1.5 1.5"/>';
+      s += '<circle cx="' + f(X(J.com)) + '" cy="' + f(Y(J.com)) + '" r="1.3" fill="' + WHITE + '"/>';
+      s += '<line x1="' + f(X(J.ftL)) + '" y1="' + f(Y([0, fl])) + '" x2="' + f(X(J.ftR)) + '" y2="' + f(Y([0, fl])) + '" stroke="' + WHITE + '" stroke-opacity=".5"/>';
+      function ang(a, b, c, side) {
+        var a1 = Math.atan2(a[1] - b[1], a[0] - b[0]), a2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
+        var d = Math.abs(a1 - a2); if (d > Math.PI) d = 2 * Math.PI - d;
+        var r = 3, p1 = [b[0] + Math.cos(a1) * r, b[1] + Math.sin(a1) * r], p2 = [b[0] + Math.cos(a2) * r, b[1] + Math.sin(a2) * r];
+        var sw = ((a2 - a1 + 4 * Math.PI) % (2 * Math.PI)) < Math.PI ? 0 : 1;
+        return '<path d="M' + f(X(p1)) + ' ' + f(Y(p1)) + 'A' + r + ' ' + r + ' 0 0 ' + sw + ' ' + f(X(p2)) + ' ' + f(Y(p2)) + '" fill="none" stroke="' + WHITE + '"/>' +
+          '<text x="' + f(X(b) + side * 4.5) + '" y="' + f(Y(b) + 1) + '" text-anchor="' + (side < 0 ? 'end' : 'start') + '">' + Math.round(d * 180 / Math.PI) + '°</text>';
+      }
+      s += '<g fill="' + WHITE + '" font-family="DM Mono, monospace" font-size="1.7">';
+      s += ang(J.hiL, J.knL, J.ftL, -1) + ang(J.shR, J.elR, J.haR, 1);
+      var nm = L.active, nt = NOTES[nm], anchor = nm === 'hR' ? J.elR : nm === 'fL' ? J.ftL : nm === 'hL' ? J.hiL : J.head;
+      var lx = nm === 'hR' || nm === 'fR' ? 16 : -16, side = lx > 0 ? 'start' : 'end';
+      s += '<line x1="' + f(X(anchor)) + '" y1="' + f(Y(anchor)) + '" x2="' + f(X(anchor) + lx) + '" y2="' + f(Y(anchor) - 6) + '" stroke="' + WHITE + '" stroke-opacity=".6"/>';
+      s += '<text x="' + f(X(anchor) + lx + (lx > 0 ? 1 : -1)) + '" y="' + f(Y(anchor) - 7) + '" text-anchor="' + side + '">' + nt[0].toUpperCase() + '</text>';
+      s += '<text x="' + f(X(anchor) + lx + (lx > 0 ? 1 : -1)) + '" y="' + f(Y(anchor) - 4.6) + '" text-anchor="' + side + '" fill-opacity=".6">' + nt[1].toUpperCase() + '</text></g>';
+      document.getElementById('an-note').textContent = nt[0] + ' / ' + nt[1];
+    }
+
+    if (mode === 'side') {
+      var wx = w * .12;
+      s += '<line x1="' + wx + '" y1="' + (-h / 2) + '" x2="' + wx + '" y2="' + (h / 2) + '" stroke="' + WHITE + '" stroke-opacity=".35"/>';
+      var dep = function (k) {
+        var base = { haL: 0, haR: 0, ftL: 0, ftR: 0, elL: 6, elR: 6, knL: 8, knR: 8, shL: 7, shR: 7, hiL: 10, hiR: 10, P: 10, S: 7, neck: 8, head: 10 }[k];
+        if (k === 'haL' || k === 'haR' || k === 'ftL' || k === 'ftR') { var nm2 = { haL: 'hL', haR: 'hR', ftL: 'fL', ftR: 'fR' }[k]; base += Math.sin(Math.PI * L[nm2][2]) * 4; }
+        if (k === 'hiL' || k === 'hiR' || k === 'P') base += Math.sin(Math.PI * L.prog) * (L.active[0] === 'h' ? 3 : -1.5);
+        return base;
+      };
+      var JS = {}; Object.keys(J).forEach(function (k) { if (J[k] && J[k].length === 2) JS[k] = [dep(k) == null ? 6 : dep(k), J[k][1]]; });
+      var XS = function (p) { return wx + p[0]; };
+      for (var r = Math.floor((cy - 40) / D); r <= Math.ceil((cy + 40) / D); r++) {
+        ORDER.forEach(function (nm3) { var yy = BASE[nm3][1] + D * r; s += '<path d="M' + wx + ' ' + f(Y([0, yy + 1.2])) + 'l1.6 1.4l-1.6 .4z" fill="none" stroke="' + WHITE + '" stroke-opacity=".38"/>'; });
+      }
+      s += figure(JS, XS, Y, MINT, false, 1);
+      s += '<g fill="' + WHITE + '" font-family="DM Mono, monospace" font-size="1.7" fill-opacity=".55"><text x="' + f(-w / 2 + 6) + '" y="' + f(h / 2 - 4) + '">FRONT</text><text x="' + (wx + 2) + '" y="' + f(h / 2 - 4) + '">SIDE</text></g>';
+      var hipOff = dep('P');
+      s += '<g fill="' + WHITE + '" font-family="DM Mono, monospace" font-size="1.7"><line x1="' + wx + '" y1="' + f(Y(J.P) + 6) + '" x2="' + f(wx + hipOff) + '" y2="' + f(Y(J.P) + 6) + '" stroke="' + WHITE + '"/><text x="' + f(wx + hipOff + 2) + '" y="' + f(Y(J.P) + 6.8) + '">HIPS ' + Math.round(hipOff * 3) + ' CM OFF THE WALL</text></g>';
+    }
+    svg.innerHTML = s; fixStroke(svg);
+    return L;
+  }
+
+
+  /* demo beta forms: nothing leaves the page */
+  document.querySelectorAll('form.form').forEach(function (fm) {
+    fm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var inp = fm.querySelector('input'), n = fm.parentNode.querySelector('.note');
+      if (!inp.value || !inp.checkValidity()) { n.textContent = 'Enter an email address, like you@email.com'; inp.focus(); return; }
+      n.textContent = 'Demo only: in the live site, ' + inp.value + ' would go on the list';
+      inp.value = '';
+    });
+  });
+
+  var WORD = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"32 -787 1660 1019\" role=\"img\" aria-label=\"grip\"><path fill=\"currentColor\" d=\"M304 232Q239 232 185.0 209.5Q131 187 94.5 144.5Q58 102 48 41H137Q151 91 196.5 122.5Q242 154 303 154Q351 154 389.0 133.5Q427 113 449.5 72.5Q472 32 472 -27V-98Q456 -71 429.5 -46.5Q403 -22 366.5 -6.5Q330 9 282 9Q212 9 155.0 -25.0Q98 -59 65.0 -117.5Q32 -176 32 -250Q32 -325 65.0 -383.0Q98 -441 155.0 -474.5Q212 -508 282 -508Q347 -508 396.5 -479.0Q446 -450 472 -410V-496H562V-30Q562 52 528.5 110.5Q495 169 436.5 200.5Q378 232 304 232ZM296 -69Q346 -69 385.0 -92.0Q424 -115 446.0 -156.0Q468 -197 468 -250Q468 -304 446.0 -344.5Q424 -385 385.0 -407.5Q346 -430 296 -430Q247 -430 208.0 -407.5Q169 -385 146.5 -344.5Q124 -304 124 -250Q124 -198 146.5 -156.5Q169 -115 208.0 -92.0Q247 -69 296 -69ZM650 0V-496H740V-418Q757 -457 786.0 -478.5Q815 -500 857 -500H931V-416H848Q816 -416 791.5 -398.0Q767 -380 753.5 -340.5Q740 -301 740 -236V0ZM1001 0V-496H1091V0ZM1177 220V-496H1267V-415Q1291 -451 1335.0 -479.5Q1379 -508 1447 -508Q1520 -508 1575.0 -474.0Q1630 -440 1661.0 -381.0Q1692 -322 1692 -247Q1692 -172 1661.0 -113.5Q1630 -55 1575.0 -21.5Q1520 12 1446 12Q1385 12 1339.0 -12.5Q1293 -37 1267 -81V220ZM1434 -66Q1483 -66 1520.5 -89.0Q1558 -112 1579.5 -153.0Q1601 -194 1601 -248Q1601 -302 1579.5 -343.0Q1558 -384 1520.5 -407.0Q1483 -430 1434 -430Q1386 -430 1348.5 -407.0Q1311 -384 1290.0 -343.0Q1269 -302 1269 -248Q1269 -194 1290.0 -153.0Q1311 -112 1348.5 -89.0Q1386 -66 1434 -66Z\"/><path fill=\"none\" stroke=\"currentColor\" stroke-width=\"90\" stroke-linecap=\"round\" d=\"M962 -636.0V-658.0a84 84 0 0 1 168 0V-636.0\"/></svg>";
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  /* ---- 1. try a clip. Clip time runs at half speed on the board (engine time = clip time x rate) ---- */
+  var CLIPS = {
+    climb: { len: 22, rate: .5, lab: 'Board / 40° / V6 project', meta: 'Session 09 / 4 attempts', notes: [
+      { s: 2.3, e: 4.6, t: '0:02', part: 'Left foot', h: 'Place it quietly', p: 'The foot lands, slides and resets. One look, one placement, then weight it.', cue: 'Eyes on the hold until the toe is on' },
+      { s: 13.8, e: 16.1, t: '0:13', part: 'Left hip', h: 'Turn it in', p: 'Hips 18 cm off the wall at the furthest reach. Turn the knee in and the hip follows.', cue: 'Knee in, then reach' },
+      { s: 18.4, e: 20.7, t: '0:18', part: 'Right arm', h: 'Stay straight', p: 'You bend the right arm before the hand needs to move, and pay for it on the next move.', cue: 'Long arm, hips do the work' } ] },
+    roll: { len: 17, rate: 1, lab: 'No-gi / round 3', meta: 'Session 04 / 6 min round', notes: [
+      { s: 1.1, e: 2.7, t: '0:01', part: 'Hips', h: 'Hips up before you push', p: 'The sweep starts with your arms, so they post and stay. Lift the hips first and the push is easy.', cue: 'Hips up, then push' },
+      { s: 8.1, e: 9.2, t: '0:08', part: 'Knees', h: 'Mount: keep your knees low', p: 'Your knees ride up to their armpits and they bridge you off. Low knees, heavy hips.', cue: 'Knees low, hips heavy' },
+      { s: 14.6, e: 16.2, t: '0:14', part: 'Frames', h: 'Frame before you shrimp', p: 'You hip-escape with no frame, so they follow you. Forearm across first, then move.', cue: 'Frame, then move' } ] }
+  };
+  var clipSvg = document.getElementById('clip'), seek = document.getElementById('seek'), playBtn = document.getElementById('play');
+  var clip = 'climb', tau = 0, playing = !still, last = null, act = -1;
+  function setClip(k) {
+    clip = k; tau = 0; trail = []; comTrail.length = 0;
+    var C = CLIPS[k];
+    document.querySelectorAll('[data-clip]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.clip === k ? 'true' : 'false'); });
+    document.getElementById('c-lab').textContent = C.lab;
+    document.getElementById('c-meta').textContent = C.meta;
+    document.getElementById('c-rate').textContent = C.rate === 1 ? '1×' : '0.5×';
+    document.getElementById('c-len').textContent = tc(C.len);
+    seek.max = C.len;
+    document.querySelectorAll('#ticks i').forEach(function (i) { i.remove(); });
+    C.notes.forEach(function (n) { var i = document.createElement('i'); i.style.left = (n.s / C.len * 100) + '%'; document.getElementById('ticks').appendChild(i); });
+    document.getElementById('notes').innerHTML = C.notes.map(function (n, j) {
+      return '<li><button type="button" data-n="' + j + '"><span class="m">' + n.t + '</span><span><span class="m q">' + esc(n.part) + '</span><h3>' + esc(n.h) + '</h3><p>' + esc(n.p) + '</p><p class="cue m">Cue / ' + esc(n.cue) + '</p></span></button></li>';
+    }).join('');
+    document.querySelectorAll('#notes button').forEach(function (b) { b.addEventListener('click', function () { jump(CLIPS[clip].notes[+b.dataset.n].s + .05); }); });
+    act = -2; drawClip();
+  }
+  function jump(t) { tau = t; trail = []; comTrail.length = 0; drawClip(); }
+  function drawClip() {
+    var C = CLIPS[clip], k = -1;
+    C.notes.forEach(function (n, j) { if (tau >= n.s && tau < n.e) k = j; });
+    if (clip === 'climb') drawClimb(clipSvg, tau * C.rate, 'an', 'clip');
+    else {
+      var pos = drawRoll(clipSvg, tau);
+      var s = '<g font-family="DM Mono, monospace" font-size="3.2" fill="' + WHITE + '"><text x="8" y="34" fill-opacity=".55">' + pos.toUpperCase() + '</text>';
+      if (k >= 0) s += '<text x="8" y="40">' + C.notes[k].part.toUpperCase() + '</text><text x="8" y="45" fill-opacity=".6">' + C.notes[k].cue.toUpperCase() + '</text>';
+      clipSvg.insertAdjacentHTML('beforeend', s + '</g>');
+    }
+    if (k !== act) { act = k; document.querySelectorAll('#notes li').forEach(function (li, j) { li.classList.toggle('on', j === k); }); }
+    seek.value = tau;
+    document.getElementById('c-tc').textContent = tc(tau);
+  }
+  document.querySelectorAll('[data-clip]').forEach(function (b) { b.addEventListener('click', function () { setClip(b.dataset.clip); }); });
+  seek.addEventListener('input', function () { jump(+seek.value); });
+  playBtn.addEventListener('click', function () { playing = !playing; last = null; playBtn.textContent = playing ? 'Pause' : 'Play'; playBtn.setAttribute('aria-pressed', playing ? 'true' : 'false'); });
+  if (!playing) { playBtn.textContent = 'Play'; playBtn.setAttribute('aria-pressed', 'false'); }
+
+  /* ---- 2. where to put your phone: angle from straight behind (wall) or from the side of the mat ---- */
+  var ph = document.getElementById('ph'), phR = document.getElementById('ph-r'), phMode = 'wall', ang = 45, CX = 200, CY = 52, RAD = 160;
+  function grade(v, a, b) { return v < a ? 0 : v < b ? 1 : 2; }
+  var WORDS = ['Lost', 'Partly', 'Clear'];
+  function phDraw() {
+    var a = Math.abs(ang), r = ang * Math.PI / 180, px = CX + Math.sin(r) * RAD, py = CY + Math.cos(r) * RAD, s = '';
+    var W = WHITE, look = Math.atan2(CY - py, CX - px);
+    if (phMode === 'wall') {
+      s += '<line x1="30" y1="40" x2="370" y2="40" stroke="' + W + '" stroke-opacity=".5"/><text x="30" y="30" font-family="DM Mono, monospace" font-size="9" fill="' + W + '" fill-opacity=".5">WALL</text>';
+      s += '<g stroke="' + MINT + '" stroke-width="1.4" fill="none" stroke-linecap="round"><line x1="186" y1="48" x2="214" y2="48"/><line x1="192" y1="56" x2="208" y2="56"/><line x1="200" y1="48" x2="200" y2="56"/><circle cx="200" cy="50" r="4.5" fill="#0D0E0D"/></g>';
+    } else {
+      s += '<rect x="70" y="26" width="260" height="56" rx="2" fill="none" stroke="' + W + '" stroke-opacity=".3"/><text x="70" y="18" font-family="DM Mono, monospace" font-size="9" fill="' + W + '" fill-opacity=".5">MAT</text>';
+      s += '<g stroke="' + MINT + '" stroke-width="1.4" fill="none" stroke-linecap="round"><line x1="150" y1="50" x2="196" y2="50"/><circle cx="144" cy="50" r="4.5"/><line x1="206" y1="56" x2="252" y2="56" stroke-opacity=".6"/><circle cx="258" cy="56" r="4.5" stroke-opacity=".6"/></g>';
+    }
+    var c1 = look - .38, c2 = look + .38, L = 230;
+    s += '<path d="M' + px.toFixed(1) + ' ' + py.toFixed(1) + 'L' + (px + Math.cos(c1) * L).toFixed(1) + ' ' + (py + Math.sin(c1) * L).toFixed(1) + 'M' + px.toFixed(1) + ' ' + py.toFixed(1) + 'L' + (px + Math.cos(c2) * L).toFixed(1) + ' ' + (py + Math.sin(c2) * L).toFixed(1) + '" stroke="' + W + '" stroke-opacity=".22" stroke-dasharray="2 3"/>';
+    s += '<path d="M' + (CX - RAD) + ' ' + CY + 'A' + RAD + ' ' + RAD + ' 0 0 0 ' + (CX + RAD) + ' ' + CY + '" fill="none" stroke="' + W + '" stroke-opacity=".08"/>';
+    s += '<g transform="translate(' + px.toFixed(1) + ' ' + py.toFixed(1) + ') rotate(' + (look * 180 / Math.PI + 90).toFixed(1) + ')"><rect x="-9" y="-5" width="18" height="10" rx="2" fill="#0D0E0D" stroke="' + W + '"/><circle cx="0" cy="-5" r="1.4" fill="' + W + '"/></g>';
+    ph.innerHTML = s;
+    var rows, good;
+    if (phMode === 'wall') {
+      rows = [['Hips to the wall', grade(a, 20, 35)], ['Arms and reach', 2 - grade(a, 60, 80)], ['Feet on holds', a < 70 ? 2 : 1], ['Both sides of the body', 2 - grade(a, 45, 75)]];
+      good = a >= 30 && a <= 60;
+      document.getElementById('ph-ang').textContent = a === 0 ? 'Straight behind' : a + '° from behind' + (a >= 85 ? ', side-on' : '');
+      document.getElementById('ph-v').textContent = good ? 'Good angle' : a < 30 ? 'Too far behind: hips are hidden' : 'Too far round: the far arm is hidden';
+    } else {
+      rows = [["Who's who", 2 - grade(a, 40, 65)], ['Hips and base', 2 - grade(a, 50, 75)], ['Grips and hands', a < 40 ? 1 : 0], ['Feet and hooks', 2 - grade(a, 45, 70)]];
+      good = a <= 35;
+      document.getElementById('ph-ang').textContent = a === 0 ? 'Square to the side of the mat' : a + '° off the side of the mat';
+      document.getElementById('ph-v').textContent = good ? 'Good angle' : 'Bodies overlap from here';
+    }
+    document.getElementById('ph-rows').innerHTML = rows.map(function (r) { return '<div class="row"><span>' + r[0] + '</span><b class="m' + (r[1] === 0 ? ' lost' : r[1] === 1 ? ' q' : '') + '">' + WORDS[r[1]] + '</b></div>'; }).join('');
+    phR.value = ang;
+  }
+  phR.addEventListener('input', function () { ang = +phR.value; phDraw(); });
+  document.querySelectorAll('[data-ph]').forEach(function (b) { b.addEventListener('click', function () {
+    phMode = b.dataset.ph; ang = phMode === 'wall' ? 45 : 0;
+    document.querySelectorAll('[data-ph]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    phDraw();
+  }); });
+  var phStage = document.getElementById('ph-stage'), dragging = false;
+  function phPoint(e) {
+    var r = ph.getBoundingClientRect(), sc = Math.max(400 / r.width, 250 / r.height);
+    var x = (e.clientX - r.left - (r.width - 400 / sc) / 2) * sc, y = (e.clientY - r.top - (r.height - 250 / sc) / 2) * sc;
+    var a = Math.atan2(x - CX, Math.max(1, y - CY)) * 180 / Math.PI;
+    ang = Math.round(Math.max(-90, Math.min(90, a))); phDraw();
+  }
+  ph.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; dragging = true; phStage.classList.add('drag'); ph.setPointerCapture(e.pointerId); phPoint(e); });
+  ph.addEventListener('pointermove', function (e) { if (dragging) phPoint(e); });
+  ph.addEventListener('pointerup', function () { dragging = false; phStage.classList.remove('drag'); });
+  phDraw();
+
+  /* ---- compare ---- */
+  var cmpSvg = document.getElementById('cmp'), cmpMode = 'friend';
+  var READ = {
+    friend: [['Hips', '4 cm lower', 'than Sam through the crux'], ['Reach', '0.3 s later', 'on every hand move'], ['Feet', '2 of 4', "placed as quietly as Sam's"]],
+    side: [['Hips', '30 cm out', 'from the wall at the furthest reach'], ['Arms', '162°', 'right elbow on the lock-off'], ['Feet', '4 cm', 'of lift before each placement']]
+  };
+  function readout() { document.getElementById('cmp-read').innerHTML = READ[cmpMode].map(function (r) { return '<div><span class="m q">' + r[0] + '</span><b>' + r[1] + '</b><span class="q">' + r[2] + '</span></div>'; }).join(''); }
+  document.querySelectorAll('[data-cmp]').forEach(function (b) { b.addEventListener('click', function () {
+    cmpMode = b.dataset.cmp;
+    document.querySelectorAll('[data-cmp]').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    document.getElementById('cmp-bl').innerHTML = cmpMode === 'friend' ? '<span style="color:var(--line)">——</span> You &nbsp; <span class="q">- - - Sam</span>' : '<span class="q">Same move, two cameras</span>';
+    readout(); if (still) frame(1.6);
+  }); });
+  readout();
+
+  /* ---- 3. next to a real coach (placeholder coach notes) ---- */
+  var VS = [['0:02', 'Left foot keeps slipping. Watch it all the way onto the hold.', 'Left foot / place it quietly', 'Same'],
+            ['0:13', 'Hips are miles off the wall. Drop the left knee.', 'Left hip / turn it in', 'Same'],
+            ['0:18', 'Bending the right arm too early.', 'Right arm / stay straight', 'Same'],
+            ['0:20', 'Chalk up before the crux, you are greasing off.', '', 'Coach only']];
+  document.getElementById('vs').innerHTML = '<div class="r h m q"><span>Time</span><span>Coach</span><span>Grip</span><span>Match</span></div>' +
+    VS.map(function (r) { return '<div class="r"><span class="m">' + r[0] + '</span><span>' + esc(r[1]) + '</span><span' + (r[2] ? '' : ' class="none"') + '>' + esc(r[2] || 'No note') + '</span><span class="m' + (r[3] === 'Same' ? '' : ' q') + '">' + r[3] + '</span></div>'; }).join('');
+
+  /* ---- 4. Grip's three notes ---- */
+  document.getElementById('ns-us').innerHTML = CLIPS.climb.notes.map(function (n) { return '<p><span class="m q">' + n.t + '</span>' + esc(n.part + ': ' + n.h.toLowerCase()) + '</p>'; }).join('');
+
+  /* ---- 6. cue cards: a still frame at each note's moment ---- */
+  document.getElementById('cue-cards').innerHTML = CLIPS.climb.notes.map(function (n, j) {
+    return '<div class="cue-card"><svg class="fr" id="cc' + j + '" aria-label="Frame at ' + n.t + '"></svg><div class="txt"><span class="m q">' + n.t + ' / ' + esc(n.part) + '</span><b>' + esc(n.h) + '</b><div class="row2"><span class="m">' + esc(n.cue) + '</span><span class="logo">' + WORD + '</span></div></div></div>';
+  }).join('');
+  function cards() { CLIPS.climb.notes.forEach(function (n, j) { drawClimb(document.getElementById('cc' + j), (n.s + .6) * CLIPS.climb.rate, 'hero', 'cc' + j); }); }
+
+
+  /* ---- built round your body: same holds, three arm and leg lengths (swaps the engine's limb lengths per draw) ---- */
+  var SIZES = [[8.6, 9.6], [10, 11], [11.4, 12.4]];
+  function drawBodies(t) {
+    var a0 = ARM, l0 = LEG;
+    SIZES.forEach(function (z, i) { ARM = z[0]; LEG = z[1]; drawClimb(document.getElementById('bd' + i), t + i * .4, 'hero', 'bd' + i); });
+    ARM = a0; LEG = l0;
+  }
+
+  /* ---- coach in the loop: approve or edit Grip's drafts (demo, nothing is sent) ---- */
+  var DRAFTS = [['Maya', '0:13', 'Left hip: turn it in. Knee in, then reach.'], ['Tom', '1:12', 'Win the far underhook before you come up on your side.'], ['Priya', '0:41', 'Right shoulder: keep the lock-off below 90° this week.']];
+  function drafts() {
+    document.getElementById('drafts').innerHTML = DRAFTS.map(function (d, i) {
+      return '<li data-i="' + i + '"><span class="m q">' + d[0] + ' / ' + d[1] + ' / Draft by Grip</span><span class="txt">' + esc(d[2]) + '</span><span class="acts m"><button type="button" data-a="ok">Approve</button><button type="button" data-a="edit">Edit</button></span></li>';
+    }).join('');
+  }
+  document.getElementById('drafts').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var li = b.closest('li'), d = DRAFTS[+li.dataset.i], txt = li.querySelector('.txt'), acts = li.querySelector('.acts');
+    if (b.dataset.a === 'edit') {
+      txt.outerHTML = '<input type="text" id="dr-in-' + li.dataset.i + '" aria-label="Edit note for ' + d[0] + '" value="' + esc(txt.textContent) + '">';
+      acts.innerHTML = '<button type="button" data-a="save">Save and approve</button>';
+      li.querySelector('input').focus();
+    } else {
+      var inp = li.querySelector('input'), val = inp ? inp.value : txt.textContent;
+      if (inp) inp.outerHTML = '<span class="txt">' + esc(val) + '</span>';
+      li.querySelector('.m.q').textContent = d[0] + ' / ' + d[1] + (inp ? ' / Edited by you' : ' / Approved');
+      acts.innerHTML = '<span class="q">Sent to ' + d[0] + ' (demo)</span>';
+    }
+  });
+  document.getElementById('dr-reset').addEventListener('click', drafts);
+  drafts();
+
+  /* ---- roster ---- */
+  var ROSTER = [['Maya R.', 'Board', 'Left hip off the wall', '5 of 8 sessions', [22, 21, 19, 19, 17, 15, 14, 12], 'Working'],
+                ['Tom K.', 'No-gi', 'No underhook from half guard', '6 of 8 sessions', [6, 7, 6, 6, 7, 6, 5, 6], 'Not yet'],
+                ['Priya S.', 'Board', 'Rehab: right shoulder range', '142° to 161°', [142, 145, 147, 150, 152, 155, 158, 161], 'Working'],
+                ['Dan O.', 'Gi', 'Posture breaks in closed guard', '3 of 8 sessions', [5, 4, 4, 3, 3, 2, 2, 1], 'Working']];
+  function spark(v, up) {
+    var mn = Math.min.apply(0, v), mx = Math.max.apply(0, v), r = mx - mn || 1;
+    var pts = v.map(function (x, i) { return (2 + i * 12).toFixed(0) + ',' + (up ? 22 - (x - mn) / r * 20 : 2 + (x - mn) / r * 20).toFixed(1); });
+    var e = pts[pts.length - 1].split(',');
+    return '<svg viewBox="0 0 88 24" aria-hidden="true"><polyline points="' + pts.join(' ') + '" fill="none" stroke="' + WHITE + '" stroke-opacity=".7" stroke-width="1.2"/><circle cx="' + e[0] + '" cy="' + e[1] + '" r="2" fill="' + WHITE + '"/></svg>';
+  }
+  document.getElementById('roster').innerHTML = ROSTER.map(function (r, i) {
+    return '<div class="r"><span>' + r[0] + '</span><span class="m q">' + r[1] + '</span><span class="f">' + esc(r[2]) + '<span>' + r[3] + '</span></span>' + spark(r[4], i === 2) + '<span class="m' + (r[5] === 'Working' ? '' : ' q') + '">' + r[5] + '</span></div>';
+  }).join('');
+
+
+  /* ---- on the bar: side-on calisthenics figure. 1 unit is about 2 cm. ---- */
+  var cali = document.getElementById('cali'), kStrip = document.getElementById('k-strip'), skill = 'pull', kTrail = [], kLog = [], kT0 = null;
+  var FA = 13, UA = 14, TOR = 26, TH = 20, SH = 19;
+  function dir(deg) { var r = deg * Math.PI / 180; return [-Math.sin(r), Math.cos(r)]; }   // 0 = straight down, 90 = pointing left
+  function add(a, d, l) { return [a[0] + d[0] * l, a[1] + d[1] * l]; }
+  function seg(a, b, extra) { return '<line x1="' + f(a[0]) + '" y1="' + f(a[1]) + '" x2="' + f(b[0]) + '" y2="' + f(b[1]) + '"' + (extra || '') + '/>'; }
+  function kFig(J) {
+    var s = '<g stroke="' + MINT + '" stroke-width="1.4" fill="none" stroke-linecap="round">';
+    [['H', 'E'], ['E', 'S'], ['S', 'P'], ['P', 'K'], ['K', 'A']].forEach(function (b) { s += seg(J[b[0]], J[b[1]]); });
+    s += '<circle cx="' + f(J.head[0]) + '" cy="' + f(J.head[1]) + '" r="4.2"/><g fill="#0D0E0D">';
+    ['H', 'E', 'S', 'P', 'K', 'A'].forEach(function (k) { s += '<circle cx="' + f(J[k][0]) + '" cy="' + f(J[k][1]) + '" r=".9"/>'; });
+    return s + '</g></g>';
+  }
+  function arcAt(a, b, c) {
+    var a1 = Math.atan2(a[1] - b[1], a[0] - b[0]), a2 = Math.atan2(c[1] - b[1], c[0] - b[0]);
+    var d = Math.abs(a1 - a2); if (d > Math.PI) d = 2 * Math.PI - d;
+    var r = 3.4, p1 = [b[0] + Math.cos(a1) * r, b[1] + Math.sin(a1) * r], p2 = [b[0] + Math.cos(a2) * r, b[1] + Math.sin(a2) * r];
+    var sw = ((a2 - a1 + 4 * Math.PI) % (2 * Math.PI)) < Math.PI ? 1 : 0;
+    return { deg: Math.round(d * 180 / Math.PI), path: '<path d="M' + f(p1[0]) + ' ' + f(p1[1]) + 'A' + r + ' ' + r + ' 0 0 ' + sw + ' ' + f(p2[0]) + ' ' + f(p2[1]) + '" fill="none" stroke="' + WHITE + '"/>' };
+  }
+  var TXT = 'font-family="DM Mono, monospace" font-size="3.4" fill="' + WHITE + '"';
+  function bar(s) { return '<g stroke="' + WHITE + '"><line x1="62" y1="20" x2="138" y2="20" stroke-opacity=".7" stroke-width="1.6"/><line x1="66" y1="20" x2="66" y2="118" stroke-opacity=".12"/><line x1="134" y1="20" x2="134" y2="118" stroke-opacity=".12"/><line x1="20" y1="118" x2="180" y2="118" stroke-opacity=".25"/></g>' + (s || ''); }
+
+  /* pull-ups: six reps; rep 4 kips, rep 6 stops short */
+  var REPS = [[1, 1.6, 1, 0], [1.05, 1.7, 1, 0], [1.1, 1.6, 1, 0], [.65, 1.2, 1, 1], [1.2, 1.9, 1, 0], [1.4, 1.5, .7, 0]];
+  function repAt(t) {
+    var acc = 0;
+    for (var i = 0; i < REPS.length; i++) { var r = REPS[i], d = r[0] + .25 + r[1] + .5; if (t < acc + d) return { i: i, u: t - acc, r: r, d: d }; acc += d; }
+    return null;
+  }
+  var PULL_LEN = REPS.reduce(function (a, r) { return a + r[0] + r[1] + .75; }, 0) + 1.5;
+  function pullUp(t) {
+    var R = repAt(t), p = 0, sw = 0, i = REPS.length, phase = 'rest';
+    if (R) {
+      i = R.i; var r = R.r, u = R.u;
+      if (u < r[0]) { p = ease(u / r[0]) * r[2]; phase = 'up'; } else if (u < r[0] + .25) { p = r[2]; phase = 'top'; } else if (u < r[0] + .25 + r[1]) { p = (1 - ease((u - r[0] - .25) / r[1])) * r[2]; phase = 'down'; } else phase = 'bottom';
+      if (r[3]) sw = Math.sin(u / R.d * Math.PI * 2 + .6);
+    }
+    var H = [100, 20], S = [lerp(100, 104, p), lerp(47, 25.5, p)];
+    var e1 = ik(S, H, UA, FA, 1), e2 = ik(S, H, UA, FA, -1), E = e1[0][0] < e2[0][0] ? e1[0] : e2[0];
+    var a = -4 + 6 * p + sw * 22, P = add(S, dir(a), TOR), K = add(P, dir(a - 10 - sw * 30), TH), A = add(K, dir(a + 4 - sw * 20), SH);
+    var hd = add(S, dir(a + 180), 7.5); hd[0] -= 1.5;
+    return { J: { H: H, E: E, S: S, P: P, K: K, A: A, head: hd }, i: i, phase: phase, p: p, sw: sw };
+  }
+  function drawPull(t) {
+    var Q = pullUp(t), J = Q.J, chin = [J.head[0], J.head[1] + 4.2], s = bar();
+    kTrail.push(J.P); if (kTrail.length > 80) kTrail.shift();
+    s += '<polyline fill="none" stroke="' + WHITE + '" stroke-opacity=".4" stroke-dasharray="1 1.6" points="' + kTrail.map(function (q) { return f(q[0]) + ',' + f(q[1]); }).join(' ') + '"/>';
+    s += '<line x1="40" y1="20" x2="62" y2="20" stroke="' + WHITE + '" stroke-opacity=".5" stroke-dasharray="1.5 1.5"/><text x="40" y="16.5" ' + TXT + ' fill-opacity=".55">CHIN LINE</text>';
+    s += kFig(J);
+    var ar = arcAt(J.S, J.E, J.H); s += ar.path + '<text x="' + f(J.E[0] - 5) + '" y="' + f(J.E[1] + 1) + '" text-anchor="end" ' + TXT + '>' + ar.deg + '°</text>';
+    s += '<circle cx="' + f(chin[0]) + '" cy="' + f(chin[1]) + '" r="1.1" fill="' + WHITE + '"/>';
+    if (Q.phase === 'top') s += '<text x="' + f(chin[0] - 6) + '" y="' + f(chin[1] + 1) + '" text-anchor="end" ' + TXT + '>' + (chin[1] < 20.5 ? 'CHIN OVER' : Math.round((chin[1] - 20) * 2) + ' CM SHORT') + '</text>';
+    if (Math.abs(Q.sw) > .3) s += '<text x="' + f(J.P[0] + 6) + '" y="' + f(J.P[1]) + '" ' + TXT + '>HIPS SWING ' + Math.round(Math.abs(Q.sw) * 16) + ' CM</text>';
+    cali.innerHTML = s; fixStroke(cali);
+    var done = Math.min(Q.i, REPS.length), cur = Math.min(Q.i + 1, REPS.length), valid = 0, ups = 0, downs = 0, n = 0;
+    for (var k = 0; k < done; k++) { var r = REPS[k]; if (r[2] === 1 && !r[3]) valid++; ups += r[0]; downs += r[1]; n++; }
+    var call = 'Rep', big = String(cur), ri = REPS[Q.i];
+    if (ri && (Q.phase === 'top' || Q.phase === 'down')) { if (ri[3]) { call = 'Rep ' + cur; big = 'No rep'; } else if (ri[2] < 1) { call = 'Rep ' + cur; big = 'No rep'; } else { call = 'Rep ' + cur; big = 'Good'; } }
+    if (!ri) { call = 'Set'; big = valid + ' of 6'; }
+    document.getElementById('k-callt').textContent = call; document.getElementById('k-call').textContent = big;
+    rows([['Clean reps', valid + ' of ' + done], ['Tempo', n ? (ups / n).toFixed(1) + ' s up / ' + (downs / n).toFixed(1) + ' s down' : '...'], ['Elbow at the top', Q.phase === 'top' ? ar.deg + '°' : '...']]);
+    notes([Q.i === 3, Q.i === 5, Q.phase === 'down' && Q.i !== 3 && Q.i !== 5]);
+    /* strip: one column per rep, height = range, white = counted */
+    var st = '';
+    REPS.forEach(function (r, k) {
+      var x = 20 + k * 96, h = r[2] * 54, ok = r[2] === 1 && !r[3], shown = k < done || (k === Q.i && Q.phase !== 'up');
+      st += '<rect x="' + x + '" y="' + (64 - 54) + '" width="56" height="54" fill="none" stroke="' + WHITE + '" stroke-opacity=".12"/>';
+      if (shown) st += '<rect x="' + x + '" y="' + (64 - h) + '" width="56" height="' + h + '" fill="' + WHITE + '" fill-opacity="' + (ok ? .85 : .18) + '"/>';
+      st += '<text x="' + x + '" y="82" ' + TXT.replace('3.4', '11') + ' fill-opacity="' + (shown ? .9 : .4) + '">' + (k + 1) + (shown ? (ok ? ' GOOD' : r[3] ? ' KIP' : ' HALF') : '') + '</text>';
+    });
+    kStrip.innerHTML = st;
+  }
+
+  /* front lever: rise, hold while the hips slowly sag, lower */
+  var LEV_LEN = 11.4;
+  function drawLever(t) {
+    var u, hold = 0, ph;
+    if (t < 1.6) { u = ease(t / 1.6); ph = 'rise'; } else if (t < 8.6) { u = 1; hold = t - 1.6; ph = 'hold'; } else if (t < 10.2) { u = 1 - ease((t - 8.6) / 1.6); ph = 'lower'; hold = 7; } else { u = 0; ph = 'rest'; hold = 7; }
+    var sag = (ph === 'hold' ? 2 + 10 * Math.pow(hold / 7, 1.6) : ph === 'lower' ? 12 : 2) * u;
+    var H = [100, 20], S = add(H, dir(-12 * u), FA + UA), E = add(H, dir(-12 * u), FA);
+    var th = 90 * u, P = add(S, dir(th - sag), TOR), K = add(P, dir(th + sag * .35), TH), A = add(K, dir(th + sag * .35), SH);
+    var hd = add(S, dir(th + 180), 7); hd = add(hd, dir(th + 90), 2);
+    var J = { H: H, E: E, S: S, P: P, K: K, A: A, head: hd }, s = bar();
+    var L = add(S, dir(th), TOR + TH + SH + 6);
+    s += '<line x1="' + f(S[0]) + '" y1="' + f(S[1]) + '" x2="' + f(L[0]) + '" y2="' + f(L[1]) + '" stroke="' + WHITE + '" stroke-opacity=".55" stroke-dasharray="2 1.6"/>';
+    var dl = dir(th), nx = -dl[1], ny = dl[0], dev = Math.abs((P[0] - S[0]) * nx + (P[1] - S[1]) * ny) * 2;
+    s += kFig(J);
+    if (u > .9) {
+      var foot = [P[0] - nx * dev / 2, P[1] - ny * dev / 2];
+      s += seg(P, foot, ' stroke="' + WHITE + '"') + '<text x="' + f(P[0] + 3) + '" y="' + f(P[1] + 7) + '" ' + TXT + '>HIPS ' + dev.toFixed(0) + ' CM BELOW LINE</text>';
+      s += '<text x="' + f(L[0]) + '" y="' + f(L[1] - 3) + '" ' + TXT + ' fill-opacity=".55">BODY LINE</text>';
+    }
+    cali.innerHTML = s; fixStroke(cali);
+    if (ph === 'hold') { kLog.push([hold, dev]); }
+    if (ph === 'rise' && t < .2) kLog = [];
+    var clean = 0; kLog.forEach(function (q) { if (q[1] <= 5) clean = q[0]; });
+    document.getElementById('k-callt').textContent = ph === 'hold' ? 'Hold' : ph === 'rise' ? 'Rising' : 'Held';
+    document.getElementById('k-call').textContent = hold.toFixed(1) + ' s';
+    rows([['Clean hold', clean.toFixed(1) + ' s under 5 cm'], ['Body line', u > .9 ? (180 - Math.round(sag * 1.35)) + '°' : '...'], ['Hips', u > .9 ? dev.toFixed(0) + ' cm below' : '...']]);
+    notes([ph === 'rise', ph === 'hold' && dev > 5, ph === 'lower' || ph === 'rest']);
+    var st = '<line x1="20" y1="64" x2="590" y2="64" stroke="' + WHITE + '" stroke-opacity=".2"/><line x1="20" y1="' + (64 - 5 * 4) + '" x2="590" y2="' + (64 - 5 * 4) + '" stroke="' + WHITE + '" stroke-opacity=".5" stroke-dasharray="3 4"/>';
+    st += '<text x="590" y="' + (64 - 5 * 4 - 6) + '" text-anchor="end" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">5 CM</text>';
+    if (kLog.length > 1) st += '<polyline fill="none" stroke="' + WHITE + '" stroke-width="1.5" points="' + kLog.map(function (q) { return f(20 + q[0] / 7 * 570) + ',' + f(64 - Math.min(14, q[1]) * 4); }).join(' ') + '"/>';
+    st += '<text x="20" y="84" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">0 S</text><text x="590" y="84" text-anchor="end" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">7 S / HIPS BELOW LINE</text>';
+    kStrip.innerHTML = st;
+  }
+
+  /* handstand: a held line with a slow sway */
+  var HAND_LEN = 12;
+  function drawHand(t) {
+    var w = t * 1.3, H = [100, 112], S = [100 + 1.4 * Math.sin(w + 1), 112 - FA - UA], E = [lerp(H[0], S[0], .5), lerp(H[1], S[1], .5)];
+    var P = [100 + 2.4 + 2.6 * Math.sin(w), S[1] - TOR], A = [100 - 1 + 3.4 * Math.sin(w + .7), P[1] - TH - SH], K = [lerp(P[0], A[0], .5) + .6, lerp(P[1], A[1], .5)];
+    var hd = [S[0] - 1.2, S[1] + 5.5], J = { H: H, E: E, S: S, P: P, K: K, A: A, head: hd };
+    var s = '<line x1="20" y1="112" x2="180" y2="112" stroke="' + WHITE + '" stroke-opacity=".3"/><line x1="100" y1="112" x2="100" y2="8" stroke="' + WHITE + '" stroke-opacity=".55" stroke-dasharray="2 1.6"/><text x="102" y="10" ' + TXT + ' fill-opacity=".55">STACK</text>';
+    kTrail.push(A); if (kTrail.length > 90) kTrail.shift();
+    s += '<polyline fill="none" stroke="' + WHITE + '" stroke-opacity=".4" stroke-dasharray="1 1.6" points="' + kTrail.map(function (q) { return f(q[0]) + ',' + f(q[1]); }).join(' ') + '"/>';
+    s += kFig(J);
+    [['SHOULDERS', S], ['HIPS', P], ['FEET', A]].forEach(function (q) {
+      var cm = (q[1][0] - 100) * 2;
+      s += seg([100, q[1][1]], q[1], ' stroke="' + WHITE + '"') + '<text x="' + f(Math.max(q[1][0], 100) + 4) + '" y="' + f(q[1][1] + 1.2) + '" ' + TXT + '>' + q[0] + ' ' + (cm >= 0 ? '+' : '') + cm.toFixed(0) + ' CM</text>';
+    });
+    cali.innerHTML = s; fixStroke(cali);
+    var hipCm = Math.abs(P[0] - 100) * 2, sway = 3.4 * 2;
+    if (t < .1) kLog = []; kLog.push([t, hipCm]);
+    document.getElementById('k-callt').textContent = 'Hold'; document.getElementById('k-call').textContent = t.toFixed(1) + ' s';
+    rows([['Hips off the stack', hipCm.toFixed(0) + ' cm'], ['Sway at the feet', sway.toFixed(0) + ' cm'], ['Line', hipCm < 4 ? 'Stacked' : 'Banana']]);
+    notes([hipCm >= 4, Math.cos(w + .7) > .5, hipCm < 4]);
+    var st = '<line x1="20" y1="64" x2="590" y2="64" stroke="' + WHITE + '" stroke-opacity=".2"/><line x1="20" y1="' + (64 - 4 * 5) + '" x2="590" y2="' + (64 - 4 * 5) + '" stroke="' + WHITE + '" stroke-opacity=".5" stroke-dasharray="3 4"/>';
+    st += '<text x="590" y="' + (64 - 20 - 6) + '" text-anchor="end" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">4 CM</text>';
+    if (kLog.length > 1) st += '<polyline fill="none" stroke="' + WHITE + '" stroke-width="1.5" points="' + kLog.map(function (q) { return f(20 + q[0] / HAND_LEN * 570) + ',' + f(64 - q[1] * 5); }).join(' ') + '"/>';
+    st += '<text x="20" y="84" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">0 S</text><text x="590" y="84" text-anchor="end" ' + TXT.replace('3.4', '11') + ' fill-opacity=".6">12 S / HIPS OFF THE STACK</text>';
+    kStrip.innerHTML = st;
+  }
+
+  var SK = {
+    pull: { len: PULL_LEN, draw: drawPull, title: 'Strict set / referee on', bl: 'Strict pull-ups / 6 reps', vb: '20 2 160 120',
+      notes: [['Rep 4', 'Kip creeping in', 'Hips swing forward to finish the rep. Not counted. Squeeze glutes and stay hollow.'], ['Rep 6', 'Half rep', 'Chin stops short of the bar. Not counted. End the set one rep earlier.'], ['Lowering', '1.6 s on the way down', 'Good. Aim for 2 s to build the top of the pull.']] },
+    lever: { len: LEV_LEN, draw: drawLever, title: 'Front lever / full', bl: 'Front lever / one hold', vb: '28 4 136 85',
+      notes: [['Rise', 'Push the bar to your hips', 'Straight arms, shoulders down. The lift comes from the lats.'], ['Hold', 'Hips dropping as you tire', 'Squeeze glutes and point the toes. Stop the hold at 5 cm of sag.'], ['Next', 'Clean hold is your number', 'Only the time with a straight line counts.']] },
+    hand: { len: HAND_LEN, draw: drawHand, title: 'Handstand / floor', bl: 'Freestanding handstand', vb: '20 2 160 120',
+      notes: [['Hips', 'Stack them over your shoulders', 'Hips are drifting past the line, so the back arches. Ribs in, push tall.'], ['Fingers', 'Press to catch the sway', 'The feet drift forward. Dig the fingertips in before it grows.'], ['Line', 'Stacked', 'Wrists, shoulders, hips and feet on one line. Hold it here.']] }
+  };
+  function rows(r) { document.getElementById('k-rows').innerHTML = r.map(function (x) { return '<div class="row"><span class="m q">' + x[0] + '</span><b>' + x[1] + '</b></div>'; }).join(''); }
+  var kOn = '';
+  function notes(on) { var key = on.join(); if (key === kOn) return; kOn = key; document.querySelectorAll('#k-notes li').forEach(function (li, j) { li.classList.toggle('on', !!on[j]); }); }
+  function setSkill(k) {
+    skill = k; kTrail = []; kLog = []; kT0 = null; kOn = '';
+    var S2 = SK[k];
+    document.querySelectorAll('[data-skill]').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.skill === k ? 'true' : 'false'); });
+    document.getElementById('k-title').textContent = S2.title; document.getElementById('k-bl').textContent = S2.bl;
+    cali.setAttribute('viewBox', S2.vb);
+    document.getElementById('k-notes').innerHTML = S2.notes.map(function (n) { return '<li><span class="m q">' + n[0] + '</span><span><b>' + esc(n[1]) + '</b><p>' + esc(n[2]) + '</p></span></li>'; }).join('');
+    if (still) SK[k].draw(k === 'pull' ? 10 : k === 'lever' ? 6 : 4);
+  }
+  document.querySelectorAll('[data-skill]').forEach(function (b) { b.addEventListener('click', function () { setSkill(b.dataset.skill); }); });
+  setSkill('pull');
+  function caliFrame(now) {
+    if (kT0 == null) kT0 = now;
+    var t = (now - kT0) / 1000, L = SK[skill].len;
+    if (t >= L) { kT0 = now; t = 0; kTrail = []; kLog = []; }
+    SK[skill].draw(t);
+  }
+
+
+  /* ---- plateau finder (example data, to scale: dot area = times seen that week, 0 to 3) ---- */
+  (function () {
+    var F = [['Straight arms', [3, 3, 2, 2, 1, 1, 0, 0, 0, 0, 0, 0]], ['Quiet feet', [2, 3, 3, 2, 2, 1, 1, 0, 0, 0, 0, 0]], ['Left hip, steep moves', [2, 3, 2, 3, 3, 2, 3, 3, 2, 3, 3, 3]], ['Looking before reaching', [1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]], ['Late flag', [0, 0, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0]]];
+    var x0 = 190, dx = 30, y0 = 30, dy = 36, mono = 'font-family="DM Mono, monospace" font-size="11"', s = '';
+    for (var w = 0; w < 12; w++) s += '<text x="' + (x0 + w * dx) + '" y="14" text-anchor="middle" ' + mono + ' fill="' + WHITE + '" fill-opacity=".45">' + (w + 1) + '</text>';
+    F.forEach(function (r, i) {
+      var y = y0 + i * dy + 8, hot = i === 2;
+      s += '<text x="0" y="' + (y + 4) + '" font-family="Host Grotesk, sans-serif" font-size="14" fill="' + WHITE + '" fill-opacity="' + (hot ? 1 : .5) + '">' + r[0] + '</text>';
+      s += '<line x1="' + x0 + '" x2="' + (x0 + 11 * dx) + '" y1="' + y + '" y2="' + y + '" stroke="' + WHITE + '" stroke-opacity=".08"/>';
+      r[1].forEach(function (v, w) { if (v) s += '<circle cx="' + (x0 + w * dx) + '" cy="' + y + '" r="' + (Math.sqrt(v) * 4.6).toFixed(1) + '" fill="' + WHITE + '" fill-opacity="' + (hot ? .95 : .3) + '"/>'; });
+    });
+    s += '<text x="' + x0 + '" y="222" ' + mono + ' fill="' + WHITE + '">LEFT HIP / STILL HERE IN WEEK 12 / ONLY ON MOVES PAST 40°</text>';
+    document.getElementById('plat').innerHTML = s;
+  })();
+  /* ---- form drop-off (example data, to scale: y 0 to 30 cm) ---- */
+  (function () {
+    var v = [9, 10, 9, 11, 10, 12, 17, 19, 22, 24], L = 40, R = 12, T = 18, B = 190, W = 560, mono = 'font-family="DM Mono, monospace" font-size="11"', s = '';
+    function y(c) { return B - c / 30 * (B - T); }
+    var bw = (W - L - R) / v.length;
+    [0, 10, 20, 30].forEach(function (c) { s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(c) + '" y2="' + y(c) + '" stroke="' + WHITE + '" stroke-opacity=".1"/><text x="' + (L - 8) + '" y="' + (y(c) + 4) + '" text-anchor="end" ' + mono + ' fill="' + WHITE + '" fill-opacity=".5">' + c + '</text>'; });
+    v.forEach(function (c, i) {
+      var x = L + i * bw + 6;
+      s += '<rect x="' + x.toFixed(1) + '" y="' + y(c).toFixed(1) + '" width="' + (bw - 12).toFixed(1) + '" height="' + (B - y(c)).toFixed(1) + '" fill="' + WHITE + '" fill-opacity="' + (i < 6 ? .85 : .22) + '"/>';
+      s += '<text x="' + (x + (bw - 12) / 2).toFixed(1) + '" y="' + (B + 16) + '" text-anchor="middle" ' + mono + ' fill="' + WHITE + '" fill-opacity=".5">' + (i + 1) + '</text>';
+    });
+    var sx = L + 6 * bw;
+    s += '<line x1="' + sx + '" x2="' + sx + '" y1="' + T + '" y2="' + B + '" stroke="' + WHITE + '" stroke-dasharray="3 4"/><text x="' + (sx + 8) + '" y="' + (T + 10) + '" ' + mono + ' fill="' + WHITE + '">FORM DROPS HERE / STOP AT 6</text>';
+    s += '<text x="' + L + '" y="' + (B + 36) + '" ' + mono + ' fill="' + WHITE + '" fill-opacity=".5">ATTEMPT</text>';
+    document.getElementById('drop').setAttribute('viewBox', '0 0 560 232');
+    document.getElementById('drop').innerHTML = s;
+  })();
+  /* ---- correct Grip (demo: nothing is sent) ---- */
+  document.getElementById('fl-acts').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    var acts = document.getElementById('fl-acts'), st = document.getElementById('fl-st');
+    if (b.dataset.fl === 'ok') { st.textContent = 'Thanks. Counted as a match.'; document.getElementById('fl-pc').textContent = '84.0%'; document.getElementById('fl-n').textContent = 'of 213 notes checked / example'; }
+    else if (b.dataset.fl === 'no') { st.textContent = 'What was wrong?'; acts.innerHTML = '<button type="button" data-fl="why">Wrong body part</button><button type="button" data-fl="why">Wrong moment</button><button type="button" data-fl="why">That was deliberate</button>'; return; }
+    else { st.textContent = 'Flagged: "' + b.textContent + '". A coach checks it. If they agree, it counts against Grip.'; document.getElementById('fl-pc').textContent = '83.6%'; document.getElementById('fl-n').textContent = 'of 213 notes checked / example'; }
+    acts.innerHTML = '<button type="button" data-fl="reset">Reset demo</button>';
+    if (b.dataset.fl === 'reset') { st.textContent = 'Is this note right?'; acts.innerHTML = '<button type="button" data-fl="ok">Looks right</button><button type="button" data-fl="no">This is wrong</button>'; document.getElementById('fl-pc').textContent = '84.0%'; document.getElementById('fl-n').textContent = 'of 212 notes checked / example'; }
+  });
+
+  /* ---- loop ---- */
+  function frame(t) { drawClimb(cmpSvg, t + 1.1, cmpMode, 'cmp'); drawBodies(t); }
+  setClip('climb'); cards();
+  if (still) { jump(14.4); frame(1.6); return; }
+  var t0 = performance.now();
+  (function loop(now) {
+    if (playing) { if (last != null) { tau += (now - last) / 1000; if (tau >= CLIPS[clip].len) { tau = 0; trail = []; comTrail.length = 0; } } last = now; drawClip(); }
+    frame((now - t0) / 1000); caliFrame(now);
+    requestAnimationFrame(loop);
+  })(t0);
+})();
+</script>
+
+<script src="solo.js"></script>

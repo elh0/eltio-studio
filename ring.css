@@ -52,22 +52,22 @@
 @media (prefers-reduced-motion: reduce) { .eltio.alt-ring .k-sheet { transition: none; } }
 
 /* covers: each project in its own brand, framed by the studio's plain card */
-.eltio.alt-ring .k-cov { position: relative; overflow: hidden; background: #0B0B0A; color: #F3F3F0; container-type: inline-size; }
-.eltio.alt-ring .k-cov > * { position: absolute; }
-.eltio.alt-ring .k-elliot-onl img { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; transform: scale(1.9); transform-origin: 0 0; }
-.eltio.alt-ring .k-out-and-scout .k-sun { left: 56%; top: 24%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: #FF5A1F; }
-.eltio.alt-ring .k-out-and-scout .lock { left: 9%; bottom: 8%; font-size: 8.5cqi !important; color: #F3F3F0; }
-.eltio.alt-ring .k-lampwerk { background: #0E0E0D; }
-.eltio.alt-ring .k-gel { inset: 40% -30% -30%; background: radial-gradient(closest-side, rgba(255,194,26,.42), rgba(255,194,26,0)); }
-.eltio.alt-ring .k-lwm { left: 50%; top: 22%; width: 22%; translate: -50% 0; fill: #EDEDEA; }
-.eltio.alt-ring .k-lww { left: 9%; bottom: 8%; width: 52%; fill: #EDEDEA; }
-.eltio.alt-ring .k-spoolends { background: #000; }
-.eltio.alt-ring .k-bands { left: 0; right: 0; top: 34%; height: 16%; display: grid; grid-template-columns: repeat(8, 1fr); }
-.eltio.alt-ring .k-bands i { background: var(--pc); }
-.eltio.alt-ring .k-spoolends .wm { left: 9%; bottom: 8%; font-size: 13cqi !important; color: #F3F3F0; }
-.eltio.alt-ring .k-grip { background: #000; }
-.eltio.alt-ring .k-crimp { left: 50%; top: 42%; width: 62%; height: auto; aspect-ratio: 1; translate: -50% -50%; }
-.eltio.alt-ring .k-grip .gp-wm2 { left: 9%; bottom: 8%; width: auto; height: 7cqi; }
+.eltio .k-cov { position: relative; overflow: hidden; background: #0B0B0A; color: #F3F3F0; container-type: inline-size; }
+.eltio .k-cov > * { position: absolute; }
+.eltio .k-elliot-onl img { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; transform: scale(1.9); transform-origin: 0 0; }
+.eltio .k-out-and-scout .k-sun { left: 56%; top: 24%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: #FF5A1F; }
+.eltio .k-out-and-scout .lock { left: 9%; bottom: 8%; font-size: 8.5cqi !important; color: #F3F3F0; }
+.eltio .k-lampwerk { background: #0E0E0D; }
+.eltio .k-gel { inset: 40% -30% -30%; background: radial-gradient(closest-side, rgba(255,194,26,.42), rgba(255,194,26,0)); }
+.eltio .k-lwm { left: 50%; top: 22%; width: 22%; translate: -50% 0; fill: #EDEDEA; }
+.eltio .k-lww { left: 9%; bottom: 8%; width: 52%; fill: #EDEDEA; }
+.eltio .k-spoolends { background: #000; }
+.eltio .k-bands { left: 0; right: 0; top: 34%; height: 16%; display: grid; grid-template-columns: repeat(8, 1fr); }
+.eltio .k-bands i { background: var(--pc); }
+.eltio .k-spoolends .wm { left: 9%; bottom: 8%; font-size: 13cqi !important; color: #F3F3F0; }
+.eltio .k-grip { background: #000; }
+.eltio .k-crimp { left: 50%; top: 42%; width: 62%; height: auto; aspect-ratio: 1; translate: -50% -50%; }
+.eltio .k-grip .gp-wm2 { left: 9%; bottom: 8%; width: auto; height: 7cqi; }
 
 /* big intro, as on the Iris page: Diatype Mono from Cargo when set, Geist Mono elsewhere */
 .eltio.alt-ring { --big: "Diatype Mono Variable", "Diatype Mono", "ABC Diatype Mono", var(--mono); }

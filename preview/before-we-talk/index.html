@@ -326,7 +326,7 @@ p { margin: 0; }
 .lv2 .fv-grid b:nth-child(3n+2) { animation-delay: -.9s; } .lv2 .fv-grid b:nth-child(3n) { animation-delay: -1.8s; }
 @keyframes fvbreath { from { opacity: .4; } to { opacity: 1; } }
 .lv3 .fv-grid { animation: fvpan 7s ease-in-out infinite; will-change: transform; }
-.lv3 .fv-play { animation: fvbreath 1.2s ease-in-out infinite alternate; }
+.lv3 .fv-play { animation: fvbreath 1.75s ease-in-out infinite alternate; }
 @keyframes fvpan { 0%, 35% { transform: translate3d(0,0,0); } 50%, 85% { transform: translate3d(-12%,0,0); } 100% { transform: translate3d(0,0,0); } }
 .lv4 .fv-grid b, .lv5 .fv-grid b { animation: fvdrift 5s ease-in-out infinite alternate; will-change: transform; }
 .lv4 .fv-grid b:nth-child(3n+2), .lv5 .fv-grid b:nth-child(3n+2) { animation-name: fvdrift2; }
@@ -334,10 +334,18 @@ p { margin: 0; }
 @keyframes fvdrift { from { transform: translate3d(0,0,0); } to { transform: translate3d(0,-8px,0); } }
 @keyframes fvdrift2 { from { transform: translate3d(0,-4px,0); } to { transform: translate3d(0,-20px,0); } }
 @keyframes fvdrift3 { from { transform: translate3d(0,0,0); } to { transform: translate3d(0,-4px,0); } }
-.lv5 .fv-big { animation: fvmarq 14s linear infinite; will-change: transform; }
+.lv5 .fv-big { animation: fvmarq 10s linear infinite; will-change: transform; }
 @keyframes fvmarq { from { transform: translate3d(0,0,0); } to { transform: translate3d(-50%,0,0); } }
-.lv5 .fv-cur { animation: fvcur 6s ease-in-out infinite; will-change: transform; }
+.lv5 .fv-cur { animation: fvcur 5s ease-in-out infinite; will-change: transform; }
 @keyframes fvcur { 0%, 100% { transform: translate3d(0,0,0); } 33% { transform: translate3d(-90px,-30px,0) scale(1.3); } 66% { transform: translate3d(40px,-50px,0); } }
+/* phones and tablets: the moving tiles glitched in iPhone Safari however they were drawn, so touch screens play
+   a recording of the desktop motion instead (13 Oct); level 1 stays the still grid */
+.fv-vid { display: none; }
+.feel.vid .fv-vid { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: left top; z-index: 1; }
+.feel.vid .fv-grid, .feel.vid .fv-cur, .feel.vid .fv-big { display: none; }
+.feel.vid .fv-body * { animation: none !important; }
+.feel.vid.own.lv5 .fv-big { display: block; opacity: 1; transform: none; }
+.feel.vid { -webkit-mask-image: none; transform: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 /* ---------- clean: take 1 with three rules. big Diatype (stand-in Inter Tight) only for the question,
@@ -629,9 +637,13 @@ function opsHTML(sc) {
   }).join('') + (sc.own ? '<button class="op add' + (open ? ' sel' : '') + '" data-act="own" data-key="' + sc.key + '" data-hot><span class="mk"></span><span class="lb">Something else</span><span class="tag"></span></button>' : '') + '</div>' +
     (open ? '<input class="in" data-t="' + sc.key + '-own" placeholder="' + h(sc.own) + '" value="' + h(own || '') + '">' : '');
 }
+var FVV = 'https://elh0.github.io/eltio-studio/media/feel/';
+function fvSrc(v, own) { return v > 1 && !fine ? FVV + (v === 5 && !own ? 'c5' : 'g' + v) : ''; } /* touch screens play a recording of the desktop motion */
+function fvCls(v, own) { return 'feel lv' + v + (fvSrc(v, own) ? ' vid' : '') + (own ? ' own' : ''); }
+function fvVidHTML(v, own) { var s = fvSrc(v, own); return '<video class="fv-vid" muted playsinline autoplay loop preload="auto"' + (s ? ' src="' + s + '.mp4" poster="' + s + '.jpg"' : '') + '></video>'; }
 function feelHTML(v) {
   var nm = h((S.txt.name || 'your name').toLowerCase());
-  return '<div class="feel lv' + v + '" id="fv" aria-hidden="true"><div class="fv-bar"><i></i><i></i><i></i></div><div class="fv-body"><div class="fv-big">' + nm + ' ' + nm + '</div><div class="fv-name">' + nm + '</div><div class="fv-grid"><b></b><b><i class="fv-play"></i></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div><span class="fv-cur"></span></div></div>';
+  return '<div class="' + fvCls(v, true) + '" id="fv" aria-hidden="true"><div class="fv-bar"><i></i><i></i><i></i></div><div class="fv-body">' + fvVidHTML(v, true) + '<div class="fv-big">' + nm + ' ' + nm + '</div><div class="fv-name">' + nm + '</div><div class="fv-grid"><b></b><b><i class="fv-play"></i></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div><span class="fv-cur"></span></div></div>';
 }
 function screenHTML(c, sc) {
   var o = '<div class="kick"><span class="dot"></span>' + h(sc.kick) + '</div><div class="qt">' + h(sc.t) + '</div>';
@@ -767,7 +779,7 @@ function step(d) {
 }
 function liveReply(k) { var c = S.c && chap(S.c), sc = c && vs(c)[S.i], rp = document.getElementById('rp'); if (!sc || !rp || sc.key !== k) return; var r = replyFor(sc); rp.textContent = r; rp.className = 'reply' + (r ? ' on' : ''); }
 page.addEventListener('input', function (e) {
-  if (e.target.id === 'fr') { var fv = +e.target.value; S.feel = fv; e.target.style.setProperty('--p', ((fv - 1) / 4 * 100) + '%'); document.getElementById('fv').className = 'feel lv' + fv; document.getElementById('fvn').textContent = fv; document.getElementById('fvl').textContent = FEEL[fv - 1][0]; document.getElementById('fvd').textContent = FEEL[fv - 1][1]; save(); return; }
+  if (e.target.id === 'fr') { var fv = +e.target.value; S.feel = fv; e.target.style.setProperty('--p', ((fv - 1) / 4 * 100) + '%'); var fvEl = document.getElementById('fv'), fvs = fvSrc(fv, true), vd = fvEl.querySelector('.fv-vid'); fvEl.className = fvCls(fv, true); if (fvs && vd.getAttribute('src') !== fvs + '.mp4') { vd.muted = true; vd.poster = fvs + '.jpg'; vd.src = fvs + '.mp4'; var pr = vd.play(); if (pr) pr.catch(function () {}); } else if (!fvs && vd.getAttribute('src')) { vd.pause(); vd.removeAttribute('src'); vd.removeAttribute('poster'); vd.load(); } document.getElementById('fvn').textContent = fv; document.getElementById('fvl').textContent = FEEL[fv - 1][0]; document.getElementById('fvd').textContent = FEEL[fv - 1][1]; save(); return; }
   if (e.target.id === 'cr') { var v = +e.target.value; S.cool = v; e.target.style.setProperty('--p', ((v - 1) / 9 * 100) + '%'); document.getElementById('cv').textContent = v; document.getElementById('cl').textContent = COOL[v]; var cn = document.getElementById('cn'); if (cn) cn.outerHTML = coolNote(v); save(); return; }
   var k = e.target.dataset.t; if (!k) return; S.txt[k] = e.target.value; if (S.ans[k] === 'cant') S.ans[k] = null; save(); if (k === 'name') liveReply('name');
 });

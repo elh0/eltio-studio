@@ -300,28 +300,24 @@ p { margin: 0; }
 .fv-grid b { aspect-ratio: 4 / 3; border-radius: 3px; background: linear-gradient(160deg, #cfccc4, #8f8b82); }
 .fv-grid b:nth-child(3n+2) { background: linear-gradient(160deg, #e3d9c8, #a3927a); }
 .fv-grid b:nth-child(4n) { background: linear-gradient(160deg, #b9c1c4, #5f6a70); }
-.fv-big { position: absolute; z-index: 3; left: 0; top: 48px; white-space: nowrap; font-size: 46px; line-height: 1; color: #fff; mix-blend-mode: difference; display: none; }
-.fv-cur { position: absolute; z-index: 4; width: 34px; height: 34px; border-radius: 50%; background: #fff; mix-blend-mode: difference; display: none; left: 30%; top: 40%; }
-.lv2 .fv-grid b { animation: fvfade 2.4s ease-in-out infinite alternate; } /* calm: a soft breathing fade, never blank */
-.lv2 .fv-grid b:nth-child(2) { animation-delay: -.3s; } .lv2 .fv-grid b:nth-child(3) { animation-delay: -.6s; } .lv2 .fv-grid b:nth-child(4) { animation-delay: -.9s; } .lv2 .fv-grid b:nth-child(5) { animation-delay: -1.2s; } .lv2 .fv-grid b:nth-child(6) { animation-delay: -1.5s; } .lv2 .fv-grid b:nth-child(7) { animation-delay: -1.8s; } .lv2 .fv-grid b:nth-child(8) { animation-delay: -2.1s; } .lv2 .fv-grid b:nth-child(9) { animation-delay: -2.4s; }
-@keyframes fvfade { from { opacity: .35; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-.lv3 .fv-grid { animation: fvslide 9s ease-in-out infinite; } /* lively: a slow, short pan */
+.fv-big { position: absolute; z-index: 3; left: 0; top: 48px; white-space: nowrap; font-size: 46px; line-height: 1; color: #fff; opacity: 0; transform: translateX(8%); }
+.fv-cur { position: absolute; z-index: 4; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15); left: 58%; top: 52%; opacity: 0; transform: scale(.6); }
+.fv-play { position: absolute; inset: 0; margin: auto; width: 0; height: 0; border-left: 9px solid #fff; border-top: 6px solid transparent; border-bottom: 6px solid transparent; opacity: 0; }
+.fv-grid b { position: relative; }
+/* no looping motion: each level is a still picture, and changing level eases between them once (looping
+   transforms inside the rounded, clipped preview glitched on iPhone, 13 Oct) */
+.fv-grid, .fv-grid b, .fv-big, .fv-cur, .fv-play, .fv-name { transition: transform .45s ease, opacity .45s ease, outline-color .45s ease; }
+.lv1 .fv-name { opacity: .45; }
+.lv2 .fv-grid b:nth-child(3n+2) { opacity: .7; } .lv2 .fv-grid b:nth-child(3n) { opacity: .45; }
+.lv3 .fv-grid { transform: translateX(-12%); }
 .lv3 .fv-grid b:nth-child(2) { outline: 1px solid var(--fg); outline-offset: 2px; }
-@keyframes fvslide { 0%, 30% { transform: none; } 50%, 80% { transform: translateX(-12%); } 100% { transform: none; } }
+.lv3 .fv-grid b:nth-child(2) .fv-play { opacity: 1; }
 .lv4 .fv-grid, .lv5 .fv-grid { align-items: start; }
-.lv4 .fv-grid b, .lv5 .fv-grid b { animation: fvup 8s ease-in-out infinite alternate; }
-.lv4 .fv-grid b:nth-child(3n+2), .lv5 .fv-grid b:nth-child(3n+2) { animation-name: fvup2; }
-.lv4 .fv-grid b:nth-child(3n), .lv5 .fv-grid b:nth-child(3n) { animation-name: fvup3; }
-@keyframes fvup { to { transform: translateY(-6px); } }
-@keyframes fvup2 { to { transform: translateY(-14px); } }
-@keyframes fvup3 { to { transform: translateY(-3px); } }
-.lv5 .fv-big { display: block; animation: fvmarq 18s linear infinite; }
+.lv4 .fv-grid b:nth-child(3n+2), .lv5 .fv-grid b:nth-child(3n+2) { transform: translateY(-14px); }
+.lv4 .fv-grid b:nth-child(3n), .lv5 .fv-grid b:nth-child(3n) { transform: translateY(-5px); }
+.lv5 .fv-big { opacity: 1; transform: none; color: #111; text-shadow: 0 0 1px #fff; }
+.lv5 .fv-cur { opacity: 1; transform: none; }
 .lv5 .fv-grid b { filter: contrast(1.1); }
-@keyframes fvmarq { to { transform: translateX(-50%); } }
-/* while the slider moves the preview just dims; the new level starts once you let go */
-.fv-body > * { transition: opacity .25s ease; }
-.feel.drag .fv-body > * { opacity: .25; animation-play-state: paused; }
-.feel.drag .fv-body * { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 /* ---------- clean: take 1 with three rules. big Diatype (stand-in Inter Tight) only for the question,
@@ -526,7 +522,7 @@ var FEEL = [
   ['full on', 'Parallax, difference layers, a custom cursor. Lots moving at once.']
 ];
 function feelHTML(v) {
-  return '<div class="feel lv' + v + '" id="fv" aria-hidden="true"><div class="fv-bar"><i></i><i></i><i></i></div><div class="fv-body"><div class="fv-big">charlie birch charlie birch</div><div class="fv-name">charlie birch</div><div class="fv-grid">' + '<b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>' + '</div><span class="fv-cur"></span></div></div>';
+  return '<div class="feel lv' + v + '" id="fv" aria-hidden="true"><div class="fv-bar"><i></i><i></i><i></i></div><div class="fv-body"><div class="fv-big">charlie birch charlie birch</div><div class="fv-name">charlie birch</div><div class="fv-grid">' + '<b></b><b><i class="fv-play"></i></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b>' + '</div><span class="fv-cur"></span></div></div>';
 }
 var COOL = { 1: 'just fine', 2: 'tidy', 3: 'clean', 4: 'nice', 5: 'quite cool', 6: 'cool', 7: 'properly cool', 8: 'very cool', 9: 'extremely cool', 10: 'unreasonably cool' };
 var JOKE = '£100,000,000,000';
@@ -698,7 +694,7 @@ function render() {
   var cc = S.c && chap(S.c), endNavy = S.c === 'start' && S.sent && cc.s[S.i] && cc.s[S.i].k === 'done'; /* the last screen ends in navy, like it starts */
   page.dataset.ch = endNavy ? 'roadmap' : S.c || (S.welcomed ? (nxc ? nxc.id : 'start') : ['roadmap', 'proposal', 'terms'][S.w || 0]);
   page.innerHTML = S.c ? obHTML() : '<div class="scroller">' + homeHTML() + '</div>';
-  page.appendChild(dc); if (TOAST && TOAST.classList.contains('on')) page.appendChild(TOAST); if (S.keep) { page.querySelector('.scroller').scrollTop = keepTop; S.keep = false; }
+  if (fine) page.appendChild(dc); if (TOAST && TOAST.classList.contains('on')) page.appendChild(TOAST); if (S.keep) { page.querySelector('.scroller').scrollTop = keepTop; S.keep = false; }
   S.fresh = null; save(); fitQ();
   var acc = page.querySelectorAll('.acc'); if (acc.length && !S.accSeen) { S.accSeen = true; setTimeout(function () { if (acc[0].isConnected) acc[0].classList.add('open'); }, 300 + acc.length * 420 + 500); }
 }
@@ -727,7 +723,7 @@ function splash(b, e) {
 
 /* ---------- difference cursor ---------- */
 var cx = -50, cy = -50, tx = -50, ty = -50, cs = 1, ts = 1;
-(function loop() { cx += (tx - cx) * .25; cy += (ty - cy) * .25; cs += (ts - cs) * .2; dc.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + cs.toFixed(3) + ')'; requestAnimationFrame(loop); })();
+if (fine) (function loop() { cx += (tx - cx) * .25; cy += (ty - cy) * .25; cs += (ts - cs) * .2; dc.style.transform = 'translate(' + cx.toFixed(1) + 'px,' + cy.toFixed(1) + 'px) scale(' + cs.toFixed(3) + ')'; requestAnimationFrame(loop); })();
 page.addEventListener('pointermove', function (e) {
   var r = page.getBoundingClientRect();
   if (e.pointerType !== 'touch') {
@@ -770,7 +766,7 @@ function countTo(id, from, to, ms) { var t0 = performance.now(); (function f(now
 function go(c, i) { S.c = c; S.i = i || 0; S.sheet = false; render(); }
 function nice() { return NICE[Math.floor(Math.random() * NICE.length)]; }
 page.addEventListener('input', function (e) {
-  if (e.target.id === 'fr') { var fv = +e.target.value; S.feel = fv; e.target.style.setProperty('--p', ((fv - 1) / 4 * 100) + '%'); var fvEl = document.getElementById('fv'); fvEl.classList.add('drag'); clearTimeout(window.fvT); window.fvT = setTimeout(function () { fvEl.className = 'feel lv' + fv; }, 220); document.getElementById('fvn').textContent = fv; document.getElementById('fvl').textContent = FEEL[fv - 1][0]; document.getElementById('fvd').textContent = FEEL[fv - 1][1]; save(); return; }
+  if (e.target.id === 'fr') { var fv = +e.target.value; S.feel = fv; e.target.style.setProperty('--p', ((fv - 1) / 4 * 100) + '%'); document.getElementById('fv').className = 'feel lv' + fv; document.getElementById('fvn').textContent = fv; document.getElementById('fvl').textContent = FEEL[fv - 1][0]; document.getElementById('fvd').textContent = FEEL[fv - 1][1]; save(); return; }
   if (e.target.id === 'cr') { var v = +e.target.value; S.cool = v; e.target.style.setProperty('--p', ((v - 1) / 9 * 100) + '%'); document.getElementById('cv').textContent = v; document.getElementById('cl').textContent = COOL[v]; var cn = document.getElementById('cn'); if (cn) cn.outerHTML = coolNote(v); S.fresh = 'cool'; var bk0 = page.querySelector('.bk'); if (bk0) bk0.innerHTML = bkInner(); S.fresh = null; return; }
   var k = e.target.dataset.t; if (!k) return; S.txt[k] = e.target.value; save(); if (S.ans[k] === 'cant') S.ans[k] = null; var bk = page.querySelector('.bk'); if (bk) bk.innerHTML = bkInner();
 });

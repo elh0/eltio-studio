@@ -1,0 +1,253 @@
+/* Cargo grid project page: fixed corner frame, one centred column, same-size tiles, two-column captions */
+.eltio.cg { --dt: "Diatype Medium", "Diatype Variable", "Diatype", "ABC Diatype", "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --ink: #111110; --g: rgba(17,17,16,.5); --tile: #F2F2EF; --mk: rgba(17,17,16,.35); --bg: #fff;
+  --colw: min(calc(100vw - 32px), 52vw, calc((100svh - 160px) * 1.5));
+  background: var(--bg); color: var(--ink); min-height: 100svh; font: 500 12px/1.25 var(--dt); letter-spacing: 0; }
+.eltio.cg.th-grey { --ink: #0E0E0D; --g: rgba(14,14,13,.55); --tile: #9A9693; --mk: rgba(14,14,13,.4); --bg: #8F8B88; }
+body:has(.eltio.cg) { background: #fff !important; }
+.eltio.cg * { font-family: var(--dt); }
+.eltio.cg a { color: inherit; text-decoration: none; }
+.eltio.cg p, .eltio.cg span, .eltio.cg a, .eltio.cg b { font-size: 12px !important; line-height: 1.25 !important; }
+
+/* the frame: six labels pinned to the corners and sides */
+.eltio.cg .cg-fr > * { position: fixed; z-index: 20; font-weight: 500; color: var(--ink); }
+.eltio.cg .cg-tl { left: 16px; top: 14px; } .eltio.cg .cg-tr { right: 16px; top: 14px; }
+.eltio.cg .cg-ml { left: 16px; top: 50%; translate: 0 -50%; } .eltio.cg .cg-mr { right: 16px; top: 50%; translate: 0 -50%; font-variant-numeric: tabular-nums; }
+.eltio.cg .cg-bl { left: 16px; bottom: 14px; } .eltio.cg .cg-br { right: 16px; bottom: 14px; }
+.eltio.cg .cg-bm { left: 50%; bottom: 14px; translate: -50% 0; }
+
+/* the column */
+.eltio.cg .cg-col { width: var(--colw); margin: 0 auto; padding: 14px 0 40vh; }
+.eltio.cg .cg-item { margin: 0 0 22vh; }
+.eltio.cg .cg-item:first-child { margin-top: calc((100svh - var(--colw) / 1.5) / 2 - 40px); }
+.eltio.cg .cg-tile { position: relative; aspect-ratio: 3 / 2; background: var(--tile); display: grid; place-items: center; overflow: hidden; container-type: size; }
+.eltio.cg .cg-pl { position: absolute; inset: 14px; z-index: 2; pointer-events: none; background: linear-gradient(var(--mk), var(--mk)) 5px 0 / 1px 11px no-repeat, linear-gradient(var(--mk), var(--mk)) 0 5px / 11px 1px no-repeat, linear-gradient(var(--mk), var(--mk)) 5px 100% / 1px 11px no-repeat, linear-gradient(var(--mk), var(--mk)) 0 calc(100% - 5px) / 11px 1px no-repeat, linear-gradient(var(--mk), var(--mk)) calc(100% - 5px) 0 / 1px 11px no-repeat, linear-gradient(var(--mk), var(--mk)) 100% 5px / 11px 1px no-repeat, linear-gradient(var(--mk), var(--mk)) calc(100% - 5px) 100% / 1px 11px no-repeat, linear-gradient(var(--mk), var(--mk)) 100% calc(100% - 5px) / 11px 1px no-repeat; }
+.eltio.cg .cg-in { display: grid; place-items: center; width: 100%; height: 100%; }
+
+/* pieces, each fitted inside the same tile */
+.eltio.cg .cg-dev .cg-in > .x-dev { width: min(84cqw, calc(80cqh * 844 / 390)); }
+.eltio.cg .cg-tall .cg-in > .x-dev { width: calc(84cqh * 390 / 844); }
+.eltio.alt-plx.cg .x-dev.x-dev-p { aspect-ratio: 390 / 844; }
+.eltio.cg .cg-dev .x-dev, .eltio.cg .cg-tall .x-dev { border-radius: clamp(10px, 2.4cqw, 28px); padding: clamp(3px, .6cqw, 7px); }
+.eltio.cg .cg-dev .x-dev iframe, .eltio.cg .cg-tall .x-dev iframe { border-radius: clamp(8px, 2cqw, 22px); }
+.eltio.cg .cg-card .cg-in > * { width: min(76cqw, 150cqh); }
+.eltio.cg .cg-card .x-oscard .fig.card { margin: 0; }
+.eltio.cg .cg-logo .cg-in > .x-frame { display: block; position: relative; width: 44cqw; }
+.eltio.cg .cg-id .cg-in > .op-id { width: 74cqh; container-type: inline-size; }
+.eltio.cg .cg-id .x-id-one, .eltio.cg .cg-id .x-id-t { width: 100%; }
+.eltio.cg .cg-id .x-id-t { background: none !important; box-shadow: none !important; }
+.eltio.cg .cg-id1 .x-ic { width: 56cqi; }
+.eltio.cg .cg-id2 .x-ph, .eltio.cg .cg-id3 .x-ph { width: 46cqi; }
+.eltio.cg .cg-id3 .x-id-t > * { transform: scale(1.9); }
+.eltio.cg .cg-id4 .x-id-ui { transform: scale(1.25); }
+
+/* captions: name and number under the left edge, title and one line from the middle */
+.eltio.cg .cg-cap { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; margin-top: 12px; }
+.eltio.cg .cg-cap p { margin: 0 !important; }
+.eltio.cg .cg-cap b { display: block; font-weight: 500; }
+.eltio.cg .cg-cap span { display: block; color: var(--g); font-weight: 400; }
+.eltio.cg .cg-info .cg-cap b { margin-top: 12px; } .eltio.cg .cg-info .cg-cap b:first-child { margin-top: 0; }
+.eltio.cg .cg-info { margin-top: 30vh; }
+
+/* reveal */
+.eltio.cg .cg-item { opacity: 0; translate: 0 24px; transition: opacity .9s, translate 1.1s cubic-bezier(.2,.7,.2,1); }
+.eltio.cg .cg-item.vis { opacity: 1; translate: none; }
+@media (prefers-reduced-motion: reduce) { .eltio.cg .cg-item { opacity: 1; translate: none; transition: none; } }
+
+@media (max-width: 760px) {
+  .eltio.cg { --colw: calc(100vw - 32px); }
+  .eltio.cg .cg-ml, .eltio.cg .cg-mr { display: none; }
+  .eltio.cg .cg-col { padding-top: 56px; }
+  .eltio.cg .cg-item { margin-bottom: 14vh; }
+  .eltio.cg .cg-item:first-child { margin-top: 24vh; }
+  .eltio.cg .cg-pl { inset: 10px; }
+}
+.eltio.alt-plx.cg .cg-id .x-blk { display: block; max-width: none; margin: 0; padding: 0; opacity: 1; translate: none; }
+
+/* ---------- 16:10, locked: white with a dark-mode switch, no fades, a scroll prompt on the left, an index of ticks on the right.
+   Two versions: Snap (one tile per scroll) and Parallax (free scroll, the pieces move at their own speed) ---------- */
+.eltio.cg.th-black { --ink: #EDEDEA; --g: rgba(237,237,234,.45); --tile: #161615; --mk: rgba(237,237,234,.35); --bg: #0A0A09; }
+body:has(.eltio.cg.th-black) { background: #0A0A09 !important; }
+html:has(.eltio.cg.v-snap) { scroll-snap-type: y mandatory; }
+.eltio.cg.v-snap .cg-item { scroll-snap-align: center; }
+
+/* top centre: the two versions and the dark-mode switch */
+.eltio.cg .cg-top { position: fixed; z-index: 21; left: 50%; top: 14px; translate: -50% 0; display: flex; align-items: center; gap: 14px; }
+.eltio.cg .cg-v { color: var(--g); } .eltio.cg .cg-v.on { color: var(--ink); }
+.eltio.cg .cg-th { width: 14px; height: 14px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
+.eltio.cg .cg-th i { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--ink); background: linear-gradient(90deg, var(--ink) 50%, transparent 50%); }
+.eltio.cg .cg-fr a:hover, .eltio.cg .cg-top a:hover, .eltio.cg .cg-th:hover { opacity: .5; }
+
+/* left: Scroll, the next piece, and a line that keeps drawing down */
+.eltio.cg .cg-go { display: grid; justify-items: start; gap: 0; }
+.eltio.cg .cg-go .cg-g { color: var(--g); }
+.eltio.cg .cg-go i { display: block; width: 1px; height: 44px; margin-top: 8px; background: var(--ink); transform-origin: 50% 0; animation: cg-line 2.2s cubic-bezier(.6,0,.2,1) infinite; }
+@keyframes cg-line { 0% { transform: scaleY(0); transform-origin: 50% 0; } 50% { transform: scaleY(1); transform-origin: 50% 0; } 50.01% { transform-origin: 50% 100%; } 100% { transform: scaleY(0); transform-origin: 50% 100%; } }
+.eltio.cg .cg-go { translate: 0 calc(-50% + 26px); }
+
+/* right: one tick per tile, the one in view drawn longer */
+.eltio.cg .cg-ticks { display: flex; flex-direction: column; align-items: flex-end; gap: 0; }
+.eltio.cg .cg-ticks a { display: block; padding: 3px 0; width: 22px; }
+.eltio.cg .cg-ticks a::after { content: ""; display: block; margin-left: auto; width: 9px; height: 1px; background: var(--g); transition: width .35s cubic-bezier(.2,.7,.2,1), background-color .2s; }
+.eltio.cg .cg-ticks a.on::after { width: 22px; background: var(--ink); }
+.eltio.cg .cg-ticks a:hover::after { width: 16px; background: var(--ink); }
+
+/* the counter rolls to the tile in view */
+.eltio.cg .cg-bm { font-variant-numeric: tabular-nums; }
+.eltio.cg .cg-n { display: inline-block; height: 1.25em; overflow: hidden; vertical-align: top; }
+.eltio.cg .cg-roll { display: flex; flex-direction: column; translate: 0 calc(var(--k, 0) * -1.25em); transition: translate .6s cubic-bezier(.6,0,.2,1); }
+.eltio.cg .cg-roll i { font-style: normal; height: 1.25em; line-height: 1.25 !important; font-size: 12px; }
+
+/* no fades: tiles are simply there */
+.eltio.cg .cg-item, .eltio.cg .cg-in, .eltio.cg .cg-cap p { opacity: 1 !important; translate: none; scale: none; transition: none; }
+
+/* Parallax: free scroll, tiles further apart, each tile and its piece travel at their own speed */
+.eltio.cg.v-parallax .cg-item { margin-bottom: 34vh; }
+.eltio.cg.v-parallax .cg-tile { translate: 0 var(--ty, 0px); will-change: translate; }
+.eltio.cg.v-parallax .cg-in { translate: 0 var(--py, 0px) !important; will-change: translate; }
+.eltio.cg.v-parallax .cg-cap { translate: 0 var(--cy, 0px); will-change: translate; }
+
+/* black: pieces made for paper get an outline or their own ink */
+.eltio.cg.th-black .x-dev { box-shadow: 0 0 0 1px rgba(237,237,234,.14), 0 30px 60px -30px #000; }
+.eltio.cg.th-black .x-oscard .fig.card { box-shadow: 0 0 0 1px rgba(237,237,234,.14); }
+.eltio.cg.th-black .cg-logo .k2, .eltio.cg.th-black .cg-logo .k2 .lock { color: #EDEDEA !important; }
+.eltio.cg.th-black .cg-id1 .x-ic { box-shadow: 0 0 0 1px rgba(237,237,234,.22) !important; }
+.eltio.cg.th-black .cg-id3 .k2 { color: #EDEDEA !important; background: none !important; }
+.eltio.cg.th-black .cg-id4 .x-id-ui { background: transparent !important; box-shadow: none !important; }
+.eltio.cg.th-black .cg-id4 .x-ui-hex { color: rgba(237,237,234,.6) !important; }
+.eltio.cg.th-black .k2-wf .w { stroke: #EDEDEA; }
+.eltio.cg.th-black .k2-wf .t { fill: #EDEDEA; }
+@media (max-width: 760px) {
+  .eltio.cg .cg-go, .eltio.cg .cg-ticks { display: none; }
+  .eltio.cg.v-parallax .cg-item { margin-bottom: 20vh; }
+}
+
+/* 16:15 locked on Snap; the next project closes the page */
+html:has(.eltio.cg) { overscroll-behavior: none; }
+.eltio.cg .cg-next .cg-tile { cursor: pointer; }
+.eltio.cg .cg-next .cg-cap p:first-child { color: var(--g); }
+/* the app screens are for looking at here; a wheel over one must still step the page */
+.eltio.cg .x-dev iframe { pointer-events: none; }
+/* 16:32: each tile owns a whole screen, so nothing from the next one shows */
+.eltio.cg .cg-col { padding: 0; }
+.eltio.cg .cg-item, .eltio.cg .cg-item:first-child, .eltio.cg .cg-info { height: 100svh; margin: 0 !important; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; padding: 60px 0; }
+.eltio.cg { --colw: min(calc(100vw - 32px), 52vw, calc((100svh - 220px) * 1.5)); }
+@media (max-width: 760px) { .eltio.cg { --colw: calc(100vw - 32px); } .eltio.cg .cg-col { padding: 0; } }
+/* embedded panels (Grip): drawn at their own size, scaled to fit the tile */
+.eltio.cg .cg-in > .cg-emb { position: relative; display: block; width: min(84cqw, calc(80cqh * var(--ar))); aspect-ratio: var(--ar); overflow: hidden; border-radius: clamp(6px, 1.2cqw, 14px); background: #000; }
+.eltio.cg .cg-emb iframe { position: absolute; left: 0; top: 0; border: 0; transform-origin: 0 0; pointer-events: none; background: #000; }
+.eltio.cg.th-black .cg-emb { box-shadow: 0 0 0 1px rgba(237,237,234,.14); }
+/* identity pieces as files */
+.eltio.cg .cg-gi .cg-in img { display: block; height: auto; }
+.eltio.cg .cg-gi-icon { width: 30cqh; border-radius: 22%; }
+.eltio.cg .cg-gi-mark { width: 34cqw; }
+.eltio.cg .cg-gi-name { width: 12cqw; }
+/* 16:55: no dark mode; Email sits top centre, bottom left steps back a project */
+.eltio.cg a.cg-top { font-weight: 500; color: var(--ink); display: block; }
+.eltio.cg a.cg-top:hover { opacity: .5; }
+/* 17:15 one page for every project: only the current project's ticks and counter show; the last stop is the email */
+.eltio.cg.cg-all .cg-ticks:not(.on), .eltio.cg.cg-all .cg-bm:not(.on) { display: none !important; }
+.eltio.cg .cg-end .cg-in { display: grid; place-items: center; height: 100%; }
+.eltio.cg .cg-end .cg-in span { font-size: clamp(18px, 2.4vw, 32px) !important; line-height: 1 !important; letter-spacing: -.01em; }
+.eltio.cg .cg-mail:hover .cg-in span { opacity: .5; }
+/* elliot.onl: frames from the films, filling the tile */
+.eltio.cg .cg-ph .cg-in { position: absolute; inset: 0; }
+.eltio.cg .cg-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 17:21: one colour tile per project, the Grip way: a dark square, the colour large, two neutrals beside it */
+.eltio.cg .cg-colour .cg-in { width: 100%; height: 100%; display: grid; place-items: center; }
+.eltio.cg .cg-sw { height: 82%; aspect-ratio: 1; background: var(--bgc); border-radius: 6px; display: grid; place-items: center; }
+.eltio.cg .cg-sws { width: 74%; aspect-ratio: 1.3; display: grid; grid-template-columns: minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap: 6px; }
+.eltio.cg .cg-sws div { border-radius: 3px; padding: 8px; display: flex; flex-direction: column; justify-content: flex-end; font-size: 11px; line-height: 1.25; box-shadow: inset 0 0 0 1px rgba(128,128,128,.18); }
+.eltio.cg .cg-sws div span { font-size: 11px !important; opacity: .6; }
+/* websites: the tab and the window sit the way the phones do */
+.eltio.cg .cg-id1 .x-tab { transform: scale(1.6); }
+.eltio.cg .cg-id2 .x-id-win { transform: scale(1.7); }
+/* the end: the address alone, as on the landing page */
+.eltio.cg .cg-end { align-items: center; gap: 18px; }
+.eltio.cg .cg-end .cg-mail { font-size: clamp(28px, 5.4vw, 84px) !important; line-height: 1 !important; letter-spacing: -.02em; }
+.eltio.cg .cg-end .cg-totop { color: var(--g); }
+.eltio.cg .cg-end a:hover { opacity: .5; }
+/* 17:39 the project list, left middle: every project one click away, the one you're in in ink */
+.eltio.cg .cg-lib { display: flex; flex-direction: column; gap: 2px; }
+.eltio.cg .cg-lib a { color: var(--g); transition: color .2s; }
+.eltio.cg .cg-lib a.on, .eltio.cg .cg-lib a:hover { color: var(--ink); }
+.eltio.cg .cg-lib a span { font-variant-numeric: tabular-nums; }
+.eltio.cg .cg-fr { transition: opacity .15s linear; }
+@media (max-width: 700px) { .eltio.cg .cg-lib { display: none; } }
+/* the landing page, waiting at the bottom to be scrolled into */
+.eltio.cg .cg-land { height: 100svh; width: 100vw; margin-left: calc(50% - 50vw); position: relative; }
+.eltio.cg .cg-land iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; background: #fff; }
+/* the Out & Scout look everywhere: live panels sit on the tile with the same soft shadow as the phones */
+.eltio.cg .cg-card .cg-emb { border-radius: 8px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.06); }
+.eltio.cg .cg-app .cg-emb { border-radius: 0; overflow: visible; box-shadow: none; }
+.eltio.cg .cg-app .cg-emb iframe { filter: drop-shadow(0 26px 30px rgba(0,0,0,.28)); }
+/* elliot.onl: a film playing in the site, in a browser window */
+.eltio.cg .cg-elt .cg-in { width: 100%; height: 100%; display: grid; place-items: center; }
+.eltio.cg .cg-elw { background: none !important; display: grid; place-items: center; width: 100%; height: 100%; }
+.eltio.cg .cg-elw .x-win { width: 76cqw; aspect-ratio: auto; grid-template-rows: auto auto; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.08); }
+.eltio.cg .cg-elw .x-win-bar b { margin-left: auto; margin-right: auto; font-weight: 400; font-size: 10px !important; color: rgba(11,11,10,.45); transform: translateX(-24px); }
+.eltio.cg .cg-elw .x-win-in { padding: 1.6cqw 2cqw 1.8cqw; font-family: "Geist Mono", ui-monospace, monospace; color: #0B0B0A; }
+.eltio.cg .cg-elw .x-win-in span, .eltio.cg .cg-elw .x-win-in b { font-family: "Geist Mono", ui-monospace, monospace !important; font-size: clamp(8px, 1.15cqw, 11px) !important; }
+.eltio.cg .cg-elw .el-top, .eltio.cg .cg-elw .el-cap { display: flex; justify-content: space-between; gap: 12px; }
+.eltio.cg .cg-elw .el-top { margin-bottom: 1.4cqw; } .eltio.cg .cg-elw .el-top span:last-child { color: rgba(11,11,10,.45); }
+.eltio.cg .cg-elw img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.eltio.cg .cg-elw .el-bar { display: block; height: 1px; background: rgba(11,11,10,.15); margin: 1cqw 0 .9cqw; position: relative; }
+.eltio.cg .cg-elw .el-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--t) * 100%); background: #0B0B0A; animation: el-play 14s linear infinite; }
+@keyframes el-play { from { width: 4%; } to { width: 96%; } }
+.eltio.cg .cg-elw .el-cap span:nth-child(2) { color: rgba(11,11,10,.45); margin-right: auto; margin-left: 2cqw; }
+/* 17:56 Lampwerk opens on its wordmark; elliot.onl windows centred and sized to always fit the tile */
+.eltio.cg .cg-lw-wm { width: 30cqw; display: block; }
+.eltio.cg .cg-elw .x-win { width: min(70cqw, 108cqh); }
+.eltio.cg .cg-elw video, .eltio.cg .cg-elw img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0B0B0A; }
+.eltio.cg .cg-elw .el-bar i { width: 30%; }
+/* 18:38 film windows centred in their tile (the inner box was taller than the tile, pushing the window low) */
+.eltio.cg .cg-elt { position: relative; overflow: hidden; }
+.eltio.cg .cg-elt .cg-in { position: absolute; inset: 0; height: auto; }
+.eltio.cg .cg-elt .cg-elw { height: 100%; min-height: 0; }
+/* 19:38 Elliot: tighter on phones (each tile no longer owns a whole screen), plus a Close pill you can always reach */
+html { -webkit-tap-highlight-color: transparent; }
+.eltio.cg .cg-x { display: none; }
+@media (max-width: 760px) {
+  .eltio.cg .cg-item, .eltio.cg .cg-item:first-child, .eltio.cg .cg-info { height: auto; padding: 22px 0; }
+  .eltio.cg .cg-proj > .cg-item:first-child { padding-top: 64px; }
+  .eltio.cg .cg-proj:first-child > .cg-item:first-child { padding-top: 96px; }
+  .eltio.cg .cg-bm { display: none !important; }
+  .eltio.cg .cg-x { display: block; position: fixed; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); translate: -50% 0; z-index: 30; padding: 10px 22px; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); font-size: 12px !important; line-height: 1 !important; }
+}
+@media (max-width: 760px) {
+  /* tiles now pass under the corner labels, so they get a soft white band to sit on */
+  .eltio.cg .cg-fr::before, .eltio.cg .cg-fr::after { content: ''; position: fixed; left: 0; right: 0; z-index: 19; pointer-events: none; }
+  .eltio.cg .cg-fr::before { top: 0; height: 56px; background: linear-gradient(var(--bg) 55%, transparent); }
+  .eltio.cg .cg-fr::after { bottom: 0; height: 84px; background: linear-gradient(transparent, var(--bg) 50%); }
+}
+/* 19:44 where am I: a marker line opens every project, and on phones a 'you are here' button with the project list */
+.eltio.cg .cg-mark { display: flex; justify-content: space-between; gap: 12px; padding: 0 0 8px; margin: 16vh 0 0; border-bottom: 1px solid rgba(11,11,10,.18); color: var(--ink); }
+.eltio.cg .cg-mark span:last-child { color: rgba(11,11,10,.45); }
+.eltio.cg .cg-proj:first-child .cg-mark { margin-top: 12vh; }
+.eltio.cg .cg-where { display: none; }
+@media (max-width: 760px) {
+  .eltio.cg .cg-mark { margin-top: 72px; }
+  .eltio.cg .cg-proj:first-child .cg-mark { margin-top: 96px; }
+  .eltio.cg .cg-proj > .cg-mark + .cg-item, .eltio.cg .cg-proj:first-child > .cg-mark + .cg-item { padding-top: 22px; }
+  .eltio.cg .cg-prev, .eltio.cg .cg-br { display: none !important; }
+  .eltio.cg .cg-x { left: auto; right: 16px; translate: none; }
+  .eltio.cg .cg-where { display: block; position: fixed; left: 16px; bottom: max(14px, env(safe-area-inset-bottom)); z-index: 30; }
+  .eltio.cg .cg-wb { all: unset; display: flex; gap: 10px; align-items: baseline; padding: 10px 16px; border: 1px solid rgba(11,11,10,.18); border-radius: 999px; background: var(--bg); color: var(--ink); font-size: 12px !important; line-height: 1 !important; cursor: pointer; }
+  .eltio.cg .cg-wb span { color: rgba(11,11,10,.45); font-size: 12px !important; }
+  .eltio.cg .cg-wb::after { content: '\2195'; color: rgba(11,11,10,.45); }
+  .eltio.cg .cg-wl { position: absolute; left: 0; bottom: calc(100% + 8px); display: grid; min-width: 190px; padding: 6px; border: 1px solid rgba(11,11,10,.18); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); opacity: 0; visibility: hidden; translate: 0 6px; transition: opacity .35s cubic-bezier(.22,1,.36,1), translate .45s cubic-bezier(.22,1,.36,1), visibility 0s .35s; }
+  .eltio.cg .cg-where.open .cg-wl { opacity: 1; visibility: visible; translate: none; transition: opacity .35s cubic-bezier(.22,1,.36,1), translate .45s cubic-bezier(.22,1,.36,1); }
+  .eltio.cg .cg-wl a { padding: 11px 10px; color: rgba(11,11,10,.45); font-size: 13px !important; text-decoration: none; }
+  .eltio.cg .cg-wl a.on { color: var(--ink); }
+  .eltio.cg .cg-wl .cg-wh { border-top: 1px solid rgba(11,11,10,.12); margin-top: 4px; }
+}
+/* 20:22 Elliot (iPhone): the Splash phones and drawings were clipped at the bottom by their inner wrappers in Safari.
+   Let the identity pieces breathe; only the tile itself clips. Phones a touch smaller so they always sit inside. */
+.eltio.cg .cg-id .op-id, .eltio.cg .cg-id .x-id-one, .eltio.cg .cg-id .x-id-t { overflow: visible !important; }
+.eltio.cg .cg-id .op-id .x-id-t { aspect-ratio: auto !important; height: auto !important; }
+.eltio.cg .cg-id2 .x-ph, .eltio.cg .cg-id3 .x-ph { width: 40cqi; }
+/* 20:22 the page ends after the last project: a quiet line and the way back */
+.eltio.cg .cg-end { min-height: 56svh; display: grid; place-content: center; justify-items: center; gap: 16px; text-align: center; }
+.eltio.cg .cg-end p { margin: 0; color: rgba(11,11,10,.45); }
+.eltio.cg .cg-end-back { padding: 10px 22px; border: 1px solid var(--ink); border-radius: 999px; color: var(--ink); text-decoration: none; }
+@media (max-width: 760px) { .eltio.cg .cg-end { min-height: 46svh; padding-bottom: 80px; } }

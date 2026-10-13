@@ -665,3 +665,20 @@ html.plx-ink .mo-cur { visibility: hidden; }
   .eltio.alt-plx.lp .x-end .x-n { display: none; }
   .eltio.alt-plx.lp .x-end .x-mail { order: -1; transform: none !important; }
 }
+/* 13 Oct Elliot: what wins clients. "You own everything" before the ending, and a Start a project link into Before we talk. */
+.eltio.alt-plx .x-own { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: 16px; padding: 22vh 16px 18vh; position: relative; z-index: 1; }
+.eltio.alt-plx .x-own-l { margin: 0; color: var(--s4); font: 400 11px/1.2 var(--mono) !important; display: flex; gap: .6em; }
+.eltio.alt-plx .x-own-t { margin: 0 !important; font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; font-size: clamp(24px, 3.5vw, 54px) !important; line-height: 1.08 !important; letter-spacing: -.015em !important; max-width: 22em; }
+.eltio.alt-plx .x-own-t span { font: inherit !important; }
+.eltio.alt-plx .x-own-1 { color: var(--s1); }
+.eltio.alt-plx .x-own-2 { color: var(--s5); }
+.eltio.alt-plx .x-start { align-self: flex-start; display: inline-flex; align-items: center; gap: .6em; padding: 9px 14px; border: 1px solid var(--s1); border-radius: 999px; color: var(--s1); text-decoration: none; font: 400 11px/1 var(--mono) !important; transition: background .3s, color .3s; }
+.eltio.alt-plx .x-start i { font-style: normal; transition: transform .3s cubic-bezier(.22,1,.36,1); }
+.eltio.alt-plx .x-start:hover { background: var(--s1); color: var(--bg, #fffff8); }
+.eltio.alt-plx .x-start:hover i { transform: translateX(3px); }
+@media (max-width: 760px) {
+  .eltio.alt-plx .x-own { grid-template-columns: 1fr; gap: 14px; padding: 24px 16px 72px; border-top: 1px solid var(--hr, var(--s6)); }
+  .eltio.alt-plx .x-own-t { font-size: 19px !important; line-height: 1.18 !important; }
+  .eltio.alt-plx.lp .x-end .x-start { order: -2; }
+  .eltio.alt-plx.lp .x-list { padding-bottom: 48px; }
+}

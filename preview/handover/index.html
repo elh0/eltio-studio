@@ -518,7 +518,7 @@ var FLOW = [
   ] },
   { id: 'proposal', name: 'Your accounts', tag: 'Four things keep it running', mins: 1, s: [
     { k: 'info', kick: 'Your accounts', t: 'Four accounts keep it running.', rows: [['Domain', 'Sends people to your site'], ['Cargo', 'Your pages, text and contact'], ['GitHub', 'The design, the player and the project list'], ['Vimeo', 'Your films and their thumbnails']] },
-    { k: 'info', kick: 'Your accounts', t: 'Put the renewals in your calendar.', p: 'You pay these directly, not through us. If the domain, Cargo or Vimeo lapses, the site or the films go quiet.', rows: [['Domain', 'Yearly, about £15'], ['Cargo', 'Yearly, depends on your plan'], ['Vimeo', 'Yearly. Keep a plan with direct file links'], ['GitHub', 'Free']] },
+    { k: 'info', kick: 'Your accounts', t: 'Put the renewals in your calendar.', p: 'You pay these directly, not through us. If the domain, Cargo or Vimeo lapses, the site or the films go quiet.', rows: [['Domain', 'About £15 a year'], ['Cargo', 'About £130 a year'], ['Vimeo', 'From about £110 a year. Keep a plan with direct file links'], ['GitHub', 'Free']] },
     { k: 'info', kick: 'Your accounts', t: 'Changes go live by themselves.', p: 'Anything saved on GitHub shows up on the site in about 10 minutes. If something looks out of date, try a private window.' }
   ] },
   { id: 'terms', name: 'Making changes', tag: 'Projects, words, what to leave', mins: 2, s: [
@@ -529,7 +529,7 @@ var FLOW = [
   ] },
   { id: 'start', name: 'Last bit', tag: 'Check your logins, then send', mins: 1, s: [
     { k: 'many', key: 'logins', b: 'Logins working', kick: 'Last bit', t: 'Can you log in to all four?', p: 'Tick the ones that work.', o: ['Domain', 'Cargo', 'GitHub', 'Vimeo'] },
-    { k: 'info', kick: 'Last bit', t: 'Need a hand later?', p: 'There\'s no subscription. You only pay when you ask for something. Step by step guides live under How to on this page.', rows: [['Fixes', 'Free for 30 days from launch'], ['Small changes', '£80 an hour after that'], ['Something new', 'A new page or feature is quoted before we start'], ['Email', 'hello@eltio.studio']] },
+    { k: 'info', kick: 'Last bit', t: 'Need a hand later?', p: 'There\'s no subscription. You only pay when you ask for something. Costs, terms and step by step guides live under How to on this page.', rows: [['Fixes', 'Free for 30 days from launch'], ['Small changes', '£80 an hour after that'], ['Something new', 'A new page or feature is quoted before we start'], ['Email', 'hello@eltio.studio']] },
     { k: 'field', key: 'name', b: 'Name', kick: 'Last bit', t: 'Who\'s this from?', ph: 'Your name' },
     { k: 'send', kick: 'Last bit', t: 'Tell us you\'re all set.', p: 'It opens an email to us saying which logins work. Hit send there and we\'ll know you\'re set.' }
   ] }
@@ -537,6 +537,24 @@ var FLOW = [
 
 /* ---------- how to: short guides they can come back to any time ---------- */
 var GUIDES = [
+  { id: 'costs', t: 'What it costs', p: 'Everything you\'ll pay once the site is live. There\'s no subscription to us.', steps: [
+    ['Domain', 'About £15 a year, to the company you bought it from'],
+    ['Cargo', 'About £130 a year, the pages you edit'],
+    ['Vimeo', 'From about £110 a year, only if you have films'],
+    ['GitHub', 'Free. It hosts the player'],
+    ['In total', 'About £255 a year, all paid by you, directly to them'],
+    ['Us', 'Nothing, unless you ask for something'],
+    ['Fixes', 'Free for 30 days from launch, for anything we built'],
+    ['After that', '£80 an hour. We tell you the cost before we start'],
+    ['Something new', 'A new page or feature is quoted first, and goes ahead only when you say yes']],
+    note: 'Prices for Cargo and Vimeo are their current yearly plans and can change. Questions: hello@eltio.studio.' },
+  { id: 'terms', t: 'The terms, after launch', p: 'The parts of the terms you signed that still matter now the site is live.', steps: [
+    ['Ownership', 'The site is yours. The domain, Cargo, GitHub and Vimeo are in your name, and the code is yours to keep, change or hand to someone else'],
+    ['After launch', 'Fixes to anything we built are free for 30 days. After that, help is £80 an hour, only when you ask'],
+    ['Your material', 'You make sure you have the right to show every film, still, credit and track on the site'],
+    ['Credit', 'A small Site by Eltio Studio line in the footer. Ask and we\'ll take it off'],
+    ['Limits', 'We aren\'t responsible for outages at Cargo, GitHub or Vimeo, or for accounts that lapse']],
+    note: 'Your full signed terms are on your onboarding page. Ask us any time for a copy.' },
   { id: 'project', t: 'Add a project', p: 'New film for the list. Takes you five minutes, then it\'s with us.', steps: [
     ['01', 'Upload the film to your Vimeo account'],
     ['02', 'In the film\'s settings, open Privacy and allow it to be embedded on your site\'s address'],
@@ -556,21 +574,15 @@ var GUIDES = [
     note: 'Deleting first leaves a gap in the list until the new one is in.' },
   { id: 'renew', t: 'Renewals', p: 'Three of your accounts renew each year. If one lapses, the site or the films go quiet.', steps: [
     ['Domain', 'Renews yearly at the company you bought it from, about £15. Turn on auto-renew'],
-    ['Cargo', 'Renews yearly, price depends on your plan. Check the card on file in your Cargo account'],
-    ['Vimeo', 'Renews yearly. Keep a plan with direct file links; ask us before you downgrade'],
+    ['Cargo', 'About £130 a year. Check the card on file in your Cargo account'],
+    ['Vimeo', 'From about £110 a year. Keep a plan with direct file links; ask us before you downgrade'],
     ['GitHub', 'Free. Nothing to renew']],
     note: 'Put all three dates in your calendar a week early.' },
   { id: 'broken', t: 'If a film stops playing', p: 'Every Monday the site checks every film still plays.', steps: [
     ['01', 'If one breaks, GitHub sends you an email'],
     ['02', 'Check the film is still on your Vimeo and still allowed on your site'],
     ['03', 'Still broken? Forward the email to us']],
-    note: 'If it\'s something we built, it\'s free in the first 30 days. After that, £80 an hour.' },
-  { id: 'costs', t: 'What things cost', p: 'There\'s no subscription. You only pay us when you ask for something.', steps: [
-    ['Fixes', 'Free for 30 days from your launch day, for anything we built'],
-    ['Small changes', '£80 an hour after that. We tell you the cost first'],
-    ['Something new', 'A new page or feature is quoted before we start'],
-    ['Accounts', 'Domain, Cargo and Vimeo are paid by you, directly to them']],
-    note: 'Questions about any of it: hello@eltio.studio.' }
+    note: 'If it\'s something we built, it\'s free in the first 30 days. After that, £80 an hour.' }
 ];
 function howtoHTML() {
   var g = S.g && GUIDES.find(function (x) { return x.id === S.g; });

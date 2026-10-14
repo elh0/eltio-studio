@@ -1,4 +1,4 @@
-// Landing page inside the project-pages artifact (17:39, Elliot): the list stays exactly as designed, but opening a project
+// Landing page inside the project-pages artifact: the list stays exactly as designed, but opening a project
 // goes to its place on the one long projects page (one-os.html#p=N) instead of the old pop-up sheet. Spoolends is off for now.
 (function () {
   var arr = function (l) { return Array.prototype.slice.call(l); };
@@ -26,11 +26,11 @@
   }
   // 19:48 the simpler phone landing (plx.css .lp) and the right count now Spoolends is off
   var lroot = document.querySelector('.eltio.alt-plx'); if (lroot) lroot.classList.add('lp');
-  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(4) projects, Out & Scout, Grip, Lampwerk, elliot.onl';
+  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(3) projects, Out & Scout, Grip, Lampwerk';
   if (ghosted) return;
   // 18:46 the preview loses the project on a page change, so projects open over the landing page in one frame we
   // address ourselves (one-os.html#p=N, then messages); Close or scrolling out of the end brings the landing back.
-  // 19:31 Elliot: make that move feel smooth. The projects page loads quietly in the background, then one of four
+  // 19:31 make that move feel smooth. The projects page loads quietly in the background, then one of four
   // moves (picked at the bottom of the preview while he compares them):
   //   grow   - the logo you pressed grows into that project's cover tile while the page settles in around it
   //   circle - the project opens as a circle from where you tapped
@@ -38,9 +38,9 @@
   //   fade   - a quick fade, already loaded
   var V = ((document.currentScript && document.currentScript.src) || '').split('?')[1] || '';
   var html = document.documentElement, ov = null, of = null;
-  var mode = 'fade'; // 19:44 Elliot picked Fade (the others stay below in case he wants to compare again)
+  var mode = 'fade'; // 19:44 picked Fade (the others stay below in case he wants to compare again)
   html.setAttribute('data-tr', mode);
-  var E = 'cubic-bezier(.22,1,.36,1)'; // 19:38 Elliot: way softer (a long gentle ease-out everywhere)
+  var E = 'cubic-bezier(.22,1,.36,1)'; // 19:38 way softer (a long gentle ease-out everywhere)
   var st = document.createElement('style');
   st.textContent =
     'html{-webkit-tap-highlight-color:transparent}.cg-ov{position:fixed;inset:0;z-index:2147483600;background:#fff;opacity:0;visibility:hidden;transition:opacity .6s ' + E + ',visibility 0s .6s}' +

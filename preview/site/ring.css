@@ -54,7 +54,7 @@
 /* covers: each project in its own brand, framed by the studio's plain card */
 .eltio .k-cov { position: relative; overflow: hidden; background: #0B0B0A; color: #F3F3F0; container-type: inline-size; }
 .eltio .k-cov > * { position: absolute; }
-.eltio .k-elliot-onl img { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; transform: scale(1.9); transform-origin: 0 0; }
+.eltio .k-folio img { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0 0; transform: scale(1.9); transform-origin: 0 0; }
 .eltio .k-out-and-scout .k-sun { left: 56%; top: 24%; width: 14%; aspect-ratio: 1; border-radius: 50%; background: #FF5A1F; }
 .eltio .k-out-and-scout .lock { left: 9%; bottom: 8%; font-size: 8.5cqi !important; color: #F3F3F0; }
 .eltio .k-lampwerk { background: #0E0E0D; }

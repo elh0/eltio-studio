@@ -1,32 +1,32 @@
 // Wireframes for the work: hairline drawings that draw themselves in, then run on their own.
-// elliot.onl is a working copy of the site (filter, list or grid, films open in place).
+// the folio site is a working copy of the site (filter, list or grid, films open in place).
 // Out & Scout is drawn from the app: the viewfinder, the sun path and scene detection.
 // Each one plays a short demo until someone touches it, then it is theirs.
 (function () {
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var ACC = '#FF5A1F';
 
-  // ---------- elliot.onl ----------
+  // ---------- the folio site ----------
   var FILMS = [
-    ['01', 'Pol\u00e8ne SS24', 'Guillaume Lebel', 'Digital, LF, 35mm Print', 'Fashion', '0:58'],
-    ['02', 'Adidas \u2018Return of the 15\u2019', 'Hannan Hussain', 'S35, Digital', 'Commercial', '0:55'],
-    ['03', 'Joe James \u2013 Papercuts', 'Uncanny', 'S35, Digital', 'Music', '3:12'],
-    ['04', 'T Magazine', 'Jess Madavo', 'Standard 16', 'Fashion', '0:43'],
-    ['05', 'Pl\u00e9i', 'Guillaume Lebel', 'LF, Digital, 35mm Print', 'Fashion', '0:54'],
-    ['06', 'Helinox \u2018Zero\u2019 S/S26', 'Tom Silvester', 'S35, Digital', 'Fashion', '0:39'],
-    ['07', 'Playing House', 'Lydia Garnett', 'Standard 16 to 16:9', 'Fashion', '0:44'],
-    ['08', 'Bladee \u2013 Blondie', 'Joe Ward', 'Anamorphic, S35, Digital', 'Music', '3:31'],
-    ['09', 'Art of Movement', 'Tayler Prince-Fraser', 'S35, LF, Digital', 'Short', '2:06'],
-    ['10', 'Oasis x Spotify', 'Uncanny', 'Standard 16, S16', 'Commercial', '1:11'],
-    ['11', 'Corteiz \u2018Lundun\u2019', 'Uncanny', 'Standard 16', 'Commercial', '0:10'],
-    ['12', 'Xiaoqiao \u2013 Lethe', 'Erika Kamano', 'S35, Digital', 'Music', '0:25'],
-    ['13', 'Adidas \u2018Tug of War\u2019', 'Dominic Chew', 'S35, Digital', 'Commercial', '0:47'],
-    ['14', 'CP x Barbour', 'Theo Cottle', 'S16', 'Fashion', '0:29'],
-    ['15', 'The North Face', 'Tayler Prince-Fraser', 'Standard 16', 'Fashion', '1:06'],
-    ['16', 'Raf Simons', 'Elliot Holbrow', 'S35, Digital', 'Fashion', '0:41'],
-    ['17', 'Swank Mami \u2013 MC69', 'Claryn Chong', 'S35, Digital', 'Music', '2:33'],
-    ['18', 'Unflirt \u2013 Seasong', 'Claryn Chong', 'DV, Beta, Digital', 'Music', '3:41'],
-    ['19', 'Rotator', 'Uncanny', 'Digital, Standard 16', 'Short', '3:51']
+    ['01', 'Film 01', 'Director', 'Digital, LF, 35mm Print', 'Fashion', '0:58'],
+    ['02', 'Film 02', 'Director', 'S35, Digital', 'Commercial', '0:55'],
+    ['03', 'Film 03', 'Director', 'S35, Digital', 'Music', '3:12'],
+    ['04', 'Film 04', 'Director', 'Standard 16', 'Fashion', '0:43'],
+    ['05', 'Film 05', 'Director', 'LF, Digital, 35mm Print', 'Fashion', '0:54'],
+    ['06', 'Film 06', 'Director', 'S35, Digital', 'Fashion', '0:39'],
+    ['07', 'Film 07', 'Director', 'Standard 16 to 16:9', 'Fashion', '0:44'],
+    ['08', 'Film 08', 'Director', 'Anamorphic, S35, Digital', 'Music', '3:31'],
+    ['09', 'Film 09', 'Director', 'S35, LF, Digital', 'Short', '2:06'],
+    ['10', 'Film 10', 'Director', 'Standard 16, S16', 'Commercial', '1:11'],
+    ['11', 'Film 11', 'Director', 'Standard 16', 'Commercial', '0:10'],
+    ['12', 'Film 12', 'Director', 'S35, Digital', 'Music', '0:25'],
+    ['13', 'Film 13', 'Director', 'S35, Digital', 'Commercial', '0:47'],
+    ['14', 'Film 14', 'Director', 'S16', 'Fashion', '0:29'],
+    ['15', 'Film 15', 'Director', 'Standard 16', 'Fashion', '1:06'],
+    ['16', 'Film 16', 'Director', 'S35, Digital', 'Fashion', '0:41'],
+    ['17', 'Film 17', 'Director', 'S35, Digital', 'Music', '2:33'],
+    ['18', 'Film 18', 'Director', 'DV, Beta, Digital', 'Music', '3:41'],
+    ['19', 'Film 19', 'Director', 'Digital, Standard 16', 'Short', '3:51']
   ];
   var TYPES = ['All', 'Fashion', 'Commercial', 'Music', 'Short'];
   function count(t) { return t === 'All' ? FILMS.length : FILMS.filter(function (f) { return f[4] === t; }).length; }
@@ -38,13 +38,13 @@
     root.innerHTML =
       '<div class="wf-guides" aria-hidden="true"></div>' +
       '<div class="wf-in">' +
-        '<div class="wf-top"><span>Elliot Holbrow</span><span class="wf-q wf-sub">Cinematographer, London</span><span class="wf-nav"><span class="u">Work</span> <span class="wf-q">Contact</span></span></div>' +
+        '<div class="wf-top"><span>Name Surname</span><span class="wf-q wf-sub">Portfolio</span><span class="wf-nav"><span class="u">Work</span> <span class="wf-q">Contact</span></span></div>' +
         '<div class="wf-bar"><span class="wf-f">' + TYPES.map(function (t) {
           return '<button type="button" data-f="' + t + '">' + t + '<sup>' + count(t) + '</sup></button>';
         }).join('') + '<i class="tag">(1)</i></span>' +
         '<span class="wf-v"><button type="button" data-v="list">List</button><button type="button" data-v="grid">Grid</button><i class="tag">(2)</i></span></div>' +
         '<div class="wf-list"></div>' +
-        '<div class="wf-foot wf-q"><span>Represented by <span class="ink">Polly Hartley, UTA</span></span><span>\u00a9 2026 Elliot Holbrow</span></div>' +
+        '<div class="wf-foot wf-q"><span>Represented by <span class="ink">Agent</span></span><span>\u00a9 2026 Name Surname</span></div>' +
       '</div>' +
       '<span class="wf-cur" aria-hidden="true"></span>';
     var inner = root.querySelector('.wf-in'), list = root.querySelector('.wf-list'), cur = root.querySelector('.wf-cur');

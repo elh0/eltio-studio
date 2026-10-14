@@ -22,7 +22,7 @@
 .eltio.alt-plx .x-p:nth-child(even) .x-media { grid-column: 3 / span 4; grid-row: 1; }
 .eltio.alt-plx .x-frame { display: block; width: 100%; aspect-ratio: 4 / 5; position: relative; overflow: hidden; will-change: transform; transform-origin: 50% 50%; }
 .eltio.alt-plx .x-frame .k-cov { position: absolute; inset: 0; display: block; will-change: transform; }
-.eltio.alt-plx .x-frame .k-elliot-onl img { transform: scale(1.6); }
+.eltio.alt-plx .x-frame .k-folio img { transform: scale(1.6); }
 .eltio.alt-plx .x-run, .eltio.alt-plx .x-idx { display: none; }
 
 .eltio.alt-plx .x-end { min-height: 80svh; display: flex; flex-direction: column; justify-content: flex-end; gap: 16px; padding: 0 16px 16px; }
@@ -48,7 +48,7 @@
 .eltio.alt-plx.p-3 .x-media, .eltio.alt-plx.p-3 .x-p:nth-child(even) .x-media { grid-column: 1; grid-row: 1; max-width: 760px; }
 .eltio.alt-plx.p-3 .x-txt, .eltio.alt-plx.p-3 .x-p:nth-child(even) .x-txt { grid-column: 1; grid-row: 2; }
 .eltio.alt-plx.p-3 .x-frame { aspect-ratio: 16 / 10; }
-.eltio.alt-plx.p-3 .x-frame .k-elliot-onl img { transform: scale(1.15); }
+.eltio.alt-plx.p-3 .x-frame .k-folio img { transform: scale(1.15); }
 
 /* p-4 drift: each name runs huge across the page and slides sideways with the scroll, the cover rides over it */
 .eltio.alt-plx.p-4 .x-p { margin: 0 0 18vh; }
@@ -132,7 +132,7 @@
 .eltio .k2-cue { animation: secue 5s steps(1) infinite; }
 @media (prefers-reduced-motion: reduce) { .eltio .k2-cue { animation: none; } }
 .eltio .k2-tag { display: none; }
-/* elliot.onl at rest: the film list rolls up like end credits */
+/* the folio site at rest: the film list rolls up like end credits */
 .eltio .k2-roll { position: relative; flex: 1 1 auto; min-height: 0; margin: 1.2em 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent); }
 .eltio .k2-roll .k2-ell { animation: elroll 38s linear infinite; }
 .eltio .x-frame:hover .k2-roll .k2-ell { animation-play-state: paused; }
@@ -609,12 +609,12 @@
 .eltio.alt-plx .x-sheet.grow { background: #0B0B0A; transition: clip-path .85s cubic-bezier(.7,0,.2,1), background-color .45s ease .2s; }
 .eltio.alt-plx .x-sheet.grow.open { background: var(--bg); transition: clip-path .85s cubic-bezier(.7,0,.2,1), background-color .5s ease .55s; }
 .eltio.alt-plx .x-sheet.grow > * { transition: opacity .5s .7s; }
-/* 18:38 Elliot: bring Grip closer on the landing (the wordmark read far away next to the others) */
+/* 18:38 bring Grip closer on the landing (the wordmark read far away next to the others) */
 .eltio.alt-plx .k2-grip .gp-wm2 { height: 22cqi; }
 /* while the intro ink is the pointer, the site cursor waits */
 html.plx-ink .mo-cur { visibility: hidden; }
 
-/* 19:48 Elliot: a simpler landing on phones (only on the landing in the project-pages artifact, which adds .lp).
+/* 19:48 a simpler landing on phones (only on the landing in the project-pages artifact, which adds .lp).
    Each project is one compact card like the project pages: its cover on the grey tile, then a two-column caption.
    No parallax, no wireframes, no Scroll prompts; tap anywhere on a card to open the project. */
 @media (max-width: 760px) {
@@ -650,7 +650,7 @@ html.plx-ink .mo-cur { visibility: hidden; }
   .eltio.alt-plx.lp .x-txt { max-width: none !important; align-self: stretch !important; justify-self: stretch !important; }
   .eltio.alt-plx.lp .x-short { max-width: none !important; }
 }
-/* 13 Oct Elliot: phone landing felt messy. Calmer hero, one tidy caption shape per card, a clean ending. */
+/* 13 Oct phone landing felt messy. Calmer hero, one tidy caption shape per card, a clean ending. */
 @media (max-width: 760px) {
   .eltio.alt-plx.lp .x-hero { padding: 96px 16px 48px; gap: 0; }
   .eltio.alt-plx.lp .x-hero p, .eltio.alt-plx.lp .x-hero p .ln { font-size: 19px !important; line-height: 1.18 !important; }
@@ -665,7 +665,7 @@ html.plx-ink .mo-cur { visibility: hidden; }
   .eltio.alt-plx.lp .x-end .x-n { display: none; }
   .eltio.alt-plx.lp .x-end .x-mail { order: -1; transform: none !important; }
 }
-/* 13 Oct Elliot: what wins clients. "You own everything" before the ending, and a Start a project link into Before we talk. */
+/* 13 Oct what wins clients. "You own everything" before the ending, and a Start a project link into Before we talk. */
 .eltio.alt-plx .x-own { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: 16px; padding: 22vh 16px 18vh; position: relative; z-index: 1; }
 .eltio.alt-plx .x-own-l { margin: 0; color: var(--s4); font: 400 11px/1.2 var(--mono) !important; display: flex; gap: .6em; }
 .eltio.alt-plx .x-own-t { margin: 0 !important; font-family: var(--big) !important; font-weight: 300 !important; font-variation-settings: var(--bigv, "MONO" 1, "wght" 300) !important; font-size: clamp(24px, 3.5vw, 54px) !important; line-height: 1.08 !important; letter-spacing: -.015em !important; max-width: 22em; }

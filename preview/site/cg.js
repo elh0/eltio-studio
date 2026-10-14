@@ -12,7 +12,7 @@
   var first = projs.map(function (pr) { return its.indexOf(pr.querySelector('.cg-item')); });
   var tickSets = arr(root.querySelectorAll('.cg-ticks')), counts = arr(root.querySelectorAll('.cg-bm'));
   var next = root.querySelector('.cg-br'), prev = root.querySelector('.cg-prev'), libs = arr(root.querySelectorAll('.cg-lib a'));
-  // 19:44 Elliot kept getting lost scrolling. Each project now starts with its own marker line in the flow, and on
+  // 19:44 people kept getting lost scrolling. Each project now starts with its own marker line in the flow, and on
   // phones a 'you are here' button (project + tile) opens the list of projects to jump between.
   projs.forEach(function (pr, j) {
     var m = document.createElement('div'); m.className = 'cg-mark';
@@ -81,7 +81,7 @@
   function warm(k) { for (var j = k - 1; j <= k + 3; j++) (frames[j] || []).forEach(function (f) { if (f.loading !== 'eager') f.loading = 'eager'; }); }
   addEventListener('load', function () { var j = 0; (function more() { if (j >= n) return; warm(j); j += 4; setTimeout(more, 1200); })(); });
 
-  // 17:21 Elliot: free scrolling (tile-by-tile felt slow to get through). The frame links still glide to a tile.
+  // 17:21 free scrolling (tile-by-tile felt slow to get through). The frame links still glide to a tile.
   var lock = false;
   function step(d) { if (!lock) jump(Math.max(0, Math.min(n - 1, (cur < 0 ? 0 : cur) + d))); }
   function jump(k) { if (!lock) { lock = true; go(k, function () { lock = false; }); } }

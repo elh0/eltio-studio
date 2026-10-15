@@ -99,6 +99,33 @@
   addEventListener('scroll', function () { if (wh.classList.contains('open') && !gliding) where(false); }, { passive: true });
   [root.querySelector('.cg-tl'), root.querySelector('.cg-tr'), cx, root.querySelector('.cg-end-back')].forEach(function (a) { if (a) a.addEventListener('click', function (e) { e.preventDefault(); home(false); }); });
   addEventListener('keydown', function (e) { if (e.key === 'Escape' && inFrame) home(false); });
+  // 15 Oct: on phones the live animations showed as stills, so phones play recorded clips of them instead
+  var CLIPS = { 0: ['Sun path', 'Scenes', 'Export', 'Drawing'], 1: ['Climb', 'Roll', 'Analysis', 'Compare', 'On the bar', 'LiDAR scan', 'Your body'], 2: ['Library'] };
+  if (matchMedia('(max-width: 760px), (hover: none)').matches) its.forEach(function (el) {
+    var pj = el.closest('.cg-proj'), pi = pj ? +pj.getAttribute('data-p') : -1, t = el.getAttribute('data-t');
+    if (!CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
+    var f = 'video/m/' + pi + '-' + t.toLowerCase().replace(/[^a-z]+/g, '-'), tile = el.querySelector('.cg-tile');
+    if (!tile) return;
+    arr(tile.querySelectorAll('iframe')).forEach(function (fr) { fr.removeAttribute('src'); fr.removeAttribute('data-src'); });
+    tile.classList.add('cg-clip');
+    tile.insertAdjacentHTML('beforeend', '<video class="cg-vid" poster="' + f + '.jpg" muted loop playsinline autoplay preload="metadata" aria-label="' + t + '"><source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm"></video>');
+  });
+  var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } else v.pause(); }); }, { rootMargin: '200px 0px' });
+  arr(root.querySelectorAll('video')).forEach(function (v) { v.muted = true; vio.observe(v); });
+  // 15 Oct: phones had three Close buttons. One Home on the left, one Menu on the right (home, every project, start a project, email)
+  var mn = document.createElement('div'); mn.className = 'cg-menu';
+  mn.innerHTML = '<button type="button" class="cg-mb" aria-expanded="false">Menu</button><div class="cg-mp">' +
+    '<a href="landing.html" class="cg-mh">Home</a>' +
+    names.map(function (nm, j) { return '<a href="#" data-p="' + j + '">' + num(j) + nm + '</a>'; }).join('') +
+    '<a href="https://eltio.studio/before-we-talk" target="_top" class="cg-ms">Start a project</a><a href="mailto:hello@eltio.studio" class="cg-me">hello@eltio.studio</a></div>';
+  fr.appendChild(mn);
+  var mb = mn.querySelector('.cg-mb');
+  function menu(open) { mn.classList.toggle('open', open); mb.setAttribute('aria-expanded', open); mb.textContent = open ? 'Close' : 'Menu'; }
+  mb.addEventListener('click', function () { menu(!mn.classList.contains('open')); });
+  arr(mn.querySelectorAll('.cg-mp a[data-p]')).forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); menu(false); jump(first[+a.getAttribute('data-p')]); }); });
+  mn.querySelector('.cg-mh').addEventListener('click', function (e) { e.preventDefault(); menu(false); home(false); });
+  addEventListener('scroll', function () { if (mn.classList.contains('open') && !gliding && !lock) menu(false); }, { passive: true });
+  var tl = root.querySelector('.cg-tl'); if (tl) tl.setAttribute('data-ph', 'Home');
   // the landing opens another project in this same frame
   addEventListener('message', function (e) {
     if (!inFrame || e.source !== window.parent || !e.data || e.data.cgGo == null) return;

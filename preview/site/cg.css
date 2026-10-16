@@ -253,12 +253,16 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 760px) { .eltio.cg .cg-end { min-height: 46svh; padding-bottom: 80px; } }
 /* 15 Oct: three Close buttons on phones was silly. Phones get Home (top left) and Menu (top right) only. */
 .eltio.cg .cg-menu { display: none; }
+.eltio.cg .cg-tl-p { display: none; }
 @media (max-width: 760px) {
   .eltio.cg .cg-tr, .eltio.cg .cg-x { display: none !important; }
-  .eltio.cg .cg-tl[data-ph] { font-size: 0 !important; }
-  .eltio.cg .cg-tl[data-ph]::before { content: "\2190\00a0Home"; font-size: 11px; }
+  .eltio.cg .cg-top { display: none !important; }
+  .eltio.cg .cg-tl { top: 8px; }
+  .eltio.cg .cg-tl-d { display: none; }
+  .eltio.cg .cg-tl-p { display: inline; }
+  .eltio.cg .cg-tl, .eltio.cg .cg-mb { display: inline-block; box-sizing: border-box; height: 30px; padding: 0 14px; line-height: 28px !important; font-size: 11px !important; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); outline: none; -webkit-tap-highlight-color: transparent; }
   .eltio.cg .cg-menu { display: block; position: fixed; right: 16px; top: 8px; z-index: 31; }
-  .eltio.cg .cg-mb { font: inherit; font-size: 11px !important; padding: 6px 12px; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .eltio.cg .cg-mb { font-family: inherit; cursor: pointer; }
   .eltio.cg .cg-mp { position: absolute; right: 0; top: calc(100% + 8px); display: grid; min-width: 220px; max-width: calc(100vw - 32px); left: auto; padding: 6px; border: 1px solid rgba(11,11,10,.18); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); opacity: 0; visibility: hidden; translate: 0 -6px; transition: opacity .25s, translate .3s, visibility 0s .3s; }
   .eltio.cg .cg-menu.open .cg-mp { opacity: 1; visibility: visible; translate: none; transition: opacity .35s cubic-bezier(.22,1,.36,1), translate .45s cubic-bezier(.22,1,.36,1); }
   .eltio.cg .cg-mp a { padding: 11px 10px; color: rgba(11,11,10,.55); font-size: 13px !important; text-decoration: none; }

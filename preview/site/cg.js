@@ -125,7 +125,7 @@
   arr(mn.querySelectorAll('.cg-mp a[data-p]')).forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); menu(false); jump(first[+a.getAttribute('data-p')]); }); });
   mn.querySelector('.cg-mh').addEventListener('click', function (e) { e.preventDefault(); menu(false); home(false); });
   addEventListener('scroll', function () { if (mn.classList.contains('open') && !gliding && !lock) menu(false); }, { passive: true });
-  var tl = root.querySelector('.cg-tl'); if (tl) tl.setAttribute('data-ph', 'Home');
+  var tl = root.querySelector('.cg-tl'); if (tl) tl.innerHTML = '<span class="cg-tl-d">' + tl.textContent + '</span><span class="cg-tl-p">\u2190\u00a0Home</span>';
   // the landing opens another project in this same frame
   addEventListener('message', function (e) {
     if (!inFrame || e.source !== window.parent || !e.data || e.data.cgGo == null) return;

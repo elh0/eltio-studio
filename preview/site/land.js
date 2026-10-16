@@ -5,8 +5,8 @@
   var ghosted = false; try { ghosted = !!(window.frameElement && window.frameElement.hasAttribute('data-ghost')); } catch (e) {}
   // loaded quietly behind the end of the projects page: hold still at the top (the intro would otherwise glide on by itself)
   if (ghosted) setInterval(function () { dispatchEvent(new Event('pointermove')); }, 700);
-  var DROP = '3';                       // Spoolends, in the list's own numbering
-  var MAP = { 0: 0, 1: 1, 2: 2, 4: 3 }; // list number -> project on one-os.html
+  var DROP = '5';                       // Spoolends, in the list's own numbering
+  var MAP = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 }; // list number -> project on one-os.html
   var se = document.querySelector('.x-p[data-i="' + DROP + '"]');
   if (se) {
     se.parentNode.removeChild(se);
@@ -26,7 +26,7 @@
   }
   // 19:48 the simpler phone landing (plx.css .lp) and the right count now Spoolends is off
   var lroot = document.querySelector('.eltio.alt-plx'); if (lroot) lroot.classList.add('lp');
-  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(3) projects, Out & Scout, Grip, Lampwerk';
+  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(5) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems';
   if (ghosted) return;
   // 18:46 the preview loses the project on a page change, so projects open over the landing page in one frame we
   // address ourselves (one-os.html#p=N, then messages); Close or scrolling out of the end brings the landing back.

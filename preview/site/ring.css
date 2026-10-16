@@ -87,3 +87,7 @@
   .eltio.alt-ring .k-intro .ln { display: inline; }
   .eltio.alt-ring .k-eye { width: 90px; }
 }
+.eltio .k-aglo { background: #C9D6E4; }
+.eltio .k-aglo .k2-ag { position: absolute; inset: 0; place-content: center; }
+.eltio .k-systems { background: #F3F3F0; }
+.eltio .k-systems .k2-sy { position: absolute; left: 50%; top: 50%; translate: -50% -50%; }

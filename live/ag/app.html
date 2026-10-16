@@ -1,0 +1,388 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aglo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&family=Funnel+Sans:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Layout: a phone on the left that is the whole product, a quiet control rail on the right (stacks under the phone on mobile).
+   The sky is the only colour; everything else is ink, paper and one grey. */
+:root{
+  --bg:#F2F2EF; --fg:#121211; --q:rgba(18,18,17,.52); --line:rgba(18,18,17,.12); --fill:#E7E7E3; --chip:#ffffff;
+  --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --f-instrument:"Instrument Sans",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-funnel:"Funnel Sans",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-haas:"Neue Haas Grotesk Text Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --app:var(--f-instrument);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121211;--fg:#F2F2EF;--q:rgba(242,242,239,.55);--line:rgba(242,242,239,.12);--fill:#1D1D1B;--chip:#272725;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121211;--fg:#F2F2EF;--q:rgba(242,242,239,.55);--line:rgba(242,242,239,.12);--fill:#1D1D1B;--chip:#272725;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font:400 12px/1.5 var(--mono);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid #6E8FC0;outline-offset:2px}
+.wrap{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding-block:28px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));flex-wrap:wrap}
+.rail{width:300px;max-width:100%;display:grid;gap:22px;min-width:0}
+.rail h1{font:500 22px/1.15 var(--f-instrument);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.rail .q{color:var(--q)}
+.grp{display:grid;gap:8px}
+.lab{color:var(--q);letter-spacing:.04em}
+.seg{display:flex;flex-wrap:wrap;gap:4px;padding:3px;background:var(--fill);border-radius:999px;width:max-content;max-width:100%}
+.seg button{border:0;background:none;padding:6px 11px;border-radius:999px;cursor:pointer;color:var(--q)}
+.seg button.on{background:var(--chip);color:var(--fg)}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.jump button{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 11px;cursor:pointer}
+.jump button:hover{background:var(--fill)}
+input[type=range]{width:100%;accent-color:var(--fg)}
+.note{border:1px dashed var(--line);border-radius:12px;padding:12px;color:var(--q)}
+
+/* Phone */
+.phone{width:min(390px,100%);aspect-ratio:390/844;max-height:calc(100vh - 56px);border-radius:46px;padding:10px;background:#0B0B0A;box-shadow:0 30px 60px -30px rgba(0,0,0,.45);flex:none}
+@media (max-width:760px){.phone{max-height:none}}
+.scr{position:relative;width:100%;height:100%;border-radius:37px;overflow:hidden;font-family:var(--app);color:var(--ink,#fff);container-type:size;user-select:none;-webkit-user-select:none}
+.sky{position:absolute;inset:0;transition:background 1.2s linear}
+.sun{position:absolute;width:120cqw;height:80cqh;margin:-40cqh 0 0 -60cqw;background:radial-gradient(closest-side,rgba(255,240,215,.45),rgba(255,240,215,0));transition:left 1.2s linear,top 1.2s linear,opacity .6s;pointer-events:none}
+.sun::after{content:"";position:absolute;left:50%;top:50%;width:40cqw;height:28cqh;margin:-14cqh 0 0 -20cqw;background:radial-gradient(closest-side,rgba(255,110,60,.22),rgba(255,110,60,0))}
+.grain{position:absolute;inset:0;opacity:.14;mix-blend-mode:overlay;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
+.abs{position:absolute;inset:0}
+.mono{font-family:var(--mono);font-size:3cqw;letter-spacing:.04em;opacity:.72}
+/* the Aglo widget, filling the iOS 27 home page; glass edge is the system border */
+.wgt{position:absolute;left:4.6cqw;right:4.6cqw;top:6.4cqh;bottom:10.6cqh;border-radius:9cqw;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.28),0 0 0 1px rgba(255,255,255,.08)}
+.wgt .in{position:absolute;inset:0;padding:5.5cqw 6cqw;display:flex;flex-direction:column;color:var(--ink)}
+.wgt .apps button{font-size:9.6cqw;color:inherit}
+.tcb{display:flex;justify-content:space-between;width:100%;background:none;border:0;padding:0;margin-top:2.4cqh;cursor:pointer;color:inherit}
+.srch{position:absolute;left:50%;bottom:3.4cqh;transform:translateX(-50%);display:flex;align-items:center;gap:1.6cqw;color:#fff;font-size:3.8cqw;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:1cqh 4.4cqw;cursor:pointer}
+.spot{background:rgba(11,11,10,.78)}
+.spot .res button{width:100%;background:none;border:0;border-top:1px solid rgba(242,242,239,.1);text-align:left;padding:1.5cqh 0;font-size:5.4cqw;cursor:pointer;color:inherit;display:flex;justify-content:space-between;align-items:baseline}
+.spot .res button span{font-family:var(--mono);font-size:2.8cqw;letter-spacing:.04em;opacity:.6}
+.layer{position:absolute;inset:0;display:flex;flex-direction:column;padding:4.4cqh 7cqw 4.2cqh}
+.status{display:flex;justify-content:space-between;font-size:3.7cqw;font-weight:500;opacity:.9}
+.home .time{font-size:17cqw;font-weight:400;letter-spacing:-.04em;line-height:1;margin-top:6cqh}
+.home .sub{font-size:3.7cqw;opacity:.7;margin-top:1.2cqh}
+.apps{margin-top:auto;display:grid;gap:.4cqh}
+.apps button{background:none;border:0;padding:.35cqh 0;text-align:left;font-size:8.6cqw;letter-spacing:-.02em;line-height:1.12;cursor:pointer;display:flex;align-items:baseline;gap:2.4cqw}
+.apps button i{font-style:normal;font-size:3.1cqw;opacity:.55;letter-spacing:0}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:3.4cqh;font-size:3.5cqw}
+.foot button{background:none;border:0;padding:0;cursor:pointer;opacity:.75}
+.pill{background:var(--glass,rgba(255,255,255,.18));border:0;border-radius:999px;padding:1.5cqh 5cqw;font-size:4cqw;cursor:pointer;color:inherit;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.pill.solid{background:var(--ink,#fff);color:var(--inv,#111)}
+.center{margin:auto 0;display:grid;gap:2cqh;text-align:center;justify-items:center}
+.big{font-size:9cqw;letter-spacing:-.025em;line-height:1.08;text-wrap:balance}
+.small{font-size:3.7cqw;opacity:.72}
+.dots{display:flex;gap:2cqw;justify-content:center}
+.dots i{width:2cqw;height:2cqw;border-radius:50%;background:currentColor;opacity:.25}
+.dots i.on{opacity:1}
+.hold{position:absolute;left:0;right:0;bottom:0;top:30%;cursor:pointer;touch-action:none}
+.bottom{margin-top:auto;display:grid;gap:1.4cqh;justify-items:center}
+.cam{width:44cqw;aspect-ratio:1;border-radius:50%;border:1px solid currentColor;opacity:.85;display:grid;place-items:center;font-size:16cqw;letter-spacing:-.04em;cursor:pointer;background:rgba(255,255,255,.06)}
+.sheet{position:absolute;inset:0;background:var(--sheet,rgba(11,11,10,.86));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);color:#F2F2EF;display:flex;flex-direction:column;padding:4.4cqh 6cqw 4cqh;overflow:auto}
+.sheet h2{font-size:7.4cqw;font-weight:400;letter-spacing:-.02em;line-height:1.1;margin:3cqh 0 1cqh;text-wrap:balance}
+.sheet .q{opacity:.6;font-size:3.6cqw}
+.rowl{display:grid;gap:1cqh;margin-top:2.4cqh}
+.ar{border-top:1px solid rgba(242,242,239,.14);padding:1.6cqh 0;display:grid;gap:1.2cqh}
+.ar .n{display:flex;justify-content:space-between;align-items:baseline;font-size:5.4cqw;letter-spacing:-.01em}
+.ar .n span{font-size:3.3cqw;opacity:.6}
+.lv{display:flex;gap:1.2cqw;flex-wrap:wrap}
+.lv button{border:1px solid rgba(242,242,239,.22);background:none;border-radius:999px;padding:.9cqh 3.2cqw;font-size:3.4cqw;cursor:pointer;color:inherit}
+.lv button.on{background:#F2F2EF;color:#121211;border-color:#F2F2EF}
+.lv button sup{font-size:2.4cqw;opacity:.7;margin-left:.6cqw}
+.plans{display:grid;gap:1.2cqh;margin-top:2cqh}
+.plan{display:flex;justify-content:space-between;align-items:baseline;border:1px solid rgba(242,242,239,.22);border-radius:4cqw;padding:2cqh 4cqw;font-size:4.2cqw;cursor:pointer;background:none;color:inherit;text-align:left}
+.plan.on{border-color:#F2F2EF;background:rgba(242,242,239,.08)}
+.plan span{font-size:3.3cqw;opacity:.65}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;margin-top:auto;padding-top:2cqh}
+.two .pill{width:100%;padding:1.8cqh 0;font-size:3.9cqw}
+.city{width:100%;background:rgba(242,242,239,.08);border:1px solid rgba(242,242,239,.2);border-radius:999px;padding:1.6cqh 4cqw;font-size:4.2cqw;color:#F2F2EF;margin-top:2cqh}
+.city::placeholder{color:rgba(242,242,239,.5)}
+.clist{display:grid;margin-top:1cqh}
+.clist button{background:none;border:0;border-top:1px solid rgba(242,242,239,.1);text-align:left;padding:1.4cqh 0;font-size:4.4cqw;cursor:pointer;color:inherit;display:flex;justify-content:space-between}
+.clist button span{opacity:.5;font-size:3.3cqw}
+.ticks{display:grid;margin-top:1cqh}
+.ticks button{background:none;border:0;border-top:1px solid rgba(242,242,239,.1);text-align:left;padding:1.4cqh 0;font-size:5cqw;cursor:pointer;color:inherit;display:flex;justify-content:space-between;align-items:center}
+.ticks button b{font-weight:400;width:5cqw;height:5cqw;border-radius:50%;border:1px solid rgba(242,242,239,.5);display:grid;place-items:center;font-size:3cqw}
+.ticks button.on b{background:#F2F2EF;color:#121211}
+.toast{position:absolute;left:50%;bottom:12cqh;transform:translateX(-50%);background:rgba(11,11,10,.8);color:#F2F2EF;border-radius:999px;padding:1.2cqh 4cqw;font-size:3.5cqw;white-space:nowrap;transition:opacity .4s}
+.sched{display:flex;gap:2cqw;align-items:center;font-size:3.6cqw;opacity:.8}
+.sched input{width:22cqw;background:rgba(242,242,239,.08);border:1px solid rgba(242,242,239,.2);border-radius:999px;padding:.6cqh 2cqw;color:#F2F2EF}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="phone"><div class="scr" id="scr"></div></div>
+  <aside class="rail">
+    <div class="grp">
+      <span class="lab">AGLO: QUIET PHONE · PROTOTYPE</span>
+      <h1>A quiet phone that follows the sun</h1>
+      <p class="q">Your home page is one Aglo widget with only the apps you chose; everything else is off the home screen. Tap Search and type Instagram or TikTok to hit Aglo's lock. Tap the timecode to open Aglo's settings.</p>
+    </div>
+    <div class="grp"><span class="lab">TYPEFACE</span>
+      <div class="seg" id="faces"><button data-f="instrument" class="on">Instrument Sans</button><button data-f="funnel">Funnel Sans</button><button data-f="haas">Helvetica</button></div>
+    </div>
+    <div class="grp"><span class="lab">TIME OF DAY</span>
+      <div class="seg" id="mode"><button data-m="live" class="on">Live</button><button data-m="scrub">Scrub</button><button data-m="play">Play a day</button></div>
+      <input type="range" id="scrub" min="0" max="1439" step="5" aria-label="Time of day">
+      <span class="q" id="sunline"></span>
+    </div>
+    <div class="grp"><span class="lab">JUMP TO</span>
+      <div class="jump" id="jump">
+        <button data-go="onb">Setup</button><button data-go="home">Home</button><button data-go="search">Search</button><button data-go="guard">Guarded apps</button><button data-go="paywall">Paywall</button><button data-go="reset">Start over</button>
+      </div>
+    </div>
+    <p class="note">This is a click-through, not the app. The camera, step count, weather and Screen Time locks are simulated. In the real app the home page is an iOS 27 full-page widget that redraws about every 15 minutes, and the lock screen is Apple's Screen Time shield dressed in Aglo's sky: it can show two buttons, and "Unlock in Aglo" reaches the app through a notification tap.</p>
+  </aside>
+</div>
+
+<script>
+(function(){
+// Cities: search covers any city in the real app; this is a sample set.
+var CITIES=[["London","United Kingdom",51.51,-0.13,0],["Manchester","United Kingdom",53.48,-2.24,0],["Glasgow","United Kingdom",55.86,-4.25,0],["Bristol","United Kingdom",51.45,-2.59,0],["Dublin","Ireland",53.35,-6.26,0],["Paris","France",48.86,2.35,1],["Berlin","Germany",52.52,13.4,1],["Amsterdam","Netherlands",52.37,4.9,1],["Lisbon","Portugal",38.72,-9.14,0],["Barcelona","Spain",41.39,2.17,1],["Copenhagen","Denmark",55.68,12.57,1],["Stockholm","Sweden",59.33,18.07,1],["Reykjavik","Iceland",64.15,-21.94,0],["New York","United States",40.71,-74.01,-5],["Los Angeles","United States",34.05,-118.24,-8],["Mexico City","Mexico",19.43,-99.13,-6],["São Paulo","Brazil",-23.55,-46.63,-3],["Cape Town","South Africa",-33.92,18.42,2],["Lagos","Nigeria",6.52,3.38,1],["Dubai","United Arab Emirates",25.2,55.27,4],["Mumbai","India",19.08,72.88,5.5],["Bangkok","Thailand",13.76,100.5,7],["Seoul","South Korea",37.57,126.98,9],["Tokyo","Japan",35.68,139.69,9],["Sydney","Australia",-33.87,151.21,11],["Melbourne","Australia",-37.81,144.96,11],["Auckland","New Zealand",-36.85,174.76,13]];
+var S={screen:"onb",step:0,face:"instrument",mode:"live",mins:0,city:CITIES[0],q:"",
+  apps:[{n:"Notes",home:1},{n:"Chrome",home:1},{n:"WhatsApp",home:1},{n:"Messages",home:1},{n:"Maps"},{n:"Camera"},{n:"Music"},{n:"Photos"},{n:"Mail",lv:"gentle",task:"breath"},{n:"Instagram",lv:"firm",task:"pushups"},{n:"TikTok",lv:"locked",task:"pushups"},{n:"YouTube",lv:"firm",task:"steps"},{n:"X"},{n:"Spotify"},{n:"Uber"}],sq:"",
+  given:160,paywallSeen:false,plus:false,plan:"year",target:null,sched:["21:00","07:00"]};
+var scr=document.getElementById("scr");
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+
+/* ---------- sun maths (NOAA approximation) ---------- */
+function rad(d){return d*Math.PI/180}
+function solar(mins){
+  var c=S.city,lat=rad(c[2]),now=new Date(),y=now.getFullYear();
+  var doy=Math.floor((now-new Date(y,0,0))/864e5);
+  var g=2*Math.PI/365*(doy-1+(mins/60-12)/24);
+  var eot=229.18*(0.000075+0.001868*Math.cos(g)-0.032077*Math.sin(g)-0.014615*Math.cos(2*g)-0.040849*Math.sin(2*g));
+  var dec=0.006918-0.399912*Math.cos(g)+0.070257*Math.sin(g)-0.006758*Math.cos(2*g)+0.000907*Math.sin(2*g)-0.002697*Math.cos(3*g)+0.00148*Math.sin(3*g);
+  var tz=c[4]+(isDST(c)?1:0);
+  var tst=mins+eot+4*c[3]-60*tz, ha=rad(tst/4-180);
+  var el=Math.asin(Math.sin(lat)*Math.sin(dec)+Math.cos(lat)*Math.cos(dec)*Math.cos(ha))*180/Math.PI;
+  var cosH=(Math.cos(rad(90.833))-Math.sin(lat)*Math.sin(dec))/(Math.cos(lat)*Math.cos(dec));
+  var H=Math.acos(Math.max(-1,Math.min(1,cosH)))*180/Math.PI;
+  var noon=720-4*c[3]-eot+60*tz;
+  return {el:el,rise:noon-4*H,set:noon+4*H,noon:noon};
+}
+function isDST(c){ // rough: northern Europe/US summer time, Australia/NZ/Brazil none-for-demo
+  var m=new Date().getMonth(); if(c[2]<0)return (c[0]==="Sydney"||c[0]==="Melbourne"||c[0]==="Auckland")?(m>=9||m<3):false;
+  if(["Tokyo","Seoul","Bangkok","Mumbai","Dubai","Lagos","Mexico City","Reykjavik"].indexOf(c[0])>=0)return false;
+  return m>=2&&m<=9;
+}
+function hm(m){m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")}
+
+/* ---------- sky colour by sun elevation ---------- */
+var STOPS=[[-18,"#070A14","#0E1322","#151B2C"],[-10,"#0D1430","#1B2346","#3A3C63"],[-4,"#1C2A57","#4F5170","#B98A86"],[0,"#34497E","#9C8C90","#F0A77A"],[5,"#5272A8","#C4B8B0","#F6C99C"],[12,"#6F95C8","#B9CDE4","#EFDDC6"],[30,"#7FA6D6","#B7D0EA","#E3EDF5"],[90,"#6E9AD2","#AFCBEA","#DDE9F4"]];
+function hx(h){return [1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})}
+function mix(a,b,t){var A=hx(a),B=hx(b);return "rgb("+A.map(function(v,i){return Math.round(v+(B[i]-v)*t)}).join(",")+")"}
+function sky(el){
+  var i=0;while(i<STOPS.length-2&&el>STOPS[i+1][0])i++;
+  var a=STOPS[i],b=STOPS[i+1],t=Math.max(0,Math.min(1,(el-a[0])/(b[0]-a[0])));
+  return {top:mix(a[1],b[1],t),mid:mix(a[2],b[2],t),bot:mix(a[3],b[3],t),light:el>9};
+}
+/* Field look: two-tone flat sky, a soft warm glow where the sun is, light grain */
+function arr(c){return c.match(/\d+/g).map(Number)}
+function mixA(A,B,t){return A.map(function(v,i){return Math.round(v+(B[i]-v)*t)})}
+function field(el){var k=sky(el),T=arr(k.top),Mi=arr(k.mid),B=arr(k.bot),c=mixA(Mi,B,.35),c2=mixA(T,Mi,.6);
+  return {bg:"linear-gradient(180deg,rgb("+c2+"),rgb("+c+") 70%)",light:(.2126*c[0]+.7152*c[1]+.0722*c[2])/255>.55}}
+function glowY(el){return 62-Math.min(el,50)*.9}
+function paintSky(el,xFrac){
+  var f=field(el),x=10+Math.max(0,Math.min(1,xFrac))*80;
+  scr.style.setProperty("--ink",f.light?"#121211":"#F7F5F0");
+  scr.style.setProperty("--inv",f.light?"#F7F5F0":"#121211");
+  scr.style.setProperty("--glass",f.light?"rgba(255,255,255,.42)":"rgba(255,255,255,.16)");
+  return '<div class="sky" style="background:'+f.bg+'"></div><div class="sun" style="left:'+x+'%;top:'+glowY(el)+'%;opacity:'+(el<-2?0:1)+'"></div><div class="grain"></div>';
+}
+
+/* ---------- time ---------- */
+function liveMins(){var n=new Date(),utc=n.getUTCHours()*60+n.getUTCMinutes();return utc+60*(S.city[4]+(isDST(S.city)?1:0))}
+function curMins(){return S.mode==="live"?((liveMins()%1440)+1440)%1440:S.mins}
+function inSched(m){var a=toM(S.sched[0]),b=toM(S.sched[1]);return a>b?(m>=a||m<b):(m>=a&&m<b)}
+function toM(s){var p=s.split(":");return (+p[0])*60+(+p[1])}
+function given(){var h=Math.floor(S.given/60),m=S.given%60;return (h?h+"h ":"")+m+"m"}
+function statusBar(m){return '<div class="status"><span>'+hm(m)+'</span><span>●●● 5G ▮</span></div>'}
+
+/* ---------- screens ---------- */
+var QUOTES=[["Nature does not hurry, yet everything is accomplished.","Lao Tzu"],["Live in the sunshine, swim the sea, drink the wild air.","Ralph Waldo Emerson"],["An early-morning walk is a blessing for the whole day.","Henry David Thoreau"],["Look at the sky. We are not alone.","after Hafiz"]];
+/* weather: a line icon and the temperature (mock here; WeatherKit in the app) */
+function wx(m,s){var day=m>s.rise&&m<s.set,t=Math.round(11+5*Math.sin(Math.PI*(m-480)/840)),cloudy=Math.floor(m/240)%2;
+  var sun='<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/>';
+  var moon='<path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/>';
+  var cloud='<path d="M7 18.5h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.4A3.3 3.3 0 0 0 7 18.5z"/>';
+  var g=cloudy?cloud:(day?sun:moon);
+  return '<span style="display:inline-flex;align-items:center;gap:1.4cqw;font-size:5.4cqw;letter-spacing:-.01em"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-label="'+(cloudy?'Cloudy':day?'Sunny':'Clear')+'" role="img">'+g+'</svg>'+t+'°</span>'}
+function tc(){var h=Math.floor(S.given/60),m=S.given%60;return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":00:00"}
+function home(){
+  var m=curMins(),s=solar(m),x=(m-s.rise)/(s.set-s.rise),q=QUOTES[new Date().getDate()%QUOTES.length];
+  var t='<div class="abs" style="background:#0B0B0A"></div><div class="layer" style="padding-top:2.2cqh;color:#fff">'+statusBar(m)+'</div>';
+  t+='<div class="wgt">'+paintSky(s.el,x)+'<div class="in">';
+  t+='<div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:17cqw;letter-spacing:-.045em;line-height:.95">'+hm(m)+'</span>'+wx(m,s)+'</div>';
+  t+='<div class="mono" style="margin-top:1.2cqh;display:flex;gap:5cqw"><span>RISE '+hm(s.rise)+'</span><span>SET '+hm(s.set)+'</span></div>';
+  t+='<div style="margin-top:3.2cqh;display:grid;gap:.8cqh;max-width:90%"><div style="font-size:4.4cqw;line-height:1.25;letter-spacing:-.01em">“'+q[0]+'”</div><div class="mono">'+q[1].toUpperCase()+'</div></div>';
+  t+='<div class="apps">'+S.apps.map(function(a,i){return a.home?'<button type="button" data-app="'+i+'">'+esc(a.n)+'</button>':''}).join("")+'</div>';
+  t+='<button type="button" class="tcb mono" data-go="guard" aria-label="Open Aglo settings"><span>'+tc()+'</span><span>GIVEN BACK</span></button></div></div>';
+  t+='<button type="button" class="srch" data-go="search"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>Search</button>';
+  return t;
+}
+/* iOS search: every app is still findable, guarded ones go through Aglo first */
+function search(){
+  var m=curMins(),s=solar(m),x=(m-s.rise)/(s.set-s.rise),q=S.sq.trim().toLowerCase();
+  var r=q?S.apps.filter(function(a){return a.n.toLowerCase().indexOf(q)===0||a.n.toLowerCase().indexOf(q)>0}):[];
+  var t=paintSky(s.el,x)+'<div class="sheet spot"><div style="display:flex;gap:3cqw;align-items:center"><input class="city" id="sq" style="margin-top:0" placeholder="Search" value="'+esc(S.sq)+'" autocomplete="off"><button type="button" data-go="home" style="background:none;border:0;color:inherit;font-size:4cqw;cursor:pointer">Cancel</button></div>';
+  t+=q?'<div class="res" style="margin-top:2cqh">'+(r.length?r.map(function(a){return '<button type="button" data-app="'+S.apps.indexOf(a)+'">'+esc(a.n)+(a.lv?'<span>AGLO · '+({gentle:"PAUSE",firm:"TASK",locked:"LOCKED"})[a.lv]+'</span>':'')+'</button>'}).join(""):'<div class="q" style="padding-top:1.6cqh">No apps</div>')+'</div>'
+    :'<div class="q" style="margin-top:3cqh;line-height:1.4">Everything off your home page is still here if you type it. Try Instagram or TikTok.</div>';
+  return t+'</div>';
+}
+/* Screen Time shield, dressed in Aglo's sky: two buttons is all Apple allows */
+function shield(){
+  var a=S.apps[S.target],m=curMins(),locked=a.lv==="locked"&&inSched(m);
+  var ask=locked?"Locked until "+S.sched[1]+". You chose this.":a.lv==="gentle"?"Three slow breaths first.":a.task==="steps"?"300 steps outside first.":a.task==="squats"?"15 squats first.":a.task==="breath"?"Three slow breaths first.":"10 press-ups first.";
+  var t=paintSky(-9,.5)+'<div class="layer">'+statusBar(m)+'<div class="center" style="margin-top:22cqh"><div class="mono" style="opacity:.7">AGLO</div><div class="big">'+esc(a.n)+' is behind Aglo.</div><div class="small">'+ask+'</div></div>';
+  t+='<div class="bottom"><button class="pill solid" data-unlock style="width:100%">'+(locked?"Open Aglo":"Unlock in Aglo")+'</button><button class="pill" data-skip style="width:100%">Close</button></div></div>';
+  return t;
+}
+function onb(){
+  var m=curMins(),s=solar(m),x=(m-s.rise)/(s.set-s.rise),t=paintSky(s.el,x);
+  if(S.step===0){
+    t+='<div class="layer">'+statusBar(m)+'<div class="center"><div class="small" style="letter-spacing:.02em">Aglo</div><div class="big">Live in the afterglow.</div><div class="small">One page, lit by the real sun. Only the apps you need on it. A pause before the ones that pull you in. Time given back.</div></div><div class="bottom"><button class="pill solid" data-next>Begin</button></div></div>';
+  }else if(S.step===1){
+    var f=CITIES.filter(function(c){return !S.q||(c[0]+" "+c[1]).toLowerCase().indexOf(S.q.toLowerCase())>=0}).slice(0,7);
+    t+='<div class="sheet"><span class="q">1 of 4</span><h2>Where are you?</h2><span class="q">We place the sun from your city. No location access needed.</span>';
+    t+='<input class="city" id="cityq" placeholder="Search any city" value="'+esc(S.q)+'" autocomplete="off">';
+    t+='<div class="clist">'+f.map(function(c){return '<button type="button" data-city="'+CITIES.indexOf(c)+'">'+esc(c[0])+'<span>'+esc(c[1])+'</span></button>'}).join("")+'</div>';
+    t+='<div style="margin-top:auto;padding-top:2cqh;font-size:3.5cqw;opacity:.6">Or use my location instead</div></div>';
+  }else if(S.step===2){
+    t+='<div class="sheet"><span class="q">2 of 4</span><h2>What stays on your home page?</h2><span class="q">Pick up to five. Everything else comes off the home screen.</span><div class="ticks">';
+    t+=S.apps.map(function(a,i){return '<button type="button" data-hp="'+i+'" class="'+(a.home?"on":"")+'">'+esc(a.n)+'<b>'+(a.home?"✓":"")+'</b></button>'}).join("");
+    t+='</div><div class="two" style="grid-template-columns:1fr"><button class="pill solid" data-next2>Next</button></div></div>';
+  }else if(S.step===3){
+    t+='<div class="sheet"><span class="q">3 of 4</span><h2>Which apps pull you in?</h2><span class="q">If you search for these, Aglo steps in first. Free covers three.</span><div class="ticks">';
+    t+=S.apps.map(function(a,i){return a.home?'':'<button type="button" data-tick="'+i+'" class="'+(a.lv?"on":"")+'">'+esc(a.n)+'<b>'+(a.lv?"✓":"")+'</b></button>'}).join("");
+    t+='</div><div class="two" style="grid-template-columns:1fr"><button class="pill solid" data-next3>Next</button></div></div>';
+  }else{
+    t+='<div class="sheet"><span class="q">4 of 4</span><h2>Clear your home screen.</h2><div class="rowl" style="font-size:4cqw">';
+    t+=['Press and hold the home screen until the apps wiggle.','Tap the page dots and hide every page but one.','Move the apps on it to the App Library.','Tap Edit, Add Widget, Aglo, and pick the full page.'].map(function(x,i){return '<div class="ar" style="grid-template-columns:7cqw 1fr;display:grid"><span class="mono">0'+(i+1)+'</span><span>'+x+'</span></div>'}).join("");
+    t+='</div><span class="q" style="margin-top:2cqh">Nothing is deleted. Every app is still in search and the App Library.</span><div class="two" style="grid-template-columns:1fr"><button class="pill solid" data-done>Done, show me</button></div></div>';
+  }
+  return t;
+}
+var P={el:-8,breaths:0,phase:"idle",holding:false,raf:0,reps:0,steps:0};
+function pause(){
+  var a=S.apps[S.target],m=curMins();
+  if(a.lv==="locked"&&inSched(m))return lockedScr(a,m);
+  var task=a.lv==="gentle"?"breath":a.task;
+  var t=paintSky(P.el,.5)+'<div class="layer">'+statusBar(m);
+  if(P.phase==="done"){
+    t+='<div class="center"><div class="big">'+(task==="breath"?"Three breaths.":task==="steps"?"300 steps.":task==="squats"?"15 squats.":"10 press-ups.")+'<br>Still want '+esc(a.n)+'?</div></div><div class="two"><button class="pill" data-skip>Not now</button><button class="pill solid" data-open>Open '+esc(a.n)+'</button></div>';
+  }else if(task==="breath"){
+    var msg=P.phase==="in"?"Breathe in":P.phase==="out"?"Let go. Breathe out":"Hold the sky to breathe in";
+    t+='<div class="center" style="margin-top:14cqh"><div class="big">'+msg+'</div><div class="dots">'+[0,1,2].map(function(i){return '<i class="'+(i<P.breaths?"on":"")+'"></i>'}).join("")+'</div><div class="small">'+esc(a.n)+' opens after three</div></div>';
+    t+='<div class="hold" id="hold" aria-label="Hold to breathe"></div><div class="bottom"><button class="pill" data-skip>Not now</button></div>';
+  }else if(task==="pushups"||task==="squats"){
+    var sq=task==="squats";
+    t+='<div class="center"><div class="small">'+(sq?"Prop the phone up. Step back.":"Phone on the floor. Nose to the screen.")+'</div><button type="button" class="cam" data-rep>'+P.reps+'</button><div class="big">'+(sq?"15 squats":"10 press-ups")+'</div><div class="small">The camera only counts. Nothing is recorded. (Tap to count here.)</div></div><div class="bottom"><button class="pill" data-skip>Not now</button></div>';
+  }else{
+    t+='<div class="center"><div class="big">'+P.steps+' <span style="opacity:.5">/ 300 steps</span></div><div class="small">Take a walk outside and '+esc(a.n)+' unlocks.</div><button class="pill" data-walk>Simulate 30 steps</button></div><div class="bottom"><button class="pill" data-skip>Not now</button></div>';
+  }
+  return t+'</div>';
+}
+function lockedScr(a,m){
+  var t=paintSky(-14,.5)+'<div class="layer">'+statusBar(m)+'<div class="center"><div class="big">'+esc(a.n)+' is resting until '+S.sched[1]+'.</div><div class="small">Locked '+S.sched[0]+' to '+S.sched[1]+'. You chose this.</div></div>';
+  t+='<div class="bottom"><button class="pill" data-skip>Back to home</button><button class="pill" data-emergency style="background:none;opacity:.7">Emergency unlock, 5 minutes</button></div></div>';
+  return t;
+}
+function guard(){
+  var m=curMins(),s=solar(m),t=paintSky(s.el,(m-s.rise)/(s.set-s.rise));
+  t+='<div class="sheet"><div style="display:flex;justify-content:space-between"><span class="q">Guarded apps</span><button class="pill" data-go="home" style="padding:.8cqh 3.6cqw;font-size:3.4cqw;color:#F2F2EF">Done</button></div>';
+  t+='<h2>Off your home page, and how strict.</h2><span class="q">Gentle is a pause. Firm asks for something first. Locked stays shut on a schedule.</span><div class="rowl">';
+  S.apps.forEach(function(a,i){
+    if(a.home)return;
+    t+='<div class="ar"><div class="n">'+esc(a.n)+'<span>'+(a.lv?({gentle:"Pause",firm:"Task first",locked:"Locked on schedule"})[a.lv]:"Open freely")+'</span></div><div class="lv">';
+    [["","Off"],["gentle","Gentle"],["firm","Firm"],["locked","Locked"]].forEach(function(l){t+='<button type="button" data-lv="'+i+'|'+l[0]+'" class="'+((a.lv||"")===l[0]?"on":"")+'">'+l[1]+(l[0]==="locked"&&!S.plus?"<sup>PLUS</sup>":"")+'</button>'});
+    t+='</div>';
+    if(a.lv==="firm"||a.lv==="locked"){t+='<div class="lv">';[["breath","Breath"],["pushups","Press-ups"],["squats","Squats"],["steps","300 steps"]].forEach(function(k){t+='<button type="button" data-task="'+i+'|'+k[0]+'" class="'+(a.task===k[0]?"on":"")+'">'+k[1]+'</button>'});t+='</div>'}
+    if(a.lv==="locked")t+='<div class="sched">Locked from <input id="s0" value="'+S.sched[0]+'" aria-label="Lock from"> to <input id="s1" value="'+S.sched[1]+'" aria-label="Lock until"></div>';
+    t+='</div>';
+  });
+  return t+'</div></div>';
+}
+function paywall(){
+  var m=curMins(),s=solar(m),t=paintSky(s.el,(m-s.rise)/(s.set-s.rise));
+  t+='<div class="sheet"><span class="q">Plus</span><h2>Keep the warm part free. Pay for the strict part.</h2><div class="rowl" style="font-size:3.8cqw">';
+  t+='<div class="ar">Free stays free: Gentle and Firm on three apps, your city’s sky.</div><div class="ar">Plus adds Locked schedules, unlimited apps and every sky.</div><div class="ar">On the year plan we remind you a day before the 7-day trial ends. Cancel in Settings any time.</div></div>';
+  t+='<div class="plans">'+[["year","£19.99 a year","7 days free"],["month","£2.99 a month","no trial"],["life","£34.99 once","lifetime"]].map(function(p){return '<button type="button" class="plan'+(S.plan===p[0]?" on":"")+'" data-plan="'+p[0]+'">'+p[1]+'<span>'+p[2]+'</span></button>'}).join("")+'</div>';
+  t+='<div class="two"><button class="pill" style="color:#F2F2EF" data-free>Continue free</button><button class="pill solid" style="--ink:#F2F2EF;--inv:#121211" data-buy>'+(S.plan==="year"?"Start free trial":"Buy")+'</button></div></div>';
+  return t;
+}
+var toastT;
+function toast(msg){var el=document.createElement("div");el.className="toast";el.textContent=msg;scr.appendChild(el);clearTimeout(toastT);toastT=setTimeout(function(){el.style.opacity=0;setTimeout(function(){el.remove()},400)},2200)}
+
+function render(){
+  document.documentElement.style.setProperty("--app","var(--f-"+S.face+")");
+  var h=S.screen==="onb"?onb():S.screen==="pause"?pause():S.screen==="search"?search():S.screen==="shield"?shield():S.screen==="guard"?guard():S.screen==="paywall"?paywall():home();
+  scr.innerHTML=h;
+  var m=curMins(),s=solar(m);
+  document.getElementById("sunline").textContent=S.city[0]+": sunrise "+hm(s.rise)+", sunset "+hm(s.set)+", sun "+Math.round(s.el)+"° now";
+  document.getElementById("scrub").value=m;
+  var sqi=document.getElementById("sq");
+  if(sqi){if(S.screen==="search"&&document.activeElement!==sqi){var L=sqi.value.length;sqi.focus({preventScroll:true});sqi.setSelectionRange(L,L)}sqi.oninput=function(){S.sq=sqi.value;render()}}
+  var cq=document.getElementById("cityq");
+  if(cq){cq.oninput=function(){S.q=cq.value;var p=cq.selectionStart;render();var n=document.getElementById("cityq");n.focus();n.setSelectionRange(p,p)}}
+  ["s0","s1"].forEach(function(id,i){var el=document.getElementById(id);if(el)el.onchange=function(){if(/^\d\d:\d\d$/.test(el.value))S.sched[i]=el.value;render()}});
+  var hold=document.getElementById("hold");if(hold)bindHold(hold);
+}
+
+/* ---------- the thumb breath: nothing moves unless you hold ---------- */
+function bindHold(el){
+  function down(e){e.preventDefault();if(P.phase==="done")return;P.holding=true;P.phase="in";render()}
+  function up(){if(!P.holding)return;P.holding=false;P.phase="out";render()}
+  el.addEventListener("pointerdown",down);el.addEventListener("pointerup",up);el.addEventListener("pointerleave",up);el.addEventListener("pointercancel",up);
+}
+function tick(){
+  if(S.screen==="pause"&&P.phase!=="done"){
+    var a=S.apps[S.target],task=a&&(a.lv==="gentle"?"breath":a.task);
+    if(task==="breath"){
+      var before=P.el;
+      if(P.phase==="in"&&P.holding){P.el=Math.min(24,P.el+0.16);P.peak=Math.max(P.peak||-8,P.el)}
+      else if(P.phase==="out")P.el=Math.max(-8,P.el-0.16);
+      if(P.phase==="in"&&P.el>=24){/* top of the breath: wait for release */}
+      if(P.phase==="out"&&P.el<=-8){if((P.peak||-8)>=14)P.breaths++;P.peak=-8;P.phase=P.breaths>=3?"done":"idle";if(P.phase==="done")finishTask();render();}
+      else if(before!==P.el){var sk=scr.querySelector(".sky"),sun=scr.querySelector(".sun");if(sk){var k=field(P.el);sk.style.transition="none";sk.style.background=k.bg;scr.style.setProperty("--ink",k.light?"#121211":"#F7F5F0");sun.style.transition="none";sun.style.top=glowY(P.el)+"%";sun.style.opacity=P.el<-2?0:1}}
+    }
+  }
+  if(S.mode==="play"&&S.screen!=="pause"){S.mins=(S.mins+4)%1440;if(S.mins%20===0)render()}
+  requestAnimationFrame(tick);
+}
+function finishTask(){P.el=18}
+function startPause(i){S.target=i;P={el:-8,breaths:0,phase:"idle",holding:false,reps:0,steps:0};S.screen="pause";render()}
+
+scr.addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  var d=b.dataset;
+  if(d.next!=null){S.step=1;render();return}
+  if(d.city!=null){S.city=CITIES[+d.city];S.step=2;render();return}
+  if(d.hp!=null){var h=S.apps[+d.hp];if(!h.home&&S.apps.filter(function(x){return x.home}).length>=5){toast("Five is plenty");return}h.home=h.home?0:1;if(h.home)h.lv=null;render();return}
+  if(d.next2!=null){S.step=3;render();return}
+  if(d.next3!=null){S.step=4;render();return}
+  if(d.unlock!=null){startPause(S.target);return}
+  if(d.tick!=null){var a=S.apps[+d.tick],n=S.apps.filter(function(x){return x.lv&&x.lv!=="locked"}).length;if(a.lv){a.lv=null}else{if(n>=3&&!S.plus){toast("Free covers three apps");return}a.lv="gentle";a.task="breath"}render();return}
+  if(d.done!=null){S.screen="home";render();toast("Home screen set");return}
+  if(d.app!=null){var ap=S.apps[+d.app];if(!ap.lv){S.screen="home";S.sq="";render();toast(ap.n+" opens");return}S.target=+d.app;S.sq="";S.screen="shield";render();return}
+  if(d.rep!=null){P.reps++;if(P.reps>=(S.apps[S.target].task==="squats"?15:10)){P.phase="done";finishTask()}render();return}
+  if(d.walk!=null){P.steps=Math.min(300,P.steps+30);if(P.steps>=300){P.phase="done";finishTask()}render();return}
+  if(d.skip!=null){S.given+=12;S.screen="home";render();toast("12 minutes given back");return}
+  if(d.open!=null){var nm=S.apps[S.target].n;if(!S.paywallSeen){S.paywallSeen=true;S.screen="paywall";render();return}S.screen="home";render();toast(nm+" opens");return}
+  if(d.emergency!=null){S.screen="home";render();toast("Unlocked for 5 minutes. Always free.");return}
+  if(d.lv!=null){var p=d.lv.split("|"),ax=S.apps[+p[0]];if(p[1]==="locked"&&!S.plus){S.screen="paywall";render();return}if(p[1]&&!ax.lv&&!S.plus&&S.apps.filter(function(x){return x.lv&&x.lv!=="locked"}).length>=3){toast("Free covers three apps");return}ax.lv=p[1]||null;if(!ax.task)ax.task="breath";render();return}
+  if(d.task!=null){var q=d.task.split("|");S.apps[+q[0]].task=q[1];render();return}
+  if(d.plan){S.plan=d.plan;render();return}
+  if(d.free!=null){S.screen="home";render();toast("Free it is. Nothing expires.");return}
+  if(d.buy!=null){S.plus=true;S.screen="home";render();toast(S.plan==="year"?"Trial started. Reminder set for day 6.":"Plus unlocked");return}
+  if(d.go){if(d.go==="search")S.sq="";S.screen=d.go;render();return}
+});
+
+document.getElementById("faces").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;S.face=b.dataset.f;[].forEach.call(this.children,function(x){x.classList.toggle("on",x===b)});render()});
+document.getElementById("mode").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;if(S.mode==="live")S.mins=curMins();S.mode=b.dataset.m;[].forEach.call(this.children,function(x){x.classList.toggle("on",x===b)});render()});
+document.getElementById("scrub").addEventListener("input",function(){S.mode="scrub";S.mins=+this.value;[].forEach.call(document.getElementById("mode").children,function(x){x.classList.toggle("on",x.dataset.m==="scrub")});render()});
+document.getElementById("jump").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var g=b.dataset.go;
+  if(g==="reset"){S.screen="onb";S.step=0;S.plus=false;S.paywallSeen=false;S.given=160;render();return}
+  if(g==="onb"){S.step=0}if(g==="search")S.sq="";S.screen=g;render()});
+setInterval(function(){if(S.mode==="live"&&S.screen!=="pause"&&S.screen!=="search")render()},30000);
+render();requestAnimationFrame(tick);
+})();
+</script>
+<script src="solo.js"></script>

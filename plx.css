@@ -682,3 +682,22 @@ html.plx-ink .mo-cur { visibility: hidden; }
   .eltio.alt-plx.lp .x-end .x-start { order: -2; }
   .eltio.alt-plx.lp .x-list { padding-bottom: 48px; }
 }
+
+/* 16 Oct: Aglo. L4: "a glo" with the o as a flat half sun (Instrument Sans, outlined); icon is the same half sun, paper on ink */
+.eltio .ag-sky { position: absolute; inset: 0; display: block; overflow: hidden; background: linear-gradient(180deg, #9BB7D9, #CCD3DA 70%); }
+.eltio .ag-sky i { position: absolute; left: 58%; top: 60%; width: 120%; height: 80%; translate: -50% -50%; background: radial-gradient(closest-side, rgba(255,217,184,.8), rgba(255,217,184,0)); }
+.eltio .ag-ic { position: relative; display: block; width: 19cqi; aspect-ratio: 1; border-radius: 22%; overflow: hidden; }
+.eltio .ag-wm { display: block; height: auto; fill: currentColor; aspect-ratio: 2068 / 935; }
+.eltio .k2-ag { display: grid; justify-items: center; gap: 6cqi; color: #0B0B0A; }
+.eltio .k2-ag .ag-wm { width: 28cqi; }
+.eltio .ag-ic svg, .eltio .ag-icon svg { display: block; width: 100%; height: 100%; }
+.eltio .ag-icon { background: #121211; }
+.eltio.alt-plx .x-ph-in .k2-ag { position: absolute; inset: 0; place-content: center; background: #121211; color: #F2F2EF; }
+.eltio.alt-plx .x-ph-in .k2-ag .ag-ic { box-shadow: 0 0 0 1px #3a3a37; }
+
+/* 16 Oct: Systems. Eltio's own back office: the name in Inter Tight and the six soft part colours from the app */
+.eltio .sy-wm { display: block; height: auto; fill: currentColor; aspect-ratio: 7483 / 1928; }
+.eltio .sy-segs { display: flex; gap: 1.2cqi; width: 100%; }
+.eltio .sy-segs i { flex: 1; height: 1.4cqi; min-height: 3px; border-radius: 9px; }
+.eltio .k2-sy { display: grid; justify-items: center; gap: 4cqi; color: #0B0B0A; width: 44cqi; }
+.eltio .k2-sy .sy-wm { width: 100%; }

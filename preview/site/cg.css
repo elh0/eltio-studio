@@ -276,3 +276,10 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 16 Oct: phones swap each live panel for a recording at the panel's own shape */
 .eltio.cg .cg-emb > .cg-m { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .eltio.cg .x-dev > .cg-m { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: clamp(8px, 2cqw, 22px); background: #121211; }
+
+/* 16 Oct: Aglo's cover, the name on today's sky */
+.eltio.cg .cg-ag-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #121211; }
+.eltio.cg .cg-ag-cov .ag-wm { position: relative; width: 24%; }
+.eltio.cg .cg-sy-cov { position: absolute; inset: 0; margin: auto; width: 32%; height: max-content; display: grid; gap: 1.6cqi; color: #0B0B0A; }
+.eltio.cg .cg-sy-cov .sy-segs { gap: .8cqi; }
+.eltio.cg .cg-sy-cov .sy-segs i { height: .7cqi; }

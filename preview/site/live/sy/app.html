@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Eltio Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter+Tight:wght@500&display=swap">
+<style>
+/* Eltio Systems client app. Same rules as Charlie's onboarding: one Geist Mono size, Inter Tight only for the question,
+   sentence case, soft rounded rows, one colour per part. Content lives in the objects at the top of the script. */
+:root{--ink:#0B0B0A;--white:#fff;--chrome:#F3F3F0;--chrome-fg:#0B0B0A;--grey:#8A8A83;
+  --mono:"Geist Mono",ui-monospace,Menlo,monospace;--disp:"Inter Tight",-apple-system,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chrome:#1a1a18;--chrome-fg:#F3F3F0}}
+:root[data-theme="dark"]{--chrome:#1a1a18;--chrome-fg:#F3F3F0}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--chrome);color:var(--chrome-fg)}
+body{font:400 13px/1.45 var(--mono);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+p{margin:0}
+.wrap{display:flex;gap:40px;justify-content:center;align-items:flex-start;padding:28px 16px}
+.side{width:260px;display:grid;gap:14px;padding-top:8px}
+.side .q{color:var(--grey)}
+.side .jump{display:grid;gap:4px}
+.side .jump button{background:none;border:0;padding:4px 0;text-align:left;cursor:pointer;color:var(--grey)}
+.side .jump button.on{color:var(--chrome-fg)}
+.side .jump button:hover{color:var(--chrome-fg)}
+/* app frame */
+.app{--bg:#fff;--fg:#0B0B0A;--q:rgba(11,11,10,.5);--hr:rgba(11,11,10,.09);--fill:#F5F5F3;--c:#DCE8D6;--d:#4F7348;
+  position:relative;width:390px;height:min(820px,calc(100vh - 56px));min-height:640px;background:var(--bg);color:var(--fg);border-radius:32px;border:1px solid rgba(128,128,128,.28);overflow:hidden;display:flex;flex-direction:column}
+.app[data-p="you"]{--c:#DCE8D6;--d:#4F7348}
+.app[data-p="work"]{--c:#F4E7B8;--d:#85691A}
+.app[data-p="services"]{--c:#D6E4F1;--d:#3C6286}
+.app[data-p="accounts"]{--c:#F3D8CE;--d:#96503F}
+.app[data-p="rules"]{--c:#E4DDF0;--d:#5E4B86}
+.app[data-p="start"]{--c:#E6E3DC;--d:#5C574C}
+@media (max-width:720px){.wrap{padding:0;display:block}.side{display:none}.app{width:100%;height:100vh;height:100dvh;min-height:0;border-radius:0;border:0}}
+.scr{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:18px 20px 20px;display:flex;flex-direction:column;gap:18px}
+.q{color:var(--q)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:28px}
+.lnk{background:none;border:0;padding:0;cursor:pointer;color:var(--q)}
+.lnk:hover{color:var(--fg)}
+.segs{display:flex;gap:4px}
+.segs i{flex:1;height:4px;border-radius:4px;background:var(--hr);transition:background .4s}
+.segs i.on{background:var(--d)}
+h1{font:500 30px/1.08 var(--disp);letter-spacing:-.02em;margin:0}
+h2{font:500 24px/1.12 var(--disp);letter-spacing:-.015em;margin:0}
+.part{display:flex;align-items:center;gap:8px;color:var(--q)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);flex:none}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{border:1px solid var(--hr);background:var(--bg);padding:8px 13px;border-radius:999px;cursor:pointer}
+.pill[aria-pressed="true"]{background:var(--c);border-color:var(--c)}
+.rows{display:grid;gap:6px}
+.row{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:13px 14px;border:0;border-radius:12px;background:var(--fill);text-align:left;cursor:pointer;transition:background .25s}
+.row[aria-pressed="true"]{background:var(--c)}
+.row .sub{grid-column:1/-1;color:var(--q)}
+.row[aria-pressed="true"] .sub{color:rgba(11,11,10,.62)}
+.row.soon{cursor:default;opacity:.55}
+.tog{width:34px;height:20px;border-radius:999px;background:var(--hr);position:relative;transition:background .25s;flex:none}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .25s}
+[aria-pressed="true"] .tog,.tog.on{background:var(--d)}
+[aria-pressed="true"] .tog::after,.tog.on::after{transform:translateX(14px)}
+.tog.lock{opacity:.6}
+.field{display:grid;gap:6px}
+.field input{border:0;border-radius:12px;background:var(--fill);padding:13px 14px;outline:none;width:100%}
+.field input:focus{box-shadow:0 0 0 1.5px var(--d)}
+.foot{padding:12px 20px calc(16px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--hr);background:var(--bg)}
+.btn{border:1px solid var(--hr);background:var(--bg);padding:12px 20px;border-radius:999px;cursor:pointer;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.solid{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.wide{flex:1;text-align:center}
+.sum{display:grid;gap:0;border-radius:12px;background:var(--fill);overflow:hidden}
+.sum div{display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--hr)}
+.sum div:last-child{border-bottom:0}
+.note{padding:12px 14px;border:1px dashed var(--hr);border-radius:12px;color:var(--q)}
+.slider{display:grid;gap:8px}
+.slider .ends{display:flex;justify-content:space-between;color:var(--q)}
+input[type=range]{width:100%;accent-color:var(--d)}
+.quote{padding:12px 14px;border-radius:12px;background:var(--c);white-space:pre-wrap}
+/* home */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--hr);padding:6px 6px calc(10px + env(safe-area-inset-bottom,0px));background:var(--bg)}
+.tabs button{background:none;border:0;padding:8px 0;cursor:pointer;color:var(--q);display:grid;justify-items:center;gap:5px}
+.tabs button.on{color:var(--fg)}
+.tabs button i{width:6px;height:6px;border-radius:50%;background:transparent}
+.tabs button.on i{background:var(--fg)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kpi{background:var(--fill);border-radius:12px;padding:12px 14px;display:grid;gap:2px}
+.kpi b{font:500 20px/1.15 var(--disp);letter-spacing:-.01em}
+.status{color:var(--q);white-space:nowrap}
+.status.live{color:var(--fg)}
+.status.live::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#4F7348;margin-right:6px;vertical-align:1px}
+.sheet{position:absolute;inset:auto 0 0 0;background:var(--bg);border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(0,0,0,.14);padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));display:grid;gap:14px;transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.2,1);max-height:82%;overflow-y:auto;z-index:20}
+.sheet.on{transform:none}
+.grab{width:36px;height:4px;border-radius:4px;background:var(--hr);justify-self:center}
+.shade{position:absolute;inset:0;background:rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .3s;z-index:19}
+.shade.on{opacity:1;pointer-events:auto}
+.banner{position:absolute;left:12px;right:12px;top:12px;z-index:30;background:var(--fg);color:var(--bg);padding:11px 14px;border-radius:12px;transform:translateY(calc(-100% - 24px));visibility:hidden;transition:transform .3s,visibility .3s}
+.banner.on{transform:none;visibility:visible}
+:focus-visible{outline:2px solid #3C6286;outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <aside class="side">
+    <p>Eltio Studio · Systems</p>
+    <p class="q">The client app, as a production company would use it. Onboarding first, then the app they come back to. Tap through on the right, or jump to a screen.</p>
+    <div class="jump" id="jump"></div>
+    <p class="q">Sample data. Nothing connects, sends or charges. </p>
+  </aside>
+  <div class="app" id="app">
+    <div class="banner" id="banner"></div>
+    <div class="scr" id="scr"></div>
+    <div id="bottom"></div>
+    <div class="shade" id="shade"></div>
+    <div class="sheet" id="sheet"></div>
+  </div>
+</div>
+<script>
+(function(){
+/* ---------- content ---------- */
+var GROUPS=[["money","Money in","#DCE8D6"],["crew","Crew and shoot","#F4E7B8"],["books","Money out and books","#D6E4F1"],["brief","Briefs and deadlines","#E4DDF0"],["rights","Delivery and rights","#F3D8CE"]];
+/* for: f = freelancer, c = company, b = both. soon = researched, not built yet */
+var SERVICES=[
+ {id:"chase",g:"money",for:"b",name:"Late payment chasing",line:"Aged invoices, with polite then firmer chase emails drafted in your inbox for you to send.",runs:"Every Monday, 07:10",from:""},
+ {id:"advance",g:"money",for:"c",name:"Advance invoice on award",line:"When a job is awarded, the advance invoice is drafted in your accounts, with the payment dates on your calendar.",runs:"When a job is awarded",from:""},
+ {id:"interest",g:"money",for:"b",name:"Interest claim letter",line:"For invoices well overdue, the statutory interest and fixed compensation worked out in a draft letter.",runs:"When an invoice passes 60 days",from:"Included with chasing"},
+ {id:"holds",g:"crew",for:"b",name:"Holds and pencils",line:"Every hold in one place, with confirm or release emails drafted before the date.",runs:"Every day, 08:00",from:""},
+ {id:"confirm",g:"crew",for:"f",name:"Booking confirmations",line:"Each booking confirmed in writing with your day rate, hours and cancellation terms.",runs:"When you're booked",from:"Included"},
+ {id:"start",g:"crew",for:"c",name:"Crew start packs",line:"Start packs sent and collected, with each crew member's tax status prepared for you to sign off.",runs:"When crew are booked",from:""},
+ {id:"overtime",g:"crew",for:"c",name:"Overtime check",line:"Crew invoices checked against shoot hours and APA overtime before you pay them.",runs:"When crew invoices arrive",from:""},
+ {id:"permits",g:"crew",for:"c",name:"London permits and licences",line:"Borough, Royal Parks, TfL and child licence deadlines counted back from the shoot date, with the forms pre-filled.",runs:"When a shoot date is set",from:""},
+ {id:"receipts",g:"books",for:"b",name:"Expenses and receipts",line:"Receipts, floats and mileage tagged to the job and filed in one weekly batch.",runs:"Every Monday, 08:00",from:""},
+ {id:"jobsetup",g:"books",for:"c",name:"Job set-up in the books",line:"Each new job set up as a code in your accounts, card and receipt apps, so spend lands on the right job.",runs:"When a job is awarded",from:""},
+ {id:"cost",g:"books",for:"c",name:"Cost report actuals",line:"Supplier invoices and POs matched to budget lines, with a draft running cost report.",runs:"Weekly while a job is live",from:"Quoted"},
+ {id:"books",g:"books",for:"b",name:"Books catch-up",line:"A one-off clean-up of your books, ready for your accountant to sign off.",runs:"One-off",from:""},
+ {id:"brief",g:"brief",for:"b",name:"Morning brief",line:"Money, holds, deadlines and what needs you, in one email each morning or each Monday.",runs:"Every morning, 07:00",from:""},
+ {id:"tax",g:"brief",for:"f",name:"Tax and VAT watch",line:"Self Assessment and payment dates, money to set aside, and a warning before you near the £90,000 VAT threshold.",runs:"Every month",from:"Included"},
+ {id:"cal",g:"brief",for:"c",name:"Compliance calendar",line:"VAT, PAYE, Companies House, insurance renewals and payment due dates on your shared calendar.",runs:"Every day, 06:30",from:""},
+ {id:"memo",g:"brief",for:"b",name:"Decision memos",line:"Kit buy or hire, a lease, a vehicle or a hire, with the numbers shown.",runs:"When you ask",from:""}];
+var SOON=[
+ ["Usage and rights expiry","Talent buyouts, music and stock licences, with reminders 90, 60 and 30 days before they run out.","c"],
+ ["Deliverables and clock numbers","Every version, cut-down and clock number, with Clearcast and delivery dates counted back from air.","c"],
+ ["Call sheets and movement orders","Drafted from the crew list, schedule and locations.","c"],
+ ["Supplier packs","Insurance, bank and policy documents ready for client portals, with expiry reminders.","c"],
+ ["AdGreen pack","Travel, fuel, hotel and catering data pulled from your books for the carbon calculator.","c"],
+ ["Crew invoices","Collected, matched to deal memos and day rates, missing ones chased.","c"],
+ ["Risk assessments","Sent to crew and locations, signatures tracked per job.","c"],
+ ["Kit","Hire lists checked against budget, returns and damage tracked at wrap.","b"],
+ ["Kit rental income","Your own kit hired out, invoiced and tracked.","f"]];
+var ACCOUNTS=[
+ ["email","Email","Google or Outlook. Drafts only, nothing is sent for you.",1],
+ ["calendar","Calendar","Google or Outlook, your shared production calendar.",1],
+ ["books","Accounts","Xero, FreeAgent, QuickBooks or Sage, as a user that can't approve payments.",1],
+ ["files","Files","Google Drive, Dropbox or Box, where budgets and cost reports live.",1],
+ ["cards","Receipts and cards","Dext, Pleo, Revolut Business, Monzo Business or Starling.",0],
+ ["sign","Signing","DocuSign, for deal memos and booking forms.",0],
+ ["pay","Payments","Stripe or Wise, to see what's been paid.",0],
+ ["review","Reviews","Frame.io, so an approved cut can trigger the final invoice.",0]];
+var SIZES=[["solo","Just me","Freelancer"],["micro","2 to 5 people","Small company"],["small","6 to 20 people","Production company"],["mid","21 or more","Larger company"]];
+var CARE={solo:"",micro:"",small:"",mid:""};
+function isSolo(){return S.d.size==="solo"}
+function fits(x){var f=x.for||x[2];return f==="b"||(isSolo()?f==="f":f==="c")}
+function starts(){return isSolo()?[["setup","Freelancer setup","Chasing, holds, booking confirmations, expenses and the tax watch, set up in a week.",""],["call","Just a call first","Twenty minutes, no prep needed.","Free"]]:
+ [["audit","Admin audit","One day looking at how money and paperwork move through the company, with a costed shortlist. Credited against any build.",""],["pilot","Pilot","Everything you picked, set up in two weeks, in return for a short case study. First two companies only.",""],["call","Just a call first","Twenty minutes, no prep needed.","Free"]]}
+var FLOW=[
+ {id:"welcome",p:"you",part:"Welcome"},
+ {id:"size",p:"you",part:"About you"},
+ {id:"company",p:"you",part:"About you"},
+ {id:"tools",p:"work",part:"How you work"},
+ {id:"pain",p:"work",part:"How you work"},
+ {id:"services",p:"services",part:"Services"},
+ {id:"accounts",p:"accounts",part:"Accounts"},
+ {id:"rules",p:"rules",part:"Your rules"},
+ {id:"start",p:"start",part:"Start"},
+ {id:"done",p:"start",part:"Done"}];
+var HOME=["home","services","waiting","account"];
+var HOME_NAMES={home:"Home",services:"Services",waiting:"For you",account:"Account"};
+var WAITING_C=[
+ {k:"chase",t:"Chase for Agency A, £18,400",s:"47 days. Second, firmer draft is in your inbox.",draft:"Hi, following up on invoice J-118 for £18,400, now 47 days old. Could you confirm a payment date this week? Happy to resend anything you need."},
+ {k:"chase",t:"Chase for Label B, £6,200",s:"33 days. First, polite draft is in your inbox.",draft:"Hi, hope the edit's going well. A quick nudge on invoice J-121 for £6,200, which was due on our 30-day terms. Could you let us know when it's scheduled?"},
+ {k:"receipts",t:"2 receipts missing on J-121",s:"Van hire day 2 (£240), art department float (£180).",draft:"Reply to Monday's email with a photo and it files itself against J-121."},
+ {k:"permits",t:"Royal Parks notice due Friday",s:"Shoot on 28 Oct in Regent's Park. Five working days' notice; the form is pre-filled.",draft:"Opens the Royal Parks form with your production details filled in. You check it and submit."},
+ {k:"cal",t:"PAYE due in 5 days",s:"21 Oct. It's on the shared calendar with a to-do.",draft:""}];
+var WAITING_F=[
+ {k:"chase",t:"Chase for a production company, £2,400",s:"38 days. A polite draft is in your inbox.",draft:"Hi, hope the job went well. A quick nudge on my invoice for the 12 Sept shoot (£2,400), which was due on 30-day terms. Could you let me know when it's scheduled?"},
+ {k:"holds",t:"First hold on 23 Oct needs an answer",s:"Second hold from another job is waiting on the same day.",draft:"Hi, I've had another enquiry for 23 Oct. Could you confirm or release my first hold by Friday? Thanks."},
+ {k:"tax",t:"Set aside £1,100 this month",s:"For the January Self Assessment payment.",draft:""}];
+var WAITING=WAITING_C;
+
+/* ---------- state ---------- */
+var S={mode:"flow",i:0,tab:"home",d:{size:"micro",make:{},name:"",you:"",role:"",books:"",email:"",budget:"",pain:{},svc:{chase:1,brief:1},acc:{},approver:"",tone:2,brief:"Every morning",start:"pilot"},on:{chase:1,brief:1},done:{}};
+try{var sv=JSON.parse(localStorage.getItem("eltio-systems-app-2")||"null");if(sv&&sv.d)S=sv}catch(e){}
+function save(){try{localStorage.setItem("eltio-systems-app-2",JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var $=function(id){return document.getElementById(id)};
+
+/* ---------- helpers ---------- */
+function pills(key,opts,multi){return '<div class="pills">'+opts.map(function(o){var on=multi?!!S.d[key][o]:S.d[key]===o;return '<button class="pill" data-pill="'+key+'" data-v="'+esc(o)+'" data-m="'+(multi?1:0)+'" aria-pressed="'+on+'">'+esc(o)+'</button>'}).join("")+'</div>'}
+function field(key,label,ph,type){return '<div class="field"><label class="q" for="f-'+key+'">'+label+'</label><input id="f-'+key+'" data-f="'+key+'" type="'+(type||"text")+'" placeholder="'+esc(ph)+'" value="'+esc(S.d[key])+'" autocomplete="off"></div>'}
+function head(step){var n=FLOW.length-2,k=Math.min(S.i,n);
+  return '<div class="top">'+(S.i>0?'<button class="lnk" data-back>Back</button>':'<span class="q">Eltio Studio</span>')+'<span class="q">'+(S.i>0&&S.i<=n?k+' of '+n:'')+'</span></div>'+
+  (S.i>0?'<div class="segs">'+FLOW.slice(1,-1).map(function(_,j){return '<i class="'+(j<S.i?'on':'')+'"></i>'}).join("")+'</div>':'')+
+  '<div class="part"><span class="dot"></span>'+esc(step.part)+'</div>'}
+
+/* ---------- onboarding screens ---------- */
+var V={
+ welcome:function(){return {b:'<h1>Less admin.<br>Same tools.</h1><p class="q">We set up the back office for production companies: chasing late invoices, filing receipts against the job, and one money brief every Monday. It plugs into the email, calendar and accounts you already have.</p><div class="rows">'+
+   [["Nothing is sent without you","Every email waits in your drafts."],["It runs on your accounts","Our access ends at handover."],["About five minutes","Skip anything you're not sure about."]].map(function(r){return '<div class="row" style="cursor:default"><span>'+r[0]+'</span><span></span><span class="sub">'+r[1]+'</span></div>'}).join("")+'</div>',f:'<button class="btn solid wide" data-next>Start</button>'}},
+ size:function(){return {b:'<h2>Who is this for?</h2><p class="q">It changes what we set up and what it costs.</p><div class="rows">'+SIZES.map(function(z){var on=S.d.size===z[0];return '<button class="row" data-size="'+z[0]+'" aria-pressed="'+on+'"><span>'+z[1]+'</span><span class="'+(on?'':'q')+'">'+z[2]+'</span></button>'}).join("")+'</div><div class="field"><span class="q">What do you make?</span>'+pills("make",["Commercials","Music videos","Film and TV","Branded content","Stills"],true)+'</div>',f:skip()}},
+ company:function(){if(isSolo())return {b:'<h2>Tell us who you are.</h2>'+field("you","Your name","First and last name")+field("name","Trading name","Your Ltd or trading name")+'<div class="field"><span class="q">What do you do?</span>'+pills("role",["Director","Camera","Producer","Production manager","Editor","Crew","Something else"])+'</div>',f:skip()};
+   return {b:'<h2>Tell us who you are.</h2>'+field("name","Company","Company name")+field("you","Your name","First and last name")+'<div class="field"><span class="q">Your role</span>'+pills("role",["Head of production","Executive producer","Managing director","Producer","Something else"])+'</div>',f:skip()}},
+ tools:function(){return {b:'<h2>What do you use now?</h2><div class="field"><span class="q">Books</span>'+pills("books",["Xero","FreeAgent","QuickBooks","An accountant does it","Not sure"])+'</div><div class="field"><span class="q">Email</span>'+pills("email",["Google","Outlook","Not sure"])+'</div><div class="field"><span class="q">Budgets and cost reports</span>'+pills("budget",["Hot Budget","APA Excel template","Our own spreadsheet","Not sure"])+'</div><p class="q">We work with what you have. Nothing gets replaced.</p>',f:skip()}},
+ pain:function(){return {b:'<h2>Where does the admin hurt most?</h2><p class="q">Pick as many as you like.</p>'+pills("pain",isSolo()?["Getting paid on time","Holds that never confirm","Cancellations","Receipts and mileage","Tax and VAT","Knowing where the money is","Books behind"]:["Chasing agencies and labels","Holds and pencils","Crew paperwork and tax status","Crew invoices and overtime","Permits and licences","Receipts and floats","Knowing where the money is","Cost reports and wrap actuals","VAT and PAYE dates","Rights and deliverables","Books behind"],true),f:skip()}},
+ services:function(){
+   return {b:'<h2>Here\'s what we\'d set up.</h2><p class="q">We\'ve switched on what fits your answers'+(isSolo()?', as a freelancer':'')+'. Change anything.</p>'+svcGroups(function(s){var on=!!S.d.svc[s.id];return '<button class="row" data-svc="'+s.id+'" aria-pressed="'+on+'"><span>'+esc(s.name)+'</span><span class="tog"></span><span class="sub">'+esc(s.line)+'</span></button>'})+soonList(),f:skip()}},
+ accounts:function(){return {b:'<h2>Connect what you already use.</h2><p class="q">Each one opens that service\'s own sign-in. We never see a password, and you can do this on the call instead.</p><div class="rows">'+ACCOUNTS.map(function(a,ix){var hd=ix===4?'</div><div class="part"><span class="dot"></span>If you use them</div><div class="rows">':'';return hd+(function(){var on=!!S.d.acc[a[0]];return '<button class="row" data-acc="'+a[0]+'" aria-pressed="'+on+'"><span>'+a[1]+'</span><span class="'+(on?'':'q')+'">'+(on?'Connected':'Connect')+'</span><span class="sub">'+a[2]+'</span></button>'})()}).join("")+'</div>',f:skip("Do this on the call")}},
+ rules:function(){var tones=["","Very polite","Polite, then firmer","Firm from the start"];
+   return {b:'<h2>Set your rules.</h2><div class="rows"><div class="row" style="cursor:default"><span>Nothing sends without a person</span><span class="tog on lock" aria-label="Always on"></span><span class="sub">Always on. It can\'t be switched off.</span></div></div>'+field("approver","Who presses send?","Name of the person who approves")+
+   '<div class="slider"><span class="q">How should chases sound?</span><input type="range" min="1" max="3" step="1" value="'+S.d.tone+'" data-tone aria-label="Chase tone"><div class="ends"><span>Very polite</span><span>Firm</span></div><p class="quote" id="toneq">'+esc(toneLine(S.d.tone))+'</p></div>'+
+   '<div class="field"><span class="q">When should your brief arrive?</span>'+pills("brief",["Every morning","Monday","Friday"])+'</div>',f:skip()}},
+ start:function(){var picked=SERVICES.filter(function(s){return S.d.svc[s.id]&&fits(s)}),ST=starts();if(!ST.some(function(x){return x[0]===S.d.start}))S.d.start=ST[0][0];
+   return {b:'<h2>How would you like to start?</h2><div class="rows">'+ST.map(function(s){var on=S.d.start===s[0];return '<button class="row" data-start="'+s[0]+'" aria-pressed="'+on+'"><span>'+s[1]+'</span><span>'+s[3]+'</span><span class="sub">'+s[2]+'</span></button>'}).join("")+'</div>'+
+   '<div class="sum"><div><span class="q">Company</span><span>'+esc(S.d.name||"Not given")+'</span></div><div><span class="q">Services</span><span>'+picked.length+'</span></div><div><span class="q">Connected</span><span>'+Object.keys(S.d.acc).filter(function(k){return S.d.acc[k]}).length+' of '+ACCOUNTS.length+'</span></div><div><span class="q">Care after setup</span><span>'+CARE[S.d.size||"micro"]+' a month, cancel any month</span></div></div>'+
+   '<p class="q">'+(S.d.start==="call"?'We\'ll send you two times to pick from.':S.d.start==="audit"?'Paid up front and taken off the build if you go ahead.':S.d.start==="setup"?'Paid up front. Prices exclude VAT.':'Half now, half when it\'s handed over. Prices exclude VAT.')+'</p>',
+   f:'<button class="btn solid wide" data-next>'+(S.d.start==="call"?"Book the call":S.d.start==="setup"?"Continue":"Continue")+'</button>'}},
+ done:function(){return {b:'<h1>You\'re in.</h1><p class="q">We\'ll be in touch within two working days. Your app fills in as each service is switched on, and nothing runs until you\'ve seen it.</p><div class="rows">'+["We look at your answers","A call to agree the plan","We set it up on your accounts","You check it, then it starts"].map(function(t,j){return '<div class="row" style="cursor:default;grid-template-columns:24px minmax(0,1fr)"><span class="q">'+(j+1)+'</span><span>'+t+'</span></div>'}).join("")+'</div><p class="q">(Sample: no payment was taken.)</p>',f:'<button class="btn solid wide" data-home>Open your app</button>'}}
+};
+function svcGroups(fn){return GROUPS.map(function(g){var L=SERVICES.filter(function(s){return s.g===g[0]&&fits(s)});if(!L.length)return '';return '<div class="part"><span class="dot" style="background:'+g[2]+'"></span>'+g[1]+'</div><div class="rows">'+L.map(fn).join("")+'</div>'}).join("")}
+function soonList(){var L=SOON.filter(fits);return L.length?'<div class="part" style="padding-top:6px"><span class="dot" style="background:var(--hr)"></span>Building next, with producers</div><div class="rows">'+L.map(function(s){return '<div class="row soon"><span>'+s[0]+'</span><span class="q">Soon</span><span class="sub">'+s[1]+'</span></div>'}).join("")+'</div>':''}
+function skip(lbl){return '<button class="lnk" data-next>'+(lbl||"Not sure yet")+'</button><button class="btn solid" data-next>Next</button>'}
+function toneLine(t){return t==1?"Hi, hope all's well. A gentle reminder that invoice J-121 is now due. No rush, just let us know when it's scheduled.":t==3?"Hi, invoice J-121 for £6,200 is now overdue. Please confirm a payment date by Friday.":"Hi, a quick nudge on invoice J-121, which was due on our 30-day terms. Could you let us know when it's scheduled?"}
+
+/* ---------- home screens ---------- */
+var H={
+ home:function(){var w=WAITING.filter(function(x,i){return !S.done[i]}).length;
+  return '<div class="top"><span>'+esc(S.d.name||"Your company")+'</span><span class="q">Mon 13 Oct</span></div><h2>Good morning'+(S.d.you?', '+esc(S.d.you.split(" ")[0]):'')+'.</h2>'+
+  '<div class="part"><span class="dot" style="background:#DCE8D6"></span>Morning brief</div><div class="kpis">'+(isSolo()?[["£8,450","Owed to you"],["3","Holds this week"],["£4,120","Tax to set aside"],["£71k","Of the £90k VAT line"]]:[["£42,180","In the bank"],["4.6 months","Runway"],["£11,240","Tax set aside"],["£38,350","Owed to you"]]).map(function(k){return '<div class="kpi"><b>'+k[0]+'</b><span class="q">'+k[1]+'</span></div>'}).join("")+'</div>'+
+  '<div class="part"><span class="dot" style="background:#F3D8CE"></span>For you ('+w+')</div><div class="rows">'+WAITING.map(function(x,i){return S.done[i]?'':'<button class="row" data-wait="'+i+'"><span>'+esc(x.t)+'</span><span class="q">›</span><span class="sub">'+esc(x.s)+'</span></button>'}).join("")+(w?'':'<p class="q">All clear.</p>')+'</div>'+
+  '<div class="part"><span class="dot" style="background:#F4E7B8"></span>'+(isSolo()?'Diary':'Jobs')+'</div><div class="sum">'+(isSolo()?[["First holds",2],["Second holds",1],["Confirmed",4],["Invoiced",5]]:[["Bidding",3],["Awarded",2],["Shooting",1],["Wrapped",2],["Invoiced",4]]).map(function(j){return '<div><span>'+j[0]+'</span><span>'+j[1]+'</span></div>'}).join("")+'</div>'},
+ services:function(){return '<div class="top"><span>Services</span><span class="q">'+Object.keys(S.on).filter(function(k){return S.on[k]}).length+' on</span></div><h2>Everything we run for you.</h2>'+svcGroups(function(s){var on=!!S.on[s.id];return '<button class="row" data-sv="'+s.id+'"><span>'+esc(s.name)+'</span><span class="status'+(on?' live':'')+'">'+(on?'On':'Add')+'</span><span class="sub">'+esc(s.line)+'</span></button>'})+soonList()+'<button class="btn" data-ask style="justify-self:start">Ask for something new</button>'},
+ waiting:function(){var w=WAITING.map(function(x,i){return S.done[i]?'':'<button class="row" data-wait="'+i+'"><span>'+esc(x.t)+'</span><span class="q">›</span><span class="sub">'+esc(x.s)+'</span></button>'}).join("");
+  return '<div class="top"><span>For you</span><span class="q">nothing sends by itself</span></div><h2>Waiting on a person.</h2><div class="rows">'+(w||'<p class="q">All clear. Nothing needs you right now.</p>')+'</div>'},
+ account:function(){return '<div class="top"><span>Account</span><span></span></div><h2>'+esc(S.d.name||"Your company")+'</h2><div class="part"><span class="dot" style="background:#F3D8CE"></span>Connected</div><div class="rows">'+ACCOUNTS.map(function(a){var on=a[3]||S.d.acc[a[0]];return '<div class="row" style="cursor:default"><span>'+a[1]+'</span><span class="status'+(on?' live':'')+'">'+(on?'Connected':'Not used')+'</span><span class="sub">'+a[2]+'</span></div>'}).join("")+'</div>'+
+  '<div class="part"><span class="dot" style="background:#E4DDF0"></span>Care</div><div class="sum"><div><span>Plan</span><span>'+CARE[S.d.size||"micro"]+' a month</span></div><div><span>Renews</span><span>1 Nov, monthly</span></div><div><span>Replies</span><span>Within two working days</span></div><div><span>Our access</span><span>Ends 7 days after care</span></div></div><div class="rows"><button class="row" data-ask><span>Runbook and data map</span><span class="q">›</span><span class="sub">What connects to what, and how to switch each part off.</span></button><button class="row" data-ask><span>Pause or end care</span><span class="q">›</span><span class="sub">Everything stays on your accounts.</span></button></div>'}
+};
+
+/* ---------- render ---------- */
+var app=$("app");
+function render(){
+ WAITING=isSolo()?WAITING_F:WAITING_C;
+ var j="";
+ if(S.mode==="flow"){var st=FLOW[S.i],r=V[st.id]();app.dataset.p=st.p;$("scr").innerHTML=head(st)+r.b;$("bottom").innerHTML='<div class="foot">'+r.f+'</div>'}
+ else{app.dataset.p="you";$("scr").innerHTML=H[S.tab]();$("bottom").innerHTML='<div class="tabs">'+HOME.map(function(t){return '<button class="'+(S.tab===t?'on':'')+'" data-tab="'+t+'"><i></i>'+HOME_NAMES[t]+'</button>'}).join("")+'</div>'}
+ $("jump").innerHTML='<span class="q">Onboarding</span>'+FLOW.map(function(f,k){return '<button data-j="'+k+'" class="'+(S.mode==="flow"&&S.i===k?'on':'')+'">'+String(k+1).padStart(2,"0")+'  '+f.id.charAt(0).toUpperCase()+f.id.slice(1)+'</button>'}).join("")+'<span class="q" style="padding-top:8px">The app</span>'+HOME.map(function(t){return '<button data-jt="'+t+'" class="'+(S.mode==="home"&&S.tab===t?'on':'')+'">'+HOME_NAMES[t]+'</button>'}).join("")+'<button data-reset style="padding-top:10px">Start again</button>';
+ save();
+}
+function go(i){S.mode="flow";S.i=Math.max(0,Math.min(FLOW.length-1,i));closeSheet();render();$("scr").scrollTop=0}
+function home(t){S.mode="home";S.tab=t||"home";
+ if(S.d&&S.d.svc){S.on={};SERVICES.forEach(function(s){if(S.d.svc[s.id]&&fits(s))S.on[s.id]=1});if(!Object.keys(S.on).length)S.on={chase:1,brief:1}}
+ closeSheet();render();$("scr").scrollTop=0}
+var bt;function banner(t){var b=$("banner");b.textContent=t;b.classList.add("on");clearTimeout(bt);bt=setTimeout(function(){b.classList.remove("on")},2200)}
+function openSheet(h){$("sheet").innerHTML='<span class="grab"></span>'+h;$("sheet").classList.add("on");$("shade").classList.add("on")}
+function closeSheet(){$("sheet").classList.remove("on");$("shade").classList.remove("on")}
+
+app.addEventListener("click",function(e){
+ var b=e.target.closest("button,.shade");if(!b)return;
+ if(b.id==="shade"||b.hasAttribute("data-close")){closeSheet();return}
+ if(b.hasAttribute("data-next")){go(S.i+1);return}
+ if(b.hasAttribute("data-back")){go(S.i-1);return}
+ if(b.hasAttribute("data-home")){home("home");return}
+ var d=b.dataset;
+ if(d.pill){var k=d.pill;if(d.m==="1"){S.d[k][d.v]=!S.d[k][d.v]}else{S.d[k]=S.d[k]===d.v?"":d.v}
+   if(k==="pain"){var map={"Chasing agencies and labels":"chase","Getting paid on time":"chase","Holds and pencils":"holds","Holds that never confirm":"holds","Cancellations":"confirm","Crew paperwork and tax status":"start","Crew invoices and overtime":"overtime","Permits and licences":"permits","Receipts and floats":"receipts","Receipts and mileage":"receipts","Tax and VAT":"tax","Knowing where the money is":"brief","Cost reports and wrap actuals":"cost","VAT and PAYE dates":"cal","Books behind":"books"};S.d.svc={};Object.keys(S.d.pain).forEach(function(p){if(S.d.pain[p]&&map[p])S.d.svc[map[p]]=1});if(!Object.keys(S.d.svc).length)S.d.svc={chase:1,brief:1}}
+   render();return}
+ if(d.size){S.d.size=d.size;S.d.svc={chase:1,brief:1};if(d.size==="solo"){S.d.svc.holds=1;S.d.svc.tax=1}render();return}
+ if(d.svc){S.d.svc[d.svc]=!S.d.svc[d.svc];render();return}
+ if(d.acc){S.d.acc[d.acc]=!S.d.acc[d.acc];render();return}
+ if(d.start){S.d.start=d.start;render();return}
+ if(d.tab){S.tab=d.tab;render();$("scr").scrollTop=0;return}
+ if(d.wait!=null){var x=WAITING[+d.wait];openSheet('<h2>'+esc(x.t)+'</h2><p class="q">'+esc(x.s)+'</p>'+(x.draft?'<p class="quote">'+esc(x.draft)+'</p>':'')+'<div style="display:flex;gap:10px">'+(x.k==="chase"||x.k==="holds"?'<button class="btn solid wide" data-did="'+d.wait+'">Open in your inbox</button>':x.k==="permits"?'<button class="btn solid wide" data-did="'+d.wait+'">Open the form</button>':'<button class="btn solid wide" data-did="'+d.wait+'">Mark as done</button>')+'<button class="btn" data-close>Later</button></div>'+(x.k==="chase"?'<p class="q">You send it from your own email. We just wrote it.</p>':''));return}
+ if(d.did!=null){S.done[d.did]=1;closeSheet();render();banner(WAITING[+d.did].k==="chase"||WAITING[+d.did].k==="holds"?"Draft opened in your inbox (sample)":WAITING[+d.did].k==="permits"?"Form opened, pre-filled (sample)":"Done");return}
+ if(d.sv){var s=SERVICES.filter(function(z){return z.id===d.sv})[0],on=!!S.on[s.id];
+   openSheet('<h2>'+esc(s.name)+'</h2><p class="q">'+esc(s.line)+'</p><div class="sum"><div><span class="q">Status</span><span>'+(on?'On':'Not set up')+'</span></div><div><span class="q">Runs</span><span>'+esc(s.runs)+'</span></div>'+(on?'<div><span class="q">Last run</span><span>Today, all fine</span></div>':'<div><span class="q">Setup from</span><span>'+esc(s.from)+'</span></div>')+'</div><div style="display:flex;gap:10px">'+(on?'<button class="btn wide" data-off="'+s.id+'">Pause this</button>':'<button class="btn solid wide" data-add="'+s.id+'">Ask us to add it</button>')+'<button class="btn" data-close>Close</button></div>');return}
+ if(d.off){delete S.on[d.off];closeSheet();render();banner("Paused. Switch it back on any time.");return}
+ if(d.add){closeSheet();banner("Sent. We'll reply within two working days.");return}
+ if(b.hasAttribute("data-ask")){banner("Sample: this opens a message to us.");return}
+});
+app.addEventListener("input",function(e){var t=e.target;
+ if(t.dataset.f){S.d[t.dataset.f]=t.value;save()}
+ if(t.hasAttribute("data-tone")){S.d.tone=+t.value;$("toneq").textContent=toneLine(S.d.tone);save()}
+});
+document.querySelector(".side").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;
+ if(b.dataset.j!=null)go(+b.dataset.j);
+ if(b.dataset.jt)home(b.dataset.jt);
+ if(b.hasAttribute("data-reset")){try{localStorage.removeItem("eltio-systems-app-2")}catch(x){}location.reload()}
+});
+render();
+})();
+</script>
+<script src="solo.js"></script>
+</body>
+</html>

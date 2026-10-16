@@ -99,14 +99,26 @@
   addEventListener('scroll', function () { if (wh.classList.contains('open') && !gliding) where(false); }, { passive: true });
   [root.querySelector('.cg-tl'), root.querySelector('.cg-tr'), cx, root.querySelector('.cg-end-back')].forEach(function (a) { if (a) a.addEventListener('click', function (e) { e.preventDefault(); home(false); }); });
   addEventListener('keydown', function (e) { if (e.key === 'Escape' && inFrame) home(false); });
-  // 15 Oct: on phones the live animations showed as stills, so phones play recorded clips of them instead
-  var CLIPS = { 0: ['Sun path', 'Scenes', 'Export', 'Drawing'], 1: ['Climb', 'Roll', 'Analysis', 'Compare', 'On the bar', 'LiDAR scan', 'Your body'], 2: ['Library'] };
+  // 16 Oct: on phones every live panel is a recording at the panel's own shape (moving ones play, the rest are stills);
+  // the three in-page drawings of Out & Scout keep their whole-tile clips
+  var CLIPS = { 0: ['Sun path', 'Scenes', 'Drawing'] }, MEDIA = {"0-library":"i","0-viewfinder":"i","0-portrait":"i","0-kit":"i","0-shot-list":"i","0-export":"i","1-climb":"v","1-roll":"v","1-analysis":"v","1-compare":"v","1-on-the-bar":"v","1-set-up":"i","1-lidar-scan":"v","1-your-body":"v","1-cue-cards":"i","1-coaches":"i","2-plots":"i","2-plan":"i","2-on-a-laptop":"i","2-light-at-subject":"i","2-power":"i","2-library":"v","2-gaffer-sheet":"i"};
+  var slug = function (t) { return t.toLowerCase().replace(/[^a-z]+/g, '-'); };
   if (matchMedia('(max-width: 760px), (hover: none)').matches) its.forEach(function (el) {
-    var pj = el.closest('.cg-proj'), pi = pj ? +pj.getAttribute('data-p') : -1, t = el.getAttribute('data-t');
-    if (!CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
-    var f = 'video/m/' + pi + '-' + t.toLowerCase().replace(/[^a-z]+/g, '-'), tile = el.querySelector('.cg-tile');
+    var pj = el.closest('.cg-proj'), pi = pj ? +pj.getAttribute('data-p') : -1, t = el.getAttribute('data-t') || '', tile = el.querySelector('.cg-tile');
     if (!tile) return;
-    arr(tile.querySelectorAll('iframe')).forEach(function (fr) { fr.removeAttribute('src'); fr.removeAttribute('data-src'); });
+    arr(tile.querySelectorAll('iframe')).forEach(function (fr, j) {
+      var k = pi + '-' + slug(t) + (j ? '-' + j : ''), kind = MEDIA[k], f = 'video/m/' + k, m;
+      if (!kind) return;
+      fr.removeAttribute('src'); fr.removeAttribute('data-src');
+      if (kind === 'v') {
+        m = document.createElement('video'); m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true;
+        m.setAttribute('muted', ''); m.setAttribute('playsinline', ''); m.setAttribute('preload', 'metadata'); m.poster = f + '.jpg';
+        m.innerHTML = '<source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm">';
+      } else { m = document.createElement('img'); m.src = f + '.jpg'; m.loading = 'lazy'; m.decoding = 'async'; }
+      m.className = 'cg-m'; m.setAttribute('aria-label', t); fr.parentNode.replaceChild(m, fr);
+    });
+    if (!CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
+    var f = 'video/m/' + pi + '-' + slug(t);
     tile.classList.add('cg-clip');
     tile.insertAdjacentHTML('beforeend', '<video class="cg-vid" poster="' + f + '.jpg" muted loop playsinline autoplay preload="metadata" aria-label="' + t + '"><source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm"></video>');
   });
@@ -149,7 +161,7 @@
   arr(root.querySelectorAll('.k2')).forEach(function (k) { k.addEventListener('mouseenter', function () { k.classList.add('on'); }); k.addEventListener('mouseleave', function () { k.classList.remove('on'); }); });
   // embedded panels keep their own drawing size and are scaled down to the tile
   var embs = arr(root.querySelectorAll('.cg-emb'));
-  function fit() { embs.forEach(function (b) { var f = b.firstElementChild; f.style.transform = 'scale(' + (b.clientWidth / +b.getAttribute('data-w')) + ')'; }); }
+  function fit() { embs.forEach(function (b) { var f = b.firstElementChild; if (f.tagName !== 'IFRAME') return; f.style.transform = 'scale(' + (b.clientWidth / +b.getAttribute('data-w')) + ')'; }); }
   addEventListener('resize', fit); fit();
   // arriving from the landing page's list (#p=N) opens straight on that project
   // (the artifact viewer can drop the #, so the project also rides in ?p= and sessionStorage)

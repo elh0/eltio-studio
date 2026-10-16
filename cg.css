@@ -179,8 +179,8 @@ html:has(.eltio.cg) { overscroll-behavior: none; }
 .eltio.cg .cg-land iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; background: #fff; }
 /* the Out & Scout look everywhere: live panels sit on the tile with the same soft shadow as the phones */
 .eltio.cg .cg-card .cg-emb { border-radius: 8px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.06); }
-.eltio.cg .cg-app .cg-emb { border-radius: 0; overflow: visible; box-shadow: none; }
-.eltio.cg .cg-app .cg-emb iframe { filter: drop-shadow(0 26px 30px rgba(0,0,0,.28)); }
+/* 16 Oct: Lampwerk's phone screens sit in the same phone frame as Out & Scout's portrait (bezel = x-dev padding, inner radius = x-dev iframe) */
+.eltio.cg .cg-app .cg-emb { border-radius: clamp(8px, 2cqw, 22px); overflow: hidden; background: #0E0E0D; box-shadow: 0 0 0 clamp(3px, .6cqw, 7px) #1d1d1b, 0 30px 60px -30px rgba(0,0,0,.5); }
 /* the folio site: a film playing in the site, in a browser window */
 .eltio.cg .cg-elt .cg-in { width: 100%; height: 100%; display: grid; place-items: center; }
 .eltio.cg .cg-elw { background: none !important; display: grid; place-items: center; width: 100%; height: 100%; }

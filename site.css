@@ -135,7 +135,7 @@
 
 /* ---------- wireframes ---------- */
 .eltio .wf { --e: cubic-bezier(.2,.7,0,1); --acc: #FF5A1F; position: relative; }
-/* elliot.onl: a working copy of the site drawn in line */
+/* the folio site: a working copy of the site drawn in line */
 .eltio .wf-el { --acc: var(--s1); container-type: inline-size; background: var(--bg); overflow: hidden; }
 .eltio .desk .wf-el { aspect-ratio: 16 / 10.4; }
 .eltio .phone .wf-el { aspect-ratio: 9 / 18.5; }
@@ -220,7 +220,7 @@
   .eltio .wf .c.fo { display: flex; }
 }
 
-/* elliot.onl: the desktop window with the phone laid over its corner */
+/* the folio site: the desktop window with the phone laid over its corner */
 .eltio .el-stack { display: grid; grid-template-columns: repeat(20, minmax(0,1fr)); }
 .eltio .el-stack > * { grid-row: 1; min-width: 0; }
 .eltio .el-stack .desk { grid-column: 1 / 18; }
@@ -510,7 +510,7 @@
 }
 .eltio .lc.trying .lc-chips, .eltio .lc.trying .lc-log { visibility: hidden; }
 
-/* elliot.onl brand row: the site's own pieces, in its one mono at one size */
+/* the folio site brand row: the site's own pieces, in its one mono at one size */
 .eltio .elb .tile.elt { container-type: inline-size; place-items: stretch; display: flex; flex-direction: column; justify-content: space-between; padding: 8%; text-align: left; font: 400 11px/1.25 var(--mono); }
 .eltio .elb .elt > * { font-size: max(9px, 4.6cqi); }
 .eltio .elb .elt i { font-style: normal; opacity: .5; }

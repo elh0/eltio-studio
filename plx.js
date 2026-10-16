@@ -74,7 +74,7 @@
     var now = performance.now(), s = vw < 760 ? .62 : 1, hh = hero.offsetHeight, hx, hy;
     var k = ss(.12, .62, y / hh); // 0 in the intro, 1 once it has scrolled away
     if (noHover && k >= 1) { inkEl.style.visibility = 'hidden'; return; }
-    // 18:41 Elliot: past the intro the pointer is the same magnify-and-invert disc as the project pages (motion.js), not the ink
+    // 18:41 past the intro the pointer is the same magnify-and-invert disc as the project pages (motion.js), not the ink
     var hand = !noHover && k > .98 && document.querySelector('.mo-cur');
     inkEl.style.visibility = hand ? 'hidden' : '';
     document.documentElement.classList.toggle('plx-ink', !noHover && !hand);

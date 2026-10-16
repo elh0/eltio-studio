@@ -1,4 +1,4 @@
-// Site-wide pointer motion (8 Oct 2026, Elliot):
+// Site-wide pointer motion (8 Oct 2026):
 // 1. the pointer is a disc that turns whatever is under it to negative, and swells over anything pressable
 // 2. buttons lean toward the pointer before you reach them, their label leans a little further, then they spring back
 // Mouse and trackpad only; touch and reduced motion keep the normal pointer.
@@ -21,7 +21,7 @@
   addEventListener('mousemove', function (e) {
     x = e.clientX; y = e.clientY; cur.classList.add('on');
     var t = e.target.closest && e.target.closest(PRESS);
-    // small text links in the frame keep the small disc, so you can read what you're about to click (Elliot, 17:56)
+    // small text links in the frame keep the small disc, so you can read what you're about to click
     if (t && t.closest('.cg-fr, .cg-top, .mo-small')) t = null;
     cur.classList.toggle('big', !!t);
     magnet();

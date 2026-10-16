@@ -19,7 +19,7 @@
   /* ---- timecode in the nav follows the shoot day; the line under it fills as you scroll ---- */
   var steps = $$("[data-tc]"), tc = $("#tc b"), prog = $("#prog");
   function onScroll() {
-    var mid = innerHeight * 0.5, t = "06:30";
+    var mid = innerHeight * 0.5, t = "Award";
     steps.forEach(function (el) { if (el.getBoundingClientRect().top < mid) t = el.getAttribute("data-tc"); });
     if (tc.textContent !== t) tc.textContent = t;
     var h = document.documentElement.scrollHeight - innerHeight; prog.style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
@@ -55,7 +55,7 @@
     $("#liveLines").innerHTML = html;
     $("#liveTime").textContent = "Wrap " + hm(wm);
     wrap.setAttribute("aria-valuetext", hm(wm));
-    $("#liveNote").textContent = !v ? "Wrapped on time. Nothing to add." : late ? "Past midnight it's triple time. Most people forget to claim it." : "That's " + gbp(otN) + " you'd have had to work out yourself.";
+    $("#liveNote").textContent = !v ? "Drag the wrap time. Systems checks every crew invoice this way." : late ? "Past midnight it's triple time. Systems knows, so the invoice can be checked line by line." : gbp(otN) + " of overtime at their band. If the invoice says more, a query is drafted.";
     live.classList.toggle("night", v >= 6);
     var from = lastTot; lastTot = tot; var el = $("#liveTot");
     if (reduce) el.textContent = gbp(tot); else { var t0 = performance.now(); (function f(t) { var k = Math.min(1, (t - t0) / 350); el.textContent = gbp(Math.round((from + (tot - from) * k) * 100) / 100); if (k < 1) requestAnimationFrame(f); })(t0); }
@@ -155,6 +155,7 @@
   var ROLES = {
     hod: { h: "Run the department, not the paperwork.", p: "For gaffers, key grips, DPs and HODs who book a team and bring kit. The whole department's hours and hire in one place.", d: ["team", "kit", "turn"] },
     dir: { h: "Keep every hold and fee straight.", p: "For directors working across several production companies, with a rep taking a cut and awards to enter.", d: ["dholds", "fee", "awards"] },
+    pm: { h: "Every crew member, every form, every date.", p: "For production managers and coordinators. Start packs, holds, call sheets, permits and the pay run, with nothing kept in your head.", d: ["packs", "permits", "check"] },
     prod: { h: "The production office, joined up.", p: "For producers and production companies. Cash in on award, crew paid right in seven days, permits on time, rights tracked. Invoices and call sheets are read for you.", d: ["award", "check", "permits", "packs", "cash", "rights"] }
   };
   Object.keys(CREW).forEach(function (k) { var c = CREW[k]; ROLES[k] = { h: c.h, p: c.p, d: ["holds", { f: "ot", r: c }, { f: "ckit", r: c }] }; });
@@ -171,7 +172,7 @@
   var seen = false;
   $$(".tabs button").forEach(function (b) { b.addEventListener("click", function () { if (b.getAttribute("data-role") !== current) showRole(b.getAttribute("data-role")); }); });
   $(".tabs").addEventListener("keydown", function (e) { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; var bs = $$(".tabs button"), i = bs.findIndex(function (b) { return b.getAttribute("aria-selected") === "true"; }); i = (i + (e.key === "ArrowRight" ? 1 : bs.length - 1)) % bs.length; bs[i].focus(); bs[i].click(); });
-  showRole("gaffer");
+  showRole("prod");
   if ("IntersectionObserver" in window) new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { seen = true; runDemos(); o.disconnect(); } }, { threshold: 0.25 }).observe(panel);
   else { seen = true; runDemos(); }
 

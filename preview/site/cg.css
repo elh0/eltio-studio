@@ -283,3 +283,4 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-sy-cov { position: absolute; inset: 0; margin: auto; width: 32%; height: max-content; display: grid; gap: 1.6cqi; color: #0B0B0A; }
 .eltio.cg .cg-sy-cov .sy-segs { gap: .8cqi; }
 .eltio.cg .cg-sy-cov .sy-segs i { height: .7cqi; }
+.eltio.cg .cg-info .cg-cap a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }

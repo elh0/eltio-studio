@@ -150,7 +150,7 @@ html:has(.eltio.cg) { overscroll-behavior: none; }
 .eltio.cg .cg-end .cg-in { display: grid; place-items: center; height: 100%; }
 .eltio.cg .cg-end .cg-in span { font-size: clamp(18px, 2.4vw, 32px) !important; line-height: 1 !important; letter-spacing: -.01em; }
 .eltio.cg .cg-mail:hover .cg-in span { opacity: .5; }
-/* elliot.onl: frames from the films, filling the tile */
+/* the folio site: frames from the films, filling the tile */
 .eltio.cg .cg-ph .cg-in { position: absolute; inset: 0; }
 .eltio.cg .cg-photo { width: 100%; height: 100%; object-fit: cover; display: block; }
 /* 17:21: one colour tile per project, the Grip way: a dark square, the colour large, two neutrals beside it */
@@ -181,7 +181,7 @@ html:has(.eltio.cg) { overscroll-behavior: none; }
 .eltio.cg .cg-card .cg-emb { border-radius: 8px; overflow: hidden; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.06); }
 .eltio.cg .cg-app .cg-emb { border-radius: 0; overflow: visible; box-shadow: none; }
 .eltio.cg .cg-app .cg-emb iframe { filter: drop-shadow(0 26px 30px rgba(0,0,0,.28)); }
-/* elliot.onl: a film playing in the site, in a browser window */
+/* the folio site: a film playing in the site, in a browser window */
 .eltio.cg .cg-elt .cg-in { width: 100%; height: 100%; display: grid; place-items: center; }
 .eltio.cg .cg-elw { background: none !important; display: grid; place-items: center; width: 100%; height: 100%; }
 .eltio.cg .cg-elw .x-win { width: 76cqw; aspect-ratio: auto; grid-template-rows: auto auto; box-shadow: 0 30px 60px -30px rgba(0,0,0,.5), 0 0 0 1px rgba(0,0,0,.08); }
@@ -195,7 +195,7 @@ html:has(.eltio.cg) { overscroll-behavior: none; }
 .eltio.cg .cg-elw .el-bar i { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--t) * 100%); background: #0B0B0A; animation: el-play 14s linear infinite; }
 @keyframes el-play { from { width: 4%; } to { width: 96%; } }
 .eltio.cg .cg-elw .el-cap span:nth-child(2) { color: rgba(11,11,10,.45); margin-right: auto; margin-left: 2cqw; }
-/* 17:56 Lampwerk opens on its wordmark; elliot.onl windows centred and sized to always fit the tile */
+/* 17:56 Lampwerk opens on its wordmark; the folio site windows centred and sized to always fit the tile */
 .eltio.cg .cg-lw-wm { width: 30cqw; display: block; }
 .eltio.cg .cg-elw .x-win { width: min(70cqw, 108cqh); }
 .eltio.cg .cg-elw video, .eltio.cg .cg-elw img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #0B0B0A; }
@@ -204,7 +204,7 @@ html:has(.eltio.cg) { overscroll-behavior: none; }
 .eltio.cg .cg-elt { position: relative; overflow: hidden; }
 .eltio.cg .cg-elt .cg-in { position: absolute; inset: 0; height: auto; }
 .eltio.cg .cg-elt .cg-elw { height: 100%; min-height: 0; }
-/* 19:38 Elliot: tighter on phones (each tile no longer owns a whole screen), plus a Close pill you can always reach */
+/* 19:38 tighter on phones (each tile no longer owns a whole screen), plus a Close pill you can always reach */
 html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-x { display: none; }
 @media (max-width: 760px) {
@@ -241,7 +241,7 @@ html { -webkit-tap-highlight-color: transparent; }
   .eltio.cg .cg-wl a.on { color: var(--ink); }
   .eltio.cg .cg-wl .cg-wh { border-top: 1px solid rgba(11,11,10,.12); margin-top: 4px; }
 }
-/* 20:22 Elliot (iPhone): the Splash phones and drawings were clipped at the bottom by their inner wrappers in Safari.
+/* 20:22 (iPhone): the Splash phones and drawings were clipped at the bottom by their inner wrappers in Safari.
    Let the identity pieces breathe; only the tile itself clips. Phones a touch smaller so they always sit inside. */
 .eltio.cg .cg-id .op-id, .eltio.cg .cg-id .x-id-one, .eltio.cg .cg-id .x-id-t { overflow: visible !important; }
 .eltio.cg .cg-id .op-id .x-id-t { aspect-ratio: auto !important; height: auto !important; }
@@ -251,3 +251,25 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-end p { margin: 0; color: rgba(11,11,10,.45); }
 .eltio.cg .cg-end-back { padding: 10px 22px; border: 1px solid var(--ink); border-radius: 999px; color: var(--ink); text-decoration: none; }
 @media (max-width: 760px) { .eltio.cg .cg-end { min-height: 46svh; padding-bottom: 80px; } }
+/* 15 Oct: three Close buttons on phones was silly. Phones get Home (top left) and Menu (top right) only. */
+.eltio.cg .cg-menu { display: none; }
+.eltio.cg .cg-tl-p { display: none; }
+@media (max-width: 760px) {
+  .eltio.cg .cg-tr, .eltio.cg .cg-x { display: none !important; }
+  .eltio.cg .cg-top { display: none !important; }
+  .eltio.cg .cg-tl { top: 8px; }
+  .eltio.cg .cg-tl-d { display: none; }
+  .eltio.cg .cg-tl-p { display: inline; }
+  .eltio.cg .cg-tl, .eltio.cg .cg-mb { display: inline-block; box-sizing: border-box; height: 30px; padding: 0 14px; line-height: 28px !important; font-size: 11px !important; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); outline: none; -webkit-tap-highlight-color: transparent; }
+  .eltio.cg .cg-menu { display: block; position: fixed; right: 16px; top: 8px; z-index: 31; }
+  .eltio.cg .cg-mb { font-family: inherit; cursor: pointer; }
+  .eltio.cg .cg-mp { position: absolute; right: 0; top: calc(100% + 8px); display: grid; min-width: 220px; max-width: calc(100vw - 32px); left: auto; padding: 6px; border: 1px solid rgba(11,11,10,.18); border-radius: 14px; background: var(--bg); box-shadow: 0 20px 40px -20px rgba(0,0,0,.35); opacity: 0; visibility: hidden; translate: 0 -6px; transition: opacity .25s, translate .3s, visibility 0s .3s; }
+  .eltio.cg .cg-menu.open .cg-mp { opacity: 1; visibility: visible; translate: none; transition: opacity .35s cubic-bezier(.22,1,.36,1), translate .45s cubic-bezier(.22,1,.36,1); }
+  .eltio.cg .cg-mp a { padding: 11px 10px; color: rgba(11,11,10,.55); font-size: 13px !important; text-decoration: none; }
+  .eltio.cg .cg-mp .cg-mh { color: var(--ink); }
+  .eltio.cg .cg-mp .cg-ms { border-top: 1px solid rgba(11,11,10,.12); margin-top: 4px; color: var(--ink); }
+}
+/* phones: recorded clips stand in for the live animations */
+.eltio.cg .cg-tile.cg-clip { position: relative; }
+.eltio.cg .cg-tile.cg-clip > :not(.cg-vid) { visibility: hidden; }
+.eltio.cg .cg-tile.cg-clip .cg-vid { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; background: transparent; }

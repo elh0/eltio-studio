@@ -284,3 +284,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-sy-cov .sy-segs { gap: .8cqi; }
 .eltio.cg .cg-sy-cov .sy-segs i { height: .7cqi; }
 .eltio.cg .cg-info .cg-cap a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+/* 16 Oct: website loops (video/w) and real app screens side by side (img/ag) */
+.eltio.cg .cg-card .cg-in > .cg-phs { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2.2cqw; width: min(84cqw, calc(var(--n) * 36cqh + (var(--n) - 1) * 2.2cqw)); }
+.eltio.cg .cg-ph { display: block; aspect-ratio: 390 / 844; border-radius: 13% / 6%; overflow: hidden; background: #0E0E0D; box-shadow: 0 0 0 clamp(2px, .45cqw, 5px) #1d1d1b, 0 24px 48px -24px rgba(0,0,0,.5); }
+.eltio.cg .cg-ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px), (hover: none) {
+  .eltio.cg .cg-card .cg-in > .cg-six { grid-template-columns: repeat(3, 1fr); width: min(84cqw, calc(3 * 17cqh + 4.4cqw)); }
+}

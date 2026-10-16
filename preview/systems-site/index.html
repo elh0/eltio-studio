@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-sky="dawn">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -12,19 +12,19 @@
 <link rel="stylesheet" href="site.css">
 </head>
 <body>
-<div class="skies" aria-hidden="true"><i class="s-dawn"></i><i class="s-day"></i><i class="s-dusk"></i><i class="s-night"></i></div>
 
 <header class="nav" id="top">
   <a class="mark" href="#top" aria-label="Systems, home"><span>S</span><span style="margin-left:.08em">y</span><span style="margin-left:.36em">st</span><span style="margin-left:.14em">e</span><span style="margin-left:.42em">ms</span></a>
   <nav class="links" aria-label="Sections">
     <a href="#day">How it works</a><a href="#jobs">Who it's for</a><a href="#all">Everything</a><a href="#faq">Questions</a>
   </nav>
-  <a class="btn ink sm" href="../systems-app/">Try it</a>
+  <span class="nav-r"><span class="tc" id="tc" aria-hidden="true"><i></i><b>06:30</b></span><a class="btn ink sm" href="../systems-app/">Try it</a></span>
+  <span class="prog" aria-hidden="true"><i id="prog"></i></span>
 </header>
 
 <main>
   <!-- HERO: the live thing. Drag the wrap and watch the day's money work itself out. -->
-  <section class="hero" data-sky="dawn">
+  <section class="hero">
     <div class="hero-copy">
       <p class="lab">For UK crew and production companies</p>
       <h1>The back office for film.</h1>
@@ -37,7 +37,6 @@
     </div>
 
     <div class="card live" id="live">
-      <div class="live-sky" id="liveSky"></div>
       <div class="live-in">
         <div class="row-top"><span class="lab">Gaffer · £450 day · APA</span><span class="lab" id="liveTime">Wrap 19:00</span></div>
         <p class="live-q">Drag the wrap.</p>
@@ -55,7 +54,7 @@
   </section>
 
   <!-- NUMBERS -->
-  <section class="nums" data-sky="day">
+  <section class="nums">
     <h2 class="sec-h">Film runs on late money.</h2>
     <div class="num-grid">
       <div class="num"><b data-count="48" data-suffix="%">48%</b><p>of crew say they're always paid on time. The rest wait, and 21% have waited over 30 days.</p><span class="src">Bectu Big Survey 2025, 5,597 workers</span></div>
@@ -67,12 +66,12 @@
 
   <!-- A SHOOT DAY: the sky follows the day as you scroll -->
   <section class="day" id="day">
-    <div class="day-h" data-sky="dawn">
+    <div class="day-h">
       <p class="lab">How it works</p>
       <h2 class="sec-h">One shoot day, from call to paid.</h2>
     </div>
 
-    <article class="step" data-sky="dawn">
+    <article class="step" data-tc="05:45">
       <div class="when"><b>05:45</b><span class="lab">Call sheet in</span></div>
       <div class="what"><h3>The day logs itself.</h3><p>Forward the call sheet. Systems takes the call time, the unit base and the job, and puts the day against your booking. No retyping.</p></div>
       <div class="card mini">
@@ -81,7 +80,7 @@
       </div>
     </article>
 
-    <article class="step" data-sky="day">
+    <article class="step" data-tc="13:10">
       <div class="when"><b>13:10</b><span class="lab">Lunch, late</span></div>
       <div class="what"><h3>The small money gets caught.</h3><p>Lunch called more than five and a half hours after call is a late break under APA terms. It goes on the sheet, so you don't have to remember it at 2am.</p></div>
       <div class="card mini">
@@ -90,7 +89,7 @@
       </div>
     </article>
 
-    <article class="step" data-sky="dusk">
+    <article class="step" data-tc="20:30">
       <div class="when"><b>20:30</b><span class="lab">Wrap</span></div>
       <div class="what"><h3>Overtime, counted properly.</h3><p>Half hours after the ten-hour day and lunch, at your band's rate: 1.5x, 1.25x or 1x by day rate. Early calls, nights and after midnight are worked out too.</p></div>
       <div class="card mini">
@@ -99,7 +98,7 @@
       </div>
     </article>
 
-    <article class="step" data-sky="night">
+    <article class="step" data-tc="23:10">
       <div class="when"><b>23:10</b><span class="lab">Home</span></div>
       <div class="what"><h3>The invoice is already written.</h3><p>Days, overtime, kit and mileage go on one invoice with the timesheet attached. It waits as a draft in your name until you tap send.</p></div>
       <div class="card mini">
@@ -108,7 +107,7 @@
       </div>
     </article>
 
-    <article class="step" data-sky="day">
+    <article class="step" data-tc="Day 30">
       <div class="when"><b>Day 30</b><span class="lab">Due</span></div>
       <div class="what"><h3>Paid, or politely chased.</h3><p>A friendly nudge at the due date and a firmer one a week on. The last one quotes the Late Payment Act, with the fixed £70 and the interest already worked out.</p></div>
       <div class="card mini">
@@ -119,11 +118,15 @@
   </section>
 
   <!-- WHO IT'S FOR: one switch, the features change with it -->
-  <section class="jobs" id="jobs" data-sky="day">
+  <section class="jobs" id="jobs">
     <div class="jobs-h">
       <h2 class="sec-h">Pick your job.</h2>
       <div class="tabs" role="tablist" aria-label="Your job">
-        <button role="tab" aria-selected="true" data-role="crew">Crew</button>
+        <button role="tab" aria-selected="true" data-role="gaffer">Gaffer</button>
+        <button role="tab" aria-selected="false" data-role="grip">Grip</button>
+        <button role="tab" aria-selected="false" data-role="camera">Camera</button>
+        <button role="tab" aria-selected="false" data-role="sound">Sound</button>
+        <button role="tab" aria-selected="false" data-role="art">Art</button>
         <button role="tab" aria-selected="false" data-role="hod">Heads of department</button>
         <button role="tab" aria-selected="false" data-role="dir">Directors</button>
         <button role="tab" aria-selected="false" data-role="prod">Producers</button>
@@ -132,8 +135,25 @@
     <div id="rolePanel" class="role" role="tabpanel" aria-live="polite"></div>
   </section>
 
+
+  <!-- SAME SHOOT: crew and producer on one job -->
+  <section class="both" id="both">
+    <div class="both-h">
+      <p class="lab">Coming next</p>
+      <h2 class="sec-h">Same shoot, both sides.</h2>
+      <p>Put the production in once. When the crew and the producer are both on Systems, the timesheet a gaffer signs off at wrap is the one the producer checks, and the invoice that arrives already matches. No PDFs to read, no numbers to retype, no queries.</p>
+    </div>
+    <div class="both-grid">
+      <div class="card mini"><div class="mrow"><span class="lab">Gaffer · Day 2</span><span class="tag">Signed off</span></div>
+        <div class="kv"><span>Call to wrap</span><b>06:30 to 20:30</b></div><div class="kv"><span>Overtime, 3 hrs at 1.5x</span><b>£202.50</b></div><div class="kv"><span>Late break</span><b>£10.00</b></div></div>
+      <div class="link" aria-hidden="true"><span class="lab">Same job</span><i class="pulse"></i></div>
+      <div class="card mini"><div class="mrow"><span class="lab">Producer · crew check</span><span class="tag ok">Matches</span></div>
+        <div class="kv"><span>Gaffer, Day 2</span><b>£662.50</b></div><div class="kv"><span>Agreed rate and band</span><b>£450 · 1.5x</b></div><div class="kv"><span>Into the 7-day run</span><b>Approved</b></div></div>
+    </div>
+  </section>
+
   <!-- EVERYTHING -->
-  <section class="all" id="all" data-sky="day">
+  <section class="all" id="all">
     <div class="all-h">
       <h2 class="sec-h">26 jobs, one place.</h2>
       <p>Everything a production office keeps in notes, spreadsheets and email, joined up. Marked <span class="tag">In the app</span> works today. <span class="tag soft">Company pilot</span> is set up on a company's own accounts.</p>
@@ -142,7 +162,7 @@
   </section>
 
   <!-- YOUR DRIVE -->
-  <section class="drive" data-sky="dusk">
+  <section class="drive">
     <div class="drive-copy">
       <h2 class="sec-h">Your books stay in your Drive.</h2>
       <p>Sign in with Google and Systems makes one spreadsheet in your own Drive. Everything lives there, readable by you, exportable to your accountant. Systems can only see the file it made.</p>
@@ -166,7 +186,7 @@
   </section>
 
   <!-- QUESTIONS -->
-  <section class="faq" id="faq" data-sky="dusk">
+  <section class="faq" id="faq">
     <h2 class="sec-h">Questions.</h2>
     <div class="qa">
       <details open><summary>Does it know APA and Bectu terms?</summary><p>Yes. Commercials use the APA crew terms: the three day-rate bands, early, late and night calls, after midnight at 3x, the late break, weekends. TV and film use the Pact/Bectu drama terms: 1.5x overtime kept between £35 and £70, quarter hours, after 23:00, sixth days. A flat day rate works too.</p></details>
@@ -175,18 +195,23 @@
       <details><summary>Does it replace FreeAgent or Xero?</summary><p>Not yet. It sits beside them and does the film part they don't: holds, call times, overtime, chasing in your name. Links to Xero, FreeAgent and bank feeds are next.</p></details>
       <details><summary>What about production companies?</summary><p>The app checks crew days against the terms today. The company tools (advance invoices on award, the permit clock, rights and usage, payment runs) are set up on a company's own Google and Xero accounts in the pilot.</p></details>
       <details><summary>Who sees my data?</summary><p>You. It lives in a spreadsheet in your Google Drive and Systems can only open the one file it made.</p></details>
+      <details><summary>Do I have to download anything?</summary><p>No. It opens in your phone's browser and you can add it to your home screen like an app. Your laptop works too.</p></details>
+      <details><summary>Commercials, TV or both?</summary><p>Both. Each booking carries its own terms, so an APA commercial on Monday and a Pact/Bectu drama day on Thursday are each worked out their own way.</p></details>
+      <details><summary>Does it help with VAT and tax?</summary><p>It keeps a rolling 12-month total against the £90,000 VAT threshold and reminds you of Self Assessment, payments on account and Making Tax Digital dates. It doesn't file anything for you.</p></details>
+      <details><summary>Do I need to be in Bectu?</summary><p>No. The terms are there as a starting point for anyone. Your own deal always wins, and anything that differs is flagged for you to check.</p></details>
+      <details><summary>What does it cost?</summary><p>It's free to try now. Prices will be on this page before anyone is asked to pay anything.</p></details>
     </div>
   </section>
 
   <!-- CLOSE -->
-  <section class="close" data-sky="night">
+  <section class="close">
     <h2 class="close-h">All systems go.</h2>
     <p>Open it, pick your job, and see your last shoot worked out properly.</p>
     <div class="acts"><a class="btn paper" href="../systems-app/">Try Systems free</a></div>
   </section>
 </main>
 
-<footer class="foot" data-sky="night">
+<footer class="foot">
   <span class="mark sm"><span>S</span><span style="margin-left:.08em">y</span><span style="margin-left:.36em">st</span><span style="margin-left:.14em">e</span><span style="margin-left:.42em">ms</span></span>
   <span class="q">The back office for film. Made in London.</span>
   <span class="flinks"><a href="../systems-app/privacy.html">Privacy</a><a href="../systems-app/terms.html">Terms</a></span>

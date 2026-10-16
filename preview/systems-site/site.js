@@ -16,14 +16,15 @@
   function later(fn, ms) { timers.push(setTimeout(fn, reduce ? 0 : ms)); }
   function clearTimers() { timers.forEach(clearTimeout); timers = []; }
 
-  /* ---- sky follows the chapter nearest the middle of the screen ---- */
-  var chapters = $$("[data-sky]").filter(function (el) { return el !== root; });
-  function setSky() {
-    var mid = innerHeight * 0.5, best = null;
-    chapters.forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top <= mid && r.bottom > mid) best = el; });
-    if (best) root.setAttribute("data-sky", best.getAttribute("data-sky"));
+  /* ---- timecode in the nav follows the shoot day; the line under it fills as you scroll ---- */
+  var steps = $$("[data-tc]"), tc = $("#tc b"), prog = $("#prog");
+  function onScroll() {
+    var mid = innerHeight * 0.5, t = "06:30";
+    steps.forEach(function (el) { if (el.getBoundingClientRect().top < mid) t = el.getAttribute("data-tc"); });
+    if (tc.textContent !== t) tc.textContent = t;
+    var h = document.documentElement.scrollHeight - innerHeight; prog.style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
   }
-  addEventListener("scroll", setSky, { passive: true }); addEventListener("resize", setSky); setSky();
+  addEventListener("scroll", onScroll, { passive: true }); addEventListener("resize", onScroll); onScroll();
 
   /* ---- reveal + counters ---- */
   var io = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
@@ -55,7 +56,7 @@
     $("#liveTime").textContent = "Wrap " + hm(wm);
     wrap.setAttribute("aria-valuetext", hm(wm));
     $("#liveNote").textContent = !v ? "Wrapped on time. Nothing to add." : late ? "Past midnight it's triple time. Most people forget to claim it." : "That's " + gbp(otN) + " you'd have had to work out yourself.";
-    live.classList.toggle("dusk", v >= 2 && v < 6); live.classList.toggle("night", v >= 6);
+    live.classList.toggle("night", v >= 6);
     var from = lastTot; lastTot = tot; var el = $("#liveTot");
     if (reduce) el.textContent = gbp(tot); else { var t0 = performance.now(); (function f(t) { var k = Math.min(1, (t - t0) / 350); el.textContent = gbp(Math.round((from + (tot - from) * k) * 100) / 100); if (k < 1) requestAnimationFrame(f); })(t0); }
   }
@@ -78,11 +79,16 @@
         [1, 2].forEach(function (i) { d[i].className = "p2"; });
         later(function () { [1, 2].forEach(function (i) { d[i].className = "p1"; }); st.textContent = "1st pencil"; m.textContent = "Moved up. Systems asks them to confirm by Friday."; }, 1200);
         later(function () { [1, 2].forEach(function (i) { d[i].className = "ok"; }); st.textContent = "Booked"; st.className = "tag"; m.textContent = "Booking note drafted: rate, hours, cancellation."; }, 2700); } },
-    ot: { h: "Overtime you'd have missed", s: "Your band, the half hours, the late break. Worked out from the call and wrap.",
-      html: '<div class="screen"><div class="mrow"><span class="lab">Day 2 · £450 · APA</span><span class="tag">1.5x band</span></div><div data-rows></div><div class="bigline"><span class="lab">The day</span><b data-t>£0</b></div></div>',
-      run: function (el) { var R = $("[data-rows]", el), rows = [["Day rate", 450], ["Overtime from 17:30, 3 hrs", 202.5], ["Late break", 10]]; R.innerHTML = "";
-        rows.forEach(function (r, i) { later(function () { R.insertAdjacentHTML("beforeend", '<div class="ln">' + "<span>" + r[0] + "</span><b>" + gbp2(r[1]) + "</b></div>"); }, 400 + i * 550); });
-        later(function () { countUp($("[data-t]", el), 662.5, function (v) { return gbp2(v); }, 900); }, 400 + 3 * 550); } },
+    ot: function (r) { var hr = r.rate / 10, ot = 3 * hr * r.m, tot = r.rate + ot + 10; return { h: "Overtime you'd have missed", s: "Your band, the half hours, the late break. Worked out from the call and wrap.",
+      html: '<div class="screen"><div class="mrow"><span class="lab">' + r.t + " · £" + r.rate + ' · APA</span><span class="tag">' + r.m + 'x band</span></div><div data-rows></div><div class="bigline"><span class="lab">The day</span><b data-t>£0</b></div></div>',
+      run: function (el) { var R = $("[data-rows]", el), rows = [["Day rate", r.rate], ["Overtime from 17:30, 3 hrs", ot], ["Late break", 10]]; R.innerHTML = "";
+        rows.forEach(function (x, i) { later(function () { R.insertAdjacentHTML("beforeend", '<div class="ln"><span>' + x[0] + "</span><b>" + gbp2(x[1]) + "</b></div>"); }, 400 + i * 550); });
+        later(function () { countUp($("[data-t]", el), tot, function (v) { return gbp2(v); }, 900); }, 400 + 3 * 550); } }; },
+    ckit: function (r) { var hr = r.rate / 10, days = 3 * r.rate + 3 * hr * r.m + 10, miles = 92 * 0.45, tot = days + r.kit * 3 + miles; return { h: "Kit and miles on the invoice", s: "Your " + r.kitName.toLowerCase() + " and mileage go on the same invoice as your days.",
+      html: '<div class="screen"><div class="mrow"><span class="lab">INV-2026-015 · draft</span><span class="tag">Ready</span></div><div data-rows></div><div class="bigline"><span class="lab">Total</span><b data-t>£0</b></div></div>',
+      run: function (el) { var R = $("[data-rows]", el), rows = [["3 days, overtime, late break", days], [r.kitName + ", 3 days", r.kit * 3], ["Mileage, 92 miles at 45p", miles]]; R.innerHTML = "";
+        rows.forEach(function (x, i) { later(function () { R.insertAdjacentHTML("beforeend", '<div class="ln"><span>' + x[0] + "</span><b>" + gbp2(x[1]) + "</b></div>"); }, 300 + i * 450); });
+        later(function () { countUp($("[data-t]", el), tot, function (v) { return gbp2(v); }, 900); }, 300 + 3 * 450); } }; },
     chase: { h: "A chase that writes itself", s: "Polite, in your name, on a schedule. You just tap send.",
       html: '<div class="screen"><div class="mrow"><span class="lab">Chase 1 of 3 · draft</span><span class="tag amber">Due today</span></div><div class="type" data-type></div></div>',
       run: function (el) { typer($("[data-type]", el), "Hi Sam,\n\nHope the edit's going well. Just a note that INV-2026-014 for £2,031.40 is due today. Bank details are on the invoice.\n\nThanks,\nAlex", 16); } },
@@ -121,28 +127,51 @@
         var urgent = $$(".bar i.amber", P).length; $("[data-n]", el).textContent = urgent + " due this week";
         later(function () { $$(".bar i", P).forEach(function (b) { b.style.width = b.getAttribute("data-w") + "%"; }); }, 100); } },
     check: { h: "Every crew invoice checked", s: "Rates, days, bands and overtime checked against the deal before you pay.",
-      html: '<div class="screen"><div class="mrow"><span class="lab">Spark · INV 1182</span><span class="tag" data-st>Checking</span></div>' + kv("Claimed overtime, 3 hrs", "£157.50") + kv("Timesheet says 2.5 hrs", "£131.25") + '<div class="flag" data-f><i></i><span>£26.25 over. A polite query is drafted; the rest is approved for the 7-day run.</span></div></div>',
-      run: function (el) { var st = $("[data-st]", el); st.textContent = "Checking"; st.className = "tag"; later(function () { $("[data-f]", el).classList.add("on"); st.textContent = "Query"; st.className = "tag amber"; }, 1100); } }
+      html: '<div class="screen"><div class="mrow"><span class="lab">Spark · INV 1182.pdf, read</span><span class="tag" data-st>Checking</span></div>' + kv("Claimed overtime, 3 hrs", "£157.50") + kv("Timesheet says 2.5 hrs", "£131.25") + '<div class="flag" data-f><i></i><span>£26.25 over. A polite query is drafted; the rest is approved for the 7-day run.</span></div></div>',
+      run: function (el) { var st = $("[data-st]", el); st.textContent = "Checking"; st.className = "tag"; later(function () { $("[data-f]", el).classList.add("on"); st.textContent = "Query"; st.className = "tag amber"; }, 1100); } },
+    packs: { h: "Start packs, chased", s: "Bank details, UTR, NI and right to work collected from every crew member before day one.",
+      html: '<div class="screen"><div class="mrow"><span class="lab">Crew paperwork · 14 crew</span><span class="tag amber" data-n>3 missing</span></div><div data-p></div></div>',
+      run: function (el) { var P = $("[data-p]", el), rows = [["Gaffer", 1, 1, 1], ["1st AC", 1, 1, 1], ["Sound recordist", 1, 0, 1], ["Runner", 1, 1, 0], ["Art director", 0, 1, 1]];
+        P.innerHTML = '<div class="kv q"><span>Crew</span><b>Bank · UTR · RTW</b></div>' + rows.map(function (r) { return '<div class="kv"><span>' + r[0] + '</span><b>' + r.slice(1).map(function (x) { return x ? "✓" : "<span style=\'color:var(--tally)\'>chase</span>"; }).join(" · ") + "</b></div>"; }).join("");
+        $$(".kv", P).forEach(function (k, i) { k.style.opacity = 0; later(function () { k.style.transition = "opacity .4s"; k.style.opacity = 1; }, 200 + i * 220); }); } },
+    cash: { h: "Cash, thirteen weeks out", s: "Advances and balances coming in, set against the crew and supplier runs going out.",
+      html: '<div class="screen"><div class="mrow"><span class="lab">Next 13 weeks</span><span class="tag amber">Week 6 tight</span></div><div class="cols" data-c></div><div class="kv q"><span>In · out</span><b>£186,500 · £171,200</b></div></div>',
+      run: function (el) { var C = $("[data-c]", el), v = [40, 62, 30, 75, 50, -35, 20, 88, 45, 60, 30, 70, 52];
+        C.innerHTML = v.map(function (x) { return '<i class="' + (x < 0 ? "neg" : "") + '" data-h="' + Math.abs(x) + '"></i>'; }).join("");
+        later(function () { $$("i", C).forEach(function (b, i) { setTimeout(function () { b.style.height = b.getAttribute("data-h") + "%"; }, reduce ? 0 : i * 60); }); }, 100); } },
+    rights: { h: "Rights before they lapse", s: "Usage from every signed contract, with reminders at 90, 60 and 30 days and a renewal quote drafted.",
+      html: '<div class="screen"><div class="mrow"><span class="lab">Usage register</span><span class="tag amber">1 renewal</span></div><div data-p></div></div>',
+      run: function (el) { var P = $("[data-p]", el), rows = [["Sportswear spot · UK TV", 28, 365], ["Music video · online", 140, 365], ["Bank campaign · stills", 300, 365]];
+        P.innerHTML = rows.map(function (r) { return '<div class="prow"><div class="t"><span>' + r[0] + "</span><b>" + r[1] + ' days left</b></div><div class="bar"><i' + (r[1] <= 30 ? ' class="amber"' : "") + ' data-w="' + (100 - r[1] / r[2] * 100) + '"></i></div></div>'; }).join("") + '<div class="flag" data-f><i></i><span>Sportswear spot ends in 28 days. A renewal quote for the agency is drafted.</span></div>';
+        later(function () { $$(".bar i", P).forEach(function (b) { b.style.width = b.getAttribute("data-w") + "%"; }); }, 100); later(function () { $("[data-f]", el).classList.add("on"); }, 1300); } },
+  };
+  var CREW = {
+    gaffer: { t: "Gaffer", rate: 450, m: 1.5, kit: 120, kitName: "Lighting package", h: "Every hour of the rig, counted.", p: "Long pre-light, late wrap, a van full of kit. Your overtime band, the package and the miles all land on one invoice." },
+    grip: { t: "Grip", rate: 420, m: 1.5, kit: 150, kitName: "Dolly and track", h: "The dolly gets paid too.", p: "Day rate, overtime and the grip kit you bring, worked out from the call sheet and wrap time." },
+    camera: { t: "1st AC", rate: 480, m: 1.25, kit: 85, kitName: "Focus kit and monitor", h: "Focus on focus, not invoices.", p: "Your band is 1.25x at this rate. Systems knows that, and adds your focus kit and the camera truck miles." },
+    sound: { t: "Sound recordist", rate: 520, m: 1.25, kit: 200, kitName: "Sound package", h: "Your package, on every invoice.", p: "Mixer, radio mics and timecode boxes hired by the day, alongside your hours at the right band." },
+    art: { t: "Art director", rate: 400, m: 1.5, kit: 60, kitName: "Props van", h: "Prep days, build days, shoot days.", p: "Prep and recce days at their own rate, overtime on the shoot, and the props runs as mileage." }
   };
   var ROLES = {
-    crew: { h: "Get paid for every hour you work.", p: "For sparks, grips, ADs, camera, art, wardrobe and everyone else on a day rate. Holds, timesheets, invoices and chasing, done on your phone on the way home.", d: ["holds", "ot", "chase"] },
     hod: { h: "Run the department, not the paperwork.", p: "For gaffers, key grips, DPs and HODs who book a team and bring kit. The whole department's hours and hire in one place.", d: ["team", "kit", "turn"] },
     dir: { h: "Keep every hold and fee straight.", p: "For directors working across several production companies, with a rep taking a cut and awards to enter.", d: ["dholds", "fee", "awards"] },
-    prod: { h: "The production office, joined up.", p: "For producers and production companies. Cash in on award, crew paid right in seven days, permits on time and rights tracked.", d: ["award", "permits", "check"] }
+    prod: { h: "The production office, joined up.", p: "For producers and production companies. Cash in on award, crew paid right in seven days, permits on time, rights tracked. Invoices and call sheets are read for you.", d: ["award", "check", "permits", "packs", "cash", "rights"] }
   };
+  Object.keys(CREW).forEach(function (k) { var c = CREW[k]; ROLES[k] = { h: c.h, p: c.p, d: ["holds", { f: "ot", r: c }, { f: "ckit", r: c }] }; });
+  function demo(id) { return typeof id === "string" ? DEMOS[id] : DEMOS[id.f](id.r); }
   var panel = $("#rolePanel"), current = null;
   function showRole(k) {
     clearTimers(); current = k; var r = ROLES[k];
-    panel.innerHTML = '<div class="role-lead"><h3>' + r.h + "</h3><p>" + r.p + '</p></div><div class="demos">' + r.d.map(function (id) { var d = DEMOS[id]; return '<div class="card demo" data-demo="' + id + '"><h4>' + d.h + '</h4><p class="say">' + d.s + "</p>" + d.html + "</div>"; }).join("") + "</div>";
+    panel.innerHTML = '<div class="role-lead"><h3>' + r.h + "</h3><p>" + r.p + '</p></div><div class="demos">' + r.d.map(function (id, i) { var d = demo(id); return '<div class="card demo" data-i="' + i + '"><h4>' + d.h + '</h4><p class="say">' + d.s + "</p>" + d.html + "</div>"; }).join("") + "</div>";
     $$(".tabs button").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-role") === k ? "true" : "false"); });
     $$(".demo", panel).forEach(function (el, i) { el.classList.add("rv"); el.style.transitionDelay = i * 90 + "ms"; requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add("on"); }); }); });
     if (seen) runDemos();
   }
-  function runDemos() { $$(".demo", panel).forEach(function (el, i) { later(function () { DEMOS[el.getAttribute("data-demo")].run(el); }, i * 250); }); }
+  function runDemos() { var r = ROLES[current]; $$(".demo", panel).forEach(function (el, i) { later(function () { demo(r.d[i]).run(el); }, i * 250); }); }
   var seen = false;
   $$(".tabs button").forEach(function (b) { b.addEventListener("click", function () { if (b.getAttribute("data-role") !== current) showRole(b.getAttribute("data-role")); }); });
   $(".tabs").addEventListener("keydown", function (e) { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; var bs = $$(".tabs button"), i = bs.findIndex(function (b) { return b.getAttribute("aria-selected") === "true"; }); i = (i + (e.key === "ArrowRight" ? 1 : bs.length - 1)) % bs.length; bs[i].focus(); bs[i].click(); });
-  showRole("crew");
+  showRole("gaffer");
   if ("IntersectionObserver" in window) new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { seen = true; runDemos(); o.disconnect(); } }, { threshold: 0.25 }).observe(panel);
   else { seen = true; runDemos(); }
 
@@ -155,5 +184,6 @@
     { g: "Books and jobs", f: [["Job set-up in the books", "Each job made a tracking category in Xero, pushed to card and receipt tools, mapped to budget lines."], ["Overage and change requests", "A costed change email to the agency, with written approval logged to the budget line."], ["Kit quotes, POs and returns", "Hire quotes compared, POs drafted, return dates tracked and hire invoices matched."], ["Bids and budget versions", "Bids, pitch costs and outcomes logged, with a what-changed note between versions."], ["Wrap and audit pack", "Invoices, POs, timesheets and receipts gathered per budget line for the cost consultant."]] }
   ];
   $("#feat").innerHTML = FEAT.map(function (g) { return '<div class="fg"><h3>' + g.g + "</h3>" + g.f.map(function (f) { return '<div class="fi"><div class="t"><b>' + f[0] + '</b><span class="tag' + (f[2] ? "" : " soft") + '">' + (f[2] ? "In the app" : "Company pilot") + "</span></div><p>" + f[1] + "</p></div>"; }).join("") + "</div>"; }).join("");
+  $("#feat").insertAdjacentHTML("beforeend", '<div class="fg next"><h3>Coming next</h3>' + [["Same shoot, both sides", "Crew and producer on one job, so the signed-off timesheet is the one that gets checked and paid."], ["Bank feeds", "Payments matched to invoices on their own, through Open Banking."], ["Xero and FreeAgent", "Invoices and expenses sent straight to the books you already use."], ["Bectu rate cards", "Grade minimums checked as you set your rate."], ["Ask for a job", "Something your office does every week that isn\'t here? It can be built for your accounts."]].map(function (f) { return '<div class="fi"><div class="t"><b>' + f[0] + '</b><span class="tag soft">Next</span></div><p>' + f[1] + "</p></div>"; }).join("") + "</div>");
   $$(".fg").forEach(function (el, i) { watch(el, (i % 3) * 80); });
 })();

@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0E0D0B">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Out &amp; Scout · A viewfinder for the recce</title>
+<meta name="description" content="A viewfinder for the recce. Frame the shot, read the light, send the list.">
+<meta property="og:title" content="Out &amp; Scout">
+<meta property="og:description" content="A viewfinder for the recce. Frame the shot, read the light, send the list.">
+<meta property="og:image" content="img/blue-hour.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Direction C, Field: made by and for the people who go out early. Film grain, two photographs used once each,
+   and the app shown as line drawings that move: the frame, the light, the shot list. */
+:root {
+  --ink: #0E0D0B; --paper: #EFEDE6; --q: #8C887D; --line: rgba(239,237,230,.16); --wire: rgba(239,237,230,.62); --faint: rgba(239,237,230,.22); --sun: #FF5A1F;
+  --sans: "Geist", "Helvetica Neue", Arial, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+  --g: clamp(16px, 4vw, 48px); --e: cubic-bezier(.2,.7,0,1); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+.mono { font: 400 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.q { color: var(--q); }
+.lock .sd { display: inline-block; width: .2em; height: .2em; border-radius: 50%; background: var(--sun); margin: 0 .22em; transform: translateY(-.55em); }
+h1, h2 { font-weight: 400; letter-spacing: -.045em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(46px, 7.6vw, 120px); line-height: .95; }
+h2 { font-size: clamp(34px, 4.6vw, 68px); line-height: 1; }
+.grain { position: fixed; inset: -50%; z-index: 20; pointer-events: none; opacity: .09; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); animation: g 1s steps(4) infinite; }
+@keyframes g { 0% { transform: translate(0,0); } 25% { transform: translate(-3%,2%); } 50% { transform: translate(2%,-3%); } 75% { transform: translate(-2%,-1%); } }
+
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: calc(env(safe-area-inset-top, 0px) + 22px) var(--g) 0; position: relative; z-index: 3; }
+.top .lock { font-size: 20px; letter-spacing: -.02em; text-decoration: none; }
+.top a.mono { text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px; background: rgba(14,13,11,.3); }
+
+/* photographs, each used once, melting into the page */
+.photo { position: relative; overflow: hidden; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.open { margin-top: -64px; height: 96svh; min-height: 580px; }
+.open img { object-position: 50% 30%; animation: in 2.4s var(--e) both; }
+@keyframes in { from { opacity: 0; scale: 1.05; } to { opacity: 1; scale: 1; } }
+.open::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 60% 40%, rgba(14,13,11,0) 40%, rgba(14,13,11,.55) 75%, var(--ink)), linear-gradient(180deg, rgba(14,13,11,.6), rgba(14,13,11,0) 25%, rgba(14,13,11,0) 55%, var(--ink)); }
+.open .say { position: absolute; z-index: 2; left: var(--g); right: var(--g); bottom: clamp(32px, 8vh, 88px); display: grid; gap: 20px; }
+.open p { margin: 0; max-width: 28em; font-size: clamp(17px, 1.6vw, 21px); color: rgba(239,237,230,.8); }
+.glacier { height: 92svh; min-height: 520px; margin-top: 22vh; }
+.glacier img { object-position: 45% 45%; scale: 1.08; transition: scale 2.4s var(--e); }
+.glacier.in img { scale: 1; }
+.glacier::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, var(--ink) 0%, rgba(14,13,11,0) 26%, rgba(14,13,11,0) 58%, rgba(14,13,11,.8) 84%, var(--ink) 100%), radial-gradient(140% 100% at 50% 50%, rgba(14,13,11,0) 55%, rgba(14,13,11,.5)); }
+.glacier .say { position: absolute; z-index: 2; left: var(--g); right: var(--g); bottom: clamp(28px, 7vh, 80px); display: flex; justify-content: space-between; align-items: end; gap: 24px; flex-wrap: wrap; }
+
+/* a slow line of words */
+.run { overflow: hidden; border-block: 1px solid var(--line); padding-block: 22px; margin-top: 12vh; }
+.run div { display: flex; width: max-content; gap: 56px; animation: run 60s linear infinite; font-size: clamp(26px, 3.4vw, 48px); letter-spacing: -.035em; white-space: nowrap; }
+.run i { display: inline-block; width: .32em; height: .32em; border-radius: 50%; background: var(--sun); vertical-align: .2em; }
+@keyframes run { to { transform: translateX(-50%); } }
+
+/* what it does, plainly */
+.does { padding: 20vh var(--g) 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 32px; }
+.does ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.does li { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--line); font-size: clamp(18px, 1.6vw, 22px); letter-spacing: -.01em; }
+.does li a { text-decoration: none; } .does li a:hover { text-decoration: underline; text-underline-offset: 5px; }
+.does li span:last-child { color: var(--q); }
+.now { display: flex; align-items: center; gap: 10px; margin-top: 22px; }
+.now i { width: 8px; height: 8px; border-radius: 50%; background: var(--sun); flex: none; }
+
+/* features: words left, the app drawn in line on the right */
+.feat { padding: 26vh var(--g) 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
+.feat .txt { display: grid; gap: 20px; align-content: center; }
+.feat p { margin: 0; color: var(--q); font-size: clamp(17px, 1.4vw, 19px); max-width: 26em; }
+.stage { position: relative; width: 100%; max-width: 100%; }
+.stage svg { display: block; width: 100%; height: auto; overflow: visible; }
+.w { fill: none; stroke: var(--wire); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.f { fill: none; stroke: var(--faint); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.t { fill: var(--q); font: 400 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.tb { fill: var(--paper); font: 400 13px var(--mono); letter-spacing: .04em; }
+.sunf { fill: var(--sun); }
+.hint { margin-top: 14px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* light read */
+.lhead { position: absolute; left: 0; top: 0; display: grid; gap: 10px; max-width: 46%; }
+.lname { font-size: clamp(24px, 2.6vw, 38px); letter-spacing: -.035em; line-height: 1.05; }
+.lt { font: 400 14px var(--mono); margin-top: 14px; font-variant-numeric: tabular-nums; }
+.lstrip { position: relative; height: 26px; margin-top: 16px; cursor: ew-resize; touch-action: pan-y; }
+.lstrip i { position: absolute; top: 6px; height: 14px; background: var(--paper); }
+.lstrip b { position: absolute; top: 0; width: 1.5px; height: 26px; background: var(--sun); }
+.lstrip u { position: absolute; top: 0; height: 2px; background: var(--sun); text-decoration: none; }
+
+/* shot list: edit, then export */
+.sl { position: relative; width: min(100%, 520px); margin-inline: auto; }
+.panel { position: relative; border: 1px solid var(--wire); border-radius: 22px; padding: 18px 16px 16px; display: grid; gap: 12px; min-width: 0; }
+.panel .hd { display: flex; justify-content: space-between; align-items: center; }
+.rows { display: grid; }
+.row { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); gap: 10px; padding: 12px 8px; border-top: 1px solid var(--line); border-radius: 8px; transition: background .4s; font-size: 14px; }
+.row:last-child { border-bottom: 1px solid var(--line); }
+.row .id { font: 400 13px var(--mono); }
+.row small { display: block; color: var(--q); font: 400 11px var(--mono); letter-spacing: .04em; margin-top: 2px; }
+.row.on { background: rgba(239,237,230,.07); }
+.row em { font-style: normal; display: inline-block; transition: color .3s; }
+.row em.ch { color: var(--paper); text-decoration: underline; text-underline-offset: 3px; }
+.edit { height: 0; overflow: hidden; transition: height .5s var(--e); }
+.edit.is-open { height: 44px; }
+.edit div { display: flex; gap: 6px; padding-top: 8px; }
+.edit span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font: 400 11px var(--mono); transition: background .3s, color .3s; }
+.edit span.on { background: var(--paper); color: var(--ink); }
+.exp { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.exp .tiers { display: flex; gap: 6px; opacity: 0; transform: translateY(6px); transition: opacity .4s, transform .5s var(--e); }
+.exp .tiers.is-open { opacity: 1; transform: none; }
+.exp .tiers span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; font: 400 10px var(--mono); }
+.exp .tiers span.on { border-color: var(--paper); }
+.exp .btn { border: 1px solid var(--wire); border-radius: 999px; padding: 8px 14px; font: 400 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; transition: background .3s, color .3s; white-space: nowrap; }
+.exp .btn.on { background: var(--paper); color: var(--ink); }
+.tap { position: absolute; z-index: 3; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; border: 1.5px solid var(--paper); background: rgba(239,237,230,.18); left: 50%; top: 50%; opacity: 0; transition: left .8s var(--e), top .8s var(--e), opacity .3s, transform .15s; pointer-events: none; }
+.tap.show { opacity: 1; } .tap.down { transform: scale(.7); }
+/* the pdf, page by page: a strip of line-drawn pages sliding past */
+.film { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 16 / 11; overflow: hidden; }
+.film::before, .film::after { content: ""; position: absolute; top: 0; bottom: 0; width: 14%; z-index: 2; pointer-events: none; }
+.film::before { left: 0; background: linear-gradient(90deg, var(--ink), rgba(14,13,11,0)); }
+.film::after { right: 0; background: linear-gradient(270deg, var(--ink), rgba(14,13,11,0)); }
+.pp { position: absolute; left: 50%; top: 50%; width: 44cqw; translate: -50% -50%; transform: translateX(calc(var(--o, 2) * 54cqw)) scale(calc(1 - var(--a, 1) * .1)); opacity: calc(1 - var(--a, 1) * .72); transition: transform 1.1s var(--e), opacity .8s; }
+.pp svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pp .d { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1.3s var(--e); transition-delay: calc(var(--i, 0) * 12ms); }
+.pp .x { opacity: 0; transition: opacity .7s; transition-delay: calc(.3s + var(--i, 0) * 12ms); }
+.pp.notr { transition: none; } .pp.on .d { stroke-dashoffset: 0; } .pp.on .x { opacity: 1; }
+.pp .s { opacity: 0; transition: opacity .6s .9s; } .pp.on .s { opacity: 1; }
+.pt { fill: var(--q); font: 400 5.6px var(--mono); letter-spacing: .03em; }
+.pb { fill: var(--paper); font: 400 7px var(--mono); letter-spacing: .03em; }
+.ph { fill: var(--paper); font: 400 17px var(--sans); letter-spacing: -.04em; }
+.fhint .tiers2 { display: flex; gap: 6px; }
+.fhint .tiers2 span { border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; transition: border-color .4s, color .4s; }
+.fhint .tiers2 span.on { border-color: var(--paper); color: var(--paper); }
+
+/* the invite */
+.join { margin: 26vh var(--g) 0; position: relative; display: grid; gap: 26px; justify-items: start; padding: clamp(28px, 5vw, 64px); border: 1px solid var(--line); border-radius: 6px; }
+.who { display: flex; gap: 8px; flex-wrap: wrap; }
+.who span { border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; }
+form { display: flex; gap: 8px; width: min(480px, 100%); }
+input { flex: 1; min-width: 0; background: rgba(239,237,230,.06); border: 1px solid var(--line); border-radius: 999px; color: var(--paper); font: 400 16px var(--sans); padding: 13px 18px; }
+input::placeholder { color: var(--q); }
+button { border: 0; border-radius: 999px; background: var(--paper); color: var(--ink); font: 400 15px var(--sans); padding: 0 22px; cursor: pointer; }
+input:focus-visible, button:focus-visible, a:focus-visible { outline: 1px solid var(--paper); outline-offset: 3px; }
+.road { display: flex; gap: 22px; flex-wrap: wrap; }
+.jbtn { display: inline-block; border-radius: 999px; background: var(--paper); color: var(--ink); font: 400 15px var(--sans); padding: 13px 22px; text-decoration: none; }
+.fl { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; } .fl a { color: inherit; }
+footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
+
+/* the app, as a line-drawn clip: sizes inside a device follow the device's width (cqw) */
+.dev { position: relative; container-type: inline-size; width: 100%; aspect-ratio: 2 / 1; border: 1px solid var(--wire); border-radius: 6% / 12%; overflow: hidden; }
+.dev .scr { position: absolute; inset: 0; opacity: 0; transition: opacity .5s; pointer-events: none; }
+.dev[data-s="launch"] .s-launch, .dev[data-s="start"] .s-start, .dev[data-s="cam"] .s-cam { opacity: 1; }
+.s-launch { display: grid; place-items: center; }
+.wm { font: 400 5.4cqw/1 var(--sans); letter-spacing: -.03em; white-space: nowrap; }
+.wm .sd { display: inline-block; width: .2em; height: .2em; border-radius: 50%; background: var(--sun); margin: 0 .22em; transform: translateY(-.55em); }
+.dev[data-s="launch"] .s-launch .sd { animation: sunup 1.6s var(--e) .3s both; }
+@keyframes sunup { from { transform: translateY(.9em); opacity: 0; } to { transform: translateY(-.55em); opacity: 1; } }
+.s-start { display: grid; justify-items: center; align-content: start; padding-top: 8cqw; gap: 4cqw; }
+.s-start .wm { font-size: 3.4cqw; }
+.btns { display: flex; gap: 2cqw; }
+.b2 { border: 1px solid var(--wire); border-radius: 2cqw; padding: 1.8cqw 2.2cqw; width: 25cqw; display: grid; gap: .6cqw; transition: background .3s, color .3s; }
+.b2 b { font: 400 2cqw/1.1 var(--sans); } .b2 small { font: 400 1.2cqw/1.2 var(--mono); color: var(--q); letter-spacing: .04em; text-transform: uppercase; }
+.b2.on { background: var(--paper); color: var(--ink); } .b2.on small { color: var(--ink); }
+.nm { position: absolute; left: 50%; bottom: 5cqw; width: 52cqw; transform: translate(-50%, 2cqw); opacity: 0; transition: opacity .4s, transform .6s var(--e); display: flex; align-items: end; justify-content: space-between; gap: 2cqw; border-bottom: 1px solid var(--wire); padding-bottom: 1.2cqw; }
+.nm.on { opacity: 1; transform: translate(-50%, 0); }
+.nm small { display: block; font: 400 1.1cqw var(--mono); color: var(--q); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .6cqw; }
+.nm b { font: 400 2.4cqw var(--sans); } .nm .caret { display: inline-block; width: 1px; height: 1em; background: var(--paper); vertical-align: -.15em; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.nm .go { width: auto; padding: 1cqw 2cqw; border-radius: 999px; font: 400 1.4cqw var(--mono); text-transform: uppercase; }
+.cam-tl { position: absolute; top: 2.6cqw; left: 4cqw; right: 4cqw; display: flex; justify-content: space-between; gap: 2cqw; font: 400 1.2cqw var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.cam-lc { position: absolute; left: 4cqw; top: 9cqw; width: 11cqw; display: grid; gap: 1.3cqw; font: 400 1.15cqw var(--mono); text-transform: uppercase; letter-spacing: .05em; }
+.cam-lc .on { color: var(--paper); } .cam-lc .q { color: var(--q); }
+.shots { display: grid; gap: .8cqw; margin-top: 1cqw; }
+.shots i { display: flex; align-items: end; height: 4.4cqw; border: 1px solid var(--wire); border-radius: .6cqw; padding: .4cqw .6cqw; font-style: normal; animation: pop .6s var(--e) both; }
+@keyframes pop { from { transform: translateX(-2cqw); opacity: 0; } }
+.win { position: absolute; left: 18cqw; top: 9cqw; width: 64cqw; aspect-ratio: 2.39; border: 1.5px solid var(--paper); overflow: hidden; }
+.win svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.win .flash { position: absolute; inset: 0; background: var(--paper); opacity: 0; }
+.win .flash.on { animation: flash .6s ease-out; }
+@keyframes flash { 0% { opacity: .9; } 100% { opacity: 0; } }
+.zoom { transition: transform 1.1s var(--e); transform-origin: 300px 150px; transform-box: view-box; }
+.cam-rat { position: absolute; left: 18cqw; top: 38.2cqw; display: flex; gap: .8cqw; }
+.cam-rat span, .lenses span { border: 1px solid var(--line); border-radius: 999px; padding: .5cqw 1cqw; font: 400 1.1cqw var(--mono); transition: background .3s, color .3s; }
+.cam-rat span.on, .lenses span.on { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.cam-day { position: absolute; left: 18cqw; width: 64cqw; top: 44.6cqw; height: 1px; background: var(--wire); }
+.cam-day i { position: absolute; left: 72%; top: -.7cqw; width: 1.4cqw; height: 1.4cqw; margin-left: -.7cqw; border-radius: 50%; background: var(--sun); }
+.cam-rc { position: absolute; right: 4cqw; top: 9cqw; width: 11cqw; display: grid; justify-items: end; gap: .3cqw; }
+.cam-rc b { font: 400 5cqw/1 var(--mono); letter-spacing: -.04em; }
+.lenses { display: grid; gap: .6cqw; margin-top: 1.4cqw; justify-items: end; }
+.shut { position: absolute; right: 5cqw; top: 35cqw; width: 6.4cqw; height: 6.4cqw; border-radius: 50%; border: 1.5px solid var(--paper); box-shadow: inset 0 0 0 .7cqw var(--ink), inset 0 0 0 4cqw rgba(239,237,230,.8); transition: transform .15s; }
+.shut.on { transform: scale(.88); }
+.toast { position: absolute; left: 50%; top: 11cqw; transform: translate(-50%, 1cqw); opacity: 0; transition: opacity .4s, transform .5s var(--e); background: rgba(14,13,11,.75); border: 1px solid var(--wire); border-radius: 999px; padding: .8cqw 1.6cqw; font: 400 1.2cqw var(--mono); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.dev .tap, .pstage .tap { width: 3.4cqw; height: 3.4cqw; margin: -1.7cqw 0 0 -1.7cqw; }
+.steps { display: flex; gap: 14px; }
+.steps span { transition: color .3s; } .steps span.on { color: var(--paper); }
+
+/* sun tracker */
+.trk svg { touch-action: pan-y; }
+.trk .scale { cursor: ew-resize; }
+.thumb { fill: var(--paper); }
+.finger { fill: rgba(239,237,230,.16); stroke: var(--paper); stroke-width: 1.2; transition: opacity .4s; }
+
+/* portrait: the phone turns and the interface follows */
+.pstage { position: relative; width: min(100%, 560px); aspect-ratio: 1; margin-inline: auto; }
+.pdev { position: absolute; left: 50%; top: 50%; width: 76%; aspect-ratio: 2 / 1; translate: -50% -50%; border: 1px solid var(--wire); border-radius: 6% / 12%; container-type: inline-size; overflow: hidden; transition: transform 1s var(--e); }
+.pdev.port { width: 38%; aspect-ratio: 1 / 2; border-radius: 12% / 6%; }
+.pdev.notr { transition: none; }
+.pdev .ui { position: absolute; inset: 0; transition: opacity .35s; }
+.pdev .land { opacity: 1; } .pdev .port-ui { opacity: 0; }
+.pdev.port .land { opacity: 0; } .pdev.port .port-ui { opacity: 1; }
+.pdev .pw { position: absolute; border: 1.5px solid var(--paper); overflow: hidden; }
+.pdev .pw svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.land .pw { left: 18cqw; top: 11cqw; width: 64cqw; aspect-ratio: 2.39; }
+.land .side { position: absolute; top: 11cqw; width: 9cqw; display: grid; gap: 1.4cqw; }
+.land .side i { height: 1px; background: var(--wire); }
+.land .shut2, .port-ui .shut2 { position: absolute; border-radius: 50%; border: 1.5px solid var(--paper); box-shadow: inset 0 0 0 .7cqw var(--ink), inset 0 0 0 4cqw rgba(239,237,230,.8); }
+.land .shut2 { right: 5cqw; top: 33cqw; width: 6.4cqw; height: 6.4cqw; }
+.port-ui .pw { left: 10cqw; top: 22cqw; width: 80cqw; aspect-ratio: 9 / 16; }
+.port-ui .tl2 { position: absolute; top: 7cqw; left: 8cqw; right: 8cqw; display: flex; justify-content: space-between; font: 400 3.4cqw var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+.port-ui .rat2 { position: absolute; left: 10cqw; top: 169cqw; display: flex; gap: 2cqw; }
+.port-ui .rat2 span { border: 1px solid var(--line); border-radius: 999px; padding: 1.2cqw 2.4cqw; font: 400 3cqw var(--mono); }
+.port-ui .rat2 span.on { background: var(--paper); color: var(--ink); }
+.port-ui .shut2 { left: 50%; top: 180cqw; width: 14cqw; height: 14cqw; margin-left: -7cqw; box-shadow: inset 0 0 0 1.6cqw var(--ink), inset 0 0 0 9cqw rgba(239,237,230,.8); }
+.port-ui .mm2 { position: absolute; left: 10cqw; top: 184cqw; font: 400 4cqw var(--mono); }
+
+/* send: rows can move */
+.row { transition: background .4s, transform .7s var(--e); background-clip: padding-box; }
+.row.lift { background: rgba(239,237,230,.1); box-shadow: 0 12px 30px rgba(0,0,0,.4); position: relative; z-index: 2; }
+.note { display: block; margin-top: 8px; font: 400 12px var(--mono); color: var(--paper); min-height: 1.4em; }
+.note:empty::before { content: "Add a note"; color: var(--q); }
+.edit.is-open { height: 76px; }
+
+.rv { opacity: .001; transform: translateY(30px); transition: opacity 1.1s, transform 1.3s var(--e); transition-delay: var(--d, 0s); }
+.rv.in { opacity: 1; transform: none; }
+@media (max-width: 860px) {
+  .does, .feat { grid-template-columns: 1fr; } .does li { grid-template-columns: 5em minmax(0, 1fr); }
+  .feat { padding-top: 20vh; } .lhead { position: static; max-width: none; margin-bottom: 8px; } .film { aspect-ratio: 1 / 1.05; } .pp { width: 64cqw; transform: translateX(calc(var(--o, 2) * 76cqw)) scale(calc(1 - var(--a, 1) * .1)); }
+}
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } .run div, .grain, .open img { animation: none; } }
+</style>
+
+<div class="grain" aria-hidden="true"></div>
+</head>
+<body>
+<header class="top"><a class="lock" href="#top" id="top">Out &amp; Sc<i class="sd"></i>out</a><a class="mono" href="#join">Get a test invite</a></header>
+
+<section class="photo open">
+  <img srcset="img/blue-hour-s.jpg 1024w, img/blue-hour.jpg 2048w" sizes="100vw" src="img/blue-hour.jpg" alt="Three people in head torches on a hillside before sunrise, one framing the mountains on a phone.">
+  <div class="say"><span class="mono" style="color:rgba(239,237,230,.75)">For the ones who go out early</span><h1>Out before first light.</h1><p>A viewfinder for the recce. Frame the shot, read the light, and come home with the shot list.</p></div>
+</section>
+
+<div class="run" aria-hidden="true"><div>
+  <span>Blue hour</span><i></i><span>Backlit</span><i></i><span>Three-quarter back</span><i></i><span>Side lit</span><i></i><span>Golden hour</span><i></i><span>Front lit</span><i></i>
+  <span>Blue hour</span><i></i><span>Backlit</span><i></i><span>Three-quarter back</span><i></i><span>Side lit</span><i></i><span>Golden hour</span><i></i><span>Front lit</span><i></i>
+</div></div>
+
+<section class="does">
+  <div><h2 class="rv">What it does.</h2><div class="now mono q"><i></i><span id="now">London now · --:--</span></div></div>
+  <ul>
+    <li class="rv"><a href="#app">Frame</a><span>See the shot at the lens you will use, with frame lines for every ratio.</span></li>
+    <li class="rv"><a href="#sun">Sun</a><span>Drag the time and watch the sun cross the frame, with golden hour marked.</span></li>
+    <li class="rv"><a href="#light">Light</a><span>Know if it will be backlit or front lit, from where you stand, any hour.</span></li>
+    <li class="rv"><a href="#portrait">Portrait</a><span>Turn the phone for vertical work and the frame turns with it.</span></li>
+    <li class="rv"><a href="#list">Send</a><span>Edit, note and order your shots, then send the cards to the whole crew.</span></li>
+  </ul>
+</section>
+
+<!-- the app: open it, start a project, step through the lenses, take the shot -->
+<section class="feat" id="app">
+  <div class="txt rv"><span class="mono q">The app</span><h2>Open it. Frame it. Shoot it.</h2><p>Start a project and you are straight in the camera. Step through your lenses and take the still. Frame lines for 2.39, 1.85, 16:9 and 4:3 sit ready over the picture.</p></div>
+  <div class="stage rv" style="--d:.1s">
+    <div class="dev" id="dev" data-s="launch" role="img" aria-label="Line drawing of the app: it opens, a new project starts, the lens steps from 18 to 50mm and a shot is taken.">
+      <div class="scr s-launch"><span class="wm">Out &amp; Sc<i class="sd"></i>out</span></div>
+      <div class="scr s-start">
+        <span class="wm">Out &amp; Sc<i class="sd"></i>out</span>
+        <div class="btns"><div class="b2" data-k="cont"><b>Continue</b><small>First recce · 2 scenes</small></div><div class="b2" data-k="new"><b>New project</b><small>Straight to the camera</small></div></div>
+        <div class="nm" id="nm"><span><small>Project name</small><b><span id="nmt"></span><i class="caret"></i></b></span><span class="b2 go" data-k="go">Start</span></div>
+      </div>
+      <div class="scr s-cam">
+        <div class="cam-tl"><span>Projects</span><span class="q">Second recce / Scene 1</span><span class="q" id="aclock">--:--</span></div>
+        <div class="cam-lc"><span class="q">Scenes</span><span class="on">Scene 1</span><span class="q">+ Scene</span><span class="shots" id="ashots"></span></div>
+        <div class="win" id="win"><svg viewBox="0 0 600 251" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g class="zoom" id="azoom" style="transform-origin: 300px 172px"><path class="f" d="M0 150 L90 108 L140 126 L210 72 L262 100 L318 50 L380 104 L440 82 L520 120 L600 96"/><path class="f" d="M196 82 L210 72 L224 84 M304 60 L318 50 L332 64 M428 90 L440 82 L452 90"/><path class="w" d="M0 192 C120 182 240 184 320 188 S500 196 600 186"/><path class="f" d="M0 232 C160 218 330 222 600 230"/><g class="w"><circle cx="280" cy="164" r="3.4"/><path d="M280 167.5 V178.0 M280 178.0 L276 188 M280 178.0 L284 188 M275 171 H285"/></g><g class="w"><circle cx="300" cy="165" r="3.4"/><path d="M300 168.5 V178.5 M300 178.5 L296 188 M300 178.5 L304 188 M295 172 H305"/></g><g class="w"><circle cx="318" cy="166" r="3.4"/><path d="M318 169.5 V179.0 M318 179.0 L314 188 M318 179.0 L322 188 M313 173 H323"/></g><circle cx="470" cy="62" r="8" class="sunf"/></g></svg><span class="flash" id="aflash"></span></div>
+        <div class="cam-rat"><span class="on">2.39</span><span>1.85</span><span>16:9</span><span>4:3</span></div>
+        <div class="cam-day"><i></i></div>
+        <div class="cam-rc"><b id="amm">18</b><span class="mono q">mm</span><div class="lenses"><span data-m="18" class="on">18</span><span data-m="24">24</span><span data-m="35">35</span><span data-m="50">50</span></div></div>
+        <span class="shut" data-k="shut"></span>
+        <span class="toast" id="atoast">6A saved · 50mm</span>
+      </div>
+      <span class="tap" id="atap"></span>
+    </div>
+    <div class="hint mono q"><span class="steps" id="asteps"><span>Open</span><span>New project</span><span>Lens</span><span>Shoot</span></span><span>Super 35 · full frame</span></div>
+  </div>
+</section>
+
+<section class="photo glacier rv" id="field">
+  <img srcset="img/hero-glacier-s.jpg 1024w, img/hero-glacier.jpg 2048w" sizes="100vw" src="img/hero-glacier.jpg" alt="Four people walking in single file across a sunlit glacier, their shadows long on the snow." loading="lazy">
+  <div class="say"><h2>Every recce,<br>a different light.</h2><span class="mono" style="color:rgba(239,237,230,.75)">From the field</span></div>
+</section>
+
+<!-- the sun tracker: drag the time along the scale, the sun crosses the frame -->
+<section class="feat" id="sun">
+  <div class="txt rv"><span class="mono q">Sun</span><h2>Move the sun through the day.</h2><p>Drag the time along the scale and watch the sun cross the frame. Its path is drawn over the picture, golden hour is marked, and the shadows follow.</p></div>
+  <div class="stage trk rv" style="--d:.1s">
+    <svg viewBox="0 0 640 372" id="trk" role="img" aria-label="The camera's frame with today's sun path drawn over it, and a time scale below. Drag the scale to move the sun.">
+      <defs><clipPath id="tclip"><rect x="40" y="16" width="560" height="234"/></clipPath></defs>
+      <g clip-path="url(#tclip)"><g transform="translate(40 16) scale(.9333)"><path class="f" d="M0 150 L90 108 L140 126 L210 72 L262 100 L318 50 L380 104 L440 82 L520 120 L600 96"/><path class="f" d="M196 82 L210 72 L224 84 M304 60 L318 50 L332 64 M428 90 L440 82 L452 90"/><path class="w" d="M0 192 C120 182 240 184 320 188 S500 196 600 186"/><path class="f" d="M0 232 C160 218 330 222 600 230"/><g class="w"><circle cx="280" cy="164" r="3.4"/><path d="M280 167.5 V178.0 M280 178.0 L276 188 M280 178.0 L284 188 M275 171 H285"/></g><g class="w"><circle cx="300" cy="165" r="3.4"/><path d="M300 168.5 V178.5 M300 178.5 L296 188 M300 178.5 L304 188 M295 172 H305"/></g><g class="w"><circle cx="318" cy="166" r="3.4"/><path d="M318 169.5 V179.0 M318 179.0 L314 188 M318 179.0 L322 188 M313 173 H323"/></g><g id="tsh" class="w" style="stroke: rgba(239,237,230,.45); stroke-width: 2.4"></g></g></g>
+      <path id="tarcf" class="f" style="stroke-dasharray: 2 5" d=""/>
+      <path id="tarc" class="w" clip-path="url(#tclip)" style="stroke-dasharray: 3 4; stroke: var(--paper)" d=""/>
+      <g id="thr" class="t"></g>
+      <circle id="tsun" r="9" class="sunf"/>
+      <rect x="40" y="16" width="560" height="234" class="w" style="stroke: var(--paper); stroke-width: 1.4"/>
+      <text x="56" y="44" class="tb" id="ttime">--:--</text>
+      <text x="56" y="62" class="t" id="tup"></text>
+      <g class="scale" id="tscale">
+        <rect x="40" y="276" width="560" height="70" fill="transparent"/>
+        <line x1="60" x2="580" y1="306" y2="306" class="w"/>
+        <g id="tticks"></g>
+        <g id="tgold"></g>
+        <circle id="tfinger" r="16" class="finger"/>
+        <circle id="tthumb" r="8" class="thumb"/>
+      </g>
+    </svg>
+    <div class="hint mono q"><span id="trise">Sunrise</span><span>Drag the scale</span><span id="tset">Sunset</span></div>
+  </div>
+</section>
+
+
+<!-- light: the sun crossing the plan through today -->
+<section class="feat" id="light">
+  <div class="txt rv"><span class="mono q">Light</span><h2>Read the light before it arrives.</h2><p>Out &amp; Scout knows which way the camera faced. Through the day it tells you when the shot is backlit, side lit or front lit, and the best time to be there.</p></div>
+  <div class="stage rv" style="--d:.1s">
+    <div style="position:relative">
+      <div class="lhead"><span class="lname" id="lname">Backlit</span><span class="lt" id="ltime">--:--</span><span class="mono q" id="lside"></span></div>
+      <svg viewBox="0 0 640 360" role="img" aria-label="Top-down plan: the camera facing west and today's London sun moving round it.">
+        <g transform="translate(400 190)">
+          <circle r="150" class="f"/><circle r="104" class="f" style="stroke-dasharray: 2 5"/>
+          <g id="ticks"></g>
+          <path d="M0 0 L-58 -140 A152 152 0 0 1 58 -140 Z" fill="rgba(239,237,230,.06)" class="w"/>
+          <text y="-158" class="t" text-anchor="middle">Lens</text>
+          <rect x="-9" y="-6" width="18" height="12" rx="2" fill="var(--paper)"/>
+          <path id="ray" class="f" style="stroke: var(--sun); stroke-dasharray: 2 4; opacity: .7" d=""/>
+          <path id="shadow" class="w" style="stroke-width: 3; stroke: rgba(239,237,230,.35)" d=""/>
+          <circle id="lsun" r="9" class="sunf"/>
+        </g>
+      </svg>
+    </div>
+    <div class="lstrip" id="lstrip" aria-label="Today, sunrise to sunset. Drag to move through the day."></div>
+    <div class="hint mono q"><span id="lrise">Sunrise</span><span>Drag the day</span><span id="lset">Sunset</span></div>
+  </div>
+</section>
+
+
+
+<!-- portrait: the phone turns, the viewfinder follows -->
+<section class="feat" id="portrait">
+  <div class="txt rv"><span class="mono q">Portrait</span><h2>Turn the phone. The frame turns with it.</h2><p>Hold it upright for vertical work. The viewfinder, the frame lines and the shutter all follow the phone.</p></div>
+  <div class="stage rv" style="--d:.1s">
+    <div class="pstage" role="img" aria-label="A phone drawn in line turns from landscape to portrait, and the viewfinder turns with it.">
+      <div class="pdev" id="pdev">
+        <div class="ui land">
+          <div class="side" style="left:4cqw"><i></i><i></i><i></i><i style="width:60%"></i></div>
+          <div class="pw"><svg viewBox="0 0 600 251" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path class="f" d="M0 150 L90 108 L140 126 L210 72 L262 100 L318 50 L380 104 L440 82 L520 120 L600 96"/><path class="f" d="M196 82 L210 72 L224 84 M304 60 L318 50 L332 64 M428 90 L440 82 L452 90"/><path class="w" d="M0 192 C120 182 240 184 320 188 S500 196 600 186"/><path class="f" d="M0 232 C160 218 330 222 600 230"/><g class="w"><circle cx="280" cy="164" r="3.4"/><path d="M280 167.5 V178.0 M280 178.0 L276 188 M280 178.0 L284 188 M275 171 H285"/></g><g class="w"><circle cx="300" cy="165" r="3.4"/><path d="M300 168.5 V178.5 M300 178.5 L296 188 M300 178.5 L304 188 M295 172 H305"/></g><g class="w"><circle cx="318" cy="166" r="3.4"/><path d="M318 169.5 V179.0 M318 179.0 L314 188 M318 179.0 L322 188 M313 173 H323"/></g><circle cx="470" cy="62" r="8" class="sunf"/></svg></div>
+          <div class="side" style="right:4cqw;justify-items:end"><i style="width:100%"></i><i style="width:70%"></i></div>
+          <span class="shut2"></span>
+        </div>
+        <div class="ui port-ui">
+          <div class="tl2"><span>Projects</span><span class="q">Scene 1</span></div>
+          <div class="pw"><svg viewBox="0 0 225 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path class="f" d="M0 200 L60 150 L112 60 L150 120 L190 96 L225 130"/><path class="f" d="M100 80 L112 60 L124 82"/><path class="w" d="M0 300 C70 290 150 292 225 298"/><path class="f" d="M0 352 C80 344 160 346 225 350"/><g class="w"><circle cx="112" cy="262" r="5"/><path d="M112 267 V284 M112 284 L106 298 M112 284 L118 298 M104 272 H120"/></g><circle cx="168" cy="52" r="9" class="sunf"/></svg></div>
+          <div class="rat2"><span class="on">9:16</span><span>4:5</span></div>
+          <span class="shut2"></span>
+        </div>
+      </div>
+    </div>
+    <div class="hint mono q"><span id="pcap">Landscape</span><span>Turn to portrait</span></div>
+  </div>
+</section>
+
+<!-- send: edit a shot, export the cards -->
+<section class="feat" id="list">
+  <div class="txt rv"><span class="mono q">Send</span><h2>Edit the shots. Send the list.</h2><p>Change a lens, add a note, drag the shots into shooting order. Then export detailed cards, a one-page summary or just the frames, as a PDF for the director and the gaffer.</p></div>
+  <div class="stage rv" style="--d:.1s">
+    <div class="sl" id="sl">
+      <div class="panel" id="panel">
+        <div class="hd"><span class="mono">First recce</span><span class="mono q" id="sq">4 shots</span></div>
+        <div class="rows" id="rows">
+          <div class="row" data-r="0"><span class="id">6A</span><span>EXT. Wide, automobile<small>18mm · <em>Backlit</em></small></span></div>
+          <div class="row" data-r="1"><span class="id">8A</span><span>Medium wide, by the plant<small><em data-lens>32mm</em> · ¾ back</small><span class="note" id="note"></span><div class="edit" id="edit"><div><span>24</span><span data-l="32">32</span><span data-l="35">35</span><span>50</span></div></div></span></div>
+          <div class="row" data-r="2"><span class="id">12B</span><span>Close, hands on the map<small>50mm · Side lit</small></span></div>
+          <div class="row" data-r="3"><span class="id">14A</span><span>Wide, the ridge at first light<small>24mm · Backlit</small></span></div>
+        </div>
+        <div class="exp"><span class="tiers" id="tiers"><span class="on">Detailed</span><span>Summary</span><span>Photos</span></span><span class="btn" id="btn">Export</span></div>
+        <span class="tap" id="tap"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- the pdf: the exported shot list, page by page, in line -->
+<section class="feat" id="pdf">
+  <div class="txt rv"><span class="mono q">The PDF</span><h2>The shot list, page by page.</h2><p>Detailed cards with the frame, the light and the best time to be there. A one-page summary for the call sheet. Or just the frames. Ready to send before you are back at the car.</p></div>
+  <div class="stage rv" style="--d:.1s">
+    <div class="film" id="film" role="img" aria-label="Line drawings of the exported PDF sliding past: a cover, detailed shot cards, a summary page and a page of frames."></div>
+    <div class="hint fhint mono q"><span class="tiers2" id="ftier"><span>Detailed</span><span>Summary</span><span>Photos</span></span><span id="fpage">Shot list.pdf</span></div>
+  </div>
+</section>
+
+<section class="join rv" id="join">
+  <span class="mono q">Testing now on real recces</span>
+  <h2>Come out with us.</h2>
+  <div class="who mono"><span>DPs</span><span>Directors</span><span>Location scouts</span><span>Photographers</span></div>
+  <a class="jbtn" href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20test%20invite">Ask for a test invite</a>
+  <div class="road mono q"><span>Now · testing</span><span>Next · invites</span><span>Then · App Store</span></div>
+</section>
+
+<footer class="mono q fl"><span>Out &amp; Scout (2026)</span><span><a href="support/">Support</a> · <a href="privacy/">Privacy</a></span></footer>
+
+<script>
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 });
+  document.querySelectorAll('.rv').forEach(function (el) { io.observe(el); });
+  // run a loop only while its stage is on screen
+  function whenSeen(el, start, stop) { new IntersectionObserver(function (es) { es.forEach(function (e) { e.isIntersecting ? start() : stop(); }); }, { threshold: .25 }).observe(el); }
+
+  // the sun, London
+  var rad = Math.PI / 180;
+  function pos(date) {
+    var d = date.valueOf() / 864e5 - 0.5 + 2440588 - 2451545, M = rad * (357.5291 + 0.98560028 * d);
+    var L = M + rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M)) + rad * 102.9372 + Math.PI, e = rad * 23.4397;
+    var dec = Math.asin(Math.sin(e) * Math.sin(L)), ra = Math.atan2(Math.sin(L) * Math.cos(e), Math.cos(L));
+    var H = rad * (280.16 + 360.9856235 * d) - rad * 0.1278 - ra, phi = rad * 51.5074;
+    var alt = Math.asin(Math.sin(phi) * Math.sin(dec) + Math.cos(phi) * Math.cos(dec) * Math.cos(H));
+    var az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(dec) * Math.cos(phi));
+    return { az: (az / rad + 180 + 360) % 360, alt: alt / rad };
+  }
+  var fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London' });
+  function now() { var n = new Date(), a = pos(n).alt, name = a < -6 ? 'night' : a < 0 ? 'blue hour' : a < 6 ? 'golden hour' : 'sun ' + Math.round(a) + '° up'; document.getElementById('now').textContent = 'London now · ' + fmt.format(n) + ' · ' + name; }
+  now(); setInterval(now, 30000);
+
+  // a scripted clip: steps at set times, looping while its stage is on screen
+  function clip(el, build, loopMs) {
+    var T = [], on = false;
+    function at(ms, fn) { T.push(setTimeout(fn, ms)); }
+    function stop() { T.forEach(clearTimeout); T = []; }
+    function run() { stop(); build.reset(); build.steps(at); at(loopMs, function () { if (on) run(); }); }
+    whenSeen(el, function () { if (reduce) { build.still(); return; } if (!on) { on = true; run(); } }, function () { on = false; stop(); build.reset(); });
+  }
+  function pointAt(tap, box, el, fx, fy) { var a = el.getBoundingClientRect(), b = box.getBoundingClientRect(); tap.style.left = (a.left - b.left + a.width * (fx == null ? .5 : fx)) + 'px'; tap.style.top = (a.top - b.top + a.height * (fy == null ? .5 : fy)) + 'px'; }
+  function pressTap(tap) { tap.classList.add('down'); setTimeout(function () { tap.classList.remove('down'); }, 180); }
+
+  /* ---- The app: open, new project, lenses, shoot ---- */
+  (function () {
+    var dev = document.getElementById('dev'), tap = document.getElementById('atap'), nm = document.getElementById('nm'), nmt = document.getElementById('nmt');
+    var zoom = document.getElementById('azoom'), mm = document.getElementById('amm'), lenses = dev.querySelectorAll('.lenses span'), shots = document.getElementById('ashots');
+    var flash = document.getElementById('aflash'), toast = document.getElementById('atoast'), steps = document.querySelectorAll('#asteps span'), shut = dev.querySelector('.shut');
+    var k = function (n) { return dev.querySelector('[data-k="' + n + '"]'); };
+    document.getElementById('aclock').textContent = fmt.format(new Date());
+    function step(i) { steps.forEach(function (s, j) { s.classList.toggle('on', j === i); }); }
+    function lens(m) { mm.textContent = m; lenses.forEach(function (s) { s.classList.toggle('on', +s.dataset.m === m); }); zoom.style.transform = 'scale(' + Math.pow(m / 18, .7).toFixed(3) + ')'; }
+    function go(at) {
+      step(0);
+      at(1900, function () { dev.dataset.s = 'start'; });
+      at(2700, function () { step(1); tap.classList.add('show'); pointAt(tap, dev, k('new')); });
+      at(3400, function () { pressTap(tap); k('new').classList.add('on'); });
+      at(3800, function () { k('new').classList.remove('on'); nm.classList.add('on'); });
+      'Second recce'.split('').forEach(function (ch, i) { at(4000 + i * 70, function () { nmt.textContent += ch; }); });
+      at(5100, function () { pointAt(tap, dev, k('go')); });
+      at(5700, function () { pressTap(tap); k('go').classList.add('on'); });
+      at(6000, function () { dev.dataset.s = 'cam'; tap.classList.remove('show'); });
+      [[24, 7000], [35, 8300], [50, 9600]].forEach(function (s, i) {
+        at(s[1] - 600, function () { if (!i) step(2); tap.classList.add('show'); pointAt(tap, dev, dev.querySelector('.lenses [data-m="' + s[0] + '"]')); });
+        at(s[1], function () { pressTap(tap); lens(s[0]); });
+      });
+      at(10600, function () { step(3); pointAt(tap, dev, shut); });
+      at(11300, function () { pressTap(tap); shut.classList.add('on'); flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on'); });
+      at(11500, function () { shut.classList.remove('on'); shots.innerHTML = '<i class="mono">6A</i>'; toast.classList.add('on'); tap.classList.remove('show'); });
+      at(13600, function () { toast.classList.remove('on'); });
+    }
+    function reset() {
+      dev.dataset.s = 'launch'; tap.classList.remove('show'); nm.classList.remove('on'); nmt.textContent = ''; shots.innerHTML = '';
+      toast.classList.remove('on'); dev.querySelectorAll('.b2').forEach(function (b) { b.classList.remove('on'); }); lens(18); step(-1);
+    }
+    clip(dev, { reset: reset, steps: go, still: function () { dev.dataset.s = 'cam'; lens(24); } }, 15000);
+  })();
+
+  /* ---- Sun tracker: drag the time, the sun crosses the frame ---- */
+  (function () {
+    var HEAD = 232, MM = 24, HF = 2 * Math.atan(24.88 / (2 * MM)) / rad, F = 280 / Math.tan(HF / 2 * rad), CX = 320, HY = 168;
+    function wrap(r) { return ((r % 360) + 540) % 360 - 180; }
+    var t0 = new Date(); t0.setHours(0, 0, 0, 0); var day = [], rise = null, set = null, prev = -1;
+    for (var m = 0; m <= 1440; m += 5) { var p = pos(new Date(t0.valueOf() + m * 6e4)); day[m] = p; if (prev < 0 && p.alt >= 0 && rise === null) rise = m; if (prev >= 0 && p.alt < 0 && rise !== null && set === null) set = m; prev = p.alt; }
+    if (rise === null) { rise = 420; set = 1140; }
+    function at(m) { return day[Math.max(rise, Math.min(set, Math.round(m / 5) * 5))]; }
+    function sxy(p) { var r = wrap(p.az - HEAD); return [CX + Math.tan(Math.max(-80, Math.min(80, r)) * rad) * F, HY - Math.tan(Math.max(-5, p.alt) * rad) * F * .55, r]; }
+    function X(m) { return 60 + (m - rise) / (set - rise) * 520; }
+    function hm(m) { m = Math.round(m); return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); }
+    // the path, hours along it, and the scale
+    var d = '', hr = '', tk = '', gd = '';
+    for (m = rise; m <= set; m += 5) { var q = sxy(day[m]); if (Math.abs(q[2]) < 75) d += (d ? ' L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); }
+    document.getElementById('tarc').setAttribute('d', d); document.getElementById('tarcf').setAttribute('d', d);
+    for (m = Math.ceil(rise / 60) * 60; m < set; m += 60) {
+      var q2 = sxy(day[m]); if (q2[0] > 50 && q2[0] < 590 && q2[1] > 24 && q2[1] < 245) hr += '<text x="' + q2[0].toFixed(1) + '" y="' + (q2[1] - 12).toFixed(1) + '" text-anchor="middle">' + ('0' + m / 60).slice(-2) + '</text>';
+      tk += '<line x1="' + X(m).toFixed(1) + '" x2="' + X(m).toFixed(1) + '" y1="300" y2="312" class="f"/>' + ((m / 60) % 3 ? '' : '<text class="t" x="' + X(m).toFixed(1) + '" y="332" text-anchor="middle">' + ('0' + m / 60).slice(-2) + '</text>');
+    }
+    var g1 = rise, g2 = set; for (m = rise; m < set; m += 5) if (day[m].alt >= 6) { g1 = m; break; } for (m = set; m > rise; m -= 5) if (day[m].alt >= 6) { g2 = m; break; }
+    gd = '<rect x="60" y="292" width="' + (X(g1) - 60).toFixed(1) + '" height="2" class="sunf"/><rect x="' + X(g2).toFixed(1) + '" y="292" width="' + (580 - X(g2)).toFixed(1) + '" height="2" class="sunf"/>';
+    document.getElementById('thr').innerHTML = hr; document.getElementById('tticks').innerHTML = tk; document.getElementById('tgold').innerHTML = gd;
+    document.getElementById('trise').textContent = 'Sunrise ' + hm(rise); document.getElementById('tset').textContent = 'Sunset ' + hm(set);
+    var sun = document.getElementById('tsun'), th = document.getElementById('tthumb'), fg = document.getElementById('tfinger'), tt = document.getElementById('ttime'), tu = document.getElementById('tup'), sh = document.getElementById('tsh');
+    var FEET = [280, 300, 318];
+    function show(M) {
+      var p = at(M), q = sxy(p), r = q[2];
+      sun.setAttribute('cx', Math.max(14, Math.min(626, q[0])).toFixed(1)); sun.setAttribute('cy', Math.max(10, q[1]).toFixed(1));
+      th.setAttribute('cx', X(M).toFixed(1)); th.setAttribute('cy', 306); fg.setAttribute('cx', X(M).toFixed(1)); fg.setAttribute('cy', 306);
+      tt.textContent = hm(M); tu.textContent = p.alt > 0 ? Math.round(p.alt) + '° up · ' + (Math.abs(r) < 30 ? 'backlit' : Math.abs(r) < 75 ? '¾ back' : Math.abs(r) < 105 ? 'side lit' : 'front lit') : 'Below the horizon';
+      var L = p.alt > 1 ? Math.min(150, 16 / Math.tan(p.alt * rad)) : 0, dx = -Math.sin(r * rad) * L, dy = Math.cos(r * rad) * L * .32;
+      sh.innerHTML = L ? FEET.map(function (x) { return '<path d="M' + x + ' 188 l' + dx.toFixed(1) + ' ' + dy.toFixed(1) + '"/>'; }).join('') : '';
+    }
+    // left alone, a finger drags the time back and forth
+    var M = rise + 180, held = 0, raf = 0, last = 0, on = false, dir = 1, pause = 0;
+    function loop(ts) {
+      var dt = Math.min(.05, (ts - (last || ts)) / 1000); last = ts;
+      if (ts > held) { fg.style.opacity = 1; if (ts > pause) { M += dir * dt * (set - rise) / 9; if (M > set - 10) { M = set - 10; dir = -1; pause = ts + 1400; } if (M < rise + 90) { M = rise + 90; dir = 1; pause = ts + 1400; } } show(M); } else fg.style.opacity = 0;
+      raf = on ? requestAnimationFrame(loop) : 0;
+    }
+    var svg = document.getElementById('trk'), scale = document.getElementById('tscale'), down = false;
+    function scrub(e) { var b = svg.getBoundingClientRect(), x = (e.clientX - b.left) / b.width * 640; M = rise + Math.max(0, Math.min(1, (x - 60) / 520)) * (set - rise); held = performance.now() + 4000; fg.style.opacity = 0; show(M); }
+    scale.addEventListener('pointerdown', function (e) { down = true; try { scale.setPointerCapture(e.pointerId); } catch (x) {} scrub(e); });
+    scale.addEventListener('pointermove', function (e) { if (down) scrub(e); });
+    ['pointerup', 'pointercancel'].forEach(function (t) { scale.addEventListener(t, function () { down = false; }); });
+    show(M);
+    whenSeen(svg, function () { if (reduce) return; on = true; last = 0; if (!raf) raf = requestAnimationFrame(loop); }, function () { on = false; });
+  })();
+
+  /* ---- Portrait: the phone turns, the interface follows ---- */
+  (function () {
+    var pd = document.getElementById('pdev'), cap = document.getElementById('pcap');
+    function snap(fn) { pd.classList.add('notr'); fn(); void pd.offsetWidth; pd.classList.remove('notr'); }
+    function go(at) {
+      at(2200, function () { pd.style.transform = 'rotate(-90deg)'; cap.textContent = 'Turning'; });
+      at(3250, function () { snap(function () { pd.style.transform = ''; pd.classList.add('port'); }); cap.textContent = 'Portrait'; });
+      at(6600, function () { pd.style.transform = 'rotate(90deg)'; cap.textContent = 'Turning'; });
+      at(7650, function () { snap(function () { pd.style.transform = ''; pd.classList.remove('port'); }); cap.textContent = 'Landscape'; });
+    }
+    function reset() { snap(function () { pd.style.transform = ''; pd.classList.remove('port'); }); cap.textContent = 'Landscape'; }
+    clip(pd.parentNode, { reset: reset, steps: go, still: function () { pd.classList.add('port'); } }, 9800);
+  })();
+
+  /* ---- Light ---- */
+  (function () {
+    var HEAD = 270, K = [[30, 'Backlit'], [75, 'Three-quarter back'], [105, 'Side lit'], [150, 'Three-quarter front'], [181, 'Front lit']];
+    var SH = [.92, .6, .38, .2, .08];
+    function cls(r) { var a = Math.abs(r); for (var i = 0; i < K.length; i++) if (a <= K[i][0]) return i; return 4; }
+    function wrap(r) { return ((r % 360) + 540) % 360 - 180; }
+    var t0 = new Date(); t0.setHours(0, 0, 0, 0); var day = [], rise = null, set = null, prev = -1;
+    for (var m = 0; m <= 1440; m += 4) { var p = pos(new Date(t0.valueOf() + m * 6e4)); day[m] = p; if (prev < 0 && p.alt >= 0 && rise === null) rise = m; if (prev >= 0 && p.alt < 0 && rise !== null && set === null) set = m; prev = p.alt; }
+    if (rise === null) { rise = 420; set = 1140; }
+    function at(m) { return day[Math.max(rise, Math.min(set, Math.round(m / 4) * 4))]; }
+    var gold = set; for (m = set; m > rise; m -= 4) if (day[m].alt >= 6) { gold = m; break; }
+    var strip = document.getElementById('lstrip'), s = '', cur = null, segs = [];
+    for (m = rise; m <= set; m += 4) { var k = cls(wrap(day[m].az - HEAD)); if (!cur || cur.k !== k) { cur = { k: k, a: m, b: m }; segs.push(cur); } cur.b = m; }
+    function X(m) { return ((m - rise) / (set - rise) * 100).toFixed(2) + '%'; }
+    segs.forEach(function (g) { s += '<i style="left:' + X(g.a) + ';width:calc(' + X(g.b + 4) + ' - ' + X(g.a) + ' - 2px);opacity:' + SH[g.k] + '"></i>'; });
+    s += '<u style="left:' + X(gold) + ';right:0"></u><b id="lph"></b>'; strip.innerHTML = s;
+    var hm = function (m) { m = Math.round(m); return ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2); };
+    document.getElementById('lrise').textContent = 'Sunrise ' + hm(rise); document.getElementById('lset').textContent = 'Sunset ' + hm(set);
+    var ticks = ''; for (var a = 0; a < 360; a += 15) { var c = Math.sin(a * rad), d = -Math.cos(a * rad), l = a % 90 ? 6 : 12; ticks += '<path class="f" d="M' + (c * 150).toFixed(1) + ' ' + (d * 150).toFixed(1) + ' L' + (c * (150 - l)).toFixed(1) + ' ' + (d * (150 - l)).toFixed(1) + '"/>'; }
+    document.getElementById('ticks').innerHTML = ticks;
+    var sun = document.getElementById('lsun'), ray = document.getElementById('ray'), sh = document.getElementById('shadow'), nm = document.getElementById('lname'), tm = document.getElementById('ltime'), sd = document.getElementById('lside'), ph = document.getElementById('lph');
+    var shown = -1;
+    function show(M) {
+      var p = at(M), r = wrap(p.az - HEAD), k = cls(r), x = Math.sin(r * rad), y = -Math.cos(r * rad), R = 104 + 46 * (1 - Math.min(1, Math.max(0, p.alt) / 45));
+      sun.setAttribute('cx', (x * R).toFixed(1)); sun.setAttribute('cy', (y * R).toFixed(1));
+      ray.setAttribute('d', 'M' + (x * R).toFixed(1) + ' ' + (y * R).toFixed(1) + ' L0 0');
+      var L = Math.min(90, 14 / Math.tan(Math.max(4, p.alt) * rad)); sh.setAttribute('d', 'M0 0 L' + (-x * L).toFixed(1) + ' ' + (-y * L).toFixed(1));
+      if (k !== shown) { shown = k; nm.textContent = K[k][1]; }
+      tm.textContent = hm(M) + '  ·  ' + Math.round(Math.max(0, p.alt)) + '° up';
+      sd.textContent = 'Sun ' + Math.round(Math.abs(r)) + '° off the lens' + (Math.abs(r) < 6 ? '' : r > 0 ? ', camera right' : ', camera left');
+      ph.style.left = X(M);
+    }
+    var M = rise + 30, held = 0, raf = 0, last = 0, on = false;
+    function loop(ts) { var dt = Math.min(.05, (ts - (last || ts)) / 1000); last = ts; if (ts > held) { M += dt * (set - rise) / 22; if (M > set - 2) M = rise + 4; show(M); } raf = on ? requestAnimationFrame(loop) : 0; }
+    function scrub(e) { var b = strip.getBoundingClientRect(); M = rise + Math.max(0, Math.min(1, (e.clientX - b.left) / b.width)) * (set - rise); held = performance.now() + 4000; show(M); }
+    var down = false;
+    strip.addEventListener('pointerdown', function (e) { down = true; try { strip.setPointerCapture(e.pointerId); } catch (x) {} scrub(e); });
+    strip.addEventListener('pointermove', function (e) { if (down) scrub(e); });
+    ['pointerup', 'pointercancel'].forEach(function (t) { strip.addEventListener(t, function () { down = false; }); });
+    show(M);
+    whenSeen(document.getElementById('light'), function () { if (reduce) return; on = true; last = 0; if (!raf) raf = requestAnimationFrame(loop); }, function () { on = false; });
+  })();
+
+  /* ---- Send: edit a shot, add a note, reorder, then export ---- */
+  (function () {
+    var sl = document.getElementById('sl'), panel = document.getElementById('panel'), tap = document.getElementById('tap'), list = document.getElementById('rows');
+    var rows = [].slice.call(list.querySelectorAll('.row')), ORDER = rows.slice();
+    var edit = document.getElementById('edit'), note = document.getElementById('note'), lensEl = panel.querySelector('[data-lens]'), tiers = document.getElementById('tiers'), btn = document.getElementById('btn'), sq = document.getElementById('sq');
+    function point(el, fx) { pointAt(tap, panel, el, fx == null ? .6 : fx); }
+    function press() { pressTap(tap); }
+    function lens(v) { edit.querySelectorAll('span').forEach(function (s) { s.classList.toggle('on', s.dataset.l === v); }); }
+    function reset() {
+      ORDER.forEach(function (r) { r.style.transition = 'none'; r.style.transform = ''; r.classList.remove('on', 'lift'); list.appendChild(r); void r.offsetWidth; r.style.transition = ''; });
+      edit.classList.remove('is-open'); lensEl.textContent = '32mm'; lensEl.classList.remove('ch'); lens('32'); note.textContent = '';
+      tiers.classList.remove('is-open'); btn.classList.remove('on'); sq.textContent = '4 shots'; tap.classList.remove('show');
+    }
+    function steps(at) {
+      var r8 = ORDER[1], r12 = ORDER[2], r14 = ORDER[3];
+      at(600, function () { tap.classList.add('show'); point(r8); });
+      at(1400, function () { press(); r8.classList.add('on'); edit.classList.add('is-open'); });
+      at(2300, function () { point(edit.querySelector('[data-l="35"]'), .5); });
+      at(3000, function () { press(); lens('35'); lensEl.textContent = '35mm'; lensEl.classList.add('ch'); });
+      at(3700, function () { point(note, .2); });
+      at(4200, function () { press(); });
+      'Wait for golden hour'.split('').forEach(function (ch, i) { at(4400 + i * 55, function () { note.textContent += ch; }); });
+      at(5800, function () { edit.classList.remove('is-open'); r8.classList.remove('on'); });
+      // hold 14A and drag it up above 8A
+      at(6500, function () { point(r14, .15); });
+      at(7200, function () { press(); r14.classList.add('lift'); });
+      at(7500, function () {
+        var up = r8.offsetHeight + r12.offsetHeight, dn = r14.offsetHeight;
+        r14.style.transform = 'translateY(' + -up + 'px)'; r8.style.transform = r12.style.transform = 'translateY(' + dn + 'px)'; point(r8, .15);
+      });
+      at(8400, function () { [r8, r12, r14].forEach(function (r) { r.style.transition = 'none'; r.style.transform = ''; }); list.insertBefore(r14, r8); void r14.offsetWidth; [r8, r12, r14].forEach(function (r) { r.style.transition = ''; }); r14.classList.remove('lift'); });
+      at(9000, function () { point(btn, .5); });
+      at(9700, function () { press(); btn.classList.add('on'); tiers.classList.add('is-open'); });
+      at(10500, function () { btn.classList.remove('on'); tap.classList.remove('show'); sq.textContent = 'Shot list.pdf · sent'; });
+    }
+    clip(sl, { reset: reset, steps: steps, still: function () {} }, 13500);
+  })();
+  /* ---- The PDF: the exported shot list slides past, page by page, in line ---- */
+  (function () {
+    var film = document.getElementById('film'), tierEl = document.querySelectorAll('#ftier span'), pageEl = document.getElementById('fpage');
+    var date = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date());
+    var SHOTS = [
+      ['6A', 'EXT. Wide, automobile', '18mm', '2.39', 'Backlit', '06:40', 'W', -30],
+      ['14A', 'Wide, the ridge at first light', '24mm', '2.39', 'Backlit', '06:10', 'E', 10],
+      ['8A', 'Medium wide, by the plant', '35mm', '1.85', '¾ back', '18:05', 'SW', 50, 'Wait for golden hour'],
+      ['12B', 'Close, hands on the map', '50mm', '2.39', 'Side lit', '10:30', 'S', 95]
+    ];
+    var n;
+    function L(d, cls) { return '<path class="' + (cls || 'w') + ' d" pathLength="1" style="--i:' + (n++) + '" d="' + d + '"/>'; }
+    function T(x, y, txt, cls, a) { return '<text class="' + (cls || 'pt') + ' x" style="--i:' + (n++) + '" x="' + x + '" y="' + y + '"' + (a ? ' text-anchor="' + a + '"' : '') + '>' + txt + '</text>'; }
+    function R(x, y, w, h, cls) { return L('M' + x + ' ' + y + ' h' + w + ' v' + h + ' h' + -w + ' Z', cls); }
+    function scene(x, y, w, h) { // a small ridge with the sun, drawn inside a frame
+      var p = function (fx, fy) { return (x + fx * w).toFixed(1) + ' ' + (y + fy * h).toFixed(1); };
+      return L('M' + p(0, .62) + ' L' + p(.18, .4) + ' L' + p(.3, .5) + ' L' + p(.48, .2) + ' L' + p(.62, .44) + ' L' + p(.78, .3) + ' L' + p(1, .52), 'f') +
+        L('M' + p(0, .8) + ' C' + p(.3, .74) + ' ' + p(.6, .78) + ' ' + p(1, .76)) +
+        '<circle class="sunf s" cx="' + (x + w * .82).toFixed(1) + '" cy="' + (y + h * .2).toFixed(1) + '" r="' + Math.max(1.6, h * .07).toFixed(1) + '"/>';
+    }
+    function head(title, i, total) { return T(14, 18, 'Out &amp; Scout · First recce', 'pt') + T(196, 18, title, 'pt', 'end') + L('M14 24 H196', 'f') + T(196, 288, ('0' + i).slice(-2) + ' / ' + ('0' + total).slice(-2), 'pt', 'end'); }
+    function card(s, Y) {
+      var c = T(14, Y + 8, s[0], 'pb') + T(38, Y + 8, s[1]) + R(14, Y + 14, 100, 42) + scene(14, Y + 14, 100, 42);
+      var cx = 138, cy = Y + 35, a = s[7] * Math.PI / 180;
+      c += L('M' + (cx + 15) + ' ' + cy + ' A15 15 0 1 1 ' + (cx + 15) + ' ' + (cy - .01), 'f') + L('M' + cx + ' ' + cy + ' L' + (cx - 6) + ' ' + (cy - 14) + ' M' + cx + ' ' + cy + ' L' + (cx + 6) + ' ' + (cy - 14));
+      c += '<circle class="sunf s" cx="' + (cx + Math.sin(a) * 15).toFixed(1) + '" cy="' + (cy - Math.cos(a) * 15).toFixed(1) + '" r="2.4"/>';
+      c += T(160, Y + 22, s[4], 'pb') + T(160, Y + 32, 'Best ' + s[5]) + T(160, Y + 41, 'Facing ' + s[6]) + T(160, Y + 50, s[2] + ' · ' + s[3]);
+      c += L('M14 ' + (Y + 64) + ' H196', 'f') + T(14, Y + 73, 'Lens ' + s[2]) + T(74, Y + 73, 'Ratio ' + s[3]) + T(134, Y + 73, 'Facing ' + s[6]);
+      c += R(14, Y + 80, 182, 4, 'f') + '<rect class="sunf s" x="14" y="' + (Y + 80) + '" width="26" height="4"/><rect class="sunf s" x="168" y="' + (Y + 80) + '" width="28" height="4"/>';
+      c += L('M' + (s[5] < '12' ? 34 : 172) + ' ' + (Y + 77) + ' v10');
+      if (s[8]) c += T(14, Y + 97, 'Note · ' + s[8], 'pb');
+      return c + L('M14 ' + (Y + 106) + ' H196', 'f');
+    }
+    var PAGES = [
+      ['Detailed', function () {
+        return R(.5, .5, 209, 296, 'f') + '<circle class="sunf s" cx="20" cy="30" r="5"/>' + T(14, 120, 'Shot list', 'pt') + T(14, 142, 'First recce', 'ph') +
+          L('M14 156 H120', 'f') + T(14, 168, '4 shots · 2 scenes') + T(14, 178, date) + T(14, 188, 'Detailed cards') + T(14, 288, 'Out &amp; Scout') + T(196, 288, '01 / 05', 'pt', 'end');
+      }],
+      ['Detailed', function () { return R(.5, .5, 209, 296, 'f') + head('Detailed', 2, 5) + card(SHOTS[0], 40) + card(SHOTS[1], 160); }],
+      ['Detailed', function () { return R(.5, .5, 209, 296, 'f') + head('Detailed', 3, 5) + card(SHOTS[2], 40) + card(SHOTS[3], 160); }],
+      ['Summary', function () {
+        var c = R(.5, .5, 209, 296, 'f') + head('Summary', 4, 5) + T(14, 44, 'Shot') + T(34, 44, 'Description') + T(114, 44, 'Lens') + T(136, 44, 'Light') + T(196, 44, 'Best', 'pt', 'end') + L('M14 50 H196');
+        SHOTS.forEach(function (s, i) { var y = 64 + i * 22; c += T(14, y, s[0], 'pb') + T(34, y, s[1].length > 21 ? s[1].slice(0, 20) + '…' : s[1]) + T(114, y, s[2]) + T(136, y, s[4]) + T(196, y, s[5], 'pt', 'end') + L('M14 ' + (y + 8) + ' H196', 'f'); });
+        return c + T(14, 170, 'Sunrise 07:05 · Sunset 18:31') + T(14, 180, 'Golden hour marked on every card');
+      }],
+      ['Photos', function () {
+        var c = R(.5, .5, 209, 296, 'f') + head('Photos', 5, 5);
+        SHOTS.forEach(function (s, i) { var x = 14 + (i % 2) * 94, y = 40 + Math.floor(i / 2) * 64; c += R(x, y, 88, 37) + scene(x, y, 88, 37) + T(x, y + 47, s[0], 'pb') + T(x + 88, y + 47, s[2], 'pt', 'end'); });
+        return c;
+      }]
+    ];
+    var els = PAGES.map(function (pg) { n = 0; var d = document.createElement('div'); d.className = 'pp'; d.innerHTML = '<svg viewBox="0 0 210 297" aria-hidden="true">' + pg[1]() + '</svg>'; film.appendChild(d); return d; });
+    function show(cur) {
+      els.forEach(function (e, i) { var o = i - cur; e.style.setProperty('--o', o); e.style.setProperty('--a', Math.min(1, Math.abs(o))); e.classList.toggle('on', o === 0 || (o < 0 && o > -2)); });
+      var t = PAGES[Math.max(0, Math.min(4, cur))][0]; tierEl.forEach(function (s) { s.classList.toggle('on', cur >= 0 && cur < 5 && s.textContent === t); });
+      pageEl.textContent = cur < 0 || cur > 4 ? 'Shot list.pdf' : 'Shot list.pdf · ' + ('0' + (cur + 1)).slice(-2) + ' / 05';
+    }
+    function reset() { els.forEach(function (e) { e.classList.add('notr'); }); show(-1); void film.offsetWidth; els.forEach(function (e) { e.classList.remove('notr'); }); }
+    function steps(at) { PAGES.forEach(function (p, i) { at(500 + i * 2900, function () { show(i); }); }); at(500 + 5 * 2900, function () { show(5); }); }
+    clip(film, { reset: reset, steps: steps, still: function () { show(1); } }, 500 + 5 * 2900 + 1100);
+  })();
+})();
+</script>
+</body>
+</html>

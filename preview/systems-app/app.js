@@ -388,13 +388,15 @@ function welcome() {
     '<button class="btn solid gbtn" data-signin' + (hasG ? "" : " disabled") + '><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3zM12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22zM6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14zM12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z"/></svg>Sign in with Google</button>' +
     (hasG ? "" : '<p class="q">Google sign-in switches on once the Eltio Google account is set up.</p>') +
     '<button class="btn" data-demo>Try it with sample data</button>' +
+    '<div class="rows forrows"><div class="row static"><span>Crew</span><span class="q">APA and Bectu overtime, timesheets</span></div><div class="row static"><span>DPs and HODs</span><span class="q">Kit, mileage, holds via your agent</span></div><div class="row static"><span>Producers</span><span class="q">Check crew invoices before you pay</span></div><div class="row static"><span>Everyone</span><span class="q">What\'s owed, chasing, tax</span></div></div>' +
     '<p class="q">On your phone, open this page and add it to your home screen. Sign in with the same Google account on your laptop and everything matches.</p><p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p></div>';
 }
 function setup() {
   var s = D.settings;
   return '<div class="top"><span class="q">Set up</span><span class="q">' + (mode === "demo" ? "Sample data" : esc(G.email)) + '</span></div><h2>Tell us about your work.</h2>' +
     field("s-name", "Your name", s.name, "text", "First and last name") + field("s-trading", "Trading name", s.trading, "text", "Your Ltd or trading name (optional)") +
-    '<div class="field"><span class="lab">What do you do?</span>' + pills("role", ["Director", "DP", "Producer", "Editor", "Crew", "Something else"], s.role) + "</div>" +
+    '<div class="field"><span class="lab">What do you do?</span>' + pills("role", ROLES, roleKey()) + "</div>" +
+    '<div class="field"><span class="lab">Mostly on</span>' + pills("work", ["Commercials", "TV and film", "Both"], s.work || "Both") + "</div>" +
     '<div class="grid2">' + field("s-rate", "Day rate (£)", s.rate, "number", "650", ' inputmode="numeric"') + field("s-terms", "Payment terms (days)", s.terms || "30", "number", "30", ' inputmode="numeric"') + "</div>" +
     '<div class="grid2">' + field("s-tax", "Put aside for tax (%)", s.tax || "25", "number", "25", ' inputmode="numeric"') + field("s-mileage", "Mileage (pence a mile)", s.mileage || "45", "number", "45", ' inputmode="numeric"') + "</div>" +
     '<div class="field"><span class="lab">Which email do you use?</span>' + pills("mail", ["Gmail", "Outlook", "Apple Mail", "Other"], s.mail || "Gmail") + "</div>" +
@@ -423,6 +425,7 @@ function starter() {
     { t: "Open a timesheet with overtime", sub: "A two-day car commercial on APA terms, worked out line by line.", a: 'data-timesheet="b6"' },
     { t: "Ask a hold to confirm", sub: "One tap drafts the nudge to the production.", a: 'data-todo="hold" data-id="b2"' }
   ];
+  if (mode === "demo" && roleKey() === "Producer") steps.unshift({ t: "Check a crew member's day", sub: "Their call, wrap and rate in, what APA says they're owed out.", a: "data-check" });
   else {
     var cb = D.bookings.find(function (b) { return b.status === "Confirmed"; });
     steps = [
@@ -461,6 +464,7 @@ function more() {
   var s = D.settings;
   return '<div class="top"><span>You</span><span></span></div><h2>' + esc(s.name || "Your account") + "</h2>" +
     '<div class="sum"><div><span class="q">Signed in</span><span>' + (mode === "demo" ? "Sample data, this browser only" : esc(G.email || "Google")) + '</span></div><div><span class="q">Your data</span><span>' + (mode === "demo" ? "Not saved to Drive" : "In your Google Drive") + '</span></div><div><span class="q">Day rate</span><span>' + money(num(s.rate)) + '</span></div><div><span class="q">Terms</span><span>' + esc(s.terms || 30) + ' days</span></div><div><span class="q">Email</span><span>' + esc(s.mail || "Gmail") + '</span></div><div><span class="q">Agent</span><span>' + (s.hasAgent === "Yes" ? esc(s.agent || "Yes") : "None") + "</span></div></div>" +
+    (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
     '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
     '<div class="part">Your data</div><p class="q">Everything is in one Google Sheet in your Drive, which you own and can edit or delete. Eltio can only see files this app made, and keeps no copy. Nothing is ever sent for you: drafts open in your own email.</p>' +
@@ -469,7 +473,7 @@ function more() {
 
 /* ---------- forms ---------- */
 function bookingForm(b) {
-  var s = D.settings, isNew = !b; b = b || { id: uid(), start: iso(addDays(today(), 7)), end: "", client: "", production: "", contact: "", status: "First hold", rate: s.rate || "", days: "1", agent: "", notes: "", terms: "APA", kit: "", extra: "", po: "" };
+  var s = D.settings, isNew = !b; b = b || { id: uid(), start: iso(addDays(today(), 7)), end: "", client: "", production: "", contact: "", status: "First hold", rate: s.rate || "", days: "1", agent: "", notes: "", terms: s.work === "TV and film" ? "TV drama" : ["Director", "Producer"].indexOf(roleKey()) >= 0 ? "Flat day" : "APA", kit: "", extra: "", po: "" };
   var acts = isNew ? "" : '<div class="acts">' + (isHold(b) ? '<button class="btn" data-draft="hold" data-id="' + b.id + '">Ask to confirm</button>' : "") + (b.status === "Confirmed" && !isDone(b) ? '<button class="btn" data-draft="confirm" data-id="' + b.id + '">Send booking confirmation</button>' : "") + (b.status === "Confirmed" && b.terms !== "Flat day" ? '<button class="btn' + (isDone(b) ? " solid" : "") + '" data-timesheet="' + b.id + '">Timesheet' + (daysFor(b.id).length ? ", " + daysFor(b.id).length + " day" + (daysFor(b.id).length > 1 ? "s" : "") : "") + "</button>" : "") + (isDone(b) && !invoiced(b.id) && !isPaye(b) ? '<button class="btn" data-invoicefor="' + b.id + '">Make the invoice</button>' : "") + "</div>";
   return '<h2>' + (isNew ? "Add a booking" : esc(b.production || "Booking")) + "</h2>" + acts + '<input type="hidden" id="b-id" value="' + esc(b.id) + '">' +
     '<div class="grid2">' + field("b-production", "What is it?", b.production, "text", "Commercial, music video…") + field("b-client", "Who for?", b.client, "text", "Production company") + "</div>" +
@@ -533,10 +537,26 @@ function dayForm(b, x) {
     '<div id="calc">' + calcHtml(calcDay(x, b)) + "</div>" +
     '<div class="acts"><button class="btn solid wide" data-saveday>Save the day</button>' + (isNew ? '<button class="btn" data-timesheet="' + b.id + '">Back</button>' : '<button class="btn" data-delday="' + x.id + '">Delete</button>') + "</div>";
 }
+/* Producers: check one crew day against the rules before paying an invoice. Nothing is saved. */
+function checkForm() {
+  return "<h2>Check a crew day</h2><p class=\"q\">Put in what's on their timesheet. Nothing here is saved.</p>" +
+    '<div class="grid2">' + field("c-rate", "Their day rate (£)", "450", "number", "", ' inputmode="numeric"') + field("c-claim", "They invoiced for this day (£)", "", "number", "", ' inputmode="decimal"') + "</div>" +
+    '<div class="field"><span class="lab">Terms</span>' + pills("cterms", TERMS, "APA") + "</div>" + field("c-date", "Date", iso(today()), "date") +
+    '<div class="grid2">' + field("c-call", "Call", "07:00", "time") + field("c-wrap", "Wrap", "20:30", "time") + "</div>" +
+    '<div class="field"><span class="lab">Lunch</span>' + pills("clunch", ["1 hour", "30 min", "None"], "1 hour") + "</div>" + field("c-lunchAt", "Lunch called at", "", "time") +
+    '<div class="grid2">' + field("c-kit", "Kit (£)", "", "number", "0", ' inputmode="numeric"') + field("c-miles", "Miles", "", "number", "0", ' inputmode="numeric"') + "</div>" +
+    '<div id="ccalc"></div><div class="acts"><button class="btn wide" data-close>Done</button></div>';
+}
+function liveCheck() {
+  var c = $("ccalc"); if (!c) return;
+  var b = { rate: val("c-rate"), terms: picked("cterms") || "APA", kit: val("c-kit") }, r = calcDay({ date: val("c-date"), call: val("c-call"), wrap: val("c-wrap"), lunch: picked("clunch") || "1 hour", lunchAt: val("c-lunchAt"), miles: val("c-miles"), type: "Normal" }, b), claim = num(val("c-claim"));
+  var diff = claim ? claim - r.total : 0;
+  c.innerHTML = calcHtml(r) + (claim ? '<p class="note' + (Math.abs(diff) >= 1 ? " amb" : "") + '">' + (Math.abs(diff) < 1 ? "Their invoice matches." : "Their invoice is " + pounds(Math.abs(diff)) + (diff > 0 ? " over" : " under") + " what the rules work out.") + "</p>" : "");
+}
 function dayFromForm() {
   return { id: val("d-id"), booking: val("d-booking"), date: val("d-date"), type: picked("dtype") || "Normal", call: val("d-call"), lunchAt: val("d-lunchAt"), lunch: picked("lunch") || "1 hour", wrap: val("d-wrap"), miles: val("d-miles"), adjust: val("d-adjust"), source: picked("source") || "", notes: val("d-notes") };
 }
-function liveCalc() { var c = $("calc"), bid = val("d-booking"); if (!c || !bid) return; var b = D.bookings.find(function (z) { return z.id === bid; }); if (b) c.innerHTML = calcHtml(calcDay(dayFromForm(), b)); }
+function liveCalc() { liveCheck(); var c = $("calc"), bid = val("d-booking"); if (!c || !bid) return; var b = D.bookings.find(function (z) { return z.id === bid; }); if (b) c.innerHTML = calcHtml(calcDay(dayFromForm(), b)); }
 function draftSheet(d, label) {
   return "<h2>" + esc(label) + '</h2><div class="sum"><div><span class="q">To</span><span>' + esc(d.to || "add their email") + '</span></div><div><span class="q">Subject</span><span>' + esc(d.subject) + '</span></div></div><div class="glass" style="padding:14px 16px;white-space:pre-wrap">' + esc(d.body) + "</div>" +
     '<div class="acts"><button class="btn solid wide" data-compose>Open in ' + esc(D.settings.mail === "Other" || !D.settings.mail ? "your email" : D.settings.mail) + '</button><button class="btn" data-copy>Copy</button><button class="btn" data-close>Close</button></div><p class="q">You check it and press send. Nothing is sent for you.</p>';
@@ -550,17 +570,45 @@ function showDraft(kind, id) {
 
 
 /* ---------- the walkthrough: five short animated screens on first open, replayable from You ---------- */
-var TOUR = [
-  { h: "See what you're owed.", p: "Every invoice, what's late and what's coming up, the moment you open it.", k: "money" },
-  { h: "Chasing, already written.", p: "When a payment's late the email is drafted in the right tone for how late it is. You check it and press send.", k: "chase" },
-  { h: "Holds that don't hang.", p: "Pencils and holds get a nudge before the date, to the production or to your agent.", k: "hold" },
-  { h: "Overtime you'd miss.", p: "Log call and wrap. APA and Bectu rules work out the rest, line by line, ready to send for approval.", k: "ot" },
-  { h: "Your data stays yours.", p: "Everything lives in one Google Sheet in your own Drive. Your phone and laptop always match.", k: "drive" }
-];
+/* The walkthrough is built for the person's job: what the app does for crew is not what it does for a producer. */
+var ROLES = ["Crew", "DP or HOD", "Director", "Producer", "Editor or post", "Something else"];
+function roleKey() { var r = D.settings.role || ""; return r === "DP" ? "DP or HOD" : ROLES.indexOf(r) >= 0 ? r : "Something else"; }
+var SL = {
+  money: { h: "See what you're owed.", p: "Every invoice, what's late and what's coming up, the moment you open it.", k: "money" },
+  chase: { h: "Chasing, already written.", p: "When a payment's late the email is drafted in the right tone for how late it is. You check it and press send.", k: "chase" },
+  hold: { h: "Holds that don't hang.", p: "Pencils and holds get a nudge before the date, so a second hold doesn't cost you the job.", k: "hold" },
+  agent: { h: "Your agent, kept in the loop.", p: "Holds that came through your agent get drafted to them, not the production.", k: "agent" },
+  ot: { h: "Overtime you'd miss.", p: "Log call and wrap. APA rules work out the rest, line by line, ready to send for approval.", k: "ot" },
+  drama: { h: "Check what payroll paid.", p: "On TV drama payroll makes the timesheet. Keep your own record on Bectu terms and spot the hours they missed.", k: "drama" },
+  kit: { h: "Kit and miles, every day.", p: "Your kit fee and mileage go on each day automatically, so they never drop off the invoice.", k: "kit" },
+  check: { h: "Check crew invoices before you pay.", p: "Put in a crew member's call, wrap and rate. See what APA or Bectu says they're owed, and where an invoice is over or under.", k: "check" },
+  company: { h: "Your whole crew, next.", p: "The company version adds crew holds in one place, start paperwork, overtime on set and a cost report. These are the next things being built.", k: "company" },
+  drive: { h: "Your data stays yours.", p: "Everything lives in one Google Sheet in your own Drive. Your phone and laptop always match.", k: "drive" }
+};
+var FOR = {
+  "Crew": { who: "crew", b: ["Works out APA and Bectu overtime from your call and wrap", "Drafts the timesheet for the production to approve", "Chases late invoices for you to send", "Nudges holds before the date"], s: ["ot", "drama", "chase", "hold", "drive"] },
+  "DP or HOD": { who: "DPs and heads of department", b: ["Overtime worked out on APA or Bectu terms", "Kit hire and mileage added to every day", "Holds through your agent, drafted to them", "Late invoices chased in the right tone"], s: ["ot", "kit", "agent", "chase", "drive"] },
+  "Director": { who: "directors", b: ["Holds and pencils kept straight, through your agent if you have one", "What's owed, and who pays slowest", "Chases drafted in the right tone", "Tax put aside and the VAT line watched"], s: ["agent", "money", "chase", "drive"] },
+  "Producer": { who: "producers", b: ["Check crew invoices against APA or Bectu before you pay", "Your own bookings, invoices and chasing", "Holds and confirmations drafted in seconds", "Tools for your whole crew are coming next"], s: ["check", "chase", "hold", "company", "drive"] },
+  "Editor or post": { who: "editors and post", b: ["Bookings and holds in one diary", "What's owed, and who pays slowest", "Chases drafted for you to send", "Tax put aside and the VAT line watched"], s: ["money", "chase", "hold", "drive"] },
+  "Something else": { who: "freelancers", b: ["Bookings and holds in one diary", "What's owed, and who pays slowest", "Chases drafted for you to send", "Overtime on APA or Bectu terms if you need it"], s: ["money", "chase", "hold", "ot", "drive"] }
+};
+function tourFor() {
+  var f = FOR[roleKey()], w = D.settings.work || "Both";
+  var list = f.s.filter(function (k) { return !(k === "drama" && w === "Commercials") && !(k === "ot" && w === "TV and film" && f.s.indexOf("drama") >= 0); });
+  return [{ h: "What it does for " + f.who + ".", p: "A minute on how it fits your work. You can replay this from You, under How it works.", k: "intro", b: f.b }].concat(list.map(function (k) { return SL[k]; }));
+}
+var TOUR = [];
 var tourI = 0, tourT = [];
 function later(fn, ms) { tourT.push(setTimeout(fn, ms)); }
 function countUp(el, to, ms, dp) { if (!el) return; var t0 = performance.now(); (function f(t) { var k = Math.min(1, (t - t0) / ms), v = to * (1 - Math.pow(1 - k, 3)); el.textContent = "£" + v.toLocaleString("en-GB", { minimumFractionDigits: dp || 0, maximumFractionDigits: dp || 0 }); if (k < 1 && $("tour")) tourT.push(requestAnimationFrame(f)); })(t0); }
 function stage(k) {
+  if (k === "intro") return '<div class="rows">' + TOUR[0].b.map(function (x, i) { return '<div class="row static tin" style="--d:' + (.2 + i * .35).toFixed(2) + 's"><span><i class="ck on"></i>' + esc(x) + "</span><span></span></div>"; }).join("") + "</div>";
+  if (k === "agent") return '<div class="rows"><div class="row static"><span>Branded film <span class="q">· Thu 6 Nov</span></span><span class="tag">Second hold</span></div></div><div class="glass mail tin" style="--d:.5s"><span class="q">To: your agent</span><p>Hi Jo, I\'m on second hold for Studio Kite on 6 Nov. Could you ask them to confirm or release by Monday?</p></div><span class="btn solid pulse tin" style="--d:1.8s">Open in Mail</span>';
+  if (k === "drama") return '<div class="sum ot"><div class="tin" style="--d:.2s"><span class="q">Wed 7 Oct, call 06:00, wrap 23:30</span><span></span></div><div class="tin" style="--d:.6s"><span class="q">Payroll paid overtime</span><span>6 hrs</span></div><div class="tin" style="--d:1s"><span class="q">Your record, Bectu terms</span><span>7.5 hrs + 0.5 after 23:00</span></div><div class="tin" style="--d:1.5s"><span>Missing</span><span class="late" id="tc">£0</span></div></div><p class="note amb tin" style="--d:1.9s">Short turnaround: 10.25 hrs rest since the last wrap.</p>';
+  if (k === "kit") return '<div class="sum ot"><div class="tin" style="--d:.2s"><span class="q">Day rate</span><span>£650</span></div><div class="tin" style="--d:.6s"><span class="q">Kit, camera package</span><span>£150</span></div><div class="tin" style="--d:1s"><span class="q">38 miles at 45p</span><span>£17.10</span></div><div class="tin" style="--d:1.4s"><span>Every day</span><span id="tc">£0</span></div></div>';
+  if (k === "check") return '<div class="rows"><div class="row static"><span>Gaffer invoice <span class="q">· 2 days</span></span><span class="tag ink">£1,820</span></div><div class="row static tin" style="--d:.6s"><span>APA works out <span class="q">· £450 a day, 1.5x</span></span><span class="tag">£1,742</span></div><div class="row static tin" style="--d:1.2s"><span>Over by <span class="q">· early call counted twice</span></span><span class="tag amb">£78</span></div></div><span class="btn solid pulse tin" style="--d:1.9s">Ask about it</span>';
+  if (k === "company") return '<div class="rows">' + ["Crew holds in one place", "Start forms and paperwork", "Overtime on set, live", "Cost report against budget"].map(function (x, i) { return '<div class="row static tin" style="--d:' + (.2 + i * .3).toFixed(2) + 's"><span>' + x + '</span><span class="tag">Coming</span></div>'; }).join("") + "</div>";
   if (k === "money") return '<div class="st-money"><span class="q">Owed to you</span><b id="tc">£0</b><div class="rows"><div class="row static tin" style="--d:.5s"><span>Studio Kite <span class="q">· 40 days late</span></span><span class="tag amb">£2,400</span></div><div class="row static tin" style="--d:.8s"><span>Northlight Films <span class="q">· due Friday</span></span><span class="tag ink">£1,300</span></div><div class="row static tin" style="--d:1.1s"><span>Field Records <span class="q">· paid</span></span><span class="tag">£1,800</span></div></div></div>';
   if (k === "chase") return '<div class="rows"><div class="row static"><span>Chase Studio Kite, £2,400</span><span class="tag amb">40 days late</span></div></div><div class="glass mail tin" style="--d:.4s"><span class="q">To: hello@studiokite.co</span><p id="ty"></p></div><span class="btn solid pulse tin" style="--d:2.6s">Open in Gmail</span>';
   if (k === "hold") return '<div class="rows"><div class="row static"><span>Music video <span class="q">· Thu 23 Oct</span></span><span class="tag" id="hs">First hold</span></div><div class="row static tin" style="--d:.9s"><span class="q">Nudge drafted: "Could you confirm or release by Monday?"</span><span></span></div></div><div class="rows tin" style="--d:2.2s"><div class="row static"><span>Branded film <span class="q">· via your agent</span></span><span class="tag">Second hold</span></div></div>';
@@ -572,11 +620,14 @@ function tourHtml() {
   return '<div class="tour-in"><div class="top"><span class="q">' + (tourI + 1) + " of " + TOUR.length + '</span><button class="lnk" data-tourend>Skip</button></div><div class="stage glass">' + stage(t.k) + "</div><h1>" + esc(t.h) + '</h1><p class="q">' + esc(t.p) + '</p><div class="dots">' + TOUR.map(function (x, i) { return '<i class="' + (i === tourI ? "on" : "") + '"></i>'; }).join("") + '</div><div class="acts">' + (tourI ? '<button class="btn" data-tourback>Back</button>' : "") + '<button class="btn solid wide" data-tournext>' + (last ? (mode === "demo" ? "Try it with the sample data" : "Get started") : "Next") + "</button></div></div>";
 }
 function showTour(i) {
+  if (!i) TOUR = tourFor();
   tourT.forEach(function (x) { clearTimeout(x); cancelAnimationFrame(x); }); tourT = [];
   tourI = i; var el = $("tour"); if (!el) { el = document.createElement("div"); el.id = "tour"; el.className = "tour"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); document.body.appendChild(el); }
   el.innerHTML = tourHtml(); var k = TOUR[i].k;
   if (k === "money") countUp($("tc"), 3700, 1100);
   if (k === "ot") later(function () { countUp($("tc"), 903.76, 900, 2); }, 2200);
+  if (k === "drama") later(function () { countUp($("tc"), 136.5, 800, 2); }, 1500);
+  if (k === "kit") later(function () { countUp($("tc"), 817.1, 800, 2); }, 1400);
   if (k === "chase") { var txt = "Hi, following up on invoice INV-2026-013 for £2,400, now 40 days past its due date. Could you confirm a payment date this week?", n = 0; later(function f() { var p = $("ty"); if (!p) return; p.textContent = txt.slice(0, n += 3); if (n < txt.length) later(f, 28); }, 700); }
   if (k === "hold") { later(function () { var h = $("hs"); if (h) h.textContent = "Asked to confirm"; }, 1300); later(function () { var h = $("hs"); if (h) { h.textContent = "Confirmed"; h.className = "tag ink"; } }, 2600); }
 }
@@ -606,9 +657,10 @@ function startGoogle(silent) {
 }
 function saveSetup() {
   var s = D.settings;
-  s.name = val("s-name"); s.trading = val("s-trading"); s.role = picked("role") || s.role || ""; s.rate = val("s-rate"); s.terms = val("s-terms") || "30"; s.tax = val("s-tax") || "25"; s.mileage = val("s-mileage") || "45";
+  s.name = val("s-name"); s.trading = val("s-trading"); var wasNew = !flag("eltio-systems-tour-1") || picked("role") !== roleKey(); s.role = picked("role") || s.role || ""; s.work = picked("work") || s.work || "Both"; s.rate = val("s-rate"); s.terms = val("s-terms") || "30"; s.tax = val("s-tax") || "25"; s.mileage = val("s-mileage") || "45";
   s.mail = picked("mail") || "Gmail"; s.hasAgent = picked("hasAgent") || "No"; s.agent = val("s-agent"); s.agentEmail = val("s-agentEmail"); s.invoicePrefix = s.invoicePrefix || "INV";
   if (!s.name) { banner("Add your name first."); return; }
+  if (wasNew) { try { localStorage.removeItem("eltio-systems-tour-1"); } catch (e) {} }
   if (mode === "demo") { demoSave(); S.tab = "home"; render(); banner("Saved."); return; }
   var p = G.sheetId ? Promise.resolve() : (busy++, render(), createSheet("Eltio Systems" + (s.trading ? ": " + s.trading : "")).then(function () { busy--; }));
   p.then(function () { return change("Settings", function () {}); }).then(function () { S.tab = "home"; render(); banner("Saved to your Drive."); }).catch(function (e) { busy = Math.max(0, busy - 1); render(); banner("Couldn't save: " + (e.message || e)); });
@@ -623,6 +675,7 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }
   if (b.hasAttribute("data-tour")) { showTour(0); return; }
+  if (b.hasAttribute("data-check")) { openSheet(checkForm()); liveCheck(); return; }
   if (b.hasAttribute("data-starteroff")) { flag("eltio-systems-starter-off", "1"); render(); return; }
   if (b.hasAttribute("data-howphone")) { flag("eltio-systems-phone", "1"); openSheet('<h2>Put it on your home screen</h2><div class="sum"><div><span class="q">iPhone</span><span>Safari, Share, Add to Home Screen</span></div><div><span class="q">Android</span><span>Chrome menu, Install app</span></div></div><p class="q">Then sign in with the same Google account on your laptop. Both read the same sheet, so they always match.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>'); render(); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }

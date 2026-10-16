@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="description" content="Systems is the back office for film. Bookings, timesheets, invoices and chasing, built on APA and Bectu terms, for crew and the companies that hire them.">
+<meta name="description" content="Systems is the back office for UK production companies: advances on award, crew invoices checked against APA and Bectu terms, permits, start packs, cash and rights.">
 <title>Systems: the back office for film</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
   <nav class="links" aria-label="Sections">
     <a href="#day">How it works</a><a href="#jobs">Who it's for</a><a href="#all">Everything</a><a href="#faq">Questions</a>
   </nav>
-  <span class="nav-r"><span class="tc" id="tc" aria-hidden="true"><i></i><b>06:30</b></span><a class="btn ink sm" href="../systems-app/">Try it</a></span>
+  <span class="nav-r"><span class="tc" id="tc" aria-hidden="true"><i></i><b>Award</b></span><a class="btn ink sm" href="../systems-app/">Try it</a></span>
   <span class="prog" aria-hidden="true"><i id="prog"></i></span>
 </header>
 
@@ -26,20 +26,20 @@
   <!-- HERO: the live thing. Drag the wrap and watch the day's money work itself out. -->
   <section class="hero">
     <div class="hero-copy">
-      <p class="lab">For UK crew and production companies</p>
-      <h1>The back office for film.</h1>
-      <p class="lede">Bookings, timesheets, invoices and chasing in one app, built on APA and Bectu terms. You do the job. Systems does the paperwork after it.</p>
+      <p class="lab">For UK production companies and producers</p>
+      <h1>The back office for production.</h1>
+      <p class="lede">Advances out the day you win the job. Every crew invoice checked against APA and Bectu terms. Permits on time, rights tracked, cash forecast. You make the work. Systems runs the office behind it.</p>
       <div class="acts">
         <a class="btn ink" href="../systems-app/">Try it with sample data</a>
-        <a class="btn ghost" href="#day">See a shoot day</a>
+        <a class="btn ghost" href="#day">See a job run through it</a>
       </div>
       <p class="fine">Free to try. No card, no call, no download.</p>
     </div>
 
     <div class="card live" id="live">
       <div class="live-in">
-        <div class="row-top"><span class="lab">Gaffer · £450 day · APA</span><span class="lab" id="liveTime">Wrap 19:00</span></div>
-        <p class="live-q">Drag the wrap.</p>
+        <div class="row-top"><span class="lab">Your gaffer · £450 · APA</span><span class="lab" id="liveTime">Wrap 19:00</span></div>
+        <p class="live-q">They wrapped late. What do you owe?</p>
         <label class="slider"><span class="sr">Wrap time</span>
           <input type="range" id="wrap" min="0" max="16" step="1" value="0" aria-valuetext="19:00">
         </label>
@@ -47,72 +47,72 @@
         <div class="lines" id="liveLines">
           <div class="ln"><span>Day rate, call 08:00</span><b>£450</b></div>
         </div>
-        <div class="tot"><span class="lab">The day</span><b id="liveTot">£450</b></div>
-        <p class="live-note" id="liveNote">Wrapped on time. Nothing to add.</p>
+        <div class="tot"><span class="lab">Their invoice should say</span><b id="liveTot">£450</b></div>
+        <p class="live-note" id="liveNote">Drag the wrap time. Systems checks every crew invoice this way.</p>
       </div>
     </div>
   </section>
 
   <!-- NUMBERS -->
   <section class="nums">
-    <h2 class="sec-h">Film runs on late money.</h2>
+    <h2 class="sec-h">Production runs on other people's money.</h2>
     <div class="num-grid">
-      <div class="num"><b data-count="48" data-suffix="%">48%</b><p>of crew say they're always paid on time. The rest wait, and 21% have waited over 30 days.</p><span class="src">Bectu Big Survey 2025, 5,597 workers</span></div>
-      <div class="num"><b><span data-count="7">7</span> <i>vs</i> <span data-count="90">90</span></b><p>Days a production company has to pay its crew, against the days it can wait to be paid itself.</p><span class="src">APA crew terms; Bectu</span></div>
-      <div class="num"><b data-count="287">287</b><p>Days, on average, one film production company took to pay its invoices.</p><span class="src">UK payment practices register</span></div>
+      <div class="num"><b><span data-count="7">7</span> <i>vs</i> <span data-count="90">90</span></b><p>Days you have to pay your crew, against the days an agency can take to pay you.</p><span class="src">APA crew terms; Bectu</span></div>
+      <div class="num"><b data-count="50" data-suffix="%">50%</b><p>The first payment the APA/IPA contract recommends. Raise it the day you win the job and the gap closes.</p><span class="src">APA/IPA production contract</span></div>
+      <div class="num"><b data-count="21">21</b><p>Days' notice a council needs for a child performance licence. Miss it and the shoot moves.</p><span class="src">Council children in entertainment guidance</span></div>
     </div>
-    <p class="nums-after">Systems closes that gap from both ends. Crew get every hour counted and every invoice chased. Producers get the advance out the day the job lands.</p>
+    <p class="nums-after">A commercial can book 40 crew, a dozen suppliers and three permits in a fortnight. Systems keeps every one of them on time, in one place.</p>
   </section>
 
   <!-- A SHOOT DAY: the sky follows the day as you scroll -->
   <section class="day" id="day">
     <div class="day-h">
       <p class="lab">How it works</p>
-      <h2 class="sec-h">One shoot day, from call to paid.</h2>
+      <h2 class="sec-h">One job, from award to delivery.</h2>
     </div>
 
-    <article class="step" data-tc="05:45">
-      <div class="when"><b>05:45</b><span class="lab">Call sheet in</span></div>
-      <div class="what"><h3>The day logs itself.</h3><p>Forward the call sheet. Systems takes the call time, the unit base and the job, and puts the day against your booking. No retyping.</p></div>
+    <article class="step" data-tc="Day −21">
+      <div class="when"><b>Day −21</b><span class="lab">Award</span></div>
+      <div class="what"><h3>The advance goes out first.</h3><p>The award email lands. Systems drafts the 50% advance and the balance invoice, puts the due dates in the calendar, and sets the job up in your books.</p></div>
       <div class="card mini">
-        <div class="mrow"><span class="lab">Call sheet · Day 2 of 3</span><span class="tag">Read</span></div>
-        <div class="kv"><span>Crew call</span><b>06:30</b></div><div class="kv"><span>Unit base</span><b>Hackney Wick</b></div><div class="kv"><span>Booking</span><b>Hartley Jones · 2 days</b></div>
+        <div class="mrow"><span class="lab">Sportswear spot · awarded</span><span class="tag">Drafted</span></div>
+        <div class="kv"><span>Budget agreed</span><b>£84,000.00</b></div><div class="kv"><span>Advance, 50%, due shoot −7</span><b>£42,000.00</b></div><div class="kv"><span>Balance, on delivery</span><b>£42,000.00</b></div>
       </div>
     </article>
 
-    <article class="step" data-tc="13:10">
-      <div class="when"><b>13:10</b><span class="lab">Lunch, late</span></div>
-      <div class="what"><h3>The small money gets caught.</h3><p>Lunch called more than five and a half hours after call is a late break under APA terms. It goes on the sheet, so you don't have to remember it at 2am.</p></div>
+    <article class="step" data-tc="Day −14">
+      <div class="when"><b>Day −14</b><span class="lab">Prep</span></div>
+      <div class="what"><h3>Nothing missed in prep.</h3><p>Every permit and licence counted back from the shoot date. Start packs chased from every crew member: bank details, UTR, right to work. Holds confirmed or released in writing.</p></div>
       <div class="card mini">
-        <div class="mrow"><span class="lab">Day 2 · flags</span><span class="tag amber">1 found</span></div>
-        <div class="kv"><span>Late break, 6 hrs 40 after call</span><b>+ £10</b></div><div class="kv q"><span>Turnaround to day 3</span><b>11 hrs 30 · fine</b></div>
+        <div class="mrow"><span class="lab">Prep · 14 days out</span><span class="tag amber">2 this week</span></div>
+        <div class="kv"><span>Child licence, 21 days</span><b>apply now</b></div><div class="kv"><span>City of London, 3 weeks</span><b>apply now</b></div><div class="kv"><span>Westminster, 3 working days</span><b>in 8 days</b></div><div class="kv q"><span>Start packs</span><b>11 of 14 back</b></div>
       </div>
     </article>
 
-    <article class="step" data-tc="20:30">
-      <div class="when"><b>20:30</b><span class="lab">Wrap</span></div>
-      <div class="what"><h3>Overtime, counted properly.</h3><p>Half hours after the ten-hour day and lunch, at your band's rate: 1.5x, 1.25x or 1x by day rate. Early calls, nights and after midnight are worked out too.</p></div>
+    <article class="step" data-tc="Shoot">
+      <div class="when"><b>Shoot</b><span class="lab">2 days</span></div>
+      <div class="what"><h3>The days are logged as you go.</h3><p>Call sheets are read for call times and locations. Lunch and wrap are logged once, for the whole unit, so every crew day is known before an invoice arrives.</p></div>
       <div class="card mini">
-        <div class="mrow"><span class="lab">Day 2 · £450 · band 1.5x</span><span class="tag">APA</span></div>
-        <div class="kv"><span>Day rate</span><b>£450.00</b></div><div class="kv"><span>Overtime from 17:30, 3 hrs</span><b>£202.50</b></div><div class="kv"><span>Late break</span><b>£10.00</b></div><div class="kv big"><span>Day 2</span><b>£662.50</b></div>
+        <div class="mrow"><span class="lab">Day 2 · unit call 06:30</span><span class="tag">Logged</span></div>
+        <div class="kv"><span>Lunch called</span><b>13:10 · late break</b></div><div class="kv"><span>Wrap</span><b>20:30 · 3 hrs over</b></div><div class="kv"><span>Crew on overtime</span><b>18 of 32</b></div>
       </div>
     </article>
 
-    <article class="step" data-tc="23:10">
-      <div class="when"><b>23:10</b><span class="lab">Home</span></div>
-      <div class="what"><h3>The invoice is already written.</h3><p>Days, overtime, kit and mileage go on one invoice with the timesheet attached. It waits as a draft in your name until you tap send.</p></div>
+    <article class="step" data-tc="Wrap +7">
+      <div class="when"><b>Wrap +7</b><span class="lab">Pay run</span></div>
+      <div class="what"><h3>Every crew invoice, checked.</h3><p>Each invoice is read and checked against the deal, the band and the logged hours. The ones that match go into the 7-day payment run. The ones that don't get a polite query.</p></div>
       <div class="card mini">
-        <div class="mrow"><span class="lab">INV-2026-014 · draft</span><span class="tag">Ready</span></div>
-        <div class="kv"><span>3 days, overtime, late break</span><b>£1,630.00</b></div><div class="kv"><span>Lighting kit, 3 days</span><b>£360.00</b></div><div class="kv"><span>Mileage, 92 miles at 45p</span><b>£41.40</b></div><div class="kv big"><span>Total</span><b>£2,031.40</b></div>
+        <div class="mrow"><span class="lab">Crew invoices · 32</span><span class="tag amber">2 queries</span></div>
+        <div class="kv"><span>Match the logged days</span><b>30 · £21,480.00</b></div><div class="kv"><span>Spark, overtime claimed 3 hrs, logged 2.5</span><b>−£26.25</b></div><div class="kv big"><span>Into the pay run</span><b>Ready to approve</b></div>
       </div>
     </article>
 
-    <article class="step" data-tc="Day 30">
-      <div class="when"><b>Day 30</b><span class="lab">Due</span></div>
-      <div class="what"><h3>Paid, or politely chased.</h3><p>A friendly nudge at the due date and a firmer one a week on. The last one quotes the Late Payment Act, with the fixed £70 and the interest already worked out.</p></div>
+    <article class="step" data-tc="Delivery">
+      <div class="when"><b>Delivery</b><span class="lab">And after</span></div>
+      <div class="what"><h3>Balance chased, rights tracked.</h3><p>The balance invoice goes out on delivery and is chased to the Late Payment Act if it has to be. Usage terms from every contract are tracked, with renewal quotes drafted before they lapse.</p></div>
       <div class="card mini">
-        <div class="mrow"><span class="lab">Chase 3 of 3 · draft</span><span class="tag amber">Overdue 21 days</span></div>
-        <p class="mail">Hi Sam, INV-2026-014 for £2,031.40 is now 21 days overdue. Under the Late Payment of Commercial Debts Act I'm entitled to £70 fixed compensation and interest at 8% above base rate…</p>
+        <div class="mrow"><span class="lab">After delivery</span><span class="tag amber">Overdue 21 days</span></div>
+        <div class="kv"><span>Balance invoice</span><b>£42,000.00</b></div><div class="kv"><span>Fixed compensation</span><b>£100.00</b></div><div class="kv"><span>UK TV usage ends</span><b>in 340 days</b></div>
       </div>
     </article>
   </section>
@@ -122,14 +122,15 @@
     <div class="jobs-h">
       <h2 class="sec-h">Pick your job.</h2>
       <div class="tabs" role="tablist" aria-label="Your job">
-        <button role="tab" aria-selected="true" data-role="gaffer">Gaffer</button>
+        <button role="tab" aria-selected="true" data-role="prod">Producers</button>
+        <button role="tab" aria-selected="false" data-role="pm">Production managers</button>
+        <button role="tab" aria-selected="false" data-role="dir">Directors</button>
+        <button role="tab" aria-selected="false" data-role="hod">Heads of department</button>
+        <button role="tab" aria-selected="false" data-role="gaffer">Gaffer</button>
         <button role="tab" aria-selected="false" data-role="grip">Grip</button>
         <button role="tab" aria-selected="false" data-role="camera">Camera</button>
         <button role="tab" aria-selected="false" data-role="sound">Sound</button>
         <button role="tab" aria-selected="false" data-role="art">Art</button>
-        <button role="tab" aria-selected="false" data-role="hod">Heads of department</button>
-        <button role="tab" aria-selected="false" data-role="dir">Directors</button>
-        <button role="tab" aria-selected="false" data-role="prod">Producers</button>
       </div>
     </div>
     <div id="rolePanel" class="role" role="tabpanel" aria-live="polite"></div>
@@ -141,7 +142,7 @@
     <div class="both-h">
       <p class="lab">Coming next</p>
       <h2 class="sec-h">Same shoot, both sides.</h2>
-      <p>Put the production in once. When the crew and the producer are both on Systems, the timesheet a gaffer signs off at wrap is the one the producer checks, and the invoice that arrives already matches. No PDFs to read, no numbers to retype, no queries.</p>
+      <p>Set the job up once and invite your crew to it. Their signed-off timesheets land straight in your crew check, and the invoices that arrive already match. No PDFs to read, no numbers to retype, no queries.</p>
     </div>
     <div class="both-grid">
       <div class="card mini"><div class="mrow"><span class="lab">Gaffer · Day 2</span><span class="tag">Signed off</span></div>
@@ -189,12 +190,15 @@
   <section class="faq" id="faq">
     <h2 class="sec-h">Questions.</h2>
     <div class="qa">
-      <details open><summary>Does it know APA and Bectu terms?</summary><p>Yes. Commercials use the APA crew terms: the three day-rate bands, early, late and night calls, after midnight at 3x, the late break, weekends. TV and film use the Pact/Bectu drama terms: 1.5x overtime kept between £35 and £70, quarter hours, after 23:00, sixth days. A flat day rate works too.</p></details>
+      <details open><summary>How does a production company start?</summary><p>Open it and pick Producer. Crew day checks work in the app today. The rest of the office (advances on award, the permit clock, start packs, payment runs, rights) is set up on your company's own Google and Xero accounts in the pilot, without a call.</p></details>
+      <details><summary>Can the whole office use it?</summary><p>That's how the company pilot works: producers, production managers and coordinators each see the jobs they're on, and everything sits in your company's own Google Drive.</p></details>
+      <details><summary>Does it work with Xero?</summary><p>In the company pilot it sits beside Xero: each job set up as a tracking category, invoices drafted there, crew bills batched for the payment run. Direct links to Xero and FreeAgent from the app are next.</p></details>
+      <details><summary>Do my crew need to use it?</summary><p>No. Crew invoices are read from email as PDFs and checked either way. If your crew are on Systems too, their timesheets arrive already matched.</p></details>
+      <details><summary>Does it know APA and Bectu terms?</summary><p>Yes. Commercials use the APA crew terms: the three day-rate bands, early, late and night calls, after midnight at 3x, the late break, weekends. TV and film use the Pact/Bectu drama terms: 1.5x overtime kept between £35 and £70, quarter hours, after 23:00, sixth days. A flat day rate works too.</p></details>
       <details><summary>I'm PAYE on a drama. Is it any use?</summary><p>Yes. Payroll pays you, so there's no invoice, but Systems keeps your own record of every day and works out what the payslip should say. If they differ, you'll know which day and by how much.</p></details>
       <details><summary>Do I need a call or a demo?</summary><p>No. Open it, pick your job, and it shows you round with sample data. Setup takes a few minutes and is all done on your phone.</p></details>
       <details><summary>Does it replace FreeAgent or Xero?</summary><p>Not yet. It sits beside them and does the film part they don't: holds, call times, overtime, chasing in your name. Links to Xero, FreeAgent and bank feeds are next.</p></details>
-      <details><summary>What about production companies?</summary><p>The app checks crew days against the terms today. The company tools (advance invoices on award, the permit clock, rights and usage, payment runs) are set up on a company's own Google and Xero accounts in the pilot.</p></details>
-      <details><summary>Who sees my data?</summary><p>You. It lives in a spreadsheet in your Google Drive and Systems can only open the one file it made.</p></details>
+            <details><summary>Who sees my data?</summary><p>You. It lives in a spreadsheet in your Google Drive and Systems can only open the one file it made.</p></details>
       <details><summary>Do I have to download anything?</summary><p>No. It opens in your phone's browser and you can add it to your home screen like an app. Your laptop works too.</p></details>
       <details><summary>Commercials, TV or both?</summary><p>Both. Each booking carries its own terms, so an APA commercial on Monday and a Pact/Bectu drama day on Thursday are each worked out their own way.</p></details>
       <details><summary>Does it help with VAT and tax?</summary><p>It keeps a rolling 12-month total against the £90,000 VAT threshold and reminds you of Self Assessment, payments on account and Making Tax Digital dates. It doesn't file anything for you.</p></details>
@@ -206,16 +210,16 @@
   <!-- CLOSE -->
   <section class="close">
     <h2 class="close-h">All systems go.</h2>
-    <p>Open it, pick your job, and see your last shoot worked out properly.</p>
+    <p>Open it, pick Producer, and run your next job through it with sample data.</p>
     <div class="acts"><a class="btn paper" href="../systems-app/">Try Systems free</a></div>
   </section>
 </main>
 
 <footer class="foot">
   <span class="mark sm"><span>S</span><span style="margin-left:.08em">y</span><span style="margin-left:.36em">st</span><span style="margin-left:.14em">e</span><span style="margin-left:.42em">ms</span></span>
-  <span class="q">The back office for film. Made in London.</span>
+  <span class="q">The back office for production companies. Made in London.</span>
   <span class="flinks"><a href="../systems-app/privacy.html">Privacy</a><a href="../systems-app/terms.html">Terms</a></span>
-  <span class="q src">Figures from Bectu's 2025 Big Survey, APA crew terms and the UK payment practices register. Rules shown are summaries; check your own deal.</span>
+  <span class="q src">Figures from APA crew terms, the APA/IPA production contract, council licensing guidance and Bectu. Rules shown are summaries; check your own deal.</span>
 </footer>
 
 <script src="site.js"></script>

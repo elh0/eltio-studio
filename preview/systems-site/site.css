@@ -93,9 +93,9 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 /* the shoot day */
 .day{padding-block:72px 40px}
 .day-h{display:grid;gap:12px;margin-bottom:24px}
-.step{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr) minmax(0,420px);gap:clamp(16px,3vw,40px);align-items:center;min-height:58svh;padding-block:40px;border-top:1px solid var(--hr)}
+.step{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr) minmax(0,420px);gap:clamp(16px,3vw,40px);align-items:center;min-height:44svh;padding-block:40px;border-top:1px solid var(--hr)}
 .when{display:grid;gap:8px;align-content:start}
-.when b{font:300 clamp(40px,5.4vw,72px)/1 var(--mono);letter-spacing:-.06em;font-variant-numeric:tabular-nums}
+.when b{font:300 clamp(30px,3.6vw,48px)/1 var(--mono);letter-spacing:-.06em;white-space:nowrap;font-variant-numeric:tabular-nums}
 .what{display:grid;gap:14px}
 .what h3{font:400 clamp(28px,3.4vw,44px)/1.05 var(--disp);letter-spacing:-.025em}
 .what p{max-width:40ch}

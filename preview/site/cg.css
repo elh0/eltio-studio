@@ -295,7 +295,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 /* 16:11 sideways phones (Out & Scout), and the wordmark on black that ends each project */
 .eltio.cg .cg-card .cg-in > .cg-side { grid-template-columns: repeat(var(--c), 1fr); width: min(86cqw, calc(var(--c) * (78cqh - (var(--r) - 1) * 2.2cqw) / var(--r) * 2.164 + (var(--c) - 1) * 2.2cqw)); }
-.eltio.cg .cg-phl { aspect-ratio: 844 / 390; border-radius: 6% / 13%; }
+.eltio.cg .cg-phl { aspect-ratio: 1600 / 739; border-radius: 4.6% / 10%; background: none; box-shadow: 0 24px 48px -24px rgba(0,0,0,.5); }
 .eltio.cg .cg-tile.cg-ink { --tile: #0E0E0D; --mk: rgba(243,243,240,.35); color: #F3F3F0; }
 .eltio.cg .cg-ink .k2, .eltio.cg .cg-ink .k2 .lock { color: #F3F3F0 !important; }
 .eltio.cg .cg-ink .cg-ag-cov, .eltio.cg .cg-ink .cg-sy-cov { color: #F3F3F0; }

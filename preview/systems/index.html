@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Eltio Studio Systems</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Eltio Systems mock: studio identity. Geist Mono, one size, caps + grey for hierarchy, ink default, corner ticks. */
+:root{--ink:#0B0B0A;--paper:#F3F3F0;--grey:#8A8A83;--line:#2E2E2B;--bg:var(--ink);--fg:var(--paper);--eye:invert(1)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0B0B0A;--fg:#F3F3F0}}
+:root[data-theme="dark"]{--bg:#0B0B0A;--fg:#F3F3F0}
+:root[data-theme="light"]{--bg:#fffff8;--fg:#0B0B0A;--line:#d9d9d2;--eye:none}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--fg)}
+body{font:400 12px/1.5 "Geist Mono",ui-monospace,Menlo,monospace;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit;background:none;border:0}
+a{color:inherit;text-decoration:none}
+.q{color:var(--grey)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:10px;border-bottom:.5px solid var(--line)}
+.bar .r{display:flex;gap:16px;align-items:center}
+.eye{width:18px;height:18px;filter:var(--eye);display:block}
+.act{text-transform:uppercase;cursor:pointer;border-bottom:.5px solid currentColor;padding-bottom:1px}
+.act:hover{color:var(--grey)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;padding-top:28px}
+@media(min-width:860px){.grid{grid-template-columns:minmax(0,2.2fr) minmax(0,1fr);gap:0}.grid>.main{padding-right:28px;border-right:.5px solid var(--line)}.grid>.side{padding-left:28px}}
+.hero{display:grid;gap:14px;padding-bottom:40px}
+.hero p{max-width:46ch}
+.lbl{text-transform:uppercase}
+.list{display:grid;border-top:.5px solid var(--line)}
+.item{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-bottom:.5px solid var(--line)}
+.item .p{text-align:right;white-space:nowrap}
+.sec{display:grid;gap:12px;padding-bottom:40px}
+.sec h2{font:inherit;text-transform:uppercase;display:flex;justify-content:space-between}
+.tick{position:relative;padding:14px}
+.tick:before,.tick:after{content:"";position:absolute;width:8px;height:8px;border-color:var(--grey);border-style:solid}
+.tick:before{top:0;left:0;border-width:.5px 0 0 .5px}
+.tick:after{bottom:0;right:0;border-width:0 .5px .5px 0}
+.steps{display:grid;gap:10px}
+@media(min-width:600px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.side .sec{gap:10px}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-top:24px;border-top:.5px solid var(--line);margin-top:20px}
+/* login */
+.login{min-height:70vh;display:grid;place-items:center}
+.login form{width:min(100%,340px);display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field input{border-bottom:.5px solid var(--line);padding:8px 0;outline:none;width:100%}
+.field input:focus{border-color:var(--fg)}
+/* dashboard */
+.tabs{display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;padding:12px 0;border-bottom:.5px solid var(--line)}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{text-transform:uppercase;color:var(--grey);cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--fg)}
+.kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(min-width:700px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.kpi{display:grid;gap:4px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:11px 0;border-bottom:.5px solid var(--line);align-items:start}
+.row .sub{grid-column:1/-1}
+.pill{text-transform:uppercase;white-space:nowrap}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--fg);margin-right:6px;vertical-align:1px}
+.dot.g{background:var(--grey)}
+.draft{white-space:pre-wrap;border-left:.5px solid var(--line);padding-left:12px;margin-top:6px}
+.note{padding:10px 0}
+:focus-visible{outline:.5px solid var(--fg);outline-offset:3px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar">
+    <a href="#" data-go="home" aria-label="Home"><img class="eye" src="eye.svg" alt=""></a>
+    <div class="r"><span class="q" id="where">eltio studio (systems)</span><button class="act" id="authBtn" data-go="login">Client login</button></div>
+  </div>
+
+  <!-- HOME -->
+  <div id="v-home">
+    <div class="grid">
+      <div class="main">
+        <div class="hero">
+          <span class="lbl">ELTIO STUDIO · SYSTEMS</span>
+          <p>Less admin. Same tools. Nothing sent without you.</p>
+          <p class="q">Back-office software for production companies. Late invoices get chased, receipts get filed against the job, and you get one money brief each Monday. It plugs into the email, calendar and accounts you already use.</p>
+          <div style="display:flex;gap:18px;flex-wrap:wrap"><button class="act" data-go="start">Get started</button><button class="act q" data-go="login">See the client view</button></div>
+        </div>
+
+        <div class="sec">
+          <h2><span>Packages (7)</span><span class="q">setup from</span></h2>
+          <div class="list" id="pk"></div>
+        </div>
+
+        <div class="sec">
+          <h2><span>How it installs (3)</span></h2>
+          <div class="steps">
+            <div class="tick"><span class="lbl">001 YOUR ACCOUNTS</span><p class="q">It runs inside accounts you own: your email, calendar and Xero or FreeAgent. Nothing lives on our servers.</p></div>
+            <div class="tick"><span class="lbl">002 DRAFTS ONLY</span><p class="q">Chases wait in your Gmail drafts. A named person presses send.</p></div>
+            <div class="tick"><span class="lbl">003 KEYS BACK</span><p class="q">Our seat is removed at handover, or within 7 days of care ending.</p></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h2><span>Building next, with producers (3)</span><span class="q">in progress</span></h2>
+          <div class="list" id="next"></div>
+        </div>
+
+        <div class="sec">
+          <h2><span>Questions (4)</span></h2>
+          <div class="list" id="faq"></div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="sec">
+          <span class="lbl">How to start</span>
+          <div class="list" id="ladder"></div>
+          <p class="q">Care rolls every 30 days. Cancel any month and everything stays on your accounts.</p>
+          <button class="act" data-go="start" style="justify-self:start">Get started</button>
+        </div>
+        <div class="sec">
+          <span class="lbl">Capacity</span>
+          <p class="q">We take on one new company at a time, so every setup gets proper attention.</p>
+        </div>
+        <div class="sec">
+          <span class="lbl">Contact</span>
+          <a class="act" href="mailto:hello@eltio.studio" style="justify-self:start">hello@eltio.studio</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="v-login" hidden>
+    <div class="login">
+      <form id="loginForm">
+        <span class="lbl">Client login</span>
+        <p class="q">Sign in with your work email. We'll send you a link, no password.</p>
+        <div class="field"><label class="q" for="em">email</label><input id="em" type="email" placeholder="you@company.co.uk" autocomplete="off"></div>
+        <button class="act" type="submit" style="justify-self:start">Send link</button>
+        <p class="q">(Mock: any email opens the sample dashboard.)</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- SIGN UP -->
+  <div id="v-start" hidden>
+    <div class="grid">
+      <div class="main"><div class="sec" id="flow"></div></div>
+      <aside class="side"><div class="sec"><span class="lbl">What happens next</span><p class="q">We book a call within two working days, then the audit. Setup is paid half now, half at handover. Nothing connects until you say so.</p></div></aside>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="v-app" hidden>
+    <div class="tabs" id="tabs"></div>
+    <div id="panel" style="padding-top:20px"></div>
+  </div>
+
+  <div class="foot"><span class="q">©2026 eltio studio</span><span class="q">preview (not live)</span></div>
+</div>
+
+<script>
+(function(){
+var PK=[
+ ["CLIENT LATE-PAYMENT CHASING","aged agency and label invoices, polite then firmer drafts waiting in your gmail","£1,500"],
+ ["CREW AND PRODUCTION EXPENSES","float and crew receipts tagged to job and budget line, filed in one monday batch","£1,250"],
+ ["COST REPORT ACTUALS","supplier invoices and pos matched to budget lines, a draft running cost report","quoted"],
+ ["MONDAY MONEY AND JOBS BRIEF","cash, runway, tax set aside, jobs by stage and who owes what","£2,500"],
+ ["PRODUCTION AND COMPLIANCE CALENDAR","vat, paye, companies house, insurance renewals and payment due dates","£750"],
+ ["BOOKS CATCH-UP","a fixed-price clean-up, ready for your accountant to sign off","£1,500"],
+ ["DECISION MEMOS","kit buy or hire, a lease, a vehicle, a hire, with the numbers shown","£500"]];
+var NEXT=[["CREW INVOICES","crew invoices collected, matched to deal memos and day rates, missing ones chased"],["RISK ASSESSMENTS","sent to crew and locations, signatures tracked against each job"],["KIT","hire lists checked against the budget, returns and damage tracked at wrap"]];
+var LADDER=[["AUDIT","one day, credited against any build","£495"],["PILOT","everything in essentials plus the money brief, first two companies only","£1,500"],["ESSENTIALS","chasing, expenses, calendar","£3,000 + £250/mo"],["FINANCE DESK","essentials, money brief, cost report actuals","£6,000 + £450/mo"]];
+var FAQ=[["CAN CLIENT BUDGETS GO INTO THIS?","everything stays inside your own accounts, with a one-page data map of what connects to what. we sign your nda."],["WE ALREADY HAVE HOT BUDGET AND XERO.","good. we connect them, we don't replace them."],["WILL IT EMAIL OUR CLIENTS BY ITSELF?","never. chases are drafts in your gmail. you read them and press send."],["WHAT IF IT BREAKS MID-JOB?","care covers fixes, with a two-working-day response and a written runbook."]];
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function n(i){return String(i+1).padStart(3,"0")}
+document.getElementById("pk").innerHTML=PK.map(function(p,i){return '<div class="item"><span class="q">'+n(i)+'</span><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span class="p">'+p[2]+'</span></div>'}).join("");
+document.getElementById("ladder").innerHTML=LADDER.map(function(p,i){return '<div class="item" style="grid-template-columns:minmax(0,1fr) auto"><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span class="p">'+p[2]+'</span></div>'}).join("");
+document.getElementById("next").innerHTML=NEXT.map(function(p,i){return '<div class="item"><span class="q">'+n(i)+'</span><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span></span></div>'}).join("");
+document.getElementById("faq").innerHTML=FAQ.map(function(p,i){return '<div class="item"><span class="q">'+n(i)+'</span><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span></span></div>'}).join("");
+
+/* sample client data */
+var INV=[
+ {c:"Agency A",j:"J-118 spring campaign",amt:"£18,400",days:47,stage:"firm",sent:false},
+ {c:"Label B",j:"J-121 music video",amt:"£6,200",days:33,stage:"polite",sent:false},
+ {c:"Agency C",j:"J-109 social cutdowns",amt:"£3,950",days:61,stage:"final",sent:false},
+ {c:"Brand D",j:"J-124 product film",amt:"£9,800",days:12,stage:"none",sent:false}];
+var DRAFT={polite:"Hi, hope the edit's going well. A quick nudge on invoice {j} for {a}, which was due on our 30-day terms. Could you let us know when it's scheduled? Thanks.",firm:"Hi, following up on invoice {j} for {a}, now {d} days old. Could you confirm a payment date this week? Happy to resend anything you need.",final:"Hi, invoice {j} for {a} is now {d} days overdue. Please arrange payment by Friday, or let us know if there's a problem with it."};
+var RC=[["J-121","Van hire, day 2","£240","missing receipt"],["J-121","Art dept float","£180","3 of 5 receipts"],["J-124","Catering","£410","filed"],["J-124","Taxi, crew wrap","£62","filed"],["J-118","Stills printing","£95","missing receipt"]];
+var CAL=[["21 Oct","PAYE and NIC due"],["24 Oct","Agency C payment terms end (J-109)"],["2 Nov","Public liability renewal"],["7 Nov","VAT return and payment"],["14 Nov","Hold on studio, J-127 shoot"]];
+var JOBS=[["Bidding","3"],["Awarded","2"],["Shooting","1"],["Wrapped","2"],["Invoiced","4"],["Paid (30 days)","3"]];
+var SYS=[["Workspace","claude team, 2 seats, billed to you","connected"],["Gmail","drafts only","connected"],["Google Calendar","shared production calendar","connected"],["Xero","standard user, can't approve payments","connected"],["Eltio seat","care access, removed within 7 days of care ending","active"]];
+var RUNS=[["Mon 07:00","Money and jobs brief","ran"],["Mon 07:10","Chase drafts (3 new)","ran"],["Mon 08:00","Receipts batch (2 missing)","ran"],["Daily 06:30","Calendar check","ran"]];
+var TABS=["Overview","Chasing","Receipts","Calendar","Systems"],tab=0,open={};
+
+function overview(){
+ var t='<div class="sec"><h2><span>Monday brief (13 Oct)</span><span class="q">read only</span></h2><div class="kpis">'+
+ [["£42,180","cash in the bank"],["4.6 months","cash runway"],["£11,240","vat and tax set aside"],["£38,350","owed to you (4)"]].map(function(k){return '<div class="kpi tick"><span>'+k[0]+'</span><span class="q">'+k[1]+'</span></div>'}).join("")+'</div></div>';
+ t+='<div class="grid" style="padding-top:0"><div class="main"><div class="sec"><h2><span>Jobs by stage ('+JOBS.length+')</span></h2><div class="list">'+JOBS.map(function(j){return '<div class="row"><span>'+j[0].toUpperCase()+'</span><span>'+j[1]+'</span></div>'}).join("")+'</div></div>';
+ t+='<div class="sec"><h2><span>Waiting for you (3)</span></h2><div class="list">'+
+ ['<div class="row"><span>3 CHASE DRAFTS IN GMAIL</span><button class="act" data-tab="1">Review</button></div>','<div class="row"><span>2 MISSING RECEIPTS ON J-121</span><button class="act" data-tab="2">See</button></div>','<div class="row"><span>PAYE DUE IN 5 DAYS</span><button class="act" data-tab="3">See</button></div>'].join("")+'</div></div></div>';
+ t+='<div class="side"><div class="sec"><h2><span>Last runs</span></h2><div class="list">'+RUNS.map(function(r){return '<div class="row"><span>'+r[1]+'<br><span class="q">'+r[0]+'</span></span><span class="q">'+r[2]+'</span></div>'}).join("")+'</div></div></div></div>';
+ return t;
+}
+function chasing(){
+ var t='<div class="sec"><h2><span>Aged invoices ('+INV.length+')</span><span class="q">nothing sends by itself</span></h2><div class="list">';
+ INV.forEach(function(v,i){
+  var st=v.sent?'<span class="pill"><span class="dot g"></span>Sent by you</span>':v.stage==="none"?'<span class="pill q">Not due</span>':'<button class="act" data-inv="'+i+'">'+(open[i]?'Hide draft':'Read draft')+'</button>';
+  t+='<div class="row"><span>'+esc(v.c).toUpperCase()+' · '+v.amt+'<br><span class="q">'+esc(v.j)+' · '+v.days+' days</span></span>'+st;
+  if(open[i]&&!v.sent){t+='<div class="sub"><p class="draft q">'+esc(DRAFT[v.stage].replace("{j}",v.j.split(" ")[0]).replace("{a}",v.amt).replace("{d}",v.days))+'</p><p class="note"><button class="act" data-send="'+i+'">Mark as sent from Gmail</button></p></div>'}
+  t+='</div>'});
+ return t+'</div><p class="q">Drafts live in your Gmail. This page only shows what is waiting.</p></div>';
+}
+function receipts(){
+ return '<div class="sec"><h2><span>This week\'s batch ('+RC.length+')</span><span class="q">filed in xero mon 08:00</span></h2><div class="list">'+RC.map(function(r){var bad=r[3]!=="filed";return '<div class="row"><span>'+r[0]+' · '+r[1].toUpperCase()+'<br><span class="q">'+r[2]+'</span></span><span class="pill'+(bad?'':' q')+'"><span class="dot'+(bad?'':' g')+'"></span>'+r[3]+'</span></div>'}).join("")+'</div><p class="q">Reply to the monday email with a photo to add a missing receipt.</p></div>';
+}
+function calendar(){
+ return '<div class="sec"><h2><span>Coming up ('+CAL.length+')</span><span class="q">on your shared calendar</span></h2><div class="list">'+CAL.map(function(c){return '<div class="row"><span>'+c[1].toUpperCase()+'</span><span class="q">'+c[0]+'</span></div>'}).join("")+'</div></div>';
+}
+function systems(){
+ return '<div class="sec"><h2><span>Connected ('+SYS.length+')</span><span class="q">all on your accounts</span></h2><div class="list">'+SYS.map(function(s){return '<div class="row"><span>'+s[0].toUpperCase()+'<br><span class="q">'+s[1]+'</span></span><span class="pill"><span class="dot"></span>'+s[2]+'</span></div>'}).join("")+'</div></div>'+
+ '<div class="sec"><h2><span>Care</span></h2><div class="list"><div class="row"><span>ESSENTIALS · £250 A MONTH<br><span class="q">rolls every 30 days, next on 1 nov</span></span><button class="act" id="pause">Pause care</button></div><div class="row"><span>RUNBOOK AND DATA MAP<br><span class="q">what connects to what, and how to switch it off</span></span><button class="act">Open</button></div><div class="row"><span>ASK FOR A CHANGE<br><span class="q">answered within two working days</span></span><a class="act" href="mailto:hello@eltio.studio">Email</a></div></div></div>';
+}
+var F={step:0,plan:1,acc:{}};
+var ACC=[["Email","google workspace or outlook, drafts only"],["Calendar","your shared production calendar"],["Accounts","xero or freeagent, a user that can't approve payments"],["Workspace","the assistant workspace, billed to you"]];
+function drawFlow(){
+ var st=["Pick a start","Connect accounts","Deposit","Done"],t='<h2><span>Get started</span><span class="q">step '+(F.step+1)+' of 3 · '+st[F.step].toLowerCase()+'</span></h2>';
+ if(F.step===0){t+='<div class="list">'+LADDER.map(function(p,i){var on=F.plan===i;return '<button class="item" style="grid-template-columns:24px minmax(0,1fr) auto;text-align:left;cursor:pointer;width:100%" data-plan="'+i+'" aria-pressed="'+on+'"><span>'+(on?'●':'○')+'</span><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span class="p">'+p[2]+'</span></button>'}).join("")+'</div>';
+  t+='<div class="field"><label class="q" for="co">company</label><input id="co" placeholder="company name"></div><div class="field"><label class="q" for="ce">work email</label><input id="ce" type="email" placeholder="you@company.co.uk"></div><button class="act" data-fs="1" style="justify-self:start">Next</button>'}
+ if(F.step===1){t+='<p class="q">Connect now or at the audit. Each one asks you to sign in on that service, we never see a password.</p><div class="list">'+ACC.map(function(a,i){var on=!!F.acc[i];return '<div class="row"><span>'+a[0].toUpperCase()+'<br><span class="q">'+a[1]+'</span></span><button class="act'+(on?' q':'')+'" data-acc="'+i+'">'+(on?'Connected':'Connect')+'</button></div>'}).join("")+'</div><div style="display:flex;gap:18px"><button class="act q" data-fs="0">Back</button><button class="act" data-fs="2">Next</button></div>'}
+ if(F.step===2){var p=LADDER[F.plan],amt=p[2].split(" ")[0],num=+amt.replace(/[£,]/g,""),dep=F.plan===0?amt:"£"+(num/2).toLocaleString("en-GB");
+  t+='<div class="list"><div class="row"><span>'+p[0]+'<br><span class="q">'+p[1]+'</span></span><span>'+p[2]+'</span></div><div class="row"><span>DUE NOW<br><span class="q">'+(F.plan===0?'audit, paid up front and credited against any build':'half the setup, the rest at handover')+'</span></span><span>'+dep+' + vat</span></div></div><div style="display:flex;gap:18px"><button class="act q" data-fs="1">Back</button><button class="act" data-fs="3">Pay deposit</button></div><p class="q">(Mock: no payment is taken.)</p>'}
+ if(F.step===3){t='<h2><span>Thanks</span><span class="q">all done</span></h2><p>We\'ll be in touch within two working days to book your call.</p><p class="q">A receipt and the one-page terms are on their way to your email.</p><button class="act" data-go="home" style="justify-self:start">Back to the start</button>'}
+ document.getElementById("flow").innerHTML=t;
+}
+var VIEWS=[overview,chasing,receipts,calendar,systems];
+function drawApp(){
+ document.getElementById("tabs").innerHTML=TABS.map(function(x,i){return '<button class="'+(i===tab?'on':'')+'" data-tab="'+i+'">'+x+'</button>'}).join("");
+ document.getElementById("panel").innerHTML=VIEWS[tab]();
+}
+function show(v){
+ ["home","login","app","start"].forEach(function(k){document.getElementById("v-"+k).hidden=k!==v});
+ var b=document.getElementById("authBtn");
+ if(v==="start"){F={step:0,plan:1,acc:{}};drawFlow()}
+ if(v==="app"){b.textContent="Sign out";b.dataset.go="home";document.getElementById("where").textContent="your company (sample)";drawApp()}
+ else{b.textContent="Client login";b.dataset.go="login";document.getElementById("where").textContent="eltio studio (systems)"}
+ window.scrollTo(0,0);
+}
+document.addEventListener("click",function(e){
+ var b=e.target.closest("[data-go],[data-tab],[data-inv],[data-send],#pause,[data-plan],[data-acc],[data-fs]");if(!b)return;
+ if(b.dataset.plan!=null){F.plan=+b.dataset.plan;drawFlow();return}
+ if(b.dataset.acc!=null){F.acc[b.dataset.acc]=!F.acc[b.dataset.acc];drawFlow();return}
+ if(b.dataset.fs!=null){F.step=+b.dataset.fs;drawFlow();window.scrollTo(0,0);return}
+ if(b.dataset.go){e.preventDefault();show(b.dataset.go);return}
+ if(b.dataset.tab!=null){tab=+b.dataset.tab;drawApp();window.scrollTo(0,0);return}
+ if(b.dataset.inv!=null){open[b.dataset.inv]=!open[b.dataset.inv];drawApp();return}
+ if(b.dataset.send!=null){INV[+b.dataset.send].sent=true;drawApp();return}
+ if(b.id==="pause"){b.textContent="Paused (mock)";}
+});
+document.getElementById("loginForm").addEventListener("submit",function(e){e.preventDefault();show("app")});
+})();
+</script>
+</body>
+</html>

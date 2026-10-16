@@ -43,8 +43,13 @@ var CFG = window.ELTIO_CONFIG || {};
 var SCOPE = "https://www.googleapis.com/auth/drive.file openid email profile";
 var G = { token: null, exp: 0, client: null, sheetId: null, email: "" };
 var mode = null; /* "google" | "demo" */
-var DEMO_KEY = "eltio-systems-demo-2";
+var DEMO_KEY = "eltio-systems-demo-3";
 
+/* A year of paid work so the graphs have something to show in sample mode. */
+function history(d) {
+  var C = ["Northlight Films", "Studio Kite", "Field Records", "Ironbridge Pictures", "Harbour Drama", "Moth & Co"], A = [1950, 1300, 2600, 650, 3250, 1950, 1300, 2275, 1950, 3900, 650, 1300, 2600, 1950], L = [24, 41, 12, 30, 55, 19, 28, 9, 35, 47, 21, 14, 33, 26];
+  return A.map(function (a, i) { var iss = -80 - i * 21; return { id: "h" + i, booking: "", number: "INV-2025-" + String(40 + i), client: C[i % C.length], contact: "", amount: String(a), issued: d(iss), due: d(iss + 30), paid: d(iss + L[i]), notes: "" }; });
+}
 function sample() {
   var t = today(), d = function (n) { return iso(addDays(t, n)); };
   return {
@@ -62,7 +67,7 @@ function sample() {
       { id: "i1", booking: "b4", number: "INV-2026-014", client: "Northlight Films", contact: "pm@example.com", amount: "1300", issued: d(-33), due: d(-3 - 30 + 30 - 8), paid: "", notes: "" },
       { id: "i2", booking: "", number: "INV-2026-013", client: "Studio Kite", contact: "hello@example.com", amount: "2400", issued: d(-70), due: d(-40), paid: "", notes: "" },
       { id: "i3", booking: "", number: "INV-2026-012", client: "Field Records", contact: "producer@example.com", amount: "1800", issued: d(-50), due: d(-20), paid: d(-12), notes: "" }
-    ],
+    ].concat(history(d)),
     expenses: [],
     days: [
       { id: "d1", booking: "b6", date: d(-3), type: "Normal", call: "06:30", lunchAt: "13:15", lunch: "1 hour", wrap: "20:00", miles: "38", adjust: "", source: "Call sheet", notes: "" },
@@ -342,6 +347,40 @@ function field(id, label, val, type, ph, extra) { return '<div class="field"><la
 function val(id) { var e = $(id); return e ? e.value.trim() : ""; }
 function picked(name) { var b = $("sheet").querySelector('[data-pick="' + name + '"][aria-pressed="true"]') || document.querySelector('main [data-pick="' + name + '"][aria-pressed="true"]'); return b ? b.dataset.v : ""; }
 
+
+/* ---------- graphs ---------- */
+function months() {
+  var t = today(), out = [];
+  for (var i = 11; i >= 0; i--) { var m = new Date(t.getFullYear(), t.getMonth() - i, 1); out.push({ y: m.getFullYear(), m: m.getMonth(), paid: 0, open: 0, late: 0 }); }
+  D.invoices.forEach(function (v) {
+    var d = parse(v.issued); if (!d) return;
+    var o = out.find(function (x) { return x.y === d.getFullYear() && x.m === d.getMonth(); }); if (!o) return;
+    var a = num(v.amount), du = parse(v.due);
+    if (v.paid) o.paid += a; else if (du && du < today()) o.late += a; else o.open += a;
+  });
+  return out;
+}
+function barChart(compact) {
+  var M = months(), max = Math.max.apply(null, M.map(function (x) { return x.paid + x.open + x.late; }).concat([1])), W = 600, H = compact ? 90 : 170, top = 8, base = H - (compact ? 4 : 22), bw = W / 12;
+  var bars = M.map(function (x, i) {
+    var X = i * bw + bw * .18, w = bw * .64, y = base, seg = function (v, cls) { if (!v) return ""; var h = (base - top) * v / max; y -= h; return '<rect class="' + cls + '" x="' + X.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3"></rect>'; };
+    var tot = x.paid + x.open + x.late;
+    return "<g><title>" + MON[x.m] + " " + x.y + ": " + money(tot) + " invoiced" + (x.late ? ", " + money(x.late) + " late" : "") + "</title>" + seg(x.paid, "b-paid") + seg(x.open, "b-open") + seg(x.late, "b-late") +
+      (compact ? "" : '<text x="' + (i * bw + bw / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + MON[x.m].charAt(0) + "</text>") + "</g>";
+  }).join("");
+  var tot = M.reduce(function (a, x) { return a + x.paid + x.open + x.late; }, 0), best = M.reduce(function (a, x) { return x.paid + x.open + x.late > a.paid + a.open + a.late ? x : a; }, M[0]);
+  return '<div class="chart"><svg viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" role="img" aria-label="Invoiced each month for the last 12 months">' + bars + "</svg>" +
+    '<div class="legend"><span><i class="b-paid"></i>Paid</span><span><i class="b-open"></i>Waiting</span><span><i class="b-late"></i>Late</span><span class="q">' + money(tot / 12) + " a month on average" + (tot ? ", best " + MON[best.m] : "") + "</span></div></div>";
+}
+function slowPayers() {
+  var by = {};
+  D.invoices.forEach(function (v) { var i = parse(v.issued), p = parse(v.paid); if (!i || !p) return; var c = by[v.client] = by[v.client] || { n: 0, days: 0, total: 0 }; c.n++; c.days += daysBetween(i, p); c.total += num(v.amount); });
+  var L = Object.keys(by).map(function (k) { return { c: k, avg: Math.round(by[k].days / by[k].n), total: by[k].total }; }).sort(function (a, b) { return b.avg - a.avg; });
+  if (!L.length) return '<p class="empty">Once invoices are paid you\'ll see who pays fastest here.</p>';
+  var max = Math.max.apply(null, L.map(function (x) { return x.avg; })), terms = num(D.settings.terms) || 30;
+  return '<div class="rows">' + L.slice(0, 6).map(function (x) { return '<div class="row static"><span>' + esc(x.c) + ' <span class="q">· ' + money(x.total) + '</span></span><span class="tag' + (x.avg > terms ? " amb" : "") + '">' + x.avg + ' days</span><span class="sub"><span class="hbar"><i style="width:' + Math.round(x.avg / max * 100) + '%"' + (x.avg > terms ? ' class="amb"' : "") + "></i></span></span></div>"; }).join("") + "</div>";
+}
+
 /* ---------- screens ---------- */
 function welcome() {
   var hasG = !!CFG.googleClientId;
@@ -368,10 +407,36 @@ function home() {
   var s = D.settings, L = todo(), up = D.bookings.filter(function (b) { var d = parse(b.end || b.start); return b.status !== "Cancelled" && d && d >= today(); }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
   return '<div class="top"><span class="q">' + nice(iso(today())) + (mode === "demo" ? " · sample data" : "") + '</span><span class="q">' + (busy ? "Saving…" : "") + "</span></div>" +
-    "<h2>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h2><p class=\"q\">" + (L.length ? L.length + " thing" + (L.length > 1 ? "s" : "") + " need" + (L.length > 1 ? "" : "s") + " you." : "Nothing needs you.") + " " + conf + " booked, " + holds + " on hold.</p>" +
-    '<div class="kpis"><div class="kpi"><b>' + money(owed()) + '</b><span class="q">Owed to you</span></div><div class="kpi' + (od ? " amb" : "") + '"><b>' + money(od) + '</b><span class="q">Overdue</span></div><div class="kpi"><b>' + money(bookedThisMonth()) + '</b><span class="q">Booked this month</span></div><div class="kpi"><b>' + money(paidThisYear() * num(s.tax || 25) / 100) + '</b><span class="q">Tax to put aside</span></div></div>' +
-    '<div class="two"><div class="stack"><div class="part">For you</div><div class="rows">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear.</p>') + "</div></div>" +
-    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(bookingRow).join("") : '<p class="empty">Nothing booked yet.</p>') + '</div><button class="lnk" data-addbooking>Add a booking</button></div></div>';
+    "<h2>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h2>" +
+    '<div class="lead"><span class="q">Owed to you</span><b>' + money(owed()) + "</b><span>" + (od ? '<span class="late">' + money(od) + " late</span> · " : "") + conf + " booked · " + holds + " on hold</span></div>" +
+    '<div class="two"><div class="stack">' + starter() + '<div class="part">For you</div><div class="rows">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div></div>" +
+    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(bookingRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div>" +
+    '<div class="sum"><div><span class="q">Booked this month</span><span>' + money(bookedThisMonth()) + '</span></div><div><span class="q">Tax to put aside</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + "</span></div></div>" + '<button class="row-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div></div>";
+}
+/* First steps: sample data gets things to try, a real account gets its setup checklist. */
+function flag(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
+function starter() {
+  if (flag("eltio-systems-starter-off")) return "";
+  var steps;
+  if (mode === "demo") steps = [
+    { t: "Write the chase for a late invoice", sub: "Studio Kite is 40 days late. The email is already drafted.", a: 'data-todo="chase" data-id="i2"' },
+    { t: "Open a timesheet with overtime", sub: "A two-day car commercial on APA terms, worked out line by line.", a: 'data-timesheet="b6"' },
+    { t: "Ask a hold to confirm", sub: "One tap drafts the nudge to the production.", a: 'data-todo="hold" data-id="b2"' }
+  ];
+  else {
+    var cb = D.bookings.find(function (b) { return b.status === "Confirmed"; });
+    steps = [
+      { t: "Add your next job or hold", sub: "Holds get a nudge before the date.", a: "data-addbooking", done: D.bookings.length > 0 },
+      { t: "Log a day's hours", sub: "Call and wrap in, overtime out, on APA or Bectu terms.", a: cb ? 'data-timesheet="' + cb.id + '"' : "data-addbooking", done: D.days.length > 0 },
+      { t: "Add an invoice you're waiting on", sub: "We'll tell you when it's late and draft the chase.", a: "data-addinvoice", done: D.invoices.length > 0 },
+      { t: "Put it on your home screen", sub: "So it opens like an app on your phone.", a: "data-howphone", done: !!flag("eltio-systems-phone") || matchMedia("(display-mode: standalone)").matches }
+    ];
+    if (steps.every(function (x) { return x.done; })) return "";
+  }
+  var n = steps.filter(function (x) { return x.done; }).length;
+  return '<div class="part">' + (mode === "demo" ? "Try it" : "Get set up · " + n + " of " + steps.length) + '</div><div class="rows starter">' + steps.map(function (x) {
+    return '<button class="row' + (x.done ? " done" : "") + '" ' + x.a + '><span><i class="ck"></i>' + esc(x.t) + '</span><span class="q">' + (x.done ? "Done" : "→") + '</span><span class="sub">' + esc(x.sub) + "</span></button>";
+  }).join("") + '</div><button class="lnk" data-starteroff>Hide this</button>';
 }
 function bookingRow(b) { return '<button class="row" data-booking="' + b.id + '"><span>' + esc(b.production || "Booking") + ' <span class="q">· ' + esc(b.client) + ", " + niceRange(b.start, b.end) + '</span></span><span class="tag' + (b.status === "Confirmed" ? " ink" : "") + '">' + esc(isDone(b) ? (invoiced(b.id) ? "Invoiced" : "Done") : b.status) + "</span></button>"; }
 function bookings() {
@@ -387,15 +452,16 @@ function moneyScr() {
   var s = D.settings, open = outstanding().sort(function (a, b) { return a.due < b.due ? -1 : 1; }), paid = D.invoices.filter(function (v) { return v.paid; }).sort(function (a, b) { return a.paid < b.paid ? 1 : -1; });
   var r12 = rolling12(), od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0);
   return '<div class="top"><span>Money</span><button class="lnk" data-addinvoice>New invoice</button></div><h2>What you\'re owed.</h2>' +
+    '<div class="part">Last 12 months</div>' + barChart(false) +
     '<div class="kpis"><div class="kpi"><b>' + money(owed()) + '</b><span class="q">Owed, ' + open.length + " invoice" + (open.length === 1 ? "" : "s") + '</span></div><div class="kpi' + (od ? " amb" : "") + '"><b>' + money(od) + '</b><span class="q">Overdue</span></div></div>' +
     '<div class="two"><div class="stack"><div class="part">Unpaid</div><div class="rows">' + (open.length ? open.map(invoiceRow).join("") : '<p class="empty">Nothing outstanding.</p>') + '</div><div class="part">Paid</div><div class="rows">' + (paid.length ? paid.slice(0, 10).map(invoiceRow).join("") : '<p class="empty">None yet.</p>') + "</div></div>" +
-    '<div class="stack"><div class="part">Tax and VAT</div><div class="sum"><div><span class="q">Paid since 6 April</span><span>' + money(paidThisYear()) + '</span></div><div><span class="q">Put aside (' + esc(s.tax || 25) + '%)</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + '</span></div><div><span class="q">Invoiced, last 12 months</span><span>' + money(r12) + ' of £90,000</span></div></div><div class="bar"><i style="width:' + Math.min(100, r12 / 900) + '%"></i></div><p class="q">£90,000 in 12 months is the VAT line. This is a guide, not tax advice.</p></div></div>';
+    '<div class="stack"><div class="part">How fast they pay</div>' + slowPayers() + '<div class="part">Tax and VAT</div><div class="sum"><div><span class="q">Paid since 6 April</span><span>' + money(paidThisYear()) + '</span></div><div><span class="q">Put aside (' + esc(s.tax || 25) + '%)</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + '</span></div><div><span class="q">Invoiced, last 12 months</span><span>' + money(r12) + ' of £90,000</span></div></div><div class="bar"><i style="width:' + Math.min(100, r12 / 900) + '%"></i></div><p class="q">£90,000 in 12 months is the VAT line. This is a guide, not tax advice.</p></div></div>';
 }
 function more() {
   var s = D.settings;
   return '<div class="top"><span>You</span><span></span></div><h2>' + esc(s.name || "Your account") + "</h2>" +
     '<div class="sum"><div><span class="q">Signed in</span><span>' + (mode === "demo" ? "Sample data, this browser only" : esc(G.email || "Google")) + '</span></div><div><span class="q">Your data</span><span>' + (mode === "demo" ? "Not saved to Drive" : "In your Google Drive") + '</span></div><div><span class="q">Day rate</span><span>' + money(num(s.rate)) + '</span></div><div><span class="q">Terms</span><span>' + esc(s.terms || 30) + ' days</span></div><div><span class="q">Email</span><span>' + esc(s.mail || "Gmail") + '</span></div><div><span class="q">Agent</span><span>' + (s.hasAgent === "Yes" ? esc(s.agent || "Yes") : "None") + "</span></div></div>" +
-    '<div class="acts"><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
+    '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
     '<div class="part">Your data</div><p class="q">Everything is in one Google Sheet in your Drive, which you own and can edit or delete. Eltio can only see files this app made, and keeps no copy. Nothing is ever sent for you: drafts open in your own email.</p>' +
     '<div class="acts"><button class="btn" data-signout>' + (mode === "demo" ? "Leave sample data" : "Sign out") + "</button>" + (mode === "demo" ? '<button class="lnk" data-resetdemo>Reset sample data</button>' : "") + "</div>" + '<p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>';
@@ -482,12 +548,47 @@ function showDraft(kind, id) {
   openSheet(draftSheet(DRAFT, { chase: "Chase draft", hold: b && b.agent && D.settings.agentEmail ? "Draft to your agent" : "Ask them to confirm", confirm: "Booking confirmation", invoice: "Invoice email" }[kind]));
 }
 
+
+/* ---------- the walkthrough: five short animated screens on first open, replayable from You ---------- */
+var TOUR = [
+  { h: "See what you're owed.", p: "Every invoice, what's late and what's coming up, the moment you open it.", k: "money" },
+  { h: "Chasing, already written.", p: "When a payment's late the email is drafted in the right tone for how late it is. You check it and press send.", k: "chase" },
+  { h: "Holds that don't hang.", p: "Pencils and holds get a nudge before the date, to the production or to your agent.", k: "hold" },
+  { h: "Overtime you'd miss.", p: "Log call and wrap. APA and Bectu rules work out the rest, line by line, ready to send for approval.", k: "ot" },
+  { h: "Your data stays yours.", p: "Everything lives in one Google Sheet in your own Drive. Your phone and laptop always match.", k: "drive" }
+];
+var tourI = 0, tourT = [];
+function later(fn, ms) { tourT.push(setTimeout(fn, ms)); }
+function countUp(el, to, ms, dp) { if (!el) return; var t0 = performance.now(); (function f(t) { var k = Math.min(1, (t - t0) / ms), v = to * (1 - Math.pow(1 - k, 3)); el.textContent = "£" + v.toLocaleString("en-GB", { minimumFractionDigits: dp || 0, maximumFractionDigits: dp || 0 }); if (k < 1 && $("tour")) tourT.push(requestAnimationFrame(f)); })(t0); }
+function stage(k) {
+  if (k === "money") return '<div class="st-money"><span class="q">Owed to you</span><b id="tc">£0</b><div class="rows"><div class="row static tin" style="--d:.5s"><span>Studio Kite <span class="q">· 40 days late</span></span><span class="tag amb">£2,400</span></div><div class="row static tin" style="--d:.8s"><span>Northlight Films <span class="q">· due Friday</span></span><span class="tag ink">£1,300</span></div><div class="row static tin" style="--d:1.1s"><span>Field Records <span class="q">· paid</span></span><span class="tag">£1,800</span></div></div></div>';
+  if (k === "chase") return '<div class="rows"><div class="row static"><span>Chase Studio Kite, £2,400</span><span class="tag amb">40 days late</span></div></div><div class="glass mail tin" style="--d:.4s"><span class="q">To: hello@studiokite.co</span><p id="ty"></p></div><span class="btn solid pulse tin" style="--d:2.6s">Open in Gmail</span>';
+  if (k === "hold") return '<div class="rows"><div class="row static"><span>Music video <span class="q">· Thu 23 Oct</span></span><span class="tag" id="hs">First hold</span></div><div class="row static tin" style="--d:.9s"><span class="q">Nudge drafted: "Could you confirm or release by Monday?"</span><span></span></div></div><div class="rows tin" style="--d:2.2s"><div class="row static"><span>Branded film <span class="q">· via your agent</span></span><span class="tag">Second hold</span></div></div>';
+  if (k === "ot") return '<div class="sum ot"><div class="tin" style="--d:.2s"><span class="q">Day rate</span><span>£650</span></div><div class="tin" style="--d:.7s"><span class="q">Early call before 07:00</span><span>£40.63</span></div><div class="tin" style="--d:1.2s"><span class="q">Overtime, 2.5 hrs at 1.25x</span><span>£203.13</span></div><div class="tin" style="--d:1.7s"><span class="q">Late break</span><span>£10</span></div><div class="tin" style="--d:2.2s"><span>Day total</span><span id="tc">£0</span></div></div><p class="q tin" style="--d:2.4s">APA crew terms · Pact/Bectu TV drama · flat rate</p>';
+  return '<div class="st-drive"><div class="dev ph"><i class="tin" style="--d:.4s"></i><i class="tin" style="--d:.6s"></i><i class="tin new" style="--d:1.2s"></i></div><div class="sync tin" style="--d:1.5s">⇄</div><div class="dev lap"><i class="tin" style="--d:.4s"></i><i class="tin" style="--d:.6s"></i><i class="tin new" style="--d:1.9s"></i></div></div><p class="q tin" style="--d:2.2s">Eltio Systems · a sheet in your Google Drive</p>';
+}
+function tourHtml() {
+  var t = TOUR[tourI], last = tourI === TOUR.length - 1;
+  return '<div class="tour-in"><div class="top"><span class="q">' + (tourI + 1) + " of " + TOUR.length + '</span><button class="lnk" data-tourend>Skip</button></div><div class="stage glass">' + stage(t.k) + "</div><h1>" + esc(t.h) + '</h1><p class="q">' + esc(t.p) + '</p><div class="dots">' + TOUR.map(function (x, i) { return '<i class="' + (i === tourI ? "on" : "") + '"></i>'; }).join("") + '</div><div class="acts">' + (tourI ? '<button class="btn" data-tourback>Back</button>' : "") + '<button class="btn solid wide" data-tournext>' + (last ? (mode === "demo" ? "Try it with the sample data" : "Get started") : "Next") + "</button></div></div>";
+}
+function showTour(i) {
+  tourT.forEach(function (x) { clearTimeout(x); cancelAnimationFrame(x); }); tourT = [];
+  tourI = i; var el = $("tour"); if (!el) { el = document.createElement("div"); el.id = "tour"; el.className = "tour"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); document.body.appendChild(el); }
+  el.innerHTML = tourHtml(); var k = TOUR[i].k;
+  if (k === "money") countUp($("tc"), 3700, 1100);
+  if (k === "ot") later(function () { countUp($("tc"), 903.76, 900, 2); }, 2200);
+  if (k === "chase") { var txt = "Hi, following up on invoice INV-2026-013 for £2,400, now 40 days past its due date. Could you confirm a payment date this week?", n = 0; later(function f() { var p = $("ty"); if (!p) return; p.textContent = txt.slice(0, n += 3); if (n < txt.length) later(f, 28); }, 700); }
+  if (k === "hold") { later(function () { var h = $("hs"); if (h) h.textContent = "Asked to confirm"; }, 1300); later(function () { var h = $("hs"); if (h) { h.textContent = "Confirmed"; h.className = "tag ink"; } }, 2600); }
+}
+function endTour() { tourT.forEach(function (x) { clearTimeout(x); cancelAnimationFrame(x); }); tourT = []; var el = $("tour"); if (el) el.remove(); flag("eltio-systems-tour-1", "1"); }
+
 /* ---------- render ---------- */
 var VIEWS = { home: home, bookings: bookings, money: moneyScr, more: more };
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
   $("main").innerHTML = !signedIn ? welcome() : !ready ? setup() : VIEWS[S.tab]();
+  if (ready && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
   $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
   $("tabs").innerHTML = ready ? '<nav class="tabs" aria-label="Sections">' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><i></i>' + TABN[t] + (t === "home" && n ? '<span class="badge">' + n + "</span>" : "") + "</button>"; }).join("") + '</nav><button class="fab" data-addbooking aria-label="Add a booking">+</button>' : "";
@@ -518,6 +619,12 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
+  if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
+  if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
+  if (b.hasAttribute("data-tourend")) { endTour(); return; }
+  if (b.hasAttribute("data-tour")) { showTour(0); return; }
+  if (b.hasAttribute("data-starteroff")) { flag("eltio-systems-starter-off", "1"); render(); return; }
+  if (b.hasAttribute("data-howphone")) { flag("eltio-systems-phone", "1"); openSheet('<h2>Put it on your home screen</h2><div class="sum"><div><span class="q">iPhone</span><span>Safari, Share, Add to Home Screen</span></div><div><span class="q">Android</span><span>Chrome menu, Install app</span></div></div><p class="q">Then sign in with the same Google account on your laptop. Both read the same sheet, so they always match.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>'); render(); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }
   if (b.hasAttribute("data-signin")) { b.disabled = true; startGoogle(false).catch(function (er) { b.disabled = false; banner("Sign-in didn't finish: " + (er.message || er)); }); return; }
   if (b.hasAttribute("data-signout")) { if (mode === "google" && G.token && window.google) { try { google.accounts.oauth2.revoke(G.token, function () {}); } catch (x) {} } try { localStorage.removeItem("eltio-systems-signed-in"); } catch (x) {} mode = null; G = { token: null, exp: 0, client: null, sheetId: null, email: "" }; S.tab = "home"; render(); return; }
@@ -559,7 +666,7 @@ document.addEventListener("click", function (e) {
   if (d.markpaid || d.markunpaid) { var x = Object.assign({}, D.invoices.find(function (z) { return z.id === (d.markpaid || d.markunpaid); })); x.paid = d.markpaid ? iso(today()) : ""; closeSheet(); upsert("Invoices", x).then(function () { banner(d.markpaid ? "Marked as paid." : "Marked as unpaid."); }); return; }
   if (d.delinvoice) { if (!confirm("Delete this invoice record?")) return; closeSheet(); remove("Invoices", d.delinvoice).then(function () { banner("Deleted."); }); return; }
 });
-document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if ($("tour")) endTour(); else closeSheet(); } });
 document.addEventListener("input", function (e) { if (e.target.closest && e.target.closest("#sheet")) liveCalc(); });
 /* Pick up changes made on another device when the app comes back into view. */
 document.addEventListener("visibilitychange", function () { if (!document.hidden) { paintSky(); refresh(); } });

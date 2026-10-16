@@ -28,43 +28,52 @@ function paintSky() { var p = phase(); document.documentElement.dataset.sky = p;
 
 /* ---------- data shape (also the columns of each sheet tab) ---------- */
 var TABS = {
-  Bookings: ["id", "start", "end", "client", "production", "contact", "status", "rate", "days", "agent", "notes"],
+  Bookings: ["id", "start", "end", "client", "production", "contact", "status", "rate", "days", "agent", "notes", "terms", "kit", "extra", "po"],
   Invoices: ["id", "booking", "number", "client", "contact", "amount", "issued", "due", "paid", "notes"],
   Expenses: ["id", "date", "booking", "item", "amount", "notes"],
+  Days: ["id", "booking", "date", "type", "call", "lunchAt", "lunch", "wrap", "miles", "adjust", "source", "notes"],
   Settings: ["key", "value"]
 };
-var KEY = { Bookings: "bookings", Invoices: "invoices", Expenses: "expenses" };
+var KEY = { Bookings: "bookings", Invoices: "invoices", Expenses: "expenses", Days: "days" };
 var STATUSES = ["Pencil", "First hold", "Second hold", "Confirmed", "Cancelled"];
-var D = { bookings: [], invoices: [], expenses: [], settings: {} };
+var D = { bookings: [], invoices: [], expenses: [], days: [], settings: {} };
 
 /* ---------- store: Google Sheets, or sample data in this browser ---------- */
 var CFG = window.ELTIO_CONFIG || {};
 var SCOPE = "https://www.googleapis.com/auth/drive.file openid email profile";
 var G = { token: null, exp: 0, client: null, sheetId: null, email: "" };
 var mode = null; /* "google" | "demo" */
-var DEMO_KEY = "eltio-systems-demo-1";
+var DEMO_KEY = "eltio-systems-demo-2";
 
 function sample() {
   var t = today(), d = function (n) { return iso(addDays(t, n)); };
   return {
-    settings: { name: "", trading: "", role: "DP", rate: "650", terms: "30", tax: "25", mail: "Gmail", hasAgent: "No", agent: "", agentEmail: "", invoicePrefix: "INV" },
+    settings: { name: "", trading: "", role: "DP", rate: "650", terms: "30", tax: "25", mileage: "45", mail: "Gmail", hasAgent: "No", agent: "", agentEmail: "", invoicePrefix: "INV" },
     bookings: [
       { id: "b1", start: d(12), end: d(13), client: "Northlight Films", production: "Commercial", contact: "pm@example.com", status: "Confirmed", rate: "650", days: "2", agent: "", notes: "" },
       { id: "b2", start: d(7), end: "", client: "Field Records", production: "Music video", contact: "producer@example.com", status: "First hold", rate: "650", days: "1", agent: "", notes: "Second hold from another job the same day" },
       { id: "b3", start: d(19), end: "", client: "Studio Kite", production: "Branded film", contact: "hello@example.com", status: "Second hold", rate: "650", days: "1", agent: "yes", notes: "" },
-      { id: "b4", start: d(-35), end: d(-34), client: "Northlight Films", production: "Commercial", contact: "pm@example.com", status: "Confirmed", rate: "650", days: "2", agent: "", notes: "" },
-      { id: "b5", start: d(-6), end: "", client: "Field Records", production: "Music video", contact: "producer@example.com", status: "Confirmed", rate: "650", days: "1", agent: "", notes: "" }
+      { id: "b4", start: d(-35), end: d(-34), client: "Northlight Films", production: "Commercial", contact: "pm@example.com", status: "Confirmed", rate: "650", days: "2", agent: "", notes: "", terms: "APA" },
+      { id: "b5", start: d(-6), end: "", client: "Field Records", production: "Music video", contact: "producer@example.com", status: "Confirmed", rate: "650", days: "1", agent: "", notes: "", terms: "Flat day" },
+      { id: "b6", start: d(-3), end: d(-2), client: "Ironbridge Pictures", production: "Car commercial", contact: "pm@example.com", status: "Confirmed", rate: "650", days: "2", agent: "", notes: "", terms: "APA", kit: "150", po: "PO-4471" },
+      { id: "b7", start: d(-10), end: d(-9), client: "Harbour Drama", production: "TV drama, second unit", contact: "payroll@example.com", status: "Confirmed", rate: "420", days: "2", agent: "", notes: "", terms: "TV drama" }
     ],
     invoices: [
       { id: "i1", booking: "b4", number: "INV-2026-014", client: "Northlight Films", contact: "pm@example.com", amount: "1300", issued: d(-33), due: d(-3 - 30 + 30 - 8), paid: "", notes: "" },
       { id: "i2", booking: "", number: "INV-2026-013", client: "Studio Kite", contact: "hello@example.com", amount: "2400", issued: d(-70), due: d(-40), paid: "", notes: "" },
       { id: "i3", booking: "", number: "INV-2026-012", client: "Field Records", contact: "producer@example.com", amount: "1800", issued: d(-50), due: d(-20), paid: d(-12), notes: "" }
     ],
-    expenses: []
+    expenses: [],
+    days: [
+      { id: "d1", booking: "b6", date: d(-3), type: "Normal", call: "06:30", lunchAt: "13:15", lunch: "1 hour", wrap: "20:00", miles: "38", adjust: "", source: "Call sheet", notes: "" },
+      { id: "d2", booking: "b6", date: d(-2), type: "Normal", call: "07:00", lunchAt: "12:30", lunch: "1 hour", wrap: "00:30", miles: "38", adjust: "", source: "AD's times", notes: "" },
+      { id: "d3", booking: "b7", date: d(-10), type: "Normal", call: "07:00", lunchAt: "", lunch: "1 hour", wrap: "19:45", miles: "", adjust: "", source: "Call sheet", notes: "" },
+      { id: "d4", booking: "b7", date: d(-9), type: "Normal", call: "06:00", lunchAt: "", lunch: "Semi-continuous", wrap: "23:30", miles: "", adjust: "", source: "My own", notes: "" }
+    ]
   };
 }
 
-function demoLoad() { try { var s = JSON.parse(localStorage.getItem(DEMO_KEY) || "null"); if (s && s.settings) return s; } catch (e) {} return sample(); }
+function demoLoad() { try { var s = JSON.parse(localStorage.getItem(DEMO_KEY) || "null"); if (s && s.settings) { s.days = s.days || []; return s; } } catch (e) {} return sample(); }
 function demoSave() { try { localStorage.setItem(DEMO_KEY, JSON.stringify(D)); } catch (e) {} }
 
 /* Google sign-in (Google Identity Services, token model). The token lives in memory only. */
@@ -107,6 +116,15 @@ function createSheet(title) {
     })
     .then(function () { return api(SHEETS + G.sheetId + "/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: Object.keys(TABS).map(function (t) { return { range: t + "!A1", values: [TABS[t]] }; }) } }); })
     .then(function () { return G.sheetId; });
+}
+/* Sheets made by an earlier version get any new tabs added, with their headings. */
+function ensureTabs() {
+  return api(SHEETS + G.sheetId + "?fields=sheets.properties.title").then(function (r) {
+    var have = (r.sheets || []).map(function (x) { return x.properties.title; }), miss = Object.keys(TABS).filter(function (t) { return have.indexOf(t) < 0; });
+    if (!miss.length) return;
+    return api(SHEETS + G.sheetId + ":batchUpdate", { method: "POST", body: { requests: miss.map(function (t) { return { addSheet: { properties: { title: t, gridProperties: { frozenRowCount: 1 } } } }; }) } })
+      .then(function () { return api(SHEETS + G.sheetId + "/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: miss.map(function (t) { return { range: t + "!A1", values: [TABS[t]] }; }) } }); });
+  });
 }
 function rowsToObjs(tab, values) {
   var cols = TABS[tab], head = (values && values[0]) || cols;
@@ -158,7 +176,8 @@ function taxYearStart() { var t = today(), y = t.getMonth() > 3 || (t.getMonth()
 function paidThisYear() { var s = taxYearStart(); return D.invoices.filter(function (v) { var p = parse(v.paid); return p && p >= s; }).reduce(function (a, v) { return a + num(v.amount); }, 0); }
 function rolling12() { var s = addDays(today(), -365); return D.invoices.filter(function (v) { var d = parse(v.issued); return d && d >= s; }).reduce(function (a, v) { return a + num(v.amount); }, 0); }
 function bookedThisMonth() { var t = today(); return D.bookings.filter(function (b) { var d = parse(b.start); return b.status === "Confirmed" && d && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear(); }).reduce(function (a, b) { return a + num(b.rate) * Math.max(1, num(b.days)); }, 0); }
-function bookingValue(b) { return num(b.rate) * Math.max(1, num(b.days) || 1); }
+function bookingValue(b) { return daysFor(b.id).length ? sheetCalc(b).total : num(b.rate) * Math.max(1, num(b.days) || 1); }
+function isPaye(b) { return b.terms === "TV drama"; }
 function invoiced(bid) { return D.invoices.some(function (v) { return v.booking === bid; }); }
 function nextInvoiceNumber() { var y = today().getFullYear(), pre = (D.settings.invoicePrefix || "INV") + "-" + y + "-", n = 0; D.invoices.forEach(function (v) { var m = String(v.number).indexOf(pre) === 0 ? parseInt(String(v.number).slice(pre.length), 10) : 0; if (m > n) n = m; }); return pre + String(n + 1).padStart(3, "0"); }
 
@@ -167,8 +186,118 @@ function todo() {
   var t = today(), L = [];
   overdue().forEach(function (v) { var n = daysBetween(parse(v.due), t); L.push({ k: "chase", id: v.id, t: "Chase " + v.client + ", " + money(num(v.amount)), tag: n + " days late", amb: 1 }); });
   D.bookings.filter(isHold).forEach(function (b) { var d = parse(b.start); if (d && d >= t && daysBetween(t, d) <= 10) L.push({ k: "hold", id: b.id, t: (b.status === "Pencil" ? "Pencil" : b.status) + ": " + b.production + ", " + nice(b.start), tag: "Ask to confirm" }); });
-  D.bookings.filter(function (b) { return isDone(b) && !invoiced(b.id); }).forEach(function (b) { L.push({ k: "invoice", id: b.id, t: "Invoice " + b.client + " for " + b.production, tag: money(bookingValue(b)) }); });
+  D.bookings.filter(function (b) { return isDone(b) && !invoiced(b.id); }).forEach(function (b) {
+    var logged = daysFor(b.id).length, needsHours = (b.terms === "APA" || isPaye(b)) && !logged;
+    if (needsHours) L.push({ k: "hours", id: b.id, t: "Log your hours for " + b.production, tag: niceRange(b.start, b.end) });
+    else if (!isPaye(b)) L.push({ k: "invoice", id: b.id, t: "Invoice " + b.client + " for " + b.production, tag: money(bookingValue(b)) });
+  });
   return L;
+}
+
+
+/* ---------- timesheets: hours in, money out ----------
+   Three rule sets. Figures come from the APA Crew Terms (Sept 2026) and the Pact/Bectu TV Drama Agreement 2023 as
+   summarised in our research; they still need checking against the source PDFs. Every line shows its working and
+   the person can add an adjustment, so the timesheet stays their own declaration. */
+var TERMS = ["APA", "TV drama", "Flat day"];
+var TERMN = { "APA": "APA crew terms (commercials)", "TV drama": "Pact/Bectu TV drama (PAYE)", "Flat day": "Flat day rate, all in" };
+var LUNCH = { "APA": ["1 hour", "30 min", "None"], "TV drama": ["1 hour", "Semi-continuous", "Continuous"], "Flat day": ["1 hour", "30 min", "None"] };
+var DAYTYPE = { "APA": ["Normal", "Bank holiday", "Prep or recce"], "TV drama": ["Normal", "6th day"], "Flat day": ["Normal"] };
+var SOURCES = ["Call sheet", "AD's times", "My own"];
+var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+function tm(s) { var m = /^(\d{1,2}):(\d{2})/.exec(s || ""); return m ? +m[1] * 60 + +m[2] : null; }
+function hm(m) { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); }
+function roundUp(m, inc) { return Math.ceil(m / inc) * inc; }
+function hrs(m) { var h = Math.round(m / 60 * 100) / 100; return h + (h === 1 ? " hr" : " hrs"); }
+function pounds(n) { return "£" + (Math.round(n * 100) / 100).toLocaleString("en-GB", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
+function dayLabel(s) { var d = parse(s); return d ? DOW[d.getDay()] + " " + nice(s) : ""; }
+/* APA overtime rate depends on the day rate band. */
+function apaBand(rate) { return rate <= 458 ? { m: 1.5, t: "up to £458" } : rate <= 696 ? { m: 1.25, t: "£459 to £696" } : { m: 1, t: "£697 and up" }; }
+function termsLine(b) {
+  var R = num(b.rate), hr = R / 10;
+  if (b.terms === "APA") { var a = apaBand(R); return "APA crew terms. Your day rate is in the " + a.t + " band, so overtime is " + a.m + "x the hourly rate (" + pounds(hr * a.m) + " an hour), in half hours. 10 hour day plus an hour's lunch."; }
+  if (b.terms === "TV drama") return "Pact/Bectu TV drama. Overtime at 1.5x (" + pounds(Math.min(70, Math.max(35, hr * 1.5))) + " an hour, kept between £35 and £70), in quarter hours. 10 hour day plus lunch, 9.5 semi-continuous, 9 continuous" + (b.extra ? ", plus your additional contracted hour" : "") + ".";
+  return "Flat day rate, all in. Hours are logged as a record; no overtime is added unless you add it.";
+}
+function calcDay(x, b) {
+  var R = num(b.rate), hr = R / 10, terms = b.terms || "APA", L = [], F = [];
+  var c = tm(x.call), w = tm(x.wrap);
+  if (c == null || w == null) return { lines: [], flags: ["Add the call and wrap times."], total: 0, c: null, w: null };
+  if (w <= c) w += 1440;
+  var lunch = x.lunch || "1 hour", lunchM = { "1 hour": 60, "30 min": 30, "None": 0 }[lunch] || 0;
+  var d = parse(x.date), dow = d ? d.getDay() : 1;
+  if (terms === "APA") {
+    if (x.type === "Prep or recce") { L.push(["Prep or recce day", R]); }
+    else if (c < 300) {
+      var nh = Math.max(10, roundUp(w - c - lunchM, 30) / 60);
+      L.push(["Night call before 05:00, " + nh + " hrs at 2x", 2 * hr * nh]);
+    } else {
+      var mult = x.type === "Bank holiday" || dow === 0 ? 2 : dow === 6 ? 1.5 : 1;
+      L.push([mult === 1 ? "Day rate" : (mult === 2 ? (dow === 0 ? "Sunday" : "Bank holiday") : "Saturday") + " day rate at " + mult + "x", R * mult]);
+      if (mult === 2 && dow === 0) F.push("Sunday rate: some summaries say 1.5x, not 2x. Check your deal.");
+      var band = apaBand(R), otr = hr * band.m;
+      if (c < 420) { var p = roundUp(420 - c, 30); L.push(["Early call, " + hrs(p) + " before 07:00 at " + band.m + "x", p / 60 * otr]); }
+      var start = c >= 660 && c < 1020 ? 660 : c;
+      if (start !== c) F.push("Late call: the day is counted from 11:00.");
+      var ots = start + 600 + lunchM, ot = Math.max(0, w - ots);
+      if (ot > 0) {
+        var after = Math.max(0, w - Math.max(ots, 1440)), norm = ot - after;
+        if (norm > 0) { var n = roundUp(norm, 30); L.push(["Overtime from " + hm(ots) + ", " + hrs(n) + " at " + band.m + "x", n / 60 * otr]); }
+        if (after > 0) { var a2 = roundUp(after, 30); L.push(["After midnight, " + hrs(a2) + " at 3x", a2 / 60 * hr * 3]); }
+      }
+      var la = tm(x.lunchAt);
+      if (lunchM > 0 && la != null) { if (la < c) la += 1440; if (la - c > 330) L.push(["Late break, more than 5.5 hrs after call", 10]); }
+      else if (lunchM === 0 && w - c > 330) F.push("No break logged. A late or missed break may be owed.");
+    }
+  } else if (terms === "TV drama") {
+    var base = lunch === "Continuous" ? 540 : lunch === "Semi-continuous" ? 570 : 600 + 60;
+    var m6 = x.type === "6th day" ? 1.5 : 1;
+    L.push([m6 === 1 ? "Day rate" : "6th day at 1.5x", R * m6]);
+    if (b.extra) { base += 60; L.push(["Additional contracted hour", hr]); }
+    var otrD = Math.min(70, Math.max(35, hr * 1.5)), otsD = c + base, otD = Math.max(0, w - otsD);
+    if (otD > 0) {
+      var late = Math.max(0, w - Math.max(otsD, 1380)), normD = otD - late;
+      if (normD > 0) { var nd = roundUp(normD, 15); L.push(["Overtime from " + hm(otsD) + ", " + hrs(nd) + " at 1.5x", nd / 60 * otrD]); }
+      if (late > 0) { var ld = roundUp(late, 15); L.push(["After 23:00, " + hrs(ld) + " at 2x", ld / 60 * hr * 2]); F.push("After 23:00 is 2x in the agreement; some payroll summaries pay it as an extra 1x. Check with payroll."); }
+    }
+  } else {
+    L.push(["Day rate (all in)", R]);
+    if (w - c - lunchM > 600) F.push("Over 10 hours on a flat rate. Check what you agreed.");
+  }
+  if (num(b.kit)) L.push(["Kit", num(b.kit)]);
+  var p2 = num(D.settings.mileage) || 45;
+  if (num(x.miles)) L.push([num(x.miles) + " miles at " + p2 + "p", num(x.miles) * p2 / 100]);
+  if (num(x.adjust)) L.push(["Adjustment" + (x.notes ? ": " + x.notes : ""), num(x.adjust)]);
+  return { lines: L, flags: F, total: L.reduce(function (t, l) { return t + l[1]; }, 0), c: c, w: w };
+}
+function daysFor(bid) { return D.days.filter(function (x) { return x.booking === bid; }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }); }
+function sheetCalc(b) {
+  var ds = daysFor(b.id), out = [], prev = null;
+  ds.forEach(function (x) {
+    var r = calcDay(x, b);
+    if (prev && prev.r.w != null && r.c != null) {
+      var rest = daysBetween(parse(prev.x.date), parse(x.date)) * 1440 + r.c - prev.r.w;
+      if (rest < 660) r.flags.unshift("Short turnaround: " + hrs(rest) + " rest since the last wrap (11 hrs is the norm" + (b.terms === "APA" && rest < 600 ? ", and under 10 is below the APA floor" : "") + ").");
+    }
+    out.push({ x: x, r: r }); prev = { x: x, r: r };
+  });
+  return { days: out, total: out.reduce(function (t, o) { return t + o.r.total; }, 0) };
+}
+function nextDate(b) {
+  var ds = daysFor(b.id).map(function (x) { return x.date; }), s = parse(b.start), e = parse(b.end || b.start) || s, d = s;
+  for (; d && d <= e; d = addDays(d, 1)) if (ds.indexOf(iso(d)) < 0) return iso(d);
+  return ds.length ? iso(addDays(parse(ds[ds.length - 1]), 1)) : b.start;
+}
+function timesheetDraft(b) {
+  var s = D.settings, T = sheetCalc(b), paye = isPaye(b);
+  var lines = T.days.map(function (o) {
+    var x = o.x;
+    return dayLabel(x.date) + ": call " + x.call + ", " + (x.lunch === "None" ? "no break" : x.lunch.toLowerCase() + " lunch" + (x.lunchAt ? " at " + x.lunchAt : "")) + ", wrap " + x.wrap + (x.source ? " (from " + (x.source === "My own" ? "my own notes" : x.source === "Call sheet" ? "the call sheet" : "the AD's times") + ")" : "") + "\n" +
+      o.r.lines.map(function (l) { return "  " + l[0] + ": " + pounds(l[1]); }).join("\n") + "\n  Day total: " + pounds(o.r.total);
+  }).join("\n\n");
+  var head = "Hi,\n\n" + (paye ? "Here are my hours for " + b.production + " so you can check them against the payroll timesheet. Could you let me know if anything doesn't match?" : "Here's my timesheet for " + b.production + ". Could you approve these hours so I can send the invoice?") + "\n\n";
+  var foot = "\n\nTotal: " + pounds(T.total) + (b.po ? "\nPO: " + b.po : "") + "\nWorked out on " + TERMN[b.terms || "APA"] + ", " + money(num(b.rate)) + " a day.";
+  return { to: b.contact, subject: (paye ? "Hours for " : "Timesheet: ") + b.production + ", " + niceRange(b.start, b.end), body: head + lines + foot + sign() };
 }
 
 /* ---------- drafts open in the person's own mail app ---------- */
@@ -228,7 +357,7 @@ function setup() {
     field("s-name", "Your name", s.name, "text", "First and last name") + field("s-trading", "Trading name", s.trading, "text", "Your Ltd or trading name (optional)") +
     '<div class="field"><span class="lab">What do you do?</span>' + pills("role", ["Director", "DP", "Producer", "Editor", "Crew", "Something else"], s.role) + "</div>" +
     '<div class="grid2">' + field("s-rate", "Day rate (£)", s.rate, "number", "650", ' inputmode="numeric"') + field("s-terms", "Payment terms (days)", s.terms || "30", "number", "30", ' inputmode="numeric"') + "</div>" +
-    field("s-tax", "Put aside for tax (%)", s.tax || "25", "number", "25", ' inputmode="numeric"') +
+    '<div class="grid2">' + field("s-tax", "Put aside for tax (%)", s.tax || "25", "number", "25", ' inputmode="numeric"') + field("s-mileage", "Mileage (pence a mile)", s.mileage || "45", "number", "45", ' inputmode="numeric"') + "</div>" +
     '<div class="field"><span class="lab">Which email do you use?</span>' + pills("mail", ["Gmail", "Outlook", "Apple Mail", "Other"], s.mail || "Gmail") + "</div>" +
     '<div class="field"><span class="lab">Do you have an agent?</span>' + pills("hasAgent", ["Yes", "No"], s.hasAgent || "No") + "</div>" +
     '<div id="agentf"' + (s.hasAgent === "Yes" ? "" : " hidden") + ' class="stack">' + field("s-agent", "Your agent", s.agent, "text", "Agency and agent's name") + field("s-agentEmail", "Their email", s.agentEmail, "email", "bookings@agency.com") + '<p class="q">Holds that come through your agent get drafted to them instead.</p></div>' +
@@ -274,21 +403,24 @@ function more() {
 
 /* ---------- forms ---------- */
 function bookingForm(b) {
-  var s = D.settings, isNew = !b; b = b || { id: uid(), start: iso(addDays(today(), 7)), end: "", client: "", production: "", contact: "", status: "First hold", rate: s.rate || "", days: "1", agent: "", notes: "" };
-  var acts = isNew ? "" : '<div class="acts">' + (isHold(b) ? '<button class="btn" data-draft="hold" data-id="' + b.id + '">Ask to confirm</button>' : "") + (b.status === "Confirmed" && !isDone(b) ? '<button class="btn" data-draft="confirm" data-id="' + b.id + '">Send booking confirmation</button>' : "") + (isDone(b) && !invoiced(b.id) ? '<button class="btn" data-invoicefor="' + b.id + '">Make the invoice</button>' : "") + "</div>";
+  var s = D.settings, isNew = !b; b = b || { id: uid(), start: iso(addDays(today(), 7)), end: "", client: "", production: "", contact: "", status: "First hold", rate: s.rate || "", days: "1", agent: "", notes: "", terms: "APA", kit: "", extra: "", po: "" };
+  var acts = isNew ? "" : '<div class="acts">' + (isHold(b) ? '<button class="btn" data-draft="hold" data-id="' + b.id + '">Ask to confirm</button>' : "") + (b.status === "Confirmed" && !isDone(b) ? '<button class="btn" data-draft="confirm" data-id="' + b.id + '">Send booking confirmation</button>' : "") + (b.status === "Confirmed" && b.terms !== "Flat day" ? '<button class="btn' + (isDone(b) ? " solid" : "") + '" data-timesheet="' + b.id + '">Timesheet' + (daysFor(b.id).length ? ", " + daysFor(b.id).length + " day" + (daysFor(b.id).length > 1 ? "s" : "") : "") + "</button>" : "") + (isDone(b) && !invoiced(b.id) && !isPaye(b) ? '<button class="btn" data-invoicefor="' + b.id + '">Make the invoice</button>' : "") + "</div>";
   return '<h2>' + (isNew ? "Add a booking" : esc(b.production || "Booking")) + "</h2>" + acts + '<input type="hidden" id="b-id" value="' + esc(b.id) + '">' +
     '<div class="grid2">' + field("b-production", "What is it?", b.production, "text", "Commercial, music video…") + field("b-client", "Who for?", b.client, "text", "Production company") + "</div>" +
     field("b-contact", "Their email", b.contact, "email", "producer@company.com") +
     '<div class="grid2">' + field("b-start", "First day", b.start, "date") + field("b-end", "Last day (if more than one)", b.end, "date") + "</div>" +
     '<div class="field"><span class="lab">Status</span>' + pills("status", STATUSES, b.status) + "</div>" +
     '<div class="grid2">' + field("b-rate", "Day rate (£)", b.rate, "number", "", ' inputmode="numeric"') + field("b-days", "Days", b.days, "number", "1", ' inputmode="numeric"') + "</div>" +
+    '<div class="field"><span class="lab">Terms</span>' + pills("terms", TERMS, b.terms || "APA") + '<span class="q" id="termsnote">' + esc(TERMN[b.terms || "APA"]) + "</span></div>" +
+    '<div id="extraf"' + (b.terms === "TV drama" ? "" : " hidden") + ' class="field"><span class="lab">Additional contracted hour? (ADs, costume, hair and make-up, locations, production, script)</span>' + pills("extra", ["Yes", "No"], b.extra ? "Yes" : "No") + "</div>" +
+    '<div class="grid2">' + field("b-kit", "Kit a day (£)", b.kit, "number", "0", ' inputmode="numeric"') + field("b-po", "PO number", b.po, "text", "If they gave one") + "</div>" +
     (s.hasAgent === "Yes" ? '<div class="field"><span class="lab">Came through your agent?</span>' + pills("viaAgent", ["Yes", "No"], b.agent ? "Yes" : "No") + "</div>" : "") +
     field("b-notes", "Notes", b.notes, "text", "Optional") +
     '<div class="acts"><button class="btn solid wide" data-savebooking>Save</button>' + (isNew ? '<button class="btn" data-close>Cancel</button>' : '<button class="btn" data-delbooking="' + b.id + '">Delete</button>') + "</div>";
 }
 function invoiceForm(v, fromBooking) {
   var s = D.settings, isNew = !v, t = today(), b = fromBooking;
-  v = v || { id: uid(), booking: b ? b.id : "", number: nextInvoiceNumber(), client: b ? b.client : "", contact: b ? b.contact : "", amount: b ? String(bookingValue(b)) : "", issued: iso(t), due: iso(addDays(t, num(s.terms) || 30)), paid: "", notes: b ? b.production + ", " + niceRange(b.start, b.end) : "" };
+  v = v || { id: uid(), booking: b ? b.id : "", number: nextInvoiceNumber(), client: b ? b.client : "", contact: b ? b.contact : "", amount: b ? String(Math.round(bookingValue(b) * 100) / 100) : "", issued: iso(t), due: iso(addDays(t, num(s.terms) || 30)), paid: "", notes: b ? b.production + ", " + niceRange(b.start, b.end) + (b.po ? ", " + b.po : "") + (daysFor(b.id).length ? ", from your timesheet" : "") : "" };
   var od = !v.paid && parse(v.due) && parse(v.due) < t;
   var acts = isNew ? "" : '<div class="acts">' + (od ? '<button class="btn solid" data-draft="chase" data-id="' + v.id + '">Write the chase</button>' : "") + (!v.paid ? '<button class="btn" data-markpaid="' + v.id + '">Mark as paid</button>' : '<button class="btn" data-markunpaid="' + v.id + '">Mark as unpaid</button>') + '<button class="btn" data-draft="invoice" data-id="' + v.id + '">Email it</button></div>';
   return "<h2>" + (isNew ? "New invoice" : esc(v.number)) + "</h2>" + acts + '<input type="hidden" id="v-id" value="' + esc(v.id) + '"><input type="hidden" id="v-booking" value="' + esc(v.booking) + '">' +
@@ -300,6 +432,45 @@ function invoiceForm(v, fromBooking) {
     '<p class="q">This records the invoice. Make the invoice itself in your accounts app as usual, then attach it to the email.</p>' +
     '<div class="acts"><button class="btn solid wide" data-saveinvoice>Save</button>' + (isNew ? '<button class="btn" data-close>Cancel</button>' : '<button class="btn" data-delinvoice="' + v.id + '">Delete</button>') + "</div>";
 }
+
+function calcHtml(r) {
+  return '<div class="sum">' + (r.lines.length ? r.lines.map(function (l) { return "<div><span class=\"q\">" + esc(l[0]) + "</span><span>" + pounds(l[1]) + "</span></div>"; }).join("") + "<div><span>Day total</span><span>" + pounds(r.total) + "</span></div>" : '<div><span class="q">Add the call and wrap times to see the day.</span><span></span></div>') + "</div>" +
+    r.flags.map(function (f) { return '<p class="note amb">' + esc(f) + "</p>"; }).join("");
+}
+function timesheet(b) {
+  var T = sheetCalc(b), paye = isPaye(b);
+  var rows = T.days.length ? T.days.map(function (o) {
+    var x = o.x;
+    return '<button class="row" data-day="' + x.id + '"><span>' + esc(dayLabel(x.date)) + ' <span class="q">· ' + esc(x.call) + " to " + esc(x.wrap) + '</span></span><span class="tag' + (o.r.flags.length ? " amb" : " ink") + '">' + pounds(o.r.total) + '</span><span class="sub">' + esc(o.r.lines.slice(1).map(function (l) { return l[0]; }).join(", ") || "No extras") + (o.r.flags.length ? ". " + esc(o.r.flags[0]) : "") + "</span></button>";
+  }).join("") : '<p class="empty">No days logged yet.</p>';
+  return "<h2>" + esc(b.production || "Timesheet") + '</h2><p class="q">' + esc(b.client) + ", " + niceRange(b.start, b.end) + "</p>" +
+    '<p class="note">' + esc(termsLine(b)) + "</p>" +
+    '<div class="rows">' + rows + "</div>" +
+    (T.days.length ? '<div class="sum"><div><span>Total</span><span>' + pounds(T.total) + "</span></div></div>" : "") +
+    '<div class="acts"><button class="btn solid" data-logday="' + b.id + '">Log a day</button>' +
+    (T.days.length ? '<button class="btn" data-tsdraft="' + b.id + '">' + (paye ? "Send to check against payroll" : "Send for approval") + "</button>" + (!paye && !invoiced(b.id) ? '<button class="btn" data-invoicefor="' + b.id + '">Make the invoice</button>' : "") : "") +
+    '<button class="btn" data-booking="' + b.id + '">Booking details</button></div>' +
+    '<p class="q">' + (paye ? "On TV drama, payroll makes the real timesheet. This is your own record to check theirs against, and it keeps the evidence if overtime or turnaround is missed." : "Worked out from APA terms as we read them. Check against your deal memo; you can add an adjustment on any day.") + "</p>";
+}
+function dayForm(b, x) {
+  var t = b.terms || "APA", isNew = !x, last = daysFor(b.id).slice(-1)[0];
+  x = x || { id: uid(), booking: b.id, date: nextDate(b), type: "Normal", call: last ? last.call : "08:00", lunchAt: "", lunch: LUNCH[t][0], wrap: last ? last.wrap : "19:00", miles: last ? last.miles : "", adjust: "", source: last ? last.source : "Call sheet", notes: "" };
+  return "<h2>" + (isNew ? "Log a day" : esc(dayLabel(x.date))) + '</h2><p class="q">' + esc(b.production) + ", " + esc(TERMN[t]) + '</p><input type="hidden" id="d-id" value="' + esc(x.id) + '"><input type="hidden" id="d-booking" value="' + esc(b.id) + '">' +
+    field("d-date", "Date", x.date, "date") +
+    (DAYTYPE[t].length > 1 ? '<div class="field"><span class="lab">Day</span>' + pills("dtype", DAYTYPE[t], x.type || "Normal") + "</div>" : "") +
+    '<div class="grid2">' + field("d-call", "Your call", x.call, "time") + field("d-wrap", "Wrap", x.wrap, "time") + "</div>" +
+    '<div class="field"><span class="lab">Lunch</span>' + pills("lunch", LUNCH[t], x.lunch || LUNCH[t][0]) + "</div>" +
+    (t === "APA" ? field("d-lunchAt", "Lunch called at (for the late break)", x.lunchAt, "time") : "") +
+    '<div class="field"><span class="lab">Where the times came from</span>' + pills("source", SOURCES, x.source || "Call sheet") + "</div>" +
+    '<div class="grid2">' + field("d-miles", "Miles", x.miles, "number", "0", ' inputmode="numeric"') + field("d-adjust", "Adjustment (£)", x.adjust, "number", "0", ' inputmode="decimal"') + "</div>" +
+    field("d-notes", "Notes", x.notes, "text", "What the adjustment is for, de-rig, anything to remember") +
+    '<div id="calc">' + calcHtml(calcDay(x, b)) + "</div>" +
+    '<div class="acts"><button class="btn solid wide" data-saveday>Save the day</button>' + (isNew ? '<button class="btn" data-timesheet="' + b.id + '">Back</button>' : '<button class="btn" data-delday="' + x.id + '">Delete</button>') + "</div>";
+}
+function dayFromForm() {
+  return { id: val("d-id"), booking: val("d-booking"), date: val("d-date"), type: picked("dtype") || "Normal", call: val("d-call"), lunchAt: val("d-lunchAt"), lunch: picked("lunch") || "1 hour", wrap: val("d-wrap"), miles: val("d-miles"), adjust: val("d-adjust"), source: picked("source") || "", notes: val("d-notes") };
+}
+function liveCalc() { var c = $("calc"), bid = val("d-booking"); if (!c || !bid) return; var b = D.bookings.find(function (z) { return z.id === bid; }); if (b) c.innerHTML = calcHtml(calcDay(dayFromForm(), b)); }
 function draftSheet(d, label) {
   return "<h2>" + esc(label) + '</h2><div class="sum"><div><span class="q">To</span><span>' + esc(d.to || "add their email") + '</span></div><div><span class="q">Subject</span><span>' + esc(d.subject) + '</span></div></div><div class="glass" style="padding:14px 16px;white-space:pre-wrap">' + esc(d.body) + "</div>" +
     '<div class="acts"><button class="btn solid wide" data-compose>Open in ' + esc(D.settings.mail === "Other" || !D.settings.mail ? "your email" : D.settings.mail) + '</button><button class="btn" data-copy>Copy</button><button class="btn" data-close>Close</button></div><p class="q">You check it and press send. Nothing is sent for you.</p>';
@@ -328,13 +499,13 @@ function startGoogle(silent) {
     return api("https://www.googleapis.com/oauth2/v3/userinfo").then(function (u) { G.email = u.email || ""; }).catch(function () {});
   }).then(findSheet).then(function (id) {
     mode = "google";
-    if (id) { G.sheetId = id; return readAll().then(function (d) { D = d; }); }
-    D = { bookings: [], invoices: [], expenses: [], settings: { name: "", rate: "", terms: "30", tax: "25", mail: "Gmail", hasAgent: "No", invoicePrefix: "INV" } };
+    if (id) { G.sheetId = id; return ensureTabs().then(readAll).then(function (d) { D = d; }); }
+    D = { bookings: [], invoices: [], expenses: [], days: [], settings: { name: "", rate: "", terms: "30", tax: "25", mileage: "45", mail: "Gmail", hasAgent: "No", invoicePrefix: "INV" } };
   }).then(render);
 }
 function saveSetup() {
   var s = D.settings;
-  s.name = val("s-name"); s.trading = val("s-trading"); s.role = picked("role") || s.role || ""; s.rate = val("s-rate"); s.terms = val("s-terms") || "30"; s.tax = val("s-tax") || "25";
+  s.name = val("s-name"); s.trading = val("s-trading"); s.role = picked("role") || s.role || ""; s.rate = val("s-rate"); s.terms = val("s-terms") || "30"; s.tax = val("s-tax") || "25"; s.mileage = val("s-mileage") || "45";
   s.mail = picked("mail") || "Gmail"; s.hasAgent = picked("hasAgent") || "No"; s.agent = val("s-agent"); s.agentEmail = val("s-agentEmail"); s.invoicePrefix = s.invoicePrefix || "INV";
   if (!s.name) { banner("Add your name first."); return; }
   if (mode === "demo") { demoSave(); S.tab = "home"; render(); banner("Saved."); return; }
@@ -345,7 +516,7 @@ function saveSetup() {
 document.addEventListener("click", function (e) {
   var b = e.target.closest("button,a"); if (!b) { if (e.target.id === "shade") closeSheet(); return; }
   var d = b.dataset;
-  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } return; }
+  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }
   if (b.hasAttribute("data-signin")) { b.disabled = true; startGoogle(false).catch(function (er) { b.disabled = false; banner("Sign-in didn't finish: " + (er.message || er)); }); return; }
@@ -359,14 +530,24 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-addinvoice")) { openSheet(invoiceForm(null)); return; }
   if (d.invoice) { openSheet(invoiceForm(D.invoices.find(function (x) { return x.id === d.invoice; }))); return; }
   if (d.invoicefor) { openSheet(invoiceForm(null, D.bookings.find(function (x) { return x.id === d.invoicefor; }))); return; }
-  if (d.todo) { if (d.todo === "chase") showDraft("chase", d.id); else if (d.todo === "hold") showDraft("hold", d.id); else openSheet(invoiceForm(null, D.bookings.find(function (x) { return x.id === d.id; }))); return; }
+  if (d.todo) { if (d.todo === "chase") showDraft("chase", d.id); else if (d.todo === "hold") showDraft("hold", d.id); else if (d.todo === "hours") openSheet(dayForm(D.bookings.find(function (x) { return x.id === d.id; }))); else openSheet(invoiceForm(null, D.bookings.find(function (x) { return x.id === d.id; }))); return; }
   if (d.draft) { showDraft(d.draft, d.id); return; }
+  if (d.timesheet) { openSheet(timesheet(D.bookings.find(function (x) { return x.id === d.timesheet; }))); return; }
+  if (d.logday) { openSheet(dayForm(D.bookings.find(function (x) { return x.id === d.logday; }))); return; }
+  if (d.day) { var dx = D.days.find(function (x) { return x.id === d.day; }); openSheet(dayForm(D.bookings.find(function (x) { return x.id === dx.booking; }), dx)); return; }
+  if (b.hasAttribute("data-saveday")) {
+    var dy = dayFromForm(); if (!dy.date || !dy.call || !dy.wrap) { banner("Add the date, call and wrap."); return; }
+    var bk = D.bookings.find(function (x) { return x.id === dy.booking; });
+    upsert("Days", dy).then(function () { openSheet(timesheet(bk)); banner("Day saved."); }); return;
+  }
+  if (d.delday) { if (!confirm("Delete this day?")) return; var bd = D.days.find(function (x) { return x.id === d.delday; }).booking; remove("Days", d.delday).then(function () { openSheet(timesheet(D.bookings.find(function (x) { return x.id === bd; }))); banner("Deleted."); }); return; }
+  if (d.tsdraft) { var tb = D.bookings.find(function (x) { return x.id === d.tsdraft; }); DRAFT = timesheetDraft(tb); openSheet(draftSheet(DRAFT, isPaye(tb) ? "Your hours, to check" : "Timesheet for approval")); return; }
   if (b.hasAttribute("data-compose")) { if (DRAFT) compose(DRAFT.to, DRAFT.subject, DRAFT.body); closeSheet(); return; }
   if (b.hasAttribute("data-copy")) { if (DRAFT && navigator.clipboard) navigator.clipboard.writeText("Subject: " + DRAFT.subject + "\n\n" + DRAFT.body).then(function () { banner("Copied."); }, function () { banner("Couldn't copy."); }); return; }
   if (b.hasAttribute("data-savebooking")) {
     var start = val("b-start"); if (!start) { banner("Add the first day."); return; }
     var end = val("b-end"), days = val("b-days") || (end && parse(end) ? String(daysBetween(parse(start), parse(end)) + 1) : "1");
-    var o = { id: val("b-id"), start: start, end: end && end !== start ? end : "", client: val("b-client"), production: val("b-production"), contact: val("b-contact"), status: picked("status") || "First hold", rate: val("b-rate"), days: days, agent: picked("viaAgent") === "Yes" ? "yes" : "", notes: val("b-notes") };
+    var o = { id: val("b-id"), start: start, end: end && end !== start ? end : "", client: val("b-client"), production: val("b-production"), contact: val("b-contact"), status: picked("status") || "First hold", rate: val("b-rate"), days: days, agent: picked("viaAgent") === "Yes" ? "yes" : "", notes: val("b-notes"), terms: picked("terms") || "APA", kit: val("b-kit"), extra: picked("terms") === "TV drama" && picked("extra") === "Yes" ? "yes" : "", po: val("b-po") };
     closeSheet(); upsert("Bookings", o).then(function () { banner("Booking saved."); }); return;
   }
   if (d.delbooking) { if (!confirm("Delete this booking?")) return; closeSheet(); remove("Bookings", d.delbooking).then(function () { banner("Deleted."); }); return; }
@@ -379,6 +560,7 @@ document.addEventListener("click", function (e) {
   if (d.delinvoice) { if (!confirm("Delete this invoice record?")) return; closeSheet(); remove("Invoices", d.delinvoice).then(function () { banner("Deleted."); }); return; }
 });
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+document.addEventListener("input", function (e) { if (e.target.closest && e.target.closest("#sheet")) liveCalc(); });
 /* Pick up changes made on another device when the app comes back into view. */
 document.addEventListener("visibilitychange", function () { if (!document.hidden) { paintSky(); refresh(); } });
 setInterval(paintSky, 5 * 60 * 1000);

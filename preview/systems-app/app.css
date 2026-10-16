@@ -121,3 +121,9 @@ html[data-sky="night"] .sheet{background:rgba(20,26,48,.94)}
 .gbtn svg{width:18px;height:18px}
 .steps{display:grid;gap:6px}
 .steps .row{grid-template-columns:24px minmax(0,1fr)}
+
+/* timesheets */
+.note.amb{border:1px solid var(--glow);background:color-mix(in srgb,var(--glow) 22%,transparent);color:var(--fg)}
+#calc{display:grid;gap:8px}
+input[type=time]{min-height:46px}
+html[data-sky="night"] input[type=time]{color-scheme:dark}

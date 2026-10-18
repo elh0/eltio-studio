@@ -24,6 +24,14 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   function centre(k) { var r = its[k].getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, scrollY + r.top + r.height / 2 - innerHeight / 2)); }
   var cur = -1, tgt = 0, born = performance.now();
+  // 18 Oct Elliot: a link of its own for every project (#out-and-scout, #grip ...) to send to people
+  var slugs = names.map(function (nm) { return nm.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); });
+  var routeP = -1;
+  function route(p) {
+    if (p === routeP) return; routeP = p;
+    if (inFrame) window.parent.postMessage({ cgRoute: slugs[p] }, '*');
+    else try { history.replaceState(null, '', location.pathname + location.search + '#' + slugs[p]); } catch (e) {}
+  }
 
   // a quick eased glide to a tile (faster than the browser's own smooth scroll)
   var anim = 0, gliding = false;
@@ -50,6 +58,7 @@
     if (best === cur) return;
     cur = best;
     var p = pk[best], l = lk[best], last = projs.length - 1;
+    route(p);
     tickSets.forEach(function (t) { var on = +t.getAttribute('data-p') === p; t.classList.toggle('on', on); arr(t.children).forEach(function (a, k) { a.classList.toggle('on', on && k === l); }); });
     counts.forEach(function (c) { var on = +c.getAttribute('data-p') === p; c.classList.toggle('on', on); if (on) c.querySelector('.cg-roll').style.setProperty('--k', l); });
     its.forEach(function (el, k) { el.classList.toggle('on', k === best); });
@@ -183,10 +192,11 @@
   }
   ['touchstart', 'wheel', 'keydown', 'pointerdown'].forEach(function (t) { addEventListener(t, function () { hold = null; userAt = performance.now(); }, { passive: true }); });
   var hp = /[#?&]p=(\d+)/.exec(location.hash + '&' + location.search);
+  if (!hp) { var sj = slugs.indexOf(location.hash.slice(1)); if (sj >= 0) hp = [0, sj]; }
   if (!hp) { try { var sp = sessionStorage.getItem('cg-p'); if (sp != null) hp = [0, sp]; } catch (e) {} }
   if (!hp) { var wn = /^cg-p=(\d+)$/.exec(window.name || ''); if (wn) hp = wn; }
   window.name = '';
   try { sessionStorage.removeItem('cg-p'); } catch (e) {}
-  if (hp && first[+hp[1]] >= 0) { history.replaceState(null, '', location.pathname); holdAt(first[+hp[1]]); } else scrollTo(0, 0);
+  if (hp && first[+hp[1]] >= 0) { history.replaceState(null, '', location.pathname + location.search); holdAt(first[+hp[1]]); } else scrollTo(0, 0);
   tick(); dbg(hp ? 'opened at ' + hp[1] : 'no project given');
 })();

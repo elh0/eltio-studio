@@ -531,6 +531,37 @@
   $$(".pr-h > *, .pr-build, .pr-fine, .pr-perks li, .price .sp-note").forEach(function (el, i) { watch(el, (i % 4) * 70); }); $$("#prPlans .plan").forEach(function (el, i) { watch(el, i * 80); });
   prDraw();
 
+  /* Try it: the dashboard it opens on. Crew get their diary and an offer, producers their shoot. */
+  var dbEl = $("#db"), dbProd = false, dbTook = "", dbFill = 0, DBW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"], DBM = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+  function dbDraw() {
+    if (!dbEl) return;
+    var t = new Date(); t.setHours(0, 0, 0, 0);
+    var at = function (n) { var d = new Date(t); d.setDate(d.getDate() + n); return d; };
+    if (!dbProd) {
+      var mark = { 5: "pn", 8: "bk", 9: "bk", 12: "pn" }; mark[2] = dbTook === "Confirmed" ? "bk" : dbTook === "Pencil" ? "pn" : dbTook ? "" : "of";
+      var cells = ""; for (var i = 0; i < 14; i++) { var d = at(i), m = mark[i] || ""; cells += '<div class="db-d' + (i ? "" : " now") + (m ? " " + m : "") + '"><span>' + DBW[d.getDay()] + "</span><b>" + d.getDate() + '</b><i class="' + (m ? "k-" + m : "") + '"></i></div>'; }
+      var od = at(2);
+      dbEl.innerHTML = '<div class="db-h"><span class="lab">Your diary · next two weeks</span><span class="db-key"><span><i class="k-bk"></i>Booked</span><span><i class="k-pn"></i>Hold</span><span><i class="k-of"></i>Offer</span></span></div><div class="db-days">' + cells + "</div>" +
+        '<div class="db-of"><span class="dt"><b>' + od.getDate() + "</b>" + DBM[od.getMonth()] + '</span><span class="t">Sportswear spot, 1 day<span class="q">Halde Films · found you in the directory</span></span>' +
+        (dbTook === "" ? '<span class="db-b"><button class="pill" data-db="Confirmed">Accept</button><button class="pill gh" data-db="Pencil">Hold</button><button class="pill gh" data-db="No">No</button></span>'
+          : '<span class="db-done"><span>' + (dbTook === "Confirmed" ? "Booked. It's in your diary." : dbTook === "Pencil" ? "Held. They see you as Pencilled." : "Declined. A polite no is drafted.") + '</span><button type="button" data-db="">Again</button></span>') + "</div>";
+    } else {
+      var rows = [["Sound recordist", "Nobody yet", "find"], ["2nd AC", "Offer sent to Priya K.", "wait"], ["Spark", "Pencilled: Leon B.", "pen"]], n = 29 + dbFill;
+      dbEl.innerHTML = '<div class="db-h"><span class="lab">Your shoot · Canal promo · tomorrow</span><span class="st-p pen">' + (32 - n) + ' to fill</span></div><div class="db-bar"><b>' + n + "</b><span>of 32 crew booked</span><span class=\"bar\"><i style=\"width:" + (n / 32 * 100).toFixed(1) + '%"></i></span></div>' +
+        rows.map(function (r, i) { var done = i < dbFill; return '<div class="db-r"><span>' + r[0] + '<span class="q">' + (done ? "Booked" + (i === 0 ? ": Kit M., from the directory" : i === 1 ? ": Priya K." : ": Leon B.") : r[1]) + "</span></span>" + (done ? '<span class="st-p av-ok">Booked</span>' : i === dbFill ? '<button class="pill" data-dbf>' + (r[2] === "find" ? "Find crew" : r[2] === "wait" ? "Nudge" : "Confirm") + "</button>" : '<span class="st-p' + (r[2] === "pen" ? " pen" : "") + '">' + (r[2] === "pen" ? "Pencilled" : "Waiting") + "</span>") + "</div>"; }).join("");
+    }
+  }
+  if (dbEl) dbEl.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-db")) { dbTook = b.getAttribute("data-db"); dbDraw(); }
+    if (b.hasAttribute("data-dbf")) { dbFill = Math.min(3, dbFill + 1); dbDraw(); }
+  });
+  function dbSet(prod) {
+    dbProd = prod; dbTook = ""; dbFill = 0; dbDraw();
+    $("#dbH").textContent = prod ? "Open it. Your shoot's already there." : "Open it. Your week's already there.";
+    $("#dbP").textContent = prod ? "Try it free and it opens on your own dashboard: tomorrow's shoot, who's booked, who's pencilled, who hasn't replied, and the roles still to fill." : "Try it free and it opens on your own dashboard: the next two weeks, the holds you're on and the offers waiting. Tap accept and it's booked.";
+  }
+
   function render(key, R) {
     R = R || ROLES[key];
     try { localStorage.setItem("sys-role", key === "other" ? "other:" + R.n : key); } catch (e) {}
@@ -540,6 +571,7 @@
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
     prPlan = key === "prod" || key === "pm" ? "producer" : "crew"; prDraw();
+    dbSet(key === "prod" || key === "pm");
     if (R.rate) { $("#kcR").value = R.rate; kcDraw(); }
     dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();

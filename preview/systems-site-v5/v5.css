@@ -443,3 +443,29 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 @keyframes markopen{from{margin-left:0}to{margin-left:var(--g)}}
 @media (hover:hover){.mark:hover span+span{animation:none;margin-left:calc(var(--g)*.35)}}
 @media (prefers-reduced-motion:reduce){.mark span+span{animation:none;transition:none}}
+
+/* Try it: the dashboard it opens on */
+.dash{padding-block:96px;display:grid;grid-template-columns:minmax(0,500px) minmax(0,1fr);gap:clamp(24px,5vw,80px);align-items:center}
+.dash-copy{display:grid;gap:18px;justify-items:start}.dash-copy>p:nth-child(3){color:var(--q);max-width:42ch}
+.db{display:grid;gap:14px;padding:20px}
+.db-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.db-key{display:flex;gap:12px;font:400 10px/1 var(--mono);color:var(--q)}.db-key i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.db-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.db-d{display:grid;justify-items:center;gap:4px;padding:8px 0 9px;border-radius:10px;background:rgba(242,242,239,.05);min-width:0}
+.db-d span{font:400 9px/1 var(--mono);color:var(--q)}.db-d b{font:400 16px/1 var(--disp)}
+.db-d i{width:16px;height:4px;border-radius:2px;background:rgba(242,242,239,.12);transition:background .4s}
+.db-d.now{box-shadow:inset 0 0 0 1px var(--paper)}
+.k-bk{background:var(--tally)!important}.k-pn{background:#C9A15A!important}.k-of{background:var(--paper)!important}
+.db-d.of i{animation:dbp 1.6s ease-in-out infinite}@keyframes dbp{50%{opacity:.35}}
+.db-of{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px 12px;align-items:center;padding:12px;border-radius:12px;background:rgba(242,242,239,.05)}
+.db-of .dt{display:grid;justify-items:center;font:400 10px/1.2 var(--mono);color:var(--q);text-transform:uppercase}.db-of .dt b{font:400 20px/1 var(--disp);color:var(--paper)}
+.db-of .t{display:grid;gap:2px;min-width:0}.db-of .t .q{color:var(--q);font-size:13px}
+.db-b{grid-column:1/-1;display:flex;gap:6px}.db-b .pill{min-height:40px;flex:1;font-size:15px;padding:0 14px}.db-b .pill.gh{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--hr)}
+.db-done{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.db-done button{background:none;border:0;color:var(--q);font:inherit;cursor:pointer;text-decoration:underline}
+.db-bar{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:6px 10px}.db-bar b{font:400 40px/1 var(--disp)}.db-bar span{color:var(--q)}
+.db-bar .bar{grid-column:1/-1;height:6px;border-radius:3px;background:rgba(242,242,239,.12);overflow:hidden}.db-bar .bar i{display:block;height:100%;background:var(--tally);transition:width .6s var(--ease)}
+.db-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--hr)}
+.db-r>span{display:grid;gap:2px;min-width:0}.db-r .q{color:var(--q);font-size:13px}
+.db-r .pill{min-height:36px;font-size:14px;padding:0 14px}
+@media (max-width:900px){.dash{grid-template-columns:minmax(0,1fr);padding-block:64px}.dash-copy{order:-1}}

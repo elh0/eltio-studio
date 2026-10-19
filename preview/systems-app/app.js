@@ -405,6 +405,8 @@ function startJob(k) {
   mode = "demo"; D = sample();
   var s = D.settings; s.name = "Sam Carter"; s.role = j.role === "DP or HOD" ? "DP" : j.role; s.rate = j.rate; s.job = j.k; s.work = "Both";
   D.bookings.forEach(function (b) { if (b.rate === "650") b.rate = j.rate; if (j.kit && b.id === "b6") b.kit = j.kit; if (!j.kit) b.kit = ""; });
+  D.offers = j.k === "prod" || j.k === "pm" ? [] : OFFERS.map(function (o) { return { id: o[0], start: iso(addDays(today(), o[1])), days: o[2], client: o[3], production: o[4], via: o[5] }; });
+  flag("eltio-systems-tour-1", "1");
   demoSave(); S.tab = "home"; closeSheet(); render(); return true;
 }
 function jobPart() {
@@ -418,6 +420,41 @@ function jobSheet(i) {
   return '<div class="top"><span class="q">Made for ' + esc(job().pl) + '</span><span class="tag">Coming in the pilot</span></div><h2>' + esc(f[0]) + '</h2><p class="q">' + esc(f[1]) + '</p><div class="sum ot">' + f[2].map(function (r) { return '<div><span class="q">' + r[0] + '</span><span' + (r[2] === "amber" ? ' class="late"' : "") + ">" + r[1] + "</span></div>"; }).join("") + '</div><p class="q">A preview with sample figures. This part is being built with the first pilot companies.</p><button class="btn solid" data-close>Got it</button>';
 }
 
+
+/* ---------- the dashboard you open on: your diary and offers (crew), your shoot (producers) ---------- */
+var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory"], ["o2", 4, "2", "Northlight Films", "Car commercial", "Via your agent"]];
+var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+function onDay(d) {
+  var k = iso(d), b = D.bookings.find(function (x) { return x.status !== "Cancelled" && x.start <= k && (x.end || x.start) >= k; });
+  if (b) return { c: b.status === "Confirmed" ? "bk" : "pn", t: b.production, id: b.id };
+  var o = (D.offers || []).find(function (x) { var e = iso(addDays(parse(x.start), num(x.days) - 1)); return x.start <= k && e >= k; });
+  return o ? { c: "of", t: o.production } : null;
+}
+function diaryCard() {
+  var t = today(), cells = "";
+  for (var i = 0; i < 14; i++) { var d = addDays(t, i), o = onDay(d); cells += '<button class="dy ' + (o ? o.c : "fr") + (i === 0 ? " now" : "") + '"' + (o && o.id ? ' data-booking="' + o.id + '"' : o ? " data-offers" : ' data-free="' + iso(d) + '"') + '><span class="q">' + DAYS[d.getDay()].slice(0, 2) + "</span><b>" + d.getDate() + "</b><i></i></button>"; }
+  var O = D.offers || [], free = 0; for (i = 0; i < 14; i++) if (!onDay(addDays(t, i))) free++;
+  return '<div class="diary"><div class="dia-h"><span class="part">Your diary · next two weeks</span><span class="key"><i class="bk"></i>Booked <i class="pn"></i>Hold <i class="of"></i>Offer</span></div><div class="days">' + cells + '</div><div class="dia-f"><span class="q">' + free + " days free · producers see Available</span>" + '<button class="lnk" data-passport>Who sees this</button></div>' +
+    (O.length ? '<div class="offers"><div class="part">Offers · ' + O.length + "</div>" + O.map(function (o) {
+      var d = parse(o.start);
+      return '<div class="offer-r"><span class="dt"><b>' + d.getDate() + "</b>" + MON[d.getMonth()] + '</span><span class="up-t">' + esc(o.production) + ", " + esc(o.days) + (o.days === "1" ? " day" : " days") + '<span class="q">' + esc(o.client) + " · " + esc(o.via) + '</span></span><span class="of-a"><button class="btn sm solid" data-accept="' + o.id + '">Accept</button><button class="btn sm" data-pencil="' + o.id + '">Hold</button><button class="btn sm ghost" data-decline="' + o.id + '" aria-label="Decline">No</button></span></div>';
+    }).join("") + "</div>" : '<p class="q dia-done">No offers waiting. Producers can find you in the directory.</p>') + "</div>";
+}
+var SHOOT = [["Sound recordist", "", "open"], ["2nd AC", "Offer sent to Priya K.", "wait"], ["Spark", "Pencilled: Leon B.", "pen"], ["Gaffer", "Booked: Sam C.", "ok"], ["1st AC", "Booked: Ana R.", "ok"]];
+function shootCard() {
+  var open = SHOOT.filter(function (r) { return r[2] !== "ok"; }).length;
+  return '<div class="diary shoot"><div class="dia-h"><span class="part">Your shoot · Canal promo · tomorrow</span><span class="tag amb">' + open + " to fill</span></div>" +
+    '<div class="sh-bar"><b>29</b><span class="q">of 32 crew booked</span><span class="bar"><i style="width:' + (29 / 32 * 100).toFixed(1) + '%"></i></span></div>' +
+    '<div class="rows">' + SHOOT.map(function (r) { return '<div class="row static sh-r"><span>' + esc(r[0]) + (r[1] ? '<span class="q sub">' + esc(r[1]) + "</span>" : '<span class="q sub">Nobody yet</span>') + "</span>" + (r[2] === "open" ? '<button class="btn sm solid" data-findcrew>Find crew</button>' : r[2] === "wait" ? '<button class="btn sm" data-nudge="' + esc(r[1].replace("Offer sent to ", "")) + '">Nudge</button>' : '<span class="tag' + (r[2] === "ok" ? " ok" : " amb") + '">' + (r[2] === "ok" ? "Booked" : "Pencilled") + "</span>") + "</div>"; }).join("") + "</div></div>";
+}
+function dashTop() { if (mode !== "demo" || !job()) return ""; return isProd() ? shootCard() : diaryCard(); }
+function takeOffer(id, st) {
+  var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
+  D.offers = D.offers.filter(function (x) { return x.id !== id; });
+  if (st) D.bookings.push({ id: uid(), start: o.start, end: num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "", client: o.client, production: o.production, contact: "producer@example.com", status: st, rate: D.settings.rate, days: o.days, agent: /agent/.test(o.via) ? "yes" : "", notes: "", terms: "APA" });
+  demoSave(); render();
+  banner(st === "Confirmed" ? "Booked. It's in your diary and the producer has your passport." : st ? "Held. The producer sees you as Pencilled." : "Declined. A polite no is drafted for you.");
+}
 
 /* ---------- the shared job: call sheet link, crew passport, directory (sample data) ---------- */
 function isProd() { var j = job(); return !!j && (j.k === "prod" || j.k === "pm"); }
@@ -478,6 +515,7 @@ function home() {
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
   var tile = function (lab, v, sub, cls) { return '<div class="tile' + (cls ? " " + cls : "") + '"><span class="part">' + lab + "</span><b>" + v + "</b><span class=\"q\">" + sub + "</span></div>"; };
   return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? '<button class="btn sm" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
+    dashTop() +
     '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
     '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
     shareCards() + jobPart() +
@@ -765,6 +803,12 @@ document.addEventListener("click", function (e) {
   if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
   if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
   if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
+  if (b.hasAttribute("data-accept")) { takeOffer(b.getAttribute("data-accept"), "Confirmed"); return; }
+  if (b.hasAttribute("data-pencil")) { takeOffer(b.getAttribute("data-pencil"), "Pencil"); return; }
+  if (b.hasAttribute("data-decline")) { takeOffer(b.getAttribute("data-decline"), ""); return; }
+  if (b.hasAttribute("data-offers")) { var of = document.querySelector(".offers"); if (of) of.scrollIntoView({ behavior: "smooth", block: "center" }); return; }
+  if (b.hasAttribute("data-free")) { banner("Free on " + nice(b.getAttribute("data-free")) + ". Producers searching see you as Available."); return; }
+  if (b.hasAttribute("data-nudge")) { banner("A nudge to " + b.getAttribute("data-nudge") + " is drafted. Nothing sends until you tap send."); return; }
   if (b.hasAttribute("data-passport")) { openSheet(passportSheet()); return; }
   if (d.hold) { b.textContent = "Hold sent"; b.disabled = true; banner("Hold sent to " + d.hold + " They join the job when they accept."); return; }
   if (b.hasAttribute("data-postv")) { closeSheet(); banner("V4 posted. Everyone gets a ping with what changed."); return; }

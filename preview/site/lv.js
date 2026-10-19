@@ -32,10 +32,10 @@
       ['img/ag/home-fullStack-night.webp', 'Night'],
       ['img/ag/breathe-inhale.webp', 'Instagram opens after three breaths']] },
     { seq: [
-      ['img/sy/home.webp', 'Money first: in, owed, and what needs you'],
-      ['img/sy/jobs.webp', 'Every job, bid to wrap'],
-      ['img/sy/onset.webp', 'On set: the clock runs, crew see their hours'],
-      ['img/sy/files.webp', 'Sheets built in your own Drive']] }
+      ['img/sy/home.webp', 'Every morning: owed, booked, on hold, tomorrow\'s call'],
+      ['img/sy/diary.webp', 'The diary: confirmed, holds and pencils'],
+      ['img/sy/callsheet.webp', 'The call sheet, one link, always the latest'],
+      ['img/sy/find.webp', 'Producers: who is free Thursday, send a hold']] }
   ];
   var ACC = ['#FF5A1F', '#4A74FF', '#FFC21A', '#E8956A', '#4F7348'];
 

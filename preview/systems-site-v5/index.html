@@ -19,7 +19,7 @@
   <a class="mark" href="#top" aria-label="Systems, home"><span>S</span><span style="--g:.08em">y</span><span style="--g:.36em">st</span><span style="--g:.14em">e</span><span style="--g:.42em">ms</span></a>
   <span class="nav-r"><a class="lab nav-price" href="#prices">Prices</a><a class="as" href="#who" id="asBtn" aria-label="Change who you are"><span class="lab">As</span> <b id="asName">Producer</b></a><a class="pill sm" href="../systems-app/">Try it</a></span>
   <nav class="jump" id="jump" aria-label="On this page"><div class="jump-in">
-  <a href="#signoff">Sign-off</a><a href="#dash">Dashboard</a><a href="#rates">Rates</a><a href="#invoices">Invoices</a><a href="#easy">How easy</a><a href="#day">On set</a><a href="#callsheet">Call sheets</a><a href="#passport">Crew</a><a href="#clients">Clients</a><a href="#prices">Prices</a><a href="#faq">Questions</a>
+  <a href="#signoff">Sign-off</a><a href="#dash">Dashboard</a><a href="#rates">Rates</a><a href="#invoices">Invoices</a><a href="#easy">How easy</a><a href="#day">On set</a><a href="#callsheet">Call sheets</a><a href="#passport">Crew</a><a href="#clients">Clients</a><a href="#prices">Prices</a><a href="#faq">Questions</a><a href="#waitlist">Waitlist</a>
 </div></nav>
 </header>
 
@@ -31,7 +31,7 @@
       <p class="lede" id="lede">Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.</p>
       <div class="acts">
         <a class="pill" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
-        <a class="pill ghost" href="#easy">See how easy <span aria-hidden="true">↓</span></a>
+        <a class="pill ghost" href="#waitlist">Join the waitlist <span aria-hidden="true">↓</span></a>
       </div>
       <p class="fine" id="fine">For UK production companies and producers. No card, no call, no download.</p>
       <div class="who" id="who">
@@ -399,9 +399,15 @@
     </div>
   </section>
 
-  <section class="close">
+  <section class="close" id="waitlist">
     <h2 class="close-h">All systems go.</h2>
-    <a class="pill paper" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
+    <form class="wl" id="wl" data-endpoint="" novalidate>
+      <p class="wl-p">The first version opens to the waitlist first.</p>
+      <div class="wl-who" role="radiogroup" aria-label="I'm a"><button type="button" role="radio" aria-checked="false" data-w="Crew">Crew</button><button type="button" role="radio" aria-checked="true" data-w="Producer">Producer</button><button type="button" role="radio" aria-checked="false" data-w="Production company">Company</button></div>
+      <div class="wl-row"><label class="sr" for="wlEmail">Your email</label><input id="wlEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@company.com" required><input class="sr" tabindex="-1" autocomplete="off" name="website" id="wlHp" aria-hidden="true"><button class="pill" type="submit">Join</button></div>
+      <p class="wl-done" id="wlDone" role="status" aria-live="polite"></p>
+    </form>
+    <a class="close-try" href="../systems-app/">Or try it now with sample data <span aria-hidden="true">→</span></a>
     <a class="close-price" href="#prices">Crew from &pound;4 a month. A producer's first job is free.</a>
   </section>
 </main>

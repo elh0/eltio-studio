@@ -359,3 +359,10 @@ h3{font:500 19px/1.2 var(--disp)}
 .lk{grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}.lk-n{display:grid;gap:2px;min-width:0}.lk .sub{font-size:13px}
 .of-a .btn{flex:1 1 auto;white-space:nowrap;padding-left:10px;padding-right:10px}
 .exp{flex-wrap:wrap}.exp .btn{flex:1 1 auto}
+/* Demo bar: the way back to the site and the waitlist, on every screen of the sample */
+.demobar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;padding:10px 14px;margin-bottom:18px;border-radius:14px;background:#171716;box-shadow:inset 0 0 0 1px var(--rim);font-size:13px}
+.demobar .db-l{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.demobar .lnk{font-size:13px;color:var(--fg);text-decoration:underline;text-underline-offset:3px}
+.demobar .btn.sm{text-decoration:none}
+/* Setup, folded to one row */
+button.onb{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px 14px;width:100%;text-align:left;cursor:pointer;border:0;color:inherit;font:inherit;padding:16px 18px}
+.onb-t{display:grid;gap:4px}.onb .bar{grid-column:1/-1;grid-row:2}.onb .go{grid-row:1;grid-column:2;font-size:18px}

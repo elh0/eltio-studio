@@ -150,6 +150,59 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
 .road { display: flex; gap: 10px 22px; flex-wrap: wrap; }
 .fl { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 0 28px; }
 
+/* ---------- price ---------- */
+.price { margin: 0 16px; display: grid; gap: 28px; }
+.price .hd { display: grid; gap: 14px; max-width: 760px; }
+.price .hd h2 { font-size: clamp(38px, 7vw, 92px); }
+.price .hd p { margin: 0; color: var(--q); font-size: 16px; line-height: 1.5; max-width: 34em; }
+.pv { display: grid; gap: 14px; justify-items: center; padding: 26px 0 8px; }
+.pv .chips { justify-content: center; }
+.sheet { position: relative; width: min(250px, 66vw); aspect-ratio: 1 / 1.414; background: var(--paper); color: var(--ink); border-radius: 4px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(239,237,230,.2); transform: perspective(900px) rotateX(10deg) rotateY(-14deg) rotateZ(2deg); transition: transform .8s var(--e); overflow: hidden; }
+.pv:hover .sheet, .sheet.pro { transform: perspective(900px) rotateX(4deg) rotateY(-6deg) rotateZ(1deg); }
+.sheet .t { font: 400 8px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; display: flex; justify-content: space-between; color: rgba(11,10,9,.55); }
+.sheet .h { font-size: 17px; letter-spacing: -.03em; line-height: 1.05; }
+.sheet .img { flex: 1; min-height: 0; border-radius: 2px; background: #1a1916 url(img/hero-glacier-s.jpg) center / cover; position: relative; }
+.sheet .img::before, .sheet .img::after { content: ""; position: absolute; width: 10px; height: 10px; border: 0 solid rgba(239,237,230,.85); }
+.sheet .img::before { top: 6px; left: 6px; border-top-width: 1px; border-left-width: 1px; }
+.sheet .img::after { bottom: 6px; right: 6px; border-bottom-width: 1px; border-right-width: 1px; }
+.sheet .rw { display: grid; grid-template-columns: 8px 1fr auto; gap: 6px; align-items: center; font: 400 7.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; border-top: 1px solid rgba(11,10,9,.12); padding-top: 5px; }
+.sheet .rw i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid rgba(11,10,9,.4); }
+.sheet .rw i.lit { background: var(--sun); border-color: var(--sun); }
+.sheet .wmk { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; transition: clip-path .9s var(--e), opacity .9s; clip-path: inset(0 0 0 0); }
+.sheet .wmk span { transform: rotate(-28deg); font: 400 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(11,10,9,.5); background: rgba(239,237,230,.82); border: 1px solid rgba(11,10,9,.35); padding: 8px 12px; white-space: nowrap; }
+.sheet.pro .wmk { clip-path: inset(0 0 0 100%); opacity: 0; }
+.pv .cap3 { min-height: 1.4em; text-align: center; }
+.tiers { display: grid; gap: 12px; }
+.tier { position: relative; padding: 26px 22px 22px; border: 1px solid var(--line); border-radius: 18px; display: grid; gap: 18px; align-content: start; background: rgba(239,237,230,.02); transition: border-color .4s, background .4s, transform .4s var(--e); }
+.tier .cm { position: absolute; width: 14px; height: 14px; border: 0 solid var(--mark); opacity: 0; transition: opacity .4s, inset .5s var(--e); }
+.tier .cm.a { top: 14px; left: 14px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.tier .cm.b { top: 14px; right: 14px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.tier .cm.c { bottom: 14px; left: 14px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.tier .cm.d { bottom: 14px; right: 14px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+.tier.sel { border-color: rgba(239,237,230,.42); background: rgba(239,237,230,.045); }
+.tier.sel .cm { opacity: 1; }
+.tier .nm { display: flex; justify-content: space-between; gap: 12px; }
+.tier .amt { display: flex; align-items: baseline; gap: 10px; }
+.tier .amt b { font-weight: 400; font-size: clamp(56px, 14vw, 84px); letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; }
+.tier .amt b sup { font-size: .42em; letter-spacing: -.02em; vertical-align: .9em; margin-right: .04em; }
+.tier .amt s { color: var(--q); font-size: 18px; text-decoration-thickness: 1px; }
+.tier p { margin: 0; color: var(--q); font-size: 15px; line-height: 1.5; }
+.tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.tier li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.35; }
+.tier li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(239,237,230,.45); transform: translateY(-1px); }
+.tier li.on::before { background: var(--paper); border-color: var(--paper); }
+.tier li em { font-style: normal; color: var(--q); }
+.tier.pro { border-color: rgba(255,90,31,.45); background: radial-gradient(120% 70% at 100% 0%, rgba(255,90,31,.16), rgba(255,90,31,0) 60%), rgba(239,237,230,.03); }
+.tier.pro.sel { border-color: var(--sun); }
+.tier.pro .cm { border-color: var(--sun); }
+.tier.pro li.on::before { background: var(--sun); border-color: var(--sun); }
+.tier .tag { color: var(--sun); }
+.tier .go { justify-self: start; }
+.tier .ghost { display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(239,237,230,.32); color: var(--paper); text-decoration: none; font-size: 15px; }
+.tier .ghost::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); }
+.small { display: flex; flex-wrap: wrap; gap: 10px 26px; }
+.small a { color: var(--paper); }
+
 /* ---------- wider screens: the card sits left, the phone sits right ---------- */
 @media (min-width: 900px) {
   :root { --inset: 18px; }
@@ -161,7 +214,14 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
   .step:not(.on) .card { transform: translateY(calc(-50% + 18px)); }
   .stick .chap { left: max(40px, 6vw); }
   .get { padding-top: 22vh; }
-  .join { margin: 0 max(40px, 6vw); }
+  .join, .price { margin: 0 max(40px, 6vw); }
+  .price { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 40px 56px; }
+  .price .hd { grid-column: 1; }
+  .pv { grid-column: 2; grid-row: 1; padding: 0; }
+  .sheet { width: 280px; }
+  .tiers { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tier:hover { transform: translateY(-4px); }
+  .small { grid-column: 1 / -1; }
   .fl { padding: 0 max(40px, 6vw); }
   .places .cap2 { padding-inline: max(40px, 6vw); }
 }
@@ -264,6 +324,60 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
   <div class="places" id="places" aria-label="Today's sun at ten places">
     <div class="cap2 mono q"><span>Today's sun · ten places we go</span><span>Orange · sun up now</span></div>
     <div class="pl-track"></div>
+  </div>
+  <div class="price" id="price">
+    <div class="hd">
+      <span class="mono q">Price · no subscription</span>
+      <h2>Free to scout. Pay once to go clean.</h2>
+      <p>Everything works for free. Your PDFs carry a small Out &amp; Scout mark. Pro takes the mark off and adds the extra exports, once, and it's yours for good.</p>
+    </div>
+    <div class="pv">
+      <div class="chips" role="group" aria-label="Preview the PDF" id="pv-t"><button type="button" class="chip" data-p="free" aria-pressed="true">Free</button><button type="button" class="chip sun" data-p="pro" aria-pressed="false">Pro</button></div>
+      <div class="sheet" id="sheet" aria-hidden="true">
+        <div class="t"><span>Day plan · Knole Park</span><span>1 / 5</span></div>
+        <div class="h">Scene 1 · The ridge</div>
+        <div class="img"></div>
+        <div class="rw"><i class="lit"></i><span>Wide · 24mm</span><span>07:12 Backlit</span></div>
+        <div class="rw"><i class="lit"></i><span>Walk in · 35mm</span><span>07:40 Side lit</span></div>
+        <div class="rw"><i></i><span>Close · 85mm</span><span>12:30 Top light</span></div>
+        <div class="wmk"><span>Scouted with Out &amp; Scout</span></div>
+      </div>
+      <span class="mono q cap3" id="pv-cap" aria-live="polite">Free · sent with the mark</span>
+    </div>
+    <div class="tiers">
+      <article class="tier sel" data-p="free">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Free</span><span class="q">Forever</span></div>
+        <div class="amt"><b><sup>£</sup>0</b></div>
+        <p>The whole app. Scout as much as you like.</p>
+        <ul>
+          <li class="on">Every lens and ratio in the finder</li>
+          <li class="on">Live sun and the light read</li>
+          <li class="on">Unlimited scenes and shots</li>
+          <li class="on">PDFs with a small watermark</li>
+        </ul>
+      </article>
+      <article class="tier pro" data-p="pro">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Pro</span><span class="tag">Pay once</span></div>
+        <div class="amt"><b><sup>£</sup>29.99</b></div>
+        <p>For the PDFs you send to a client or a crew.</p>
+        <ul>
+          <li class="on">Clean PDFs, no watermark</li>
+          <li class="on">Shot list as CSV</li>
+          <li class="on">Every scene in one send</li>
+          <li class="on"><span>Live link for the crew <em>(coming)</em></span></li>
+        </ul>
+      </article>
+      <article class="tier" data-p="founding">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Founding</span><span class="q">Launch</span></div>
+        <div class="amt"><b><sup>£</sup>14.99</b><s>£29.99</s></div>
+        <p>Pro at half price for the people who scout with us first. Join the list and we send your code on launch day.</p>
+        <a class="ghost go" href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20founding%20price">Join the founding list</a>
+      </article>
+    </div>
+    <div class="small mono q"><span>Testing it now? Pro is yours free at launch.</span><span>Production company? <a href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20team%20price">Ask about a team price</a></span></div>
   </div>
   <div class="join">
     <span class="mono q">Testing now on real recces</span>

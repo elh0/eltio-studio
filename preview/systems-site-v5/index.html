@@ -17,7 +17,7 @@
 <header class="nav" id="top">
   <span class="nav-l"><i class="dot" aria-hidden="true"></i><span class="lab" id="clock">London 00:00</span></span>
   <a class="mark" href="#top" aria-label="Systems, home"><span>S</span><span style="margin-left:.08em">y</span><span style="margin-left:.36em">st</span><span style="margin-left:.14em">e</span><span style="margin-left:.42em">ms</span></a>
-  <span class="nav-r"><a class="lab hide-s" href="#easy">How</a><a class="pill sm" href="../systems-app/">Try it</a></span>
+  <span class="nav-r"><a class="as" href="#who" id="asBtn" aria-label="Change who you are"><span class="lab">As</span> <b id="asName">Producer</b></a><a class="pill sm" href="../systems-app/">Try it</a></span>
 </header>
 
 <main>
@@ -25,12 +25,16 @@
   <section class="hero">
     <div class="hero-copy">
       <h1>Production admin, made easy.</h1>
-      <p class="lede">Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.</p>
+      <p class="lede" id="lede">Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.</p>
       <div class="acts">
         <a class="pill" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
         <a class="pill ghost" href="#easy">See how easy <span aria-hidden="true">↓</span></a>
       </div>
       <p class="fine">For UK production companies and producers. No card, no call, no download.</p>
+      <div class="who" id="who">
+        <span class="lab">Run it as</span>
+        <div class="who-pills" role="radiogroup" aria-label="Your job" id="whoPills"></div>
+      </div>
     </div>
     <div class="float" id="float" aria-hidden="true">
       <div class="fl" style="--z:60px;--x:-40px;--y:-150px;--r:-6deg">
@@ -115,11 +119,11 @@
   <section class="wrap">
     <div class="wrap-copy">
       <p class="lab">Try it</p>
-      <h2 class="h2">They wrapped late. What do you owe?</h2>
-      <p>Drag the wrap. This is how every crew invoice is checked, on APA terms, before you pay it.</p>
+      <h2 class="h2" id="wrapH">They wrapped late. What do you owe?</h2>
+      <p id="wrapP">Drag the wrap. This is how every crew invoice is checked, on APA terms, before you pay it.</p>
     </div>
     <div class="card live" id="live">
-      <div class="row-top"><span class="lab">Gaffer · £450 · APA</span><span class="lab" id="liveTime">Wrap 19:00</span></div>
+      <div class="row-top"><span class="lab" id="liveWho">Your gaffer · £450 · APA</span><span class="lab" id="liveTime">Wrap 19:00</span></div>
       <label class="slider"><span class="sr">Wrap time</span>
         <input type="range" id="wrap" min="0" max="16" step="1" value="0" aria-valuetext="19:00">
       </label>

@@ -192,4 +192,18 @@ if (strip) {
   }).join("");
   strip.querySelector(".pl-track").innerHTML = html + html;
 }
+
+/* ---------- price: Free / Pro flips the sample page and the selected card ---------- */
+var sheet = $("#sheet");
+if (sheet) {
+  var CAP = { free: "Free · sent with the mark", pro: "Pro · clean, £29.99 once", founding: "Founding · clean, £14.99 once" };
+  var setP = function (p) {
+    sheet.classList.toggle("pro", p !== "free");
+    $$("#pv-t .chip").forEach(function (b) { b.setAttribute("aria-pressed", (b.dataset.p === "free") === (p === "free") ? "true" : "false"); });
+    $$(".tier").forEach(function (t) { t.classList.toggle("sel", t.dataset.p === p); });
+    $("#pv-cap").textContent = CAP[p];
+  };
+  $$("#pv-t .chip").forEach(function (b) { b.addEventListener("click", function () { setP(b.dataset.p); }); });
+  $$(".tier").forEach(function (t) { t.addEventListener("click", function (e) { if (!e.target.closest("a")) setP(t.dataset.p); }); });
+}
 })();

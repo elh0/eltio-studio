@@ -1,16 +1,21 @@
 // 19 Oct Elliot: the phone landing needs its own opening moment, in the world of the desktop ink (a white goo layer
 // set to difference, so wherever the ink is the page turns paper on ink). Four options to try on the test site,
 // picked with ?intro=1..4 (intros.html links them). Phones only; the desktop keeps its pointer ink.
+// Elliot picked 03 Touch (19 Oct), so phones get it with no ?intro; the others stay reachable by number.
 (function () {
-  var m = /[?&]intro=(\d)/.exec(location.search), V = m ? +m[1] : 0;
+  var m = /[?&]intro=(\d)/.exec(location.search), V = m ? +m[1] : 3;
   if (!V || innerWidth > 760) return;
+  // not on the copy of the landing that waits behind the end of the projects page
+  try { if (window.frameElement && window.frameElement.hasAttribute('data-ghost')) return; } catch (e) {}
   var NS = 'http://www.w3.org/2000/svg', W = innerWidth, H = innerHeight, t0 = 0, done = false, raf;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduce) return;
   var css = document.createElement('style');
   css.textContent = '.mi-ink{position:fixed;inset:0;z-index:2147483000;pointer-events:none;mix-blend-mode:difference;transition:opacity .35s}' +
     '.mi-ink svg{display:block;width:100%;height:100%}.mi-ink.out{opacity:0}html.mi-hold,html.mi-hold body{overflow:hidden;touch-action:none}' +
-    '.eltio.lp .x-ink{display:none!important}';
+    '.eltio.lp .x-ink{display:none!important}html.cg-open .mi-ink,html.cg-deep .mi-ink{display:none}' +
+    // dragging the ink sideways should never count as a swipe back
+    'html,body{overscroll-behavior-x:none}';
   document.head.appendChild(css);
   var lay = document.createElement('div'); lay.className = 'mi-ink'; lay.setAttribute('aria-hidden', 'true');
   var blur = V === 4 ? 14 : 10;
@@ -107,6 +112,8 @@
       else if (t < 1.6) { hx = W * .5; hy = H - 40 - (H * .45) * rise; }
       else { var w = t - 1.6; hx = W * (.5 + .3 * Math.sin(w * .8)); hy = H * (.32 + .12 * Math.sin(w * 1.3 + 1)); }
       hy += gone * gone * H * 1.2;
+      // fade as it runs off, so nothing is left over the project cards
+      lay.style.opacity = (1 - seg(gone, .35, 1)).toFixed(3);
       D.forEach(function (d, i) {
         var lead = i ? D[i - 1] : { x: hx, y: hy }, f = i ? .3 : .14;
         d.x += (lead.x - d.x) * f; d.y += (lead.y - d.y) * f;

@@ -128,6 +128,55 @@
   if (io) new IntersectionObserver(function (es) { sheet.classList.toggle("flat", es[0].isIntersecting); }, { threshold: .5 }).observe(sheet);
 
 
+
+  /* ---- inbox: every email from back-to-back jobs, sorted into the right place ---- */
+  var IB_X = { dop: ["Rental house", "Camera package quote", "Added as a kit line"], gaffer: ["Best boy", "Team hours, day 2", "Team timesheet updated"], spark: ["Northbound Films", "Rig day on Friday?", "Rig rate applied"], grip: ["Rental house", "Crane cross-hire", "Sub-hire line added"], camera: ["2nd AC", "Kit back at 21:10", "Your own wrap logged"], sound: ["Northbound Films", "Six radio mics?", "Channels on the kit line"], dit: ["Northbound Films", "Two more drives", "Recharge logged, receipt filed"], art: ["Props hire", "Return by Friday", "Float updated, return in diary"], costume: ["Selfridges", "Refund, £89.00", "Return logged, float balanced"], hmu: ["Northbound Films", "Cast list updated", "Consumables split by cast"], locations: ["Camden Council", "Permit approved", "Residents' letter drafted"], runner: ["Northbound Films", "Fuel and parking?", "Receipts on your timesheet"], editor: ["Agency", "v8 notes", "Round 4 of 3, extra drafted"] };
+  function ibFor(k) {
+    if (k === "prod" || k === "pm") return [["Agency", "We'd love to go with you", "Award, advance drafted"], ["Gaffer", "INV-021, 2 days", "Checked, matches APA", "ok"], ["Spark", "Invoice, 2 days", "£26.25 over, query drafted"], ["Agency", "Can we add the canal shot?", "Extra costed, link ready"], ["Westminster Council", "Question on your permit", "Reply drafted, needs you", "you"]];
+    if (k === "dir") return [["Northbound Films", "Pencil for the 13th?", "Hold logged, rep copied"], ["Field & Co", "First pencil, 13 and 14", "Clash flagged"], ["Your rep", "Fee statement, sportswear", "£4,800 to you, checked", "ok"], ["Low Tide", "Treatment due Thursday", "In your diary"], ["Field & Co", "Can you confirm by Friday?", "Reply drafted, needs you", "you"]];
+    var x = IB_X[k] || ["Northbound Films", "Kit list for Tuesday?", "Kit list attached"];
+    return [["Northbound Films", "Hold for Tue and Wed?", "Pencil logged"], ["Field & Co", "Call sheet, day 1", "Call 06:30, in your diary"], ["Low Tide", "Shoot moved to Thursday", "Moved, clash flagged"], [x[0], x[1], x[2]], ["Northbound Films", "Remittance, £1,770", "Paid, invoice closed", "ok"], ["Field & Co", "Free on the 14th?", "Reply drafted, needs you", "you"]];
+  }
+  var ibT = [], ibKey = "prod", ibSeen = false;
+  function ibPlay() {
+    ibT.forEach(clearTimeout); ibT = [];
+    var L = ibFor(ibKey), rows = $("#ibRows"), sorted = 0;
+    rows.innerHTML = L.map(function (r) { return '<div class="ib-r"><span class="lab">' + r[0].replace("&", "&amp;") + '</span><span class="s">' + r[1] + '</span><span class="tag new">New</span></div>'; }).join("");
+    $("#ibSum").textContent = L.length + " in · 0 sorted";
+    $$(".ib-r", rows).forEach(function (el, i) {
+      var r = L[i];
+      ibT.push(setTimeout(function () { el.classList.add("in"); }, reduce ? 0 : 200 + i * 380));
+      ibT.push(setTimeout(function () { var g = $(".tag", el); g.className = "tag" + (r[3] ? " " + r[3] : ""); g.textContent = r[2]; if (r[3] !== "you") sorted++; $("#ibSum").textContent = L.length + " in · " + sorted + " sorted" + (i === L.length - 1 ? " · 1 needs you" : ""); }, reduce ? 0 : 900 + i * 380));
+    });
+  }
+  $("#ibAgain").addEventListener("click", ibPlay);
+  if (io) new IntersectionObserver(function (es) { if (es[0].isIntersecting && !ibSeen) { ibSeen = true; ibPlay(); } }, { threshold: .35 }).observe($("#ib")); else ibSeen = true;
+  $$(".ib-copy > *").forEach(function (el, i) { watch(el, i * 70); });
+
+
+  /* ---- the day, live: a countdown from the call sheet, then the day as production posts it ---- */
+  var dyKey = "prod", dyT = [], dyLeft = 14 * 3600 + 32 * 60 + 10, dyRun = false;
+  function hms(s) { var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return [h, m, x].map(function (n) { return String(n).padStart(2, "0"); }).join(":"); }
+  setInterval(function () { if (dyRun) return; dyLeft = Math.max(0, dyLeft - 1); $("#dyClock").textContent = hms(dyLeft); }, 1000);
+  function dyDay() {
+    var prod = dyKey === "prod" || dyKey === "pm", c = (ROLES[dyKey] && ROLES[dyKey].crew) || { band: 1.5, rate: 450 };
+    var last = prod ? ["Timesheets drafted", "32 crew, 18 on overtime, all from one wrap"] : ["Your timesheet is drafted", "1.5 hrs overtime at " + c.band + "x, " + gbp2(c.rate / 10 * c.band * 1.5)];
+    return [["06:30", "Call. The unit's on the clock", prod ? "31 of 32 checked in" : "You checked in at 06:24", ""], ["09:10", "Unit move to the bridge", "15 minutes, parking on Mare St", ""], ["13:05", "Lunch called", "One hour, back at 14:05", ""], ["18:00", "Running 30 minutes over", "Overtime starts at 18:30 for everyone", "amber"], ["19:45", "Wrap in 15", prod ? "Overtime so far £2,940" : "Kit back by 20:30", "amber"], ["20:00", "Wrap", last[0] + ". " + last[1], "red"]];
+  }
+  function dyReset() { dyT.forEach(clearTimeout); dyT = []; dyRun = false; $("#dy").classList.remove("ot"); $("#dyFeed").innerHTML = '<div class="dy-n"><span class="t">Yesterday</span><b>Call sheet read from your inbox</b><span>Day 1 call 06:30, in your diary with the countdown on</span></div>'; $("#dyLab").textContent = "Call in"; $("#dyClock").textContent = hms(dyLeft); $("#dyPlay").textContent = "Play the day"; }
+  function dyPlay() {
+    dyReset(); dyRun = true; $("#dyPlay").textContent = "Play it again"; $("#dyLab").textContent = "On the clock";
+    var D = dyDay(), feed = $("#dyFeed");
+    D.forEach(function (n, i) { dyT.push(setTimeout(function () {
+      $("#dyClock").textContent = n[0]; $("#dy").classList.toggle("ot", i >= 3);
+      if (i >= 3) $("#dyLab").textContent = i === 5 ? "Wrapped" : "Overtime";
+      feed.insertAdjacentHTML("afterbegin", '<div class="dy-n' + (n[3] ? " " + n[3] : "") + '"><span class="t">' + n[0] + "</span><b>" + n[1] + "</b><span>" + n[2] + "</span></div>");
+      var all = $$(".dy-n", feed); if (all.length > 3) all[all.length - 1].remove();
+    }, reduce ? 0 : 300 + i * 1100)); });
+  }
+  $("#dyPlay").addEventListener("click", function () { if (dyRun && $("#dyPlay").textContent === "Play it again") { dyPlay(); return; } dyPlay(); });
+  $$(".day-copy > *").forEach(function (el, i) { watch(el, i * 70); }); watch($("#dy"), 120);
+
   /* ---- both sides: one wrap drafts every crew invoice, and the producer's check already matches ---- */
   var BD = [["gaffer", "Gaffer", 450, 1.5], ["spark", "Spark", 350, 1.5], ["camera", "1st AC", 480, 1.25], ["sound", "Sound recordist", 520, 1.25]], bdKey = "prod", bdT = [];
   function bdDraw(state) {
@@ -376,6 +425,9 @@
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
+    dyKey = key === "other" ? guess(R.n) : key; dyReset();
+    ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();
+    $("#ibP").textContent = (key === "prod" || key === "pm") ? "Systems reads your work email and turns it into the job. Awards, crew invoices, client extras and council questions are sorted as they land. You only see what needs you, with the reply already drafted." : "Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.";
     var tk = key === "other" ? guess(R.n) : key;
     $$('a[href*="systems-app/"]').forEach(function (l) { if (!/\.html/.test(l.getAttribute("href"))) l.href = l.href.split("?")[0] + "?as=" + tk; });
     var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);

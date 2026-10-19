@@ -1,7 +1,7 @@
 // 19 Oct: four takes on the phone project list, to make it land harder without making it busy. Picked with
 // ?lv=1..4 (views.html links them). Phones only; the cards keep their covers and still open the project on a tap.
 (function () {
-  var m = /[?&]lv=(\d)/.exec(location.search), V = m ? +m[1] : 0;
+  var m = /[?&]lv=(\d)/.exec(location.search), V = m ? +m[1] : 6; // 06 Float was picked (19 Oct); ?lv=0 turns it off
   if (!V || innerWidth > 760) return;
   try { if (window.frameElement && window.frameElement.hasAttribute('data-ghost')) return; } catch (e) {}
   var html = document.documentElement; html.classList.add('lv', 'lv' + V);
@@ -79,7 +79,13 @@
     'html.lv .lv-sp .k2-rest{transform:scale(1.55)!important;opacity:1!important;filter:none!important}',
     'html.lv .lv-ph.w .lv-sp .k2-rest{transform:scale(1.05)!important}',
     'html.lv .lv-sp .k2-wf,html.lv .lv-sp .k2-tag{display:none!important}',
-    'html.lv .x-p.lv-play .lv-sp{opacity:0}'
+    'html.lv .x-p.lv-play .lv-sp{opacity:0}',
+    // each app's own opening screen, the way the app shows it (not the cover on white)
+    'html.lv .lv-sp.s0{background:#0B0B0A}html.lv .lv-sp.s0 .lock{color:#F3F3F0!important;white-space:nowrap}html.lv .lv-sp.s0 .k2-rest{transform:scale(.95)!important}',
+    'html.lv .lv-sp.s1{background:#000}html.lv .lv-ph.w .lv-sp.s1 .k2-rest{transform:scale(.6)!important}',
+    'html.lv .lv-sp.s2{background:#0E0E0D}html.lv .lv-sp.s2 svg{filter:invert(1)}html.lv .lv-sp.s2 .k2-rest{transform:scale(1.25)!important}',
+    'html.lv .lv-sp.s3{background:#121211}html.lv .lv-sp.s3 .ag-wm{filter:invert(1)}',
+    'html.lv .lv-sp.s4{background:#F3F3F0}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -105,7 +111,7 @@
         var p = ph(a.loop || a.still, a.wide); f.appendChild(p);
         if (V >= 5) {
           // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
-          var sp = document.createElement('span'); sp.className = 'lv-sp'; var k2 = f.querySelector('.k2');
+          var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
           if (k2) sp.appendChild(k2.cloneNode(true)); p.appendChild(sp);
           c.style.setProperty('--k', cards.indexOf(c));
         }
@@ -180,5 +186,6 @@
     }
     requestAnimationFrame(frame);
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  // after load, so the covers drawn by script (the Lampwerk mark) are there to copy
+  if (document.readyState !== 'complete') addEventListener('load', go); else go();
 })();

@@ -127,6 +127,33 @@
   var sheet = $(".sheet");
   if (io) new IntersectionObserver(function (es) { sheet.classList.toggle("flat", es[0].isIntersecting); }, { threshold: .5 }).observe(sheet);
 
+
+  /* ---- both sides: one wrap drafts every crew invoice, and the producer's check already matches ---- */
+  var BD = [["gaffer", "Gaffer", 450, 1.5], ["spark", "Spark", 350, 1.5], ["camera", "1st AC", 480, 1.25], ["sound", "Sound recordist", 520, 1.25]], bdKey = "prod", bdT = [];
+  function bdDraw(state) {
+    bdT.forEach(clearTimeout); bdT = [];
+    var board = $("#board"); board.classList.remove("paid");
+    $("#bdRows").innerHTML = BD.map(function (c) { return '<div class="bd-r' + (c[0] === bdKey ? " you" : "") + '"><span>' + c[1] + '</span><span class="lab">Waiting for wrap</span><span class="tag wait">Open</span></div>'; }).join("");
+    $("#bdTot").textContent = "£0"; $("#bdPayLab").textContent = "Pay run · Friday"; $("#bdApprove").disabled = true; $("#bdApprove").textContent = "Approve the run";
+    $("#bdWrap").disabled = false; $("#bdWrap").textContent = "Tap wrap"; $("#bdReset").hidden = true;
+  }
+  function bdWrap() {
+    $("#bdWrap").disabled = true; $("#bdWrap").textContent = "Wrapped";
+    var rows = $$(".bd-r", $("#bdRows")), sum = 0;
+    BD.forEach(function (c, i) {
+      var ot = c[2] / 10 * c[3] * 2.5, t = c[2] + ot;
+      bdT.push(setTimeout(function () {
+        var r = rows[i]; r.classList.add("go");
+        $(".lab", r).textContent = "Invoice drafted · " + gbp2(t);
+        bdT.push(setTimeout(function () { var g = $(".tag", r); g.className = "tag ok"; g.textContent = "Matched"; sum += t; $("#bdTot").textContent = gbp2(sum); if (i === BD.length - 1) { $("#bdPayLab").textContent = "Pay run · Friday · 4 of 4 matched"; $("#bdApprove").disabled = false; } }, 380));
+      }, 350 + i * 420));
+    });
+  }
+  $("#bdWrap").addEventListener("click", bdWrap);
+  $("#bdApprove").addEventListener("click", function () { $("#board").classList.add("paid"); $("#bdPayLab").textContent = "Paid Friday · 4 crew"; $("#bdApprove").disabled = true; $("#bdApprove").textContent = "Paid"; $("#bdReset").hidden = false; });
+  $("#bdReset").addEventListener("click", function () { bdDraw(); });
+  watch($("#board"), 120); $$(".both-copy > *").forEach(function (el, i) { watch(el, i * 70); });
+
   /* ---- run it as: the whole page follows your job ---- */
   function card(c, i) { var p = POS[i]; return '<div class="fl' + (i === 2 ? " red" : "") + '" style="--z:' + p.z + ';--x:' + p.x + ';--y:' + p.y + ';--r:' + p.r + '"><div class="fl-top"><span class="lab">' + c[0] + '</span><span class="tag' + (i === 1 ? " ok" : i === 2 ? " paper" : "") + '">' + c[1] + '</span></div><span class="fl-s">' + c[2] + "</span><b>" + c[3] + "</b></div>"; }
   var POS = [{ z: "60px", x: "-40px", y: "-150px", r: "-6deg" }, { z: "0px", x: "60px", y: "0px", r: "4deg" }, { z: "140px", x: "-20px", y: "150px", r: "-3deg" }];
@@ -348,6 +375,7 @@
     other.hidden = key !== "other";
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
+    bdKey = key; bdDraw();
     var tk = key === "other" ? guess(R.n) : key;
     $$('a[href*="systems-app/"]').forEach(function (l) { if (!/\.html/.test(l.getAttribute("href"))) l.href = l.href.split("?")[0] + "?as=" + tk; });
     var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);

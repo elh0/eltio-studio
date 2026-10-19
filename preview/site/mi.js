@@ -1,7 +1,7 @@
-// 19 Oct Elliot: the phone landing needs its own opening moment, in the world of the desktop ink (a white goo layer
+// 19 Oct: the phone landing needs its own opening moment, in the world of the desktop ink (a white goo layer
 // set to difference, so wherever the ink is the page turns paper on ink). Four options to try on the test site,
 // picked with ?intro=1..4 (intros.html links them). Phones only; the desktop keeps its pointer ink.
-// Elliot picked 03 Touch (19 Oct), so phones get it with no ?intro; the others stay reachable by number.
+// 03 Touch was picked (19 Oct), so phones get it with no ?intro; the others stay reachable by number.
 (function () {
   var m = /[?&]intro=(\d)/.exec(location.search), V = m ? +m[1] : 3;
   if (!V || innerWidth > 760) return;

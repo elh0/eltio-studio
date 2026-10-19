@@ -64,3 +64,6 @@ Philosophers and poets:
 28. To the illumined mind the whole world burns and sparkles with light. (Emerson)
 29. An old pond. A frog jumps in. The sound of water. (Bashō)
 30. Every day is a journey, and the journey itself is home. (Bashō)
+
+## Opening screen notes (item 12)
+Exact timings, CSS and SwiftUI port notes are in `aglo/wordmark-motion/` next to this file (README.md, cv.css, markup-aglo.html). Aglo: its sky gradient as the background, sun top 112% -> 58% over 55% of the loop, hold, down at 94%. For a ~2 s splash use the `cv-quick` timing (3.6 s loop) and fade to the app at ~2.1 s. Port the keyframes to SwiftUI rather than embedding a web view. Respect Reduce Motion.

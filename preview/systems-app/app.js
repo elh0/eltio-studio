@@ -582,8 +582,8 @@ function linkSheet(g) {
     return '<div class="row static lk"><span class="lk-n">' + esc(x.n) + '<span class="sub q">' + esc(x.sub) + "</span></span>" + (on ? '<span class="tag ok">Linked</span>' : '<button class="btn sm solid" data-link="' + x.k + '">Connect</button>') + "</div>";
   }).join("") + '</div><p class="note">' + (g === "Bank" ? "Bank links are read-only and go through a regulated Open Banking provider. Systems can never move money." : "Systems only writes drafts. Nothing is sent or paid until you do it.") + (mode === "demo" ? " In the preview, Connect shows how it works with sample data." : "") + '</p><div class="acts"><button class="btn wide" data-close>Done</button></div>';
 }
-function onboard() {
-  if (flag("sy-onb-off")) return "";
+function onboard(asSheet) {
+  if (flag("sy-onb-off") && !asSheet) return "";
   var have = linked(), prod = isProd(), s = D.settings;
   var steps = [
     prod ? { t: "Your crew list", sub: "Who's on the shoot and their grade. Rates fill from the card.", a: "data-findcrew", done: true } : { t: "Your grade and rate", sub: s.grade ? s.grade + ", " + money(num(s.rate)) + " a day" : "Pick your grade and the rate fills in.", a: "data-rates", done: !!s.grade },
@@ -592,11 +592,12 @@ function onboard() {
     { t: "Link your calendar", sub: "Google or Apple, so holds show up everywhere.", a: 'data-links="Calendar"', done: ["gcal", "ical"].some(function (k) { return have.indexOf(k) >= 0; }) },
     { t: "See what your dashboard does", sub: "A minute, with your own sample numbers.", a: "data-tour", done: !!flag("sy-onb-tour") }
   ], n = steps.filter(function (x) { return x.done; }).length;
-  return '<div class="onb"><div class="dia-h"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><button class="lnk" data-onboff>Hide</button></div><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><div class="rows">' + steps.map(function (x) {
+  if (asSheet) return "<h2>Set up your dashboard.</h2><p class=\"q\">Link what you already use. Each one takes a minute, and you can skip any of them.</p>" + '<div class="rows">' + steps.map(function (x) {
     return '<button class="row" ' + x.a + '><span><i class="ck' + (x.done ? " on" : "") + '"></i>' + esc(x.t) + '</span><span class="q">' + (x.done ? "Done" : "Start") + '</span><span class="sub">' + esc(x.sub) + "</span></button>";
-  }).join("") + "</div></div>";
+  }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
+  return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero, your bank and your calendar</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode !== "demo" || !job()) return onboard(); return onboard() + (isProd() ? shootCard() + hotCost() + signCard() + poCard() : diaryCard() + jobsCard()); }
+function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + hotCost() + signCard() + poCard() : diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -669,7 +670,7 @@ function home() {
   var s = D.settings, L = todo(), up = D.bookings.filter(function (b) { var d = parse(b.end || b.start); return b.status !== "Cancelled" && d && d >= today(); }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
   var tile = function (lab, v, sub, cls) { return '<div class="tile' + (cls ? " " + cls : "") + '"><span class="part">' + lab + "</span><b>" + v + "</b><span class=\"q\">" + sub + "</span></div>"; };
-  return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? '<button class="btn sm" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
+  return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? "" : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
     dashTop() +
     '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
     '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
@@ -971,10 +972,13 @@ function endTour() { tourT.forEach(function (x) { clearTimeout(x); cancelAnimati
 
 /* ---------- render ---------- */
 var VIEWS = { home: home, bookings: bookings, money: moneyScr, more: more };
+/* Trying it with sample data: always show the way back to the site and the waitlist. */
+function siteUrl() { return /\/preview\/systems-app\//.test(location.pathname) ? "../systems-site-v5/" : /^https?:/.test(location.protocol) && location.hostname !== "localhost" && !/claude/.test(location.hostname) ? "/" : "https://eltio.systems/"; }
+function demoBar() { return '<div class="demobar"><span class="q">Sample data · nothing is saved</span><span class="db-l"><button class="lnk" data-switchjob>Switch job</button><a class="lnk" href="' + siteUrl() + '">Back to the site</a><a class="btn sm solid" href="' + siteUrl() + '#waitlist">Join the waitlist</a></span></div>'; }
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
-  $("main").innerHTML = !signedIn ? welcome() : !ready ? setup() : VIEWS[S.tab]();
+  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : !ready ? setup() : VIEWS[S.tab]());
   if (ready && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
   $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
@@ -1025,7 +1029,8 @@ document.addEventListener("click", function (e) {
   if (d.export) { if (d.export === "csv") exportCSV(); else if (d.export === "xls") exportXLS(); else exportPDF(); if (d.export !== "pdf") banner(d.export === "csv" ? "Bookings saved as a CSV." : "Saved as an Excel workbook."); return; }
   if (b.hasAttribute("data-links")) { openSheet(linkSheet(b.getAttribute("data-links"))); return; }
   if (d.link) { var lk = LINKS.find(function (x) { return x.k === d.link; }); if (mode !== "demo") { banner(lk.n + " linking switches on once their review of Systems is done."); return; } var ls = linked(); ls.push(d.link); D.settings.links = ls.join("|"); demoSave(); render(); openSheet(linkSheet(LG)); banner(lk.n + " linked, with sample data."); return; }
-  if (b.hasAttribute("data-onboff")) { flag("sy-onb-off", "1"); render(); banner("Hidden. Find it again in You, under Set up your dashboard."); return; }
+  if (b.hasAttribute("data-onbopen")) { openSheet(onboard(true)); return; }
+  if (b.hasAttribute("data-onboff")) { closeSheet(); flag("sy-onb-off", "1"); render(); banner("Hidden. Find it again in You, under Set up your dashboard."); return; }
   if (b.hasAttribute("data-onbon")) { try { localStorage.removeItem("sy-onb-off"); } catch (e) {} S.tab = "home"; render(); return; }
   if (b.hasAttribute("data-rates")) { openSheet(rateSheet()); return; }
   if (d.usegrade) { D.settings.grade = d.usegrade; var cr = cardRate(d.card, d.usegrade); if (cr) D.settings.rate = String(cr); if (mode === "demo") demoSave(); else change("Settings", function () {}); openSheet(rateSheet(d.card)); banner(d.usegrade + (cr ? ", £" + cr + " a day. Change it to your deal in Edit details." : ". Own deal: put your rate in Edit details.")); return; }

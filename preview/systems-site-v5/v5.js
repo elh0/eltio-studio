@@ -676,3 +676,22 @@ var RATES = {
   var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (!en.isIntersecting) return; var a = J.querySelector('a[href="#' + en.target.id + '"]'); if (!a || a === cur) return; if (cur) cur.classList.remove("on"); cur = a; a.classList.add("on"); var inr = J.querySelector(".jump-in"); inr.scrollTo({ left: a.offsetLeft - 16, behavior: "smooth" }); }); }, { rootMargin: "-45% 0px -50% 0px" });
   links.forEach(function (a) { var t = document.getElementById(a.getAttribute("href").slice(1)); if (t) io.observe(t); });
 })();
+/* Waitlist for the first version. Posts to the form's endpoint; until one is set, it says so instead of pretending. */
+(function () {
+  var f = document.getElementById("wl"); if (!f) return;
+  var who = "Producer", out = document.getElementById("wlDone"), em = document.getElementById("wlEmail");
+  try { var r = localStorage.getItem("sys-role") || ""; who = /^(prod|pm)$/.test(r) ? "Producer" : r && r.indexOf("other:") !== 0 ? "Crew" : who; } catch (e) {}
+  function setWho(v) { who = v; f.querySelectorAll("[data-w]").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-w") === v)); }); }
+  setWho(who);
+  f.addEventListener("click", function (e) { var b = e.target.closest("[data-w]"); if (b) setWho(b.getAttribute("data-w")); });
+  f.addEventListener("submit", function (e) {
+    e.preventDefault(); var v = em.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { out.textContent = "Add your email to join."; em.focus(); return; }
+    if (document.getElementById("wlHp").value) return;
+    var url = f.getAttribute("data-endpoint");
+    if (!url) { out.textContent = "Preview only: the list switches on before launch. Nothing was sent."; return; }
+    var btn = f.querySelector("button[type=submit]"); btn.disabled = true; out.textContent = "Adding you…";
+    var body = new URLSearchParams({ email: v, role: who, page: location.href, at: new Date().toISOString() });
+    fetch(url, { method: "POST", mode: "no-cors", body: body }).then(function () { f.classList.add("in"); out.textContent = "You're on the list. We'll email you when the first version opens."; }, function () { btn.disabled = false; out.textContent = "That didn't go through. Try again?"; });
+  });
+})();

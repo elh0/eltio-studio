@@ -122,8 +122,8 @@
     'html.lv .lv-sp.s3{background:#121211}html.lv .lv-sp.s3 .ag-wm{filter:invert(1)}',
     'html.lv .lv-sp.s4{background:#F3F3F0}',
     // the wordmark motion on the opening screen, sized for a phone (cv.css)
-    'html.lv .lv-sp .cv{--cvs:1.7}html.lv .lv-ph.w .lv-sp .cv{--cvs:.95}',
-    'html.lv .lv-sp.s0 .cv{--cvs:2.3;color:#F3F3F0}html.lv .lv-sp.s2 .cv{color:#EDEDEA}html.lv .lv-sp.s2 .cv svg,html.lv .lv-sp.s3 .cv .ag-wm{filter:none}html.lv .lv-sp.s3{background:#9BB7D9}html.lv .lv-sp.s4 .cv{color:#0B0B0A}'
+    'html.lv .lv-sp .cv{--cvs:2.2}html.lv .lv-sp.s2 .cv{--cvs:2.1}html.lv .lv-ph.w .lv-sp .cv{--cvs:1.2}',
+    'html.lv .lv-sp.s0 .cv{--cvs:2.85;color:#F3F3F0}html.lv .lv-sp.s2 .cv{color:#EDEDEA}html.lv .lv-sp.s2 .cv svg,html.lv .lv-sp.s3 .cv .ag-wm{filter:none}html.lv .lv-sp.s3{background:#9BB7D9}html.lv .lv-sp.s4 .cv{color:#0B0B0A}'
   ].join('\n');
   document.head.appendChild(css);
 

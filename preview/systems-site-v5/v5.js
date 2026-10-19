@@ -114,7 +114,7 @@
     ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]
   ];
   var chips = $("#chips"), out = $("#chipOut");
-  chips.innerHTML = F.map(function (f, i) { return '<button role="tab" type="button" aria-selected="false" data-i="' + i + '">' + (f[2] ? "<i></i>" : "") + f[0] + "</button>"; }).join("");
+  chips.innerHTML = F.map(function (f, i) { return '<button role="tab" type="button" aria-selected="false" data-i="' + i + '">' + (f[2] === 1 ? "<i></i>" : "") + f[0] + "</button>"; }).join("");
   function pick(i) {
     var f = F[i];
     $$("button", chips).forEach(function (b, j) { b.setAttribute("aria-selected", j === i ? "true" : "false"); });
@@ -236,6 +236,26 @@
   var PAY = scr("Pay run · Friday", rows([["30 invoices match", "£21,480"], ["2 queries drafted", "−£26.25", "amber"], ["Paid in 7 days", "APA terms", "q"]]), "Approve the run");
   var CREW_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and payments are matched to invoices. No bank login. Skip it if you prefer.", 0], ["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
   var PROD_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and client payments and crew runs are matched. No bank login. Skip it if you prefer.", 0], ["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
+  /* more features per job, shown first in "the rest is there when you need it" */
+  var EXTRA = {
+    prod: [["Overtime ask", "Ask the whole unit to go over in one tap, see who's in and who wants a word."], ["Cost to complete", "Actuals against the budget, updated as crew invoices are checked."], ["Wrap book", "Contracts, releases, receipts and the final cost report in one folder for the agency."], ["Client extras log", "Every approved extra, with who said yes and when, on the balance invoice."]],
+    pm: [["Unit call to every timesheet", "One unit call and wrap fills every crew member's day."], ["Crew list once", "Start forms, call sheet lines and deal memos all from one list."], ["Supplier insurance", "Certificates checked for expiry before kit goes on the truck."], ["Daily progress report", "Call, lunch, wrap and overtime from the day, drafted for you."]],
+    dir: [["Treatment budget", "What each pitch is costing you, before you say yes to another."], ["Rep statements", "Every job's fee, rep share and what landed, checked against each other."], ["Usage reminders", "Your work's licence periods tracked, so renewals become fees."], ["Showreel credits", "Final credits for every job kept ready for your reel and site."]],
+    dop: [["Grade days", "Grade attendance logged and invoiced like any prep day."], ["Lens and body log", "What went on each job, for insurance and cross-hire."], ["Camera team holds", "Pencil your AC, loader and DIT with your own dates."], ["Recce mileage", "Recce trips logged with miles, so they reach the invoice."]],
+    gaffer: [["Genny and fuel", "Generator hire and fuel receipts on the department invoice."], ["Pre-rig team", "Riggers' days logged separately from the shoot crew."], ["Kit damage notes", "Photos and notes when a lamp comes back broken."], ["Team turnaround", "One warning when anyone in your team is short on rest."]],
+    spark: [["Night premium", "Hours after midnight marked at the right rate."], ["Late break", "Lunch called late is noticed and added."], ["Two jobs, one week", "Back-to-back bookings with different terms kept apart."], ["Mileage to set", "Miles from home to the location added each day."]],
+    grip: [["Car rig days", "Rigging and car days priced as their own day type."], ["Track and dolly log", "What went out on each job, and when it came back."], ["Rental house returns", "Cross-hired kit back by its deadline, with a reminder."], ["Van and parking", "Van miles and parking receipts added as you go."]],
+    camera: [["Checkout days", "Rental house prep logged and paid."], ["Data handover", "The time cards went to the DIT, for when the night runs late."], ["Loader and AC grades", "Each grade's own overtime, even on a shared sheet."], ["Expendables", "Tape, batteries and wipes snapped and claimed."]],
+    sound: [["Battery spend", "Batteries and consumables claimed per job."], ["Mic hire by day", "Extra radio mics priced for the days they were out."], ["Sound reports", "Reports filed with the job so post can find them."], ["Licence renewal", "Your radio mic licence date tracked."]],
+    dit: [["Offload log", "When each card was offloaded and checked."], ["Drive handover", "Who got which drive, signed for."], ["Overnight transcodes", "Extra hours after wrap logged with the reason."], ["Cart hire terms", "Your cart rate and cancellation terms on every booking."]],
+    art: [["Buyer floats", "Each buyer's float and receipts under your department."], ["Hire returns", "Prop hire return dates with a reminder before each one."], ["Set by set costs", "Spend tracked against each set's budget."], ["Strike day", "Strike and clear-up days invoiced, not forgotten."]],
+    costume: [["Fittings diary", "Every fitting booked, with the time paid as prep."], ["Continuity notes", "What each character wore, with photos, kept with the job."], ["Approval buys", "Items on approval tracked until they're kept or returned."], ["Laundry and repairs", "Dry cleaning and repair receipts claimed per job."]],
+    hmu: [["Early calls", "Calls before the unit call priced as early starts."], ["Cast notes", "Allergies and looks per actor, kept private to your team."], ["Team box rates", "Each artist's kit fee on the department invoice."], ["Wig and prosthetics hire", "Hire dates and returns tracked."]],
+    locations: [["Recce packs", "Photos, access and parking notes per location."], ["Reinstatement", "Before and after photos paired for the sign-off."], ["Unit base", "Parking, toilets and power booked and costed."], ["Residents' contacts", "Everyone who got a letter, and who got back to you."]],
+    runner: [["Pick-up log", "Every drop-off and pick-up with time and miles."], ["Petty cash", "What you spent for the production, with receipts, paid back."], ["First invoice", "Your first invoice laid out right, ready to send."], ["Long days", "Hours over 12 shown clearly when you talk about rates."]],
+    editor: [["Cut versions", "Every version with who approved it and when."], ["Assist days", "Your assistant's days on the same invoice."], ["Deliverables list", "Each master and cut-down ticked off before you invoice."], ["Project rates", "Rounds and days agreed in writing before you start."]]
+  };
+  function withExtra(k, base) { var x = EXTRA[k]; return x ? x.map(function (e) { return [e[0], e[1], 2]; }).concat(base) : base; }
 
   /* crew jobs: a rate, a band, the kit they bring, and three things made for them */
   var CREW = {
@@ -418,6 +438,7 @@
       ["PAYE or invoice?", "Whether a runner booking is likely to be PAYE or invoiced, with the rule explained. Production makes the call.", [["Booking", "2 days"], ["Likely", "PAYE", "amber"], ["Start form", "drafted", "q"]]],
       ["Receipts, paid back.", "Lunches, fuel and parking you paid for, snapped and added, so nothing comes out of your own pocket.", [["Lunch run", "£64.20"], ["Parking", "£22.00"], ["Fuel", "£18.00", "q"]]]] }
   };
+  Object.keys(EXTRA).forEach(function (k) { if (ROLES[k]) ROLES[k].chips = withExtra(k, ROLES[k].chips); });
   Object.keys(COPY).forEach(function (k) {
     var c = COPY[k], R = ROLES[k];
     R.h1 = c.h1; R.lede = c.lede;
@@ -437,10 +458,34 @@
 
   var pills = $("#whoPills"), other = $("#whoOther"), otherIn = $("#whoIn");
   pills.innerHTML = PICK.map(function (k) { return '<button type="button" role="radio" data-r="' + k + '">' + ROLES[k].n + "</button>"; }).join("") + '<button type="button" role="radio" data-r="other">Something else</button>';
-  var chips = $("#chips"), out = $("#chipOut"), CH = [];
-  function pickChip(i) { var f = CH[i]; $$("button", chips).forEach(function (b, j) { b.setAttribute("aria-selected", j === i ? "true" : "false"); }); out.innerHTML = '<span class="lab">' + (f[2] ? "In the app now" : "Coming in the pilot") + "</span><h3>" + f[0] + "</h3><p>" + f[1] + "</p>"; }
+  var chips = $("#chips"), out = $("#chipOut"), CH = [], chipFor = "you";
+  function pickChip(i) { var f = CH[i]; $$("button", chips).forEach(function (b, j) { b.setAttribute("aria-selected", j === i ? "true" : "false"); }); out.innerHTML = '<span class="lab">' + (f[2] === 2 ? "Made for " + chipFor + " · in the pilot" : f[2] ? "In the app now" : "Coming in the pilot") + "</span><h3>" + f[0] + "</h3><p>" + f[1] + "</p>"; }
   function spotCard(it) { return '<article class="sp"><h3>' + it[0] + "</h3><p>" + it[1] + '</p><div class="sp-scr">' + rows(it[2]) + "</div></article>"; }
   var cur0 = null;
+
+  /* ---- prices: a plan, then packs on top ---- */
+  var PLANS = { crew: 4, producer: 19, company: 59 };
+  var PACKS = {
+    crew: [["Bank matching", 2], ["Calendar sync", 2], ["Receipt scanning", 2]],
+    producer: [["Live day", 6], ["Bank matching", 2], ["Permits", 4], ["Rights and usage", 6]],
+    company: [["Bank matching", 2], ["Permits", 4], ["Extra person", 8], ["Wrap books", 6]]
+  };
+  var prPlan = "producer", prOn = {};
+  function prDraw() {
+    $$("#prPlans .plan").forEach(function (b) { b.setAttribute("aria-checked", b.getAttribute("data-p") === prPlan ? "true" : "false"); });
+    $("#prPacks").innerHTML = PACKS[prPlan].map(function (p, i) { return '<button type="button" data-i="' + i + '" aria-pressed="' + (prOn[prPlan + i] ? "true" : "false") + '">' + p[0] + "<span>+&pound;" + p[1] + "</span></button>"; }).join("");
+    prSum();
+  }
+  function prSum() {
+    var t = PLANS[prPlan]; PACKS[prPlan].forEach(function (p, i) { if (prOn[prPlan + i]) t += p[1]; });
+    var b = $("#prTot"); b.textContent = "\u00a3" + t; b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+    var d = t * 12 / 365; $("#prDay").textContent = "about " + (d < 1 ? Math.round(d * 100) + "p" : "\u00a3" + d.toFixed(2)) + " a day";
+  }
+  $$("#prPlans .plan").forEach(function (b) { b.addEventListener("click", function () { prPlan = b.getAttribute("data-p"); prDraw(); }); });
+  $("#prPacks").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; var k = prPlan + b.getAttribute("data-i"); prOn[k] = !prOn[k]; b.setAttribute("aria-pressed", prOn[k] ? "true" : "false"); prSum(); });
+  $$(".pr-h > *, .pr-build, .price .sp-note").forEach(function (el, i) { watch(el, (i % 4) * 70); }); $$("#prPlans .plan").forEach(function (el, i) { watch(el, i * 80); });
+  prDraw();
+
   function render(key, R) {
     R = R || ROLES[key];
     try { localStorage.setItem("sys-role", key === "other" ? "other:" + R.n : key); } catch (e) {}
@@ -449,6 +494,7 @@
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
+    prPlan = key === "prod" || key === "pm" ? "producer" : "crew"; prDraw();
     dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();
     $("#ibP").textContent = (key === "prod" || key === "pm") ? "Systems reads your work email and turns it into the job. Awards, crew invoices, client extras and council questions are sorted as they land. You only see what needs you, with the reply already drafted." : "Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.";
@@ -469,7 +515,8 @@
     $("#clients").hidden = !R.client;
     var sp = $("#spot"); sp.hidden = !R.spot;
     if (R.spot) { $("#spLab").textContent = R.spot.lab; $("#spH").textContent = R.spot.h; $("#spGrid").innerHTML = R.spot.items.map(spotCard).join(""); $$(".sp", sp).forEach(function (el, i) { el.style.animationDelay = i * 90 + "ms"; }); }
-    CH = R.chips; chips.innerHTML = CH.map(function (f, i) { return '<button role="tab" type="button" aria-selected="false" data-i="' + i + '">' + (f[2] ? "<i></i>" : "") + f[0] + "</button>"; }).join("");
+    chipFor = R.spot ? R.spot.lab.replace("Made for ", "") : "you"; chips.classList.toggle("has-job", !!EXTRA[key]);
+    CH = R.chips; chips.innerHTML = CH.map(function (f, i) { return '<button role="tab" type="button" aria-selected="false" data-i="' + i + '">' + (f[2] === 1 ? "<i></i>" : "") + f[0] + "</button>"; }).join("");
     $$("button", chips).forEach(function (b) { b.addEventListener("click", function () { pickChip(+b.getAttribute("data-i")); }); });
     pickChip(0);
   }

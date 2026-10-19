@@ -102,7 +102,7 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .scr-card b{font:400 34px/1 var(--disp);letter-spacing:-.03em}
 .scr-q{font-size:13px;color:rgba(14,14,13,.55)}
 .scr-q.c{text-align:center;margin-top:-6px}
-.scr-big{font:300 84px/1 var(--mono);letter-spacing:-.06em;text-align:center;margin-top:10px}
+.scr-big{font:300 58px/1 var(--mono);letter-spacing:-.05em;text-align:center;margin-top:10px;white-space:nowrap}
 .scr-row{display:flex;justify-content:space-between;gap:10px;padding:14px;border-radius:12px;background:#fff;font-size:15px}
 .scr-row b{font:400 14px/1.4 var(--mono)}
 .scr-row.amber{background:var(--amber-bg)}

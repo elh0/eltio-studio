@@ -162,6 +162,42 @@
     </div>
   </section>
 
+  <!-- 2c. CALL SHEET: one link, always the latest -->
+  <section class="csh" id="callsheet">
+    <div class="csh-copy">
+      <p class="lab">Call sheets · in the pilot</p>
+      <h2 class="h2">One link. Always the latest.</h2>
+      <p>Send your own call sheet as a link by WhatsApp or email. No app, no login. Post V2 and only what changed lights up, and everyone gets a ping.</p>
+      <ul class="ticks-list">
+        <li>Your PM or coordinator posts versions from an edit link. Rates stay hidden.</li>
+        <li>Schedule, risk assessment, maps and start pack live on the job, not in a group chat.</li>
+        <li>Every version is kept, so nobody had the old one. No call sheet? Build one in a minute.</li>
+      </ul>
+    </div>
+    <div class="card cs" id="cs">
+      <div class="cs-top"><span class="lab">Canal promo · day 1</span><div class="cs-v" id="csV" role="tablist" aria-label="Versions"><button type="button" data-v="0">V1</button><button type="button" data-v="1">V2</button><button type="button" data-v="2" aria-selected="true">V3</button></div></div>
+      <div class="cs-rows" id="csRows"></div>
+      <div class="cs-foot"><span id="csSeen">Opened by 29 of 32 crew</span><span class="lab" id="csBy">Posted by the coordinator, 21:14</span></div>
+    </div>
+  </section>
+
+  <!-- 2d. CREW PASSPORT + DIRECTORY -->
+  <section class="pp" id="passport">
+    <div class="card dir" id="dir">
+      <div class="dir-q"><span class="lab">Search crew</span><b>1st AC · Thu 24 Oct</b></div>
+      <div class="dir-rows" id="dirRows"></div>
+      <div class="pp-mini"><span class="lab">Your passport</span><div class="pp-ch"><i>Bank</i><i>UTR</i><i>NI</i><i>Address</i><i>Next of kin</i><i>Vegetarian</i></div><span class="q">Filled in once. On 3 jobs this month.</span></div>
+    </div>
+    <div class="pp-copy">
+      <p class="lab">Crew passport · camera first</p>
+      <h2 class="h2">Fill it in once. Get booked without the 10%.</h2>
+      <p>Bank, UTR, address, NI, dietary and next of kin go in once and carry onto every job. Start packs fill themselves, and nobody asks your dietary again.</p>
+      <p>Choose to be found. Producers see your role, credits and whether you're Available, Pencilled or Booked, never who for. They send a hold, you tap accept. Show your rate card only if you want to.</p>
+      <p class="both-tag">Your diary's in the &pound;4. No 10%, ever.</p>
+      <p class="sp-note">The directory opens with camera first: ACs, loaders and DITs. <a href="../systems-app/?as=camera">Join as camera &rarr;</a></p>
+    </div>
+  </section>
+
   <!-- 3. THE LIVE THING: drag the wrap -->
   <section class="wrap">
     <div class="wrap-copy">
@@ -241,7 +277,7 @@
       <p>Pick a plan, then add packs as the work grows. Monthly, cancel any month.</p>
     </div>
     <div class="pr-plans" id="prPlans" role="radiogroup" aria-label="Plans">
-      <button class="plan" data-p="crew" role="radio" aria-checked="false"><span class="lab">Crew</span><b>&pound;4</b><span class="per">a month, one person</span><span class="inc">Inbox sorting, timesheets, invoices, chasing, holds and pencils.</span></button>
+      <button class="plan" data-p="crew" role="radio" aria-checked="false"><span class="lab">Crew</span><b>Free</b><span class="per">overtime and timesheets, every job</span><span class="inc">&pound;4 a month adds inbox sorting, invoices, chasing and your diary. No 10%, ever.</span></button>
       <button class="plan" data-p="producer" role="radio" aria-checked="false"><span class="lab">Producer <em class="tag-free">First job free</em></span><b>&pound;19</b><span class="per">a month, jobs up to 25 crew</span><span class="inc">Everything in Crew, plus crew lists, start packs, overtime asks and one wrap for everyone.</span></button>
       <button class="plan" data-p="company" role="radio" aria-checked="false"><span class="lab">Company</span><b>&pound;59</b><span class="per">a month, 5 people, jobs up to 60 crew</span><span class="inc">Everything in Producer, plus the live day, client approvals and rights and usage.</span></button>
     </div>
@@ -250,7 +286,7 @@
       <div class="pr-packs" id="prPacks"></div>
       <div class="pr-tot"><span class="lab">Your month</span><b id="prTot">&pound;19</b><span id="prDay">about 63p a day</span></div>
     </div>
-    <p class="pr-fine" id="prFine">One overtime hour on a &pound;450 day is &pound;67.50. That's more than a year of Crew.</p>
+    <p class="pr-fine" id="prFine">Overtime and timesheets are free on every job. One missed hour on a &pound;450 day is &pound;67.50.</p>
     <ul class="pr-perks">
       <li><b>First job free</b><span>Producers run one real job, start to wrap, before paying anything.</span></li>
       <li><b>Pay yearly, two months free</b><span>Crew &pound;40 a year, Producer &pound;190, Company &pound;590.</span></li>
@@ -271,8 +307,11 @@
       <details><summary>What if I don't want to go over?</summary><p>Tap "Talk to the producer". They're told who wants a word, and the ask stays open until you've spoken. The app saves the walk round the set, not the conversation.</p></details>
       <details><summary>Can it read my bank statements?</summary><p>If you want. Export a CSV from your bank, drop it in your Systems folder in Google Drive, and payments are matched to invoices. There's no bank login, and you can skip it completely.</p></details>
       <details><summary>Who sees my hours and overtime?</summary><p>You, and the production you're working for on that job. Nobody else.</p></details>
+      <details><summary>Is it free for crew?</summary><p>Overtime and timesheets are free on every job, for good. If a producer runs the job on Systems, you use everything on it free. &pound;4 a month adds your inbox, invoices, chasing and diary across all your jobs.</p></details>
+      <details><summary>Is it a diary service?</summary><p>It does the diary part: availability, holds, offers and clash warnings. It's a flat &pound;4 a month with no commission, ever. Keep your agent if you have one and give them a link to manage your holds.</p></details>
+      <details><summary>Who can see my passport?</summary><p>Nobody, until you choose to be found. Producers then see your role, credits and whether you're free. Bank, NI, address and dietary are only shared with a job you've accepted.</p></details>
       <details><summary>Commercials, TV or both?</summary><p>Both. Each job carries its own terms: APA for commercials, Pact/Bectu for drama, or your own flat rate.</p></details>
-      <details><summary>What does it cost?</summary><p>Crew &pound;4 a month, producers &pound;19, companies &pound;59, with packs on top only if you want them. A producer's first real job is free, and trying it with sample data needs no card.</p></details>
+      <details><summary>What does it cost?</summary><p>Overtime and timesheets are free for crew. Crew Pro is &pound;4 a month, producers &pound;19, companies &pound;59, with packs on top only if you want them. A producer's first real job is free, and trying it with sample data needs no card.</p></details>
     </div>
   </section>
 

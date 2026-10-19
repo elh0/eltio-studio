@@ -418,6 +418,37 @@ function jobSheet(i) {
   return '<div class="top"><span class="q">Made for ' + esc(job().pl) + '</span><span class="tag">Coming in the pilot</span></div><h2>' + esc(f[0]) + '</h2><p class="q">' + esc(f[1]) + '</p><div class="sum ot">' + f[2].map(function (r) { return '<div><span class="q">' + r[0] + '</span><span' + (r[2] === "amber" ? ' class="late"' : "") + ">" + r[1] + "</span></div>"; }).join("") + '</div><p class="q">A preview with sample figures. This part is being built with the first pilot companies.</p><button class="btn solid" data-close>Got it</button>';
 }
 
+
+/* ---------- the shared job: call sheet link, crew passport, directory (sample data) ---------- */
+function isProd() { var j = job(); return !!j && (j.k === "prod" || j.k === "pm"); }
+function callIn() { var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1, 6, 30), m = Math.max(0, Math.round((t - n) / 60000)); return Math.floor(m / 60) + "h " + String(m % 60).padStart(2, "0") + "m"; }
+var CSH = [["Call", "06:30", "07:00"], ["Location", "Canal, E2, then Studio 3", "Canal, E2"], ["Unit base", "Studio 3 car park", "Wharf Rd car park"], ["Lunch", "12:30", ""], ["Weather", "Showers after 3", "Dry, 14°"]];
+function shareCards() {
+  if (mode !== "demo" || !job()) return "";
+  var p = isProd();
+  return '<div class="share"><button class="csc" data-callsheet><span class="part">Tomorrow · Canal promo · V3</span><span class="tag amb">3 changed</span><span class="csc-main"><span><span class="q">Call</span><b>06:30</b></span><span><span class="q">Leave by</span><b>05:50</b></span><span><span class="q">Call in</span><b class="callin">' + callIn() + '</b></span></span><span class="q">' + (p ? "Opened by 29 of 32 crew. 3 haven't seen V3 yet." : "Now Canal, E2, then Studio 3. Unit base moved, showers after 3.") + "</span></button>" +
+    (p ? '<button class="ppc" data-findcrew><span class="part">Find crew · camera first</span><b>Who\'s free Thursday?</b><span class="q">Search the directory, see Available, Pencilled or Booked, and send a hold.</span><span class="go">Search crew <span aria-hidden="true">→</span></span></button>'
+       : '<button class="ppc" data-passport><span class="part">Crew passport</span><b>Filled in once</b><span class="q">Bank, UTR, NI, address, next of kin, vegetarian. On 3 jobs this month.</span><span class="tag ok">Findable</span></button>') + "</div>";
+}
+function callSheet() {
+  var p = isProd();
+  return '<div class="top"><span class="q">Canal promo · day 1</span><span class="tag amb">V3 · 21:14</span></div><h2>Tomorrow\'s call sheet.</h2><div class="sum ot">' + CSH.map(function (r) { return "<div><span class=\"q\">" + r[0] + "</span><span>" + (r[2] ? '<s class="q">' + r[2] + "</s> " : "") + '<span' + (r[2] ? ' class="late"' : "") + ">" + r[1] + "</span></span></div>"; }).join("") + "</div>" +
+    '<div class="part">On this job</div><div class="rows"><div class="row static"><span>Schedule</span><span class="q">PDF</span></div><div class="row static"><span>Risk assessment</span><span class="q">PDF</span></div><div class="row static"><span>Map and parking</span><span class="q">Link</span></div><div class="row static"><span>Start pack</span><span class="tag ok">Filled from passport</span></div></div>' +
+    '<p class="q">V1 posted by the producer, V2 by the PM, V3 by the coordinator. Every version is kept.</p>' +
+    (p ? '<div class="acts"><button class="btn solid" data-postv>Post V4</button><button class="btn" data-editlink>Share an edit link</button></div>' : '<div class="acts"><button class="btn solid wide" data-close>Got it</button></div>');
+}
+var DIRC = [["AR", "Ana R.", "1st AC · 12 commercials this year", "ok"], ["TW", "Tom W.", "1st AC · Alexa Mini, Venice", "pen"], ["PK", "Priya K.", "1st AC · 2nd unit drama", "ok"], ["LB", "Leon B.", "1st AC · music videos", "book"]];
+function findCrew() {
+  return '<div class="top"><span class="q">Crew directory · camera first</span><span class="q">Sample</span></div><h2>1st AC, Thursday 24 Oct.</h2><div class="rows">' + DIRC.map(function (d) {
+    return '<div class="row static dirr"><span class="av">' + d[0] + "</span><span>" + d[1] + '<span class="sub q">' + d[2] + '</span></span>' + (d[3] === "ok" ? '<button class="btn sm solid" data-hold="' + d[1] + '">Send hold</button>' : '<span class="tag' + (d[3] === "pen" ? " amb" : "") + '">' + (d[3] === "pen" ? "Pencilled" : "Booked") + "</span>") + "</div>";
+  }).join("") + '</div><p class="q">You see whether people are free, never who they\'re pencilled for. Rate cards show only when crew switch them on.</p>';
+}
+function passportSheet() {
+  return '<div class="top"><span class="q">Crew passport</span><span class="tag ok">Findable</span></div><h2>Filled in once.</h2><div class="sum"><div><span class="q">Bank</span><span>Saved in your Drive</span></div><div><span class="q">UTR and NI</span><span>Added</span></div><div><span class="q">Address</span><span>Added</span></div><div><span class="q">Next of kin</span><span>Added</span></div><div><span class="q">Dietary</span><span>Vegetarian</span></div></div>' +
+    '<div class="part">Who can see you</div><div class="sum"><div><span class="q">In the directory</span><span>On</span></div><div><span class="q">Rate card</span><span>Off</span></div><div><span class="q">Shared with a job</span><span>Only once you accept</span></div></div>' +
+    '<p class="q">Producers see your role, credits and Available, Pencilled or Booked. Your diary is in Crew Pro, with no 10%, ever.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>';
+}
+
 /* ---------- screens ---------- */
 function welcome() {
   var hasG = !!CFG.googleClientId;
@@ -449,8 +480,8 @@ function home() {
   return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? '<button class="btn sm" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
     '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
     '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
-    jobPart() +
-    '<div class="two"><div class="stack"><div class="part">Needs you' + (L.length ? " · " + L.length : "") + '</div><div class="rows needs">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span><i class="' + (x.amb ? "rd" : "od") + '"></i>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div>" + starter() + "</div>" +
+    shareCards() + jobPart() +
+    '<div class="two"><div class="stack"><div class="part">Needs you' + (L.length ? " · " + L.length : "") + '</div><div class="rows needs">' + (mode === "demo" && job() && !isProd() ? '<button class="row" data-confirmed><span><i class="gd" style="margin-right:10px"></i>Car commercial hours, confirmed by production</span><span class="tag ok">Confirmed</span></button>' : "") + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span><i class="' + (x.amb ? "rd" : "od") + '"></i>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div>" + starter() + "</div>" +
     '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(upRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div></div></div>";
 }
 function upRow(b) { var d = parse(b.start); return '<button class="row up" data-booking="' + b.id + '"><span class="dt"><b>' + (d ? d.getDate() : "") + "</b>" + (d ? MON[d.getMonth()] : "") + '</span><span class="up-t">' + esc(b.production || "Booking") + '<span class="q">' + esc(b.client) + (b.end && b.end !== b.start ? ", to " + nice(b.end) : "") + '</span></span><span class="tag' + (b.status === "Confirmed" ? " ok" : "") + '">' + esc(b.status) + "</span></button>"; }
@@ -732,6 +763,13 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-howphone")) { flag("eltio-systems-phone", "1"); openSheet('<h2>Put it on your home screen</h2><div class="sum"><div><span class="q">iPhone</span><span>Safari, Share, Add to Home Screen</span></div><div><span class="q">Android</span><span>Chrome menu, Install app</span></div></div><p class="q">Then sign in with the same Google account on your laptop. Both read the same sheet, so they always match.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>'); render(); return; }
   if (d.job) { startJob(d.job); return; }
   if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
+  if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
+  if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
+  if (b.hasAttribute("data-passport")) { openSheet(passportSheet()); return; }
+  if (d.hold) { b.textContent = "Hold sent"; b.disabled = true; banner("Hold sent to " + d.hold + " They join the job when they accept."); return; }
+  if (b.hasAttribute("data-postv")) { closeSheet(); banner("V4 posted. Everyone gets a ping with what changed."); return; }
+  if (b.hasAttribute("data-editlink")) { closeSheet(); banner("Edit link ready for your PM. Rates and budget stay hidden."); return; }
+  if (b.hasAttribute("data-confirmed")) { banner("Production confirmed these hours. The mark goes on your invoice."); return; }
   if (b.hasAttribute("data-switchjob")) { closeSheet(); mode = null; S.tab = "home"; render(); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }
   if (b.hasAttribute("data-signin")) { b.disabled = true; startGoogle(false).catch(function (er) { b.disabled = false; banner("Sign-in didn't finish: " + (er.message || er)); }); return; }
@@ -787,3 +825,5 @@ if (!(asJob && startJob(asJob))) render();
 /* Returning user on this device: try a silent sign-in. If Google needs a tap, the welcome screen stays. */
 try { if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in")) startGoogle(true).catch(function () {}); } catch (e) {}
 })();
+
+setInterval(function () { document.querySelectorAll(".callin").forEach(function (e) { e.textContent = callIn(); }); }, 30000);

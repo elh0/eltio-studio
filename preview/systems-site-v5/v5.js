@@ -234,8 +234,8 @@
   function scard(l, b, q) { return '<div class="scr-card"><span class="lab">' + l + "</span><b>" + b + '</b><span class="scr-q">' + q + "</span></div>"; }
   function scr(lab, body, btn, red) { return '<div class="scr"><span class="lab">' + lab + "</span>" + body + '<span class="scr-btn' + (red ? " red" : "") + '">' + btn + "</span></div>"; }
   var PAY = scr("Pay run · Friday", rows([["30 invoices match", "£21,480"], ["2 queries drafted", "−£26.25", "amber"], ["Paid in 7 days", "APA terms", "q"]]), "Approve the run");
-  var CREW_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and payments are matched to invoices. No bank login. Skip it if you prefer.", 0], ["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
-  var PROD_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and client payments and crew runs are matched. No bank login. Skip it if you prefer.", 0], ["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
+  var CREW_CHIPS = [["Crew passport", "Bank, UTR, NI, address, dietary and next of kin, filled in once. Every start pack fills itself.", 0], ["Crew directory", "Choose to be found. Producers see Available, Pencilled or Booked, never who for, and send holds you accept in a tap. No 10%, ever.", 0], ["Call sheet link", "Every version in one link, with what changed lit up and a ping when it does.", 0], ["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and payments are matched to invoices. No bank login. Skip it if you prefer.", 0], ["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
+  var PROD_CHIPS = [["Find crew", "Search the directory by department and date, see who is free, and send a hold. They join the job when they accept.", 0], ["Call sheet versions", "Send your own call sheet as a link. V2 and V3 light up what changed and ping everyone. Or build one in a minute.", 0], ["Edit links", "Your PM or coordinator posts call sheets and documents. Rates and budget stay hidden unless you share them.", 0], ["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and client payments and crew runs are matched. No bank login. Skip it if you prefer.", 0], ["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
   /* more features per job, shown first in "the rest is there when you need it" */
   var EXTRA = {
     prod: [["Overtime ask", "Ask the whole unit to go over in one tap, see who's in and who wants a word."], ["Cost to complete", "Actuals against the budget, updated as crew invoices are checked."], ["Wrap book", "Contracts, releases, receipts and the final cost report in one folder for the agency."], ["Client extras log", "Every approved extra, with who said yes and when, on the balance invoice."]],
@@ -463,14 +463,40 @@
   function spotCard(it) { return '<article class="sp"><h3>' + it[0] + "</h3><p>" + it[1] + '</p><div class="sp-scr">' + rows(it[2]) + "</div></article>"; }
   var cur0 = null;
 
+
+  /* ---- call sheet versions: only what changed lights up ---- */
+  var CSV = [
+    { seen: "Opened by 32 of 32 crew", by: "Posted by the producer, 16:02", r: [["Call", "07:00"], ["Location", "Canal, E2"], ["Unit base", "Wharf Rd car park"], ["Lunch", "13:00"], ["Weather", "Dry, 14\u00b0"]] },
+    { seen: "Opened by 32 of 32 crew", by: "Posted by the PM, 18:40", r: [["Call", "06:30", "07:00"], ["Location", "Canal, E2"], ["Unit base", "Wharf Rd car park"], ["Lunch", "12:30", "13:00"], ["Weather", "Dry, 14\u00b0"]] },
+    { seen: "Opened by 29 of 32 crew", by: "Posted by the coordinator, 21:14", r: [["Call", "06:30"], ["Location", "Canal, E2, then Studio 3", "Canal, E2"], ["Unit base", "Studio 3 car park", "Wharf Rd car park"], ["Lunch", "12:30"], ["Weather", "Showers after 3"]] }
+  ];
+  CSV[2].r[4][2] = "Dry, 14\u00b0";
+  function csDraw(v) {
+    var V = CSV[v];
+    $$("#csV button").forEach(function (b) { b.setAttribute("aria-selected", +b.getAttribute("data-v") === v ? "true" : "false"); });
+    $("#csRows").innerHTML = V.r.map(function (r) { return '<div class="cs-r' + (r[2] ? " ch" : "") + '"><span class="lab">' + r[0] + "</span><b>" + (r[2] ? "<s>" + r[2] + "</s>" : "") + r[1] + "</b></div>"; }).join("");
+    $("#csSeen").textContent = V.seen; $("#csBy").textContent = V.by;
+  }
+  $$("#csV button").forEach(function (b) { b.addEventListener("click", function () { csDraw(+b.getAttribute("data-v")); }); });
+  csDraw(2);
+  $$(".csh-copy > *, .pp-copy > *").forEach(function (el, i) { watch(el, (i % 5) * 70); }); watch($("#cs"), 120); watch($("#dir"), 120);
+
+  /* ---- directory: available, pencilled or booked, never who for ---- */
+  var DIR = [["AR", "Ana R.", "1st AC · 12 commercials this year", "ok"], ["TW", "Tom W.", "1st AC · Alexa Mini, Venice", "pen"], ["PK", "Priya K.", "1st AC · 2nd unit drama", "ok"], ["LB", "Leon B.", "1st AC · music videos", "book"]];
+  $("#dirRows").innerHTML = DIR.map(function (d, i) {
+    var st = d[3] === "ok" ? '<span class="st-p av-ok">Available</span><button type="button" data-i="' + i + '">Send hold</button>' : d[3] === "pen" ? '<span class="st-p pen">Pencilled</span>' : '<span class="st-p">Booked</span>';
+    return '<div class="dr"><span class="av">' + d[0] + "</span><span>" + d[1] + '</span><span class="lab">' + d[2] + '</span><span class="st">' + st + "</span></div>";
+  }).join("");
+  $("#dirRows").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.classList.contains("sent")) return; b.classList.add("sent"); b.textContent = "Hold sent"; });
+
   /* ---- prices: a plan, then packs on top ---- */
-  var PLANS = { crew: 4, producer: 19, company: 59 };
+  var PLANS = { crew: 0, producer: 19, company: 59 };
   var PACKS = {
-    crew: [["Bank matching", 2], ["Calendar sync", 2], ["Receipt scanning", 2]],
+    crew: [["Crew Pro: inbox, invoices, diary", 4], ["Bank matching", 2], ["Calendar sync", 2]],
     producer: [["Live day", 6], ["Bank matching", 2], ["Permits", 4], ["Rights and usage", 6]],
     company: [["Bank matching", 2], ["Permits", 4], ["Extra person", 8], ["Big shoots, 60+ crew", 20]]
   };
-  var prPlan = "producer", prOn = {};
+  var prPlan = "producer", prOn = { crew0: true };
   function prDraw() {
     $$("#prPlans .plan").forEach(function (b) { b.setAttribute("aria-checked", b.getAttribute("data-p") === prPlan ? "true" : "false"); });
     $("#prPacks").innerHTML = PACKS[prPlan].map(function (p, i) { return '<button type="button" data-i="' + i + '" aria-pressed="' + (prOn[prPlan + i] ? "true" : "false") + '">' + p[0] + "<span>+&pound;" + p[1] + "</span></button>"; }).join("");
@@ -478,9 +504,9 @@
   }
   function prSum() {
     var t = PLANS[prPlan]; PACKS[prPlan].forEach(function (p, i) { if (prOn[prPlan + i]) t += p[1]; });
-    var b = $("#prTot"); b.textContent = "\u00a3" + t; b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
-    $("#prFine").innerHTML = prPlan === "crew" ? "One overtime hour on a &pound;450 day is &pound;67.50. That's more than a year of Crew." : "Catch one missed overtime hour on a &pound;450 day, &pound;67.50, and the month has paid for itself.";
-    var d = t * 12 / 365; $("#prDay").textContent = "about " + (d < 1 ? Math.round(d * 100) + "p" : "\u00a3" + d.toFixed(2)) + " a day";
+    var b = $("#prTot"); b.textContent = t ? "\u00a3" + t : "Free"; b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+    $("#prFine").innerHTML = prPlan === "crew" ? "Overtime and timesheets are free on every job. One missed hour on a &pound;450 day is &pound;67.50, more than a year of Crew Pro." : "Catch one missed overtime hour on a &pound;450 day, &pound;67.50, and the month has paid for itself.";
+    var d = t * 12 / 365; $("#prDay").textContent = !t ? "overtime and timesheets, every job" : "about " + (d < 1 ? Math.round(d * 100) + "p" : "\u00a3" + d.toFixed(2)) + " a day";
   }
   $$("#prPlans .plan").forEach(function (b) { b.addEventListener("click", function () { prPlan = b.getAttribute("data-p"); prDraw(); }); });
   $("#prPacks").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; var k = prPlan + b.getAttribute("data-i"); prOn[k] = !prOn[k]; b.setAttribute("aria-pressed", prOn[k] ? "true" : "false"); prSum(); });

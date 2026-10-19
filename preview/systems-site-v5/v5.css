@@ -337,3 +337,7 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .dy .pill{justify-self:start}
 .dy.ot .dy-top b{color:var(--tally)}
 @media (max-width:900px){.day{grid-template-columns:minmax(0,1fr);padding-block:64px}}
+.dy-meter{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;margin-top:8px}
+.dy-meter i{height:6px;border-radius:3px;background:var(--hr);overflow:hidden}.dy-meter s{display:block;height:100%;width:0;background:var(--tally);transition:width .8s var(--ease)}
+.dy-meter b{font:400 14px/1 var(--mono);font-variant-numeric:tabular-nums}
+.dy-ask{display:flex;gap:8px;flex-wrap:wrap}

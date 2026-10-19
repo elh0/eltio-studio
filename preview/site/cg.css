@@ -280,7 +280,10 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 16 Oct: Aglo's cover, the name on today's sky */
 .eltio.cg .cg-ag-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #121211; }
 .eltio.cg .cg-ag-cov .ag-wm { position: relative; width: 24%; }
-.eltio.cg .cg-sy-cov { position: absolute; inset: 0; margin: auto; width: 32%; height: max-content; display: grid; gap: 1.6cqi; color: #0B0B0A; }
+/* 19 Oct 19:57: centred the Aglo way; margin:auto + height:max-content pinned the word to the top of the tile on iPhone */
+.eltio.cg .cg-sy-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0A; }
+.eltio.cg .cg-sy-cov .sy-wm { display: block; width: 32%; height: auto; aspect-ratio: 5318 / 995; }
+.eltio.cg .cg-ag-cov .ag-wm { height: auto; aspect-ratio: 2068 / 935; }
 .eltio.cg .cg-sy-cov .sy-segs { gap: .8cqi; }
 .eltio.cg .cg-sy-cov .sy-segs i { height: .7cqi; }
 .eltio.cg .cg-info .cg-cap a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }

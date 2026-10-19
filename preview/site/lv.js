@@ -42,15 +42,13 @@
   css.textContent = [
     // shared: a taller tile so there is room for the work, and phones drawn like the project pages
     'html.lv .eltio.alt-plx.lp .x-frame{aspect-ratio:4/5!important;overflow:hidden}',
-    'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 24px 40px -22px rgba(0,0,0,.55);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(#fff,#000);transform:translateZ(0)}',
+        'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 34px 56px -24px rgba(0,0,0,.5),0 10px 18px -10px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.18);isolation:isolate;transform:translateZ(0)}',
     'html.lv .lv-ph.w{aspect-ratio:698/350;border-radius:7%/14%}',
-    'html.lv .lv-ph img,html.lv .lv-ph video{position:absolute;inset:0}',
-    'html.lv .lv-ph .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-ph .lv-s.on{opacity:1}',
-    'html.lv .lv-ph video{opacity:0;transition:opacity .4s}html.lv .lv-ph .lv-vid video{opacity:1}',
-    'html.lv .lv-cap{position:absolute;left:8%;right:8%;bottom:4.5%;text-align:center;font:400 11px/1.35 ui-monospace,"Geist Mono",monospace;letter-spacing:.01em;color:rgba(20,20,18,.55);opacity:0;transform:translateY(4px);transition:opacity .5s ease .2s,transform .5s ease .2s}',
-    'html.lv .x-p.lv-play .lv-cap{opacity:1;transform:none}',
-    'html.lv .lv-ph img,html.lv .lv-ph video{display:block;width:100%;height:100%;object-fit:cover}',
-    'html.lv .x-frame .k2{z-index:2;transition:transform .9s cubic-bezier(.2,.8,.2,1)}',
+    'html.lv .lv-scr{position:absolute;inset:var(--b,6px);border-radius:var(--sr,24px);overflow:hidden;background:#000;isolation:isolate;transform:translateZ(0);-webkit-mask-image:-webkit-radial-gradient(#fff,#000)}',
+    'html.lv .lv-scr img,html.lv .lv-scr video{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
+    'html.lv .lv-scr .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-scr .lv-s.on{opacity:1}',
+    'html.lv .lv-scr video{opacity:0;transition:opacity .4s}html.lv .lv-scr .lv-vid video{opacity:1}',
+'html.lv .x-frame .k2{z-index:2;transition:transform .9s cubic-bezier(.2,.8,.2,1)}',
 
     // 1 Stack: each card pins under the bar and the next slides over it; the one underneath sinks back
     'html.lv1 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:30vh!important}',
@@ -101,7 +99,7 @@
     'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
     'html.lv5 .x-p.lv-on .lv-ph,html.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
-    'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;border-radius:inherit;overflow:hidden;transition:opacity .6s ease}',
+    'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;transition:opacity .6s ease}',
     'html.lv .lv-sp .k2{position:absolute;inset:0;border:0!important;background:none!important;opacity:1!important;transform:none!important}',
     'html.lv .lv-sp .k2-rest{transform:scale(1.55)!important;opacity:1!important;filter:none!important}',
     'html.lv .lv-ph.w .lv-sp .k2-rest{transform:scale(1.05)!important}',
@@ -123,8 +121,9 @@
     return v;
   }
   function ph(a, cls) {
-    var d = document.createElement('span'); d.className = 'lv-ph' + (a.wide ? ' w' : '') + (cls ? ' ' + cls : '');
-    if (a.ar) d.style.aspectRatio = a.ar;
+    var sh = document.createElement('span'); sh.className = 'lv-ph' + (a.wide ? ' w' : '') + (cls ? ' ' + cls : '');
+    if (a.ar) sh.style.aspectRatio = a.ar;
+    var d = document.createElement('span'); d.className = 'lv-scr'; sh.appendChild(d); sh._scr = d;
     function im(src, c) { var i = new Image(); i.src = src; i.alt = ''; i.decoding = 'async'; if (c) i.className = c; d.appendChild(i); return i; }
     if (a.seq) {
       a.seq.forEach(function (x, k) {
@@ -132,13 +131,21 @@
         var i = new Image(); i.src = /\.(jpg|webp)$/.test(x[0]) ? x[0] : x[0] + '.jpg'; i.alt = ''; i.decoding = 'async'; w.appendChild(i);
         if (!/\.(jpg|webp)$/.test(x[0])) w.appendChild(vid(x[0], w));
       });
-      d._seq = a.seq;
+      sh._seq = a.seq;
     }
     else if (a.still) im(a.still);
-    else {
-      im(a.loop + '.jpg'); d.appendChild(vid(a.loop, d));
-    }
-    return d;
+    else { im(a.loop + '.jpg'); d.appendChild(vid(a.loop, d)); }
+    return sh;
+  }
+
+  // Safari works percentage corners out before the phone has its size, so corners are set in pixels once it has one
+  function fit() {
+    document.querySelectorAll('.lv-ph').forEach(function (p) {
+      var r = p.getBoundingClientRect(), w = r.width, h = r.height; if (!w) return;
+      var rad = p.classList.contains('w') ? h * .14 : w * .13, b = Math.max(3, Math.round((p.classList.contains('w') ? h : w) * .028));
+      p.style.borderRadius = rad.toFixed(1) + 'px';
+      p.style.setProperty('--b', b + 'px'); p.style.setProperty('--sr', Math.max(4, rad - b).toFixed(1) + 'px');
+    });
   }
 
   function play(v) { if (v.preload === 'none') { v.preload = 'auto'; v.load(); } var p = v.play(); if (p && p.catch) p.catch(function () {}); }
@@ -153,7 +160,7 @@
       if (V >= 5) {
         // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
         var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
-        if (k2) sp.appendChild(k2.cloneNode(true)); p.appendChild(sp);
+        if (k2) sp.appendChild(k2.cloneNode(true)); p._scr.appendChild(sp);
         c.style.setProperty('--k', cards.indexOf(c));
       }
     });
@@ -166,6 +173,8 @@
       c._lvCap.textContent = p._seq[n][1];
       c._lvHold = p.querySelector('.lv-s.on video') ? 2 : 0; // the AR take gets a few beats
     }
+
+    fit(); addEventListener('resize', fit); setTimeout(fit, 400);
 
     // play a loop only while its card is on screen
     var io = new IntersectionObserver(function (es) {

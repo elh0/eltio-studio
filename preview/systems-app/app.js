@@ -398,13 +398,33 @@ function slowPayers() {
   return '<div class="rows">' + L.slice(0, 6).map(function (x) { return '<div class="row static"><span>' + esc(x.c) + ' <span class="q">· ' + money(x.total) + '</span></span><span class="tag' + (x.avg > terms ? " amb" : "") + '">' + x.avg + ' days</span><span class="sub"><span class="hbar"><i style="width:' + Math.round(x.avg / max * 100) + '%"' + (x.avg > terms ? ' class="amb"' : "") + "></i></span></span></div>"; }).join("") + "</div>";
 }
 
+/* ---------- try it as any job: sample data set up for that job, no form ---------- */
+function job() { var k = D && D.settings && D.settings.job; return JOBS.find(function (j) { return j.k === k; }); }
+function startJob(k) {
+  var j = JOBS.find(function (x) { return x.k === k; }); if (!j) return false;
+  mode = "demo"; D = sample();
+  var s = D.settings; s.name = "Sam Carter"; s.role = j.role === "DP or HOD" ? "DP" : j.role; s.rate = j.rate; s.job = j.k; s.work = "Both";
+  D.bookings.forEach(function (b) { if (b.rate === "650") b.rate = j.rate; if (j.kit && b.id === "b6") b.kit = j.kit; if (!j.kit) b.kit = ""; });
+  demoSave(); S.tab = "home"; closeSheet(); render(); return true;
+}
+function jobPart() {
+  var j = job(); if (mode !== "demo" || !j) return "";
+  return '<div class="part">Made for ' + esc(j.pl) + ' · in the pilot</div><p class="pain">' + esc(j.pain) + '</p><div class="rows">' + j.f.map(function (f, i) {
+    return '<button class="row" data-jobf="' + i + '"><span>' + esc(f[0].replace(/\.$/, "")) + '</span><span class="tag">Pilot</span><span class="sub">' + esc(f[1]) + "</span></button>";
+  }).join("") + "</div>";
+}
+function jobSheet(i) {
+  var f = job().f[i];
+  return '<div class="top"><span class="q">Made for ' + esc(job().pl) + '</span><span class="tag">Coming in the pilot</span></div><h2>' + esc(f[0]) + '</h2><p class="q">' + esc(f[1]) + '</p><div class="sum ot">' + f[2].map(function (r) { return '<div><span class="q">' + r[0] + '</span><span' + (r[2] === "amber" ? ' class="late"' : "") + ">" + r[1] + "</span></div>"; }).join("") + '</div><p class="q">A preview with sample figures. This part is being built with the first pilot companies.</p><button class="btn solid" data-close>Got it</button>';
+}
+
 /* ---------- screens ---------- */
 function welcome() {
   var hasG = !!CFG.googleClientId;
   return '<div class="hero"><p class="q">Eltio Systems</p><h1>Less admin.<br>Same tools.</h1><p class="q">Bookings, holds, invoices and chasing in one place. Your data lives in a sheet in your own Google Drive, and nothing is ever sent for you.</p>' +
     '<button class="btn solid gbtn" data-signin' + (hasG ? "" : " disabled") + '><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.4-.2-2H12v3.8h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.3zM12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3.1v2.6A10 10 0 0 0 12 22zM6.4 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2V7.4H3.1a10 10 0 0 0 0 9.2L6.4 14zM12 5.9c1.5 0 2.8.5 3.8 1.5l2.9-2.9A10 10 0 0 0 3.1 7.4L6.4 10c.8-2.3 3-4.1 5.6-4.1z"/></svg>Sign in with Google</button>' +
     (hasG ? "" : '<p class="q">Google sign-in switches on once the Eltio Google account is set up.</p>') +
-    '<button class="btn" data-demo>Try it with sample data</button>' +
+    '<div class="part">Try it with sample data, as</div><div class="pills jobs">' + JOBS.map(function (j) { return '<button class="pill" data-job="' + j.k + '">' + esc(j.n) + "</button>"; }).join("") + "</div>" +
     '<div class="rows forrows"><div class="row static"><span>Crew</span><span class="q">APA and Bectu overtime, timesheets</span></div><div class="row static"><span>DPs and HODs</span><span class="q">Kit, mileage, holds via your agent</span></div><div class="row static"><span>Producers</span><span class="q">Check crew invoices before you pay</span></div><div class="row static"><span>Everyone</span><span class="q">What\'s owed, chasing, tax</span></div></div>' +
     '<p class="q">On your phone, open this page and add it to your home screen. Sign in with the same Google account on your laptop and everything matches.</p><p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p></div>';
 }
@@ -425,10 +445,10 @@ function setup() {
 function home() {
   var s = D.settings, L = todo(), up = D.bookings.filter(function (b) { var d = parse(b.end || b.start); return b.status !== "Cancelled" && d && d >= today(); }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
-  return '<div class="top"><span class="q">' + nice(iso(today())) + (mode === "demo" ? " · sample data" : "") + '</span><span class="q">' + (busy ? "Saving…" : "") + "</span></div>" +
+  return '<div class="top"><span class="q">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + '</span>' + (mode === "demo" ? '<button class="lnk" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
     "<h2>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h2>" +
     '<div class="lead"><span class="q">Owed to you</span><b>' + money(owed()) + "</b><span>" + (od ? '<span class="late">' + money(od) + " late</span> · " : "") + conf + " booked · " + holds + " on hold</span></div>" +
-    '<div class="two"><div class="stack">' + starter() + '<div class="part">For you</div><div class="rows">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div></div>" +
+    '<div class="two"><div class="stack">' + jobPart() + starter() + '<div class="part">For you</div><div class="rows">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div></div>" +
     '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(bookingRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div>" +
     '<div class="sum"><div><span class="q">Booked this month</span><span>' + money(bookedThisMonth()) + '</span></div><div><span class="q">Tax to put aside</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + "</span></div></div>" + '<button class="row-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div></div>";
 }
@@ -444,7 +464,7 @@ function starter() {
   ];
   if (roleKey() === "Producer") steps.unshift({ t: "See all 26 things Systems runs", sub: "Advance invoices, permits, rights, deliverables and the books.", a: "data-features" });
   if (mode === "demo" && roleKey() === "Producer") steps.unshift({ t: "Check a crew member's day", sub: "Their call, wrap and rate in, what APA says they're owed out.", a: "data-check" });
-  else {
+  if (mode !== "demo") {
     var cb = D.bookings.find(function (b) { return b.status === "Confirmed"; });
     steps = [
       { t: "Add your next job or hold", sub: "Holds get a nudge before the date.", a: "data-addbooking", done: D.bookings.length > 0 },
@@ -619,7 +639,7 @@ var FOR = {
 function tourFor() {
   var f = FOR[roleKey()], w = D.settings.work || "Both";
   var list = f.s.filter(function (k) { return !(k === "drama" && w === "Commercials") && !(k === "ot" && w === "TV and film" && f.s.indexOf("drama") >= 0); });
-  return [{ h: "What it does for " + f.who + ".", p: "A minute on how it fits your work. You can replay this from You, under How it works.", k: "intro", b: f.b }].concat(list.map(function (k) { return SL[k]; }));
+  return [{ h: "What it does for " + (mode === "demo" && job() ? job().pl : f.who) + ".", p: "A minute on how it fits your work. You can replay this from You, under How it works.", k: "intro", b: f.b }].concat(list.map(function (k) { return SL[k]; }));
 }
 var TOUR = [];
 var tourI = 0, tourT = [];
@@ -708,6 +728,9 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-check")) { openSheet(checkForm()); liveCheck(); return; }
   if (b.hasAttribute("data-starteroff")) { flag("eltio-systems-starter-off", "1"); render(); return; }
   if (b.hasAttribute("data-howphone")) { flag("eltio-systems-phone", "1"); openSheet('<h2>Put it on your home screen</h2><div class="sum"><div><span class="q">iPhone</span><span>Safari, Share, Add to Home Screen</span></div><div><span class="q">Android</span><span>Chrome menu, Install app</span></div></div><p class="q">Then sign in with the same Google account on your laptop. Both read the same sheet, so they always match.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>'); render(); return; }
+  if (d.job) { startJob(d.job); return; }
+  if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
+  if (b.hasAttribute("data-switchjob")) { closeSheet(); mode = null; S.tab = "home"; render(); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }
   if (b.hasAttribute("data-signin")) { b.disabled = true; startGoogle(false).catch(function (er) { b.disabled = false; banner("Sign-in didn't finish: " + (er.message || er)); }); return; }
   if (b.hasAttribute("data-signout")) { if (mode === "google" && G.token && window.google) { try { google.accounts.oauth2.revoke(G.token, function () {}); } catch (x) {} } try { localStorage.removeItem("eltio-systems-signed-in"); } catch (x) {} mode = null; G = { token: null, exp: 0, client: null, sheetId: null, email: "" }; S.tab = "home"; render(); return; }
@@ -756,7 +779,9 @@ document.addEventListener("visibilitychange", function () { if (!document.hidden
 setInterval(paintSky, 5 * 60 * 1000);
 if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
 
-render();
+/* Opened from the site as a job (?as=gaffer): straight into sample data for that job. */
+var asJob = (location.search.match(/[?&]as=([a-z]+)/) || [])[1];
+if (!(asJob && startJob(asJob))) render();
 /* Returning user on this device: try a silent sign-in. If Google needs a tap, the welcome screen stays. */
 try { if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in")) startGoogle(true).catch(function () {}); } catch (e) {}
 })();

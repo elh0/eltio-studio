@@ -348,6 +348,8 @@
     other.hidden = key !== "other";
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
+    var tk = key === "other" ? guess(R.n) : key;
+    $$('a[href*="systems-app/"]').forEach(function (l) { if (!/\.html/.test(l.getAttribute("href"))) l.href = l.href.split("?")[0] + "?as=" + tk; });
     var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);
     $("#lede").textContent = R.lede; $("#fine").textContent = R.fine;
     inner.innerHTML = R.cards.map(card).join("");

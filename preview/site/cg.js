@@ -24,7 +24,7 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   function centre(k) { var r = its[k].getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, scrollY + r.top + r.height / 2 - innerHeight / 2)); }
   var cur = -1, tgt = 0, born = performance.now();
-  // 18 Oct Elliot: a link of its own for every project (#out-and-scout, #grip ...) to send to people
+  // 18 Oct: a link of its own for every project (#out-and-scout, #grip ...) to send to people
   var slugs = names.map(function (nm) { return nm.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); });
   var routeP = -1;
   function route(p) {

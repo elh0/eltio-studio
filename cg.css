@@ -288,7 +288,14 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 16 Oct: website loops (video/w) and real app screens side by side (img/ag) */
 .eltio.cg .cg-card .cg-in > .cg-phs { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 2.2cqw; width: min(84cqw, calc(var(--n) * 36cqh + (var(--n) - 1) * 2.2cqw)); }
 .eltio.cg .cg-ph { display: block; aspect-ratio: 390 / 844; border-radius: 13% / 6%; overflow: hidden; background: #0E0E0D; box-shadow: 0 0 0 clamp(2px, .45cqw, 5px) #1d1d1b, 0 24px 48px -24px rgba(0,0,0,.5); }
-.eltio.cg .cg-ph img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.eltio.cg .cg-ph img, .eltio.cg .cg-ph video { display: block; width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 760px), (hover: none) {
   .eltio.cg .cg-card .cg-in > .cg-six { grid-template-columns: repeat(3, 1fr); width: min(84cqw, calc(3 * 17cqh + 4.4cqw)); }
 }
+
+/* 16:11 sideways phones (Out & Scout), and the wordmark on black that ends each project */
+.eltio.cg .cg-card .cg-in > .cg-side { grid-template-columns: repeat(var(--c), 1fr); width: min(86cqw, calc(var(--c) * (78cqh - (var(--r) - 1) * 2.2cqw) / var(--r) * 2.164 + (var(--c) - 1) * 2.2cqw)); }
+.eltio.cg .cg-phl { aspect-ratio: 1600 / 739; border-radius: 4.6% / 10%; background: none; box-shadow: 0 24px 48px -24px rgba(0,0,0,.5); }
+.eltio.cg .cg-tile.cg-ink { --tile: #0E0E0D; --mk: rgba(243,243,240,.35); color: #F3F3F0; }
+.eltio.cg .cg-ink .k2, .eltio.cg .cg-ink .k2 .lock { color: #F3F3F0 !important; }
+.eltio.cg .cg-ink .cg-ag-cov, .eltio.cg .cg-ink .cg-sy-cov { color: #F3F3F0; }

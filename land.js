@@ -28,6 +28,16 @@
   var lroot = document.querySelector('.eltio.alt-plx'); if (lroot) lroot.classList.add('lp');
   var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(5) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems';
   if (ghosted) return;
+  // 18 Oct: every project gets a link of its own to send people (eltio.studio/#grip). The address follows the
+  // project you're in, and a link with a project in it opens straight onto that project. Inside Cargo the page above
+  // us keeps its own address in step from our messages.
+  var SL = ['out-and-scout', 'grip', 'lampwerk', 'aglo', 'systems'];
+  function setRoute(s) {
+    try { history.replaceState(history.state, '', location.pathname + location.search + (s ? '#' + s : '')); } catch (e) {}
+    if (window.parent !== window) window.parent.postMessage({ eltioRoute: s }, '*');
+  }
+  var deep = SL.indexOf((location.hash.slice(1) || (/[?&]p=([a-z-]+)/.exec(location.search) || [])[1] || '').toLowerCase());
+  if (deep >= 0) { var dst = document.createElement('style'); dst.textContent = 'html.cg-deep .eltio{visibility:hidden}'; document.head.appendChild(dst); document.documentElement.classList.add('cg-deep'); }
   // 18:46 the preview loses the project on a page change, so projects open over the landing page in one frame we
   // address ourselves (one-os.html#p=N, then messages); Close or scrolling out of the end brings the landing back.
   // 19:31 make that move feel smooth. The projects page loads quietly in the background, then one of four
@@ -77,6 +87,7 @@
     of.addEventListener('load', function () { of.ready = true; [0, 400, 1200].forEach(function (d) { setTimeout(function () { if (!busy) of.contentWindow.postMessage({ cgGo: last }, '*'); }, d); }); });
   }
   addEventListener('load', function () { setTimeout(ensure, 1200); });
+  if (deep >= 0) { last = MAP[deep]; setTimeout(function () { openP(last, null); }, 0); }
   function settle() { busy = false; setTimeout(function () { try { of.focus(); } catch (e) {} }, 50); }
   function openP(to, from) {
     last = to; busy = true; ensure();
@@ -109,9 +120,11 @@
   addEventListener('message', function (e) {
     if (!of || e.source !== of.contentWindow || !e.data) return;
     if (e.data.cgAt && wantAt) wantAt(e.data.cgAt);
+    if (e.data.cgRoute != null && html.classList.contains('cg-open')) setRoute(e.data.cgRoute);
     if (!e.data.cgClose) return;
     if (e.data.top) scrollTo(0, 0);
-    html.classList.remove('cg-open', 'cg-in', 'cg-go');
+    html.classList.remove('cg-open', 'cg-in', 'cg-go', 'cg-deep');
+    setRoute('');
   });
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.x-go, .x-frame');

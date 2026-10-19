@@ -8,7 +8,7 @@
 
   var A = [
     // 19 Oct: real app screens, clicked through one after another, each with a line saying what it is
-    { ar: '1600/739', wide: true, seq: [
+    { ar: '1588/727', wide: true, seq: [
       ['img/os/s-start.webp', 'Projects and recces, each with its next good light'],
       ['img/os/s-cam.webp', 'The sun path drawn over the live camera'],
       ['img/os/s-portrait.webp', 'Grid, level, portrait'],
@@ -42,7 +42,7 @@
   css.textContent = [
     // shared: a taller tile so there is room for the work, and phones drawn like the project pages
     'html.lv .eltio.alt-plx.lp .x-frame{aspect-ratio:4/5!important;overflow:hidden}',
-    'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 24px 40px -22px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.06)}',
+    'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 24px 40px -22px rgba(0,0,0,.55);isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(#fff,#000);transform:translateZ(0)}',
     'html.lv .lv-ph.w{aspect-ratio:698/350;border-radius:7%/14%}',
     'html.lv .lv-ph img,html.lv .lv-ph video{position:absolute;inset:0}',
     'html.lv .lv-ph .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-ph .lv-s.on{opacity:1}',
@@ -101,7 +101,7 @@
     'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
     'html.lv5 .x-p.lv-on .lv-ph,html.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
-    'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;transition:opacity .6s ease}',
+    'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;border-radius:inherit;overflow:hidden;transition:opacity .6s ease}',
     'html.lv .lv-sp .k2{position:absolute;inset:0;border:0!important;background:none!important;opacity:1!important;transform:none!important}',
     'html.lv .lv-sp .k2-rest{transform:scale(1.55)!important;opacity:1!important;filter:none!important}',
     'html.lv .lv-ph.w .lv-sp .k2-rest{transform:scale(1.05)!important}',

@@ -32,10 +32,10 @@
       ['img/ag/home-fullStack-night.webp', 'Night'],
       ['img/ag/breathe-inhale.webp', 'Instagram opens after three breaths']] },
     { seq: [
-      ['img/sy/home.webp', 'Money first: in, owed, and what needs you'],
-      ['img/sy/jobs.webp', 'Every job, bid to wrap'],
-      ['img/sy/onset.webp', 'On set: the clock runs, crew see their hours'],
-      ['img/sy/files.webp', 'Sheets built in your own Drive']] }
+      ['img/sy/home.webp', 'Every morning: owed, booked, on hold, tomorrow\'s call'],
+      ['img/sy/diary.webp', 'The diary: confirmed, holds and pencils'],
+      ['img/sy/callsheet.webp', 'The call sheet, one link, always the latest'],
+      ['img/sy/find.webp', 'Producers: who is free Thursday, send a hold']] }
   ];
   var ACC = ['#FF5A1F', '#4A74FF', '#FFC21A', '#E8956A', '#4F7348'];
 
@@ -120,7 +120,10 @@
     'html.lv .lv-sp.s1{background:#000}html.lv .lv-sp.s1 .k2-rest{transform:scale(.7)!important}',
     'html.lv .lv-sp.s2{background:#0E0E0D}html.lv .lv-sp.s2 svg{filter:invert(1)}html.lv .lv-sp.s2 .k2-rest{transform:scale(1.25)!important}',
     'html.lv .lv-sp.s3{background:#121211}html.lv .lv-sp.s3 .ag-wm{filter:invert(1)}',
-    'html.lv .lv-sp.s4{background:#F3F3F0}'
+    'html.lv .lv-sp.s4{background:#F3F3F0}',
+    // the wordmark motion on the opening screen, sized for a phone (cv.css)
+    'html.lv .lv-sp .cv{--cvs:1.7}html.lv .lv-ph.w .lv-sp .cv{--cvs:.95}',
+    'html.lv .lv-sp.s0 .cv{--cvs:2.3;color:#F3F3F0}html.lv .lv-sp.s2 .cv{color:#EDEDEA}html.lv .lv-sp.s2 .cv svg,html.lv .lv-sp.s3 .cv .ag-wm{filter:none}html.lv .lv-sp.s3{background:#9BB7D9}html.lv .lv-sp.s4 .cv{color:#0B0B0A}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -168,8 +171,10 @@
       var p = ph(a); f.appendChild(p);
       if (V >= 5) {
         // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
-        var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
-        if (k2) sp.appendChild(k2.cloneNode(true)); p._scr.appendChild(sp);
+        var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2'), tpl = f.querySelector('.cv-tpl');
+        // 16:50 the app's own wordmark motion as its opening screen (cv.css), the way the app itself will open
+        if (tpl && tpl.firstElementChild) sp.appendChild(tpl.firstElementChild.cloneNode(true)); else if (k2) sp.appendChild(k2.cloneNode(true));
+        p._scr.appendChild(sp);
         c.style.setProperty('--k', cards.indexOf(c));
       }
     });

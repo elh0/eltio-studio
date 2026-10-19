@@ -59,7 +59,27 @@
     'html.lv4 .lv-big{position:fixed;right:16px;top:58px;z-index:5;text-align:right;font:400 56px/0.9 ui-monospace,"Geist Mono",monospace;letter-spacing:-.04em;color:rgba(20,20,18,.9);pointer-events:none;opacity:0;transition:opacity .4s}',
     'html.lv4 .lv-big small{display:block;font-size:11px;letter-spacing:0;margin-top:8px;text-transform:uppercase}',
     'html.lv4.lv-in .lv-big{opacity:1}',
-    'html.cg-open .lv-big,html.cg-open .lv-bg{display:none}'
+    'html.cg-open .lv-big,html.cg-open .lv-bg{display:none}',
+    // 5 Stack, refined (19 Oct: less bulky, the logo lands ON the phone, the whole phone in view, floating)
+    // 6 Float: the same cards without pinning, drifting at their own pace
+    'html.lv5 .eltio.alt-plx.lp .x-list,html.lv6 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:24vh!important}',
+    'html.lv5 .eltio.alt-plx.lp .x-p{position:sticky!important;top:calc(60px + var(--k) * 9px);padding-bottom:22px!important}',
+    'html.lv6 .eltio.alt-plx.lp .x-p{padding-bottom:56px!important}',
+    'html.lv5 .eltio.alt-plx.lp .x-pin,html.lv6 .eltio.alt-plx.lp .x-pin{transform-origin:50% 0;will-change:transform,opacity;background:#fffff8;border-radius:22px}',
+    'html.lv5 .eltio.alt-plx.lp .x-frame,html.lv6 .eltio.alt-plx.lp .x-frame{border-radius:22px;background:#F1F1EC!important;box-shadow:0 1px 0 rgba(0,0,0,.03),0 30px 60px -40px rgba(0,0,0,.35)}',
+    'html.lv5 .eltio.alt-plx.lp .x-txt,html.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
+    'html.lv5 .x-frame .k2,html.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv5 .x-p.lv-on .x-frame>.k2,html.lv6 .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
+    'html.lv5 .lv-ph,html.lv6 .lv-ph{left:50%;top:50%;height:80%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:84%}',
+    'html.lv5 .x-p.lv-on .lv-ph,html.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
+    '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
+    'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;transition:opacity .6s ease}',
+    'html.lv .lv-sp .k2{position:absolute;inset:0;border:0!important;background:none!important;opacity:1!important;transform:none!important}',
+    'html.lv .lv-sp .k2-rest{transform:scale(1.55)!important;opacity:1!important;filter:none!important}',
+    'html.lv .lv-ph.w .lv-sp .k2-rest{transform:scale(1.05)!important}',
+    'html.lv .lv-sp .k2-wf,html.lv .lv-sp .k2-tag{display:none!important}',
+    'html.lv .x-p.lv-play .lv-sp{opacity:0}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -81,14 +101,26 @@
     cards.forEach(function (c) {
       var i = +c.getAttribute('data-i'), a = A[i], f = c.querySelector('.x-frame'); if (!a || !f) return;
       if (V === 3) a.shots.forEach(function (s, k) { var p = ph(s, a.wide, 'f' + k); p.style.zIndex = k === 1 ? 1 : 0; f.appendChild(p); });
-      else f.appendChild(ph(a.loop || a.still, a.wide));
+      else {
+        var p = ph(a.loop || a.still, a.wide); f.appendChild(p);
+        if (V >= 5) {
+          // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
+          var sp = document.createElement('span'); sp.className = 'lv-sp'; var k2 = f.querySelector('.k2');
+          if (k2) sp.appendChild(k2.cloneNode(true)); p.appendChild(sp);
+          c.style.setProperty('--k', cards.indexOf(c));
+        }
+      }
     });
 
     // play a loop only while its card is on screen
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
         var c = e.target, v = c.querySelector('video');
-        c.classList.toggle('lv-on', e.intersectionRatio > .55);
+        var on = e.intersectionRatio > .55;
+        if (on !== c.classList.contains('lv-on')) {
+          c.classList.toggle('lv-on', on); clearTimeout(c._lvT);
+          if (on) c._lvT = setTimeout(function () { c.classList.add('lv-play'); }, 1500); else c.classList.remove('lv-play');
+        }
         if (v) { if (e.intersectionRatio > .3) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause(); }
       });
     }, { threshold: [0, .3, .55, .8] });
@@ -112,6 +144,17 @@
           // how far the next card has come over this one
           var nx = cards[k + 1], over = nx ? Math.min(1, Math.max(0, 1 - (nx.getBoundingClientRect().top - 64) / (r.height || vh))) : 0;
           var pin = c.querySelector('.x-pin'); pin.style.transform = 'scale(' + (1 - .08 * over).toFixed(4) + ')'; pin.style.filter = 'brightness(' + (1 - .35 * over).toFixed(3) + ')';
+        }
+        if (V === 5) {
+          var nx5 = cards[k + 1], o5 = nx5 ? Math.min(1, Math.max(0, 1 - (nx5.getBoundingClientRect().top - 60 - (k + 1) * 9) / ((r.height || vh) * .9))) : 0;
+          var e5 = o5 * o5 * (3 - 2 * o5), pin5 = c.querySelector('.x-pin');
+          pin5.style.transform = 'translateY(' + (-10 * e5).toFixed(1) + 'px) scale(' + (1 - .07 * e5).toFixed(4) + ')';
+          pin5.style.opacity = (1 - .55 * e5).toFixed(3);
+        }
+        if (V === 6) {
+          // each card drifts a little against the scroll, so the list feels like it is floating
+          var mid6 = (r.top + r.height / 2 - vh / 2) / vh, pin6 = c.querySelector('.x-pin');
+          pin6.style.transform = 'translateY(' + (mid6 * -36).toFixed(1) + 'px) rotate(' + (mid6 * (k % 2 ? 1.2 : -1.2)).toFixed(2) + 'deg)';
         }
         if (V === 3) {
           // 0 as the card comes up from the bottom, 1 once it is in the middle of the screen

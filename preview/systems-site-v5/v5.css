@@ -232,6 +232,14 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .pr-tot span:last-child{color:var(--q);font-size:15px}
 @media (max-width:900px){.price{padding-block:64px}.pr-plans{grid-template-columns:minmax(0,1fr)}.plan{grid-template-columns:auto 1fr;align-items:baseline;gap:4px 16px}.plan .lab{grid-column:1/-1}.plan b{margin:0}.plan .inc{grid-column:1/-1}.pr-build{grid-template-columns:minmax(0,1fr)}.pr-tot{justify-items:start;text-align:left}}
 
+.tag-free{font-style:normal;margin-left:8px;padding:3px 8px;border-radius:999px;background:var(--tally);color:#fff}
+.pr-fine{font:400 clamp(21px,2.2vw,26px)/1.25 var(--disp);letter-spacing:-.01em;max-width:34ch}
+.pr-perks{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.pr-perks li{display:grid;align-content:start;gap:6px;padding-top:14px;border-top:1px solid var(--hr)}
+.pr-perks b{font-weight:500}.pr-perks span{color:var(--q);font-size:15px}
+@media (max-width:1024px){.pr-perks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.pr-perks{grid-template-columns:minmax(0,1fr)}}
+
 /* faq */
 .faq{padding-block:72px 120px;display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:32px;align-items:start}
 .qa details{border-top:1px solid var(--hr)}

@@ -409,10 +409,10 @@ function picked(name) { var b = $("sheet").querySelector('[data-pick="' + name +
 
 /* Everything Systems runs for a production company, from the producer admin research. "app" = in this app today. */
 var FEAT = [
-  { g: "Cash", f: [["Advance invoice on award", "The award email lands and the 50% advance and balance invoices are drafted in Xero or FreeAgent, with due dates in the calendar."], ["Statutory interest letter", "The final-stage chase quotes the Late Payment Act: fixed compensation worked out, interest at 8% above base rate.", "app"], ["13-week cash forecast", "Receipts across every open job set against the crew and supplier payment runs."], ["Payment run prep", "Approved crew invoices (7-day) and supplier bills batched in Xero, ready for you to approve."], ["Client payment check", "Looks up a new client's published days to pay before you accept their terms."]] },
-  { g: "Crew and shoot", f: [["Holds and pencils", "First and second pencils logged, confirm-or-release notes drafted, the calendar blocked.", "app"], ["Booking confirmations", "Rate, hours, overtime and cancellation fee confirmed in writing for every booking.", "app"], ["Crew invoice check", "Every crew invoice checked against the agreed rate, days, overtime grade and late-break rules before approval.", "app"], ["Start packs and IR35", "Bank details, UTR, NI and right-to-work chased, role status pre-tagged, the status determination drafted for sign-off."], ["Call sheets and movement orders", "Built from the schedule, the crew list and the location."], ["Payroll bureau hand-off", "Signed deal memos for PAYE grades turned into the bureau's input file."], ["Director holds and fee statements", "Director holds tracked, and per-job fee and commission statements drafted."]] },
-  { g: "Locations and compliance", f: [["Permit and licence clock", "Borough, TfL, Royal Parks, drone and 21-day child-licence deadlines counted back from the shoot date."], ["Supplier pack", "Insurance certificates, policies and standard answers kept current for Coupa and Ariba onboarding."], ["AdGreen pack", "Travel, fuel, hotel and catering pulled from expenses into an AdGreen-ready sheet."], ["VAT and tax deadlines", "Rolling 12-month turnover against £90,000, with Self Assessment, payments on account and MTD dates.", "app"]] },
-  { g: "Rights and delivery", f: [["Rights and usage register", "Usage terms pulled from signed contracts, with reminders at 90, 60 and 30 days and renewal quotes."], ["Deliverables and clock numbers", "Versions, ratios, clock numbers, Clearcast stage and Peach or Vevo deadlines from the air date."], ["Music video credits sheet", "One credits and ISRC record per video, ready for Vevo, awards and press."], ["Contract clause memo", "Flags payment terms over 60 days, GenAI, IP and indemnity clauses against the APA standard."], ["Awards calendar", "Arrows, UKMVA, Kinsale and Ciclope deadlines, with entry credits drafted."]] },
+  { g: "Cash", f: [["Advance invoice on award", "The award email lands and the 50% advance and balance invoices are drafted as drafts for Xero or FreeAgent, with due dates in the calendar.", "app"], ["Statutory interest letter", "The final-stage chase quotes the Late Payment Act: fixed compensation worked out, interest at 8% above base rate.", "app"], ["13-week cash forecast", "Receipts across every open job set against the crew and supplier payment runs."], ["Payment run prep", "Approved crew invoices (7-day) and supplier bills batched in Xero, ready for you to approve.", "app"], ["Client payment check", "Looks up a new client's published days to pay before you accept their terms."]] },
+  { g: "Crew and shoot", f: [["Holds and pencils", "First and second pencils logged, confirm-or-release notes drafted, the calendar blocked.", "app"], ["Booking confirmations", "Rate, hours, overtime and cancellation fee confirmed in writing for every booking.", "app"], ["Crew invoice check", "Every crew invoice checked against the agreed rate, days, overtime grade and late-break rules before approval.", "app"], ["Start packs and IR35", "Bank details, UTR, NI and right-to-work chased, role status pre-tagged, the status determination drafted for sign-off.", "app"], ["Call sheets and movement orders", "Built from the schedule, the crew list and the location."], ["Payroll bureau hand-off", "Signed deal memos for PAYE grades turned into the bureau's input file."], ["Director holds and fee statements", "Director holds tracked, and per-job fee and commission statements drafted."]] },
+  { g: "Locations and compliance", f: [["Permit and licence clock", "Borough, TfL, Royal Parks, drone and 21-day child-licence deadlines counted back from the shoot date.", "app"], ["Supplier pack", "Insurance certificates, policies and standard answers kept current for Coupa and Ariba onboarding."], ["AdGreen pack", "Travel, fuel, hotel and catering pulled from expenses into an AdGreen-ready sheet."], ["VAT and tax deadlines", "Rolling 12-month turnover against £90,000, with Self Assessment, payments on account and MTD dates.", "app"]] },
+  { g: "Rights and delivery", f: [["Rights and usage register", "Usage terms pulled from signed contracts, with reminders at 90, 60 and 30 days and renewal quotes.", "app"], ["Deliverables and clock numbers", "Versions, ratios, clock numbers, Clearcast stage and Peach or Vevo deadlines from the air date."], ["Music video credits sheet", "One credits and ISRC record per video, ready for Vevo, awards and press."], ["Contract clause memo", "Flags payment terms over 60 days, GenAI, IP and indemnity clauses against the APA standard."], ["Awards calendar", "Arrows, UKMVA, Kinsale and Ciclope deadlines, with entry credits drafted."]] },
   { g: "Books and jobs", f: [["Job set-up in the books", "The Xero tracking category made, pushed to Pleo and Dext, and mapped to budget lines."], ["Overage and change requests", "A costed change email to the agency, with written approval logged to the budget line."], ["Kit quotes, POs and returns", "Hire quotes compared, POs drafted, return dates tracked and hire invoices matched."], ["Bids and budget versions", "Bids, pitch costs and outcomes logged, with a what-changed note between budget versions."], ["Wrap and audit pack", "Invoices, POs, timesheets and receipts gathered per budget line for the cost consultant."]] }
 ];
 function workBack(d, n) { var x = new Date(d); while (n > 0) { x = addDays(x, -1); if (x.getDay() % 6) n--; } return x; }
@@ -545,15 +545,8 @@ function shootCard() {
 var SIGN = [{ id: "s1", who: "Ana R.", role: "1st AC", days: "2 days, 3 hrs over", amt: 1180, h: 340, pay: "Self-employed", chain: ["Camera HoD", "PM"], st: "" }, { id: "s2", who: "Leon B.", role: "Spark", days: "2 days, 1 hr over", amt: 840, h: 120, pay: "Self-employed", chain: ["Gaffer", "PM"], st: "" }, { id: "s3", who: "Kit M.", role: "Sound recordist", days: "2 days", amt: 1040, h: 260, pay: "PAYE", chain: ["PM", "Accountant"], st: "" }];
 function chainHtml(names, done) { return '<span class="chain">' + names.map(function (n, i) { return '<span class="' + (i < done ? "ok" : i === done ? "now" : "") + '">' + (i < done ? "✓ " : "") + esc(n) + "</span>"; }).join('<i aria-hidden="true">›</i>') + "</span>"; }
 function hotCost() {
-  var ok = SIGN.filter(function (x) { return x.st === "ok"; }).reduce(function (a, x) { return a + x.amt; }, 0), today = 21480 + ok, todate = 38960 + ok, budget = 52000, pct = Math.min(100, todate / budget * 100);
+  var ok = signRows().filter(function (x) { return x.st === "ok"; }).reduce(function (a, x) { return a + x.amt; }, 0), today = 21480 + ok, todate = 38960 + ok, budget = 52000, pct = Math.min(100, todate / budget * 100);
   return '<div class="hot"><div class="dia-h"><span class="part">Hot cost · Canal promo · day 2</span><span class="q">from approved and pending timesheets</span></div><div class="hot-n"><div><span class="q">Labour today</span><b>' + money(today) + '</b></div><div><span class="q">To date</span><b>' + money(todate) + '</b></div><div><span class="q">Budget</span><b>' + money(budget) + '</b></div></div><span class="bar"><i style="width:' + pct.toFixed(1) + '%"></i></span><span class="q">' + Math.round(pct) + "% of labour budget used, with one shoot day to go. Plus " + money(committed()) + " committed on approved POs.</span></div>";
-}
-function signCard() {
-  var w = SIGN.filter(function (x) { return !x.st; }).length;
-  return '<div class="diary sign"><div class="dia-h"><span class="part">Sign-offs · timesheet and invoice together</span><span class="tag' + (w ? " amb" : " ok") + '">' + (w ? w + " waiting for you" : "All signed off") + "</span></div>" + SIGN.map(function (x) {
-    return '<div class="sg-r">' + av({ ini: inis(x.who), h: x.h }) + '<span class="sg-t">' + esc(x.who) + ", " + esc(x.role) + '<span class="q">' + esc(x.days) + " · invoice " + money(x.amt) + " drafted from the timesheet</span>" + chainHtml(x.chain.concat(["You"]), x.st === "ok" ? x.chain.length + 1 : x.chain.length) + "</span>" +
-      (x.st === "ok" ? '<span class="tag ok">Approved and invoiced</span>' : x.st === "back" ? '<span class="tag amb">Sent back</span>' : '<span class="sg-a"><button class="btn sm solid" data-signok="' + x.id + '">Approve both</button><button class="btn sm" data-signback="' + x.id + '">Send back</button></span>') + "</div>";
-  }).join("") + '<p class="q">The order is set once per job. Everyone in the chain gets one link and one tap, no login.</p></div>';
 }
 /* Simple PO: a department asks, you approve, it becomes committed spend. */
 var POS = [{ id: "p1", who: "Art dept", what: "Dressing hire, kitchen set", amt: 640, st: "" }, { id: "p2", who: "Camera", what: "Cross-hire zoom, 2 days", amt: 380, st: "" }, { id: "p3", who: "Locations", what: "Bay suspension, 2 streets", amt: 220, st: "ok" }];
@@ -581,8 +574,7 @@ var LINKS = [
   { g: "Accounts", k: "xero", n: "Xero", sub: "Invoices you approve land as drafts in Xero." },
   { g: "Accounts", k: "qb", n: "QuickBooks", sub: "Invoices and bills, matched to each job." },
   { g: "Accounts", k: "fa", n: "FreeAgent", sub: "Invoices, expenses and your tax estimate." },
-  { g: "Bank", k: "monzo", n: "Monzo", sub: "See who's paid and tick invoices off. Read-only." },
-  { g: "Bank", k: "bank", n: "Any UK bank", sub: "Starling, Barclays, HSBC and the rest, through Open Banking. Read-only." },
+  { g: "Bank", k: "csv", n: "Bank statement (CSV)", sub: "Monzo, Starling, Barclays, HSBC or any UK bank. Drop in a CSV and payments are matched to invoices. No bank login." },
   { g: "Calendar", k: "gcal", n: "Google Calendar", sub: "Bookings and holds in your calendar." },
   { g: "Calendar", k: "ical", n: "Apple Calendar", sub: "The same diary on your iPhone." }
 ];
@@ -593,7 +585,7 @@ function linkSheet(g) {
   return "<h2>" + (g === "Bank" ? "Link your bank." : g === "Accounts" ? "Link your accounts app." : "Link your tools.") + '</h2><p class="q">You sign in on their own page and choose what Systems can see. Unlink any time from You.</p><div class="rows">' + L.map(function (x) {
     var on = have.indexOf(x.k) >= 0;
     return '<div class="row static lk"><span class="lk-n">' + esc(x.n) + '<span class="sub q">' + esc(x.sub) + "</span></span>" + (on ? '<span class="tag ok">Linked</span>' : '<button class="btn sm solid" data-link="' + x.k + '">Connect</button>') + "</div>";
-  }).join("") + '</div><p class="note">' + (g === "Bank" ? "Bank links are read-only and go through a regulated Open Banking provider. Systems can never move money." : "Systems only writes drafts. Nothing is sent or paid until you do it.") + (mode === "demo" ? " In the preview, Connect shows how it works with sample data." : "") + '</p><div class="acts"><button class="btn wide" data-close>Done</button></div>';
+  }).join("") + '</div><p class="note">' + (g === "Bank" ? "No bank login, ever. You download the CSV from your bank and Systems reads it on this device. It can never move money." : "Systems only writes drafts. Nothing is sent or paid until you do it.") + (mode === "demo" ? " In the preview, Connect shows how it works with sample data." : "") + '</p><div class="acts"><button class="btn wide" data-close>Done</button></div>';
 }
 function onboard(asSheet) {
   if (flag("sy-onb-off") && !asSheet) return "";
@@ -601,16 +593,16 @@ function onboard(asSheet) {
   var steps = [
     prod ? { t: "Your crew list", sub: "Who's on the shoot and their grade. Rates fill from the card.", a: "data-findcrew", done: true } : { t: "Your grade and rate", sub: s.grade ? s.grade + ", " + money(num(s.rate)) + " a day" : "Pick your grade and the rate fills in.", a: "data-rates", done: !!s.grade },
     { t: "Link your accounts app", sub: "Xero, QuickBooks or FreeAgent.", a: 'data-links="Accounts"', done: ["xero", "qb", "fa"].some(function (k) { return have.indexOf(k) >= 0; }) },
-    { t: "Link your bank", sub: "Monzo or any UK bank, read-only, to see who's paid.", a: 'data-links="Bank"', done: ["monzo", "bank"].some(function (k) { return have.indexOf(k) >= 0; }) },
+    { t: "Match your bank statement", sub: "Drop in a CSV from any UK bank to see who's paid. No bank login.", a: 'data-link="csv"', done: have.indexOf("csv") >= 0 },
     { t: "Link your calendar", sub: "Google or Apple, so holds show up everywhere.", a: 'data-links="Calendar"', done: ["gcal", "ical"].some(function (k) { return have.indexOf(k) >= 0; }) },
     { t: "See what your dashboard does", sub: "A minute, with your own sample numbers.", a: "data-tour", done: !!flag("sy-onb-tour") }
   ], n = steps.filter(function (x) { return x.done; }).length;
   if (asSheet) return "<h2>Set up your dashboard.</h2><p class=\"q\">Link what you already use. Each one takes a minute, and you can skip any of them.</p>" + '<div class="rows">' + steps.map(function (x) {
     return '<button class="row" ' + x.a + '><span><i class="ck' + (x.done ? " on" : "") + '"></i>' + esc(x.t) + '</span><span class="q">' + (x.done ? "Done" : "Start") + '</span><span class="sub">' + esc(x.sub) + "</span></button>";
   }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
-  return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero, your bank and your calendar</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
+  return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero and your calendar, match your bank</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + hotCost() + signCard() + poCard() : diaryCard() + onboard() + jobsCard(); }
+function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -629,16 +621,9 @@ var CSH = [["Call", "06:30", "07:00"], ["Location", "Canal, E2, then Studio 3", 
 function shareCards() {
   if (mode !== "demo" || !job()) return "";
   var p = isProd();
-  return '<div class="share"><button class="csc" data-callsheet><span class="part">Tomorrow · Canal promo · V3</span><span class="tag amb">3 changed</span><span class="csc-main"><span><span class="q">Call</span><b>06:30</b></span><span><span class="q">Leave by</span><b>05:50</b></span><span><span class="q">Call in</span><b class="callin">' + callIn() + '</b></span></span><span class="q">' + (p ? "Opened by 29 of 32 crew. 3 haven't seen V3 yet." : "Now Canal, E2, then Studio 3. Unit base moved, showers after 3.") + "</span></button>" +
+  return '<div class="share"><button class="csc" data-callsheet><span class="part">Tomorrow · Canal promo · V' + (D.pj ? D.pj.cs.length : 3) + '</span><span class="tag amb">3 changed</span><span class="csc-main"><span><span class="q">Call</span><b>06:30</b></span><span><span class="q">Leave by</span><b>05:50</b></span><span><span class="q">Call in</span><b class="callin">' + callIn() + '</b></span></span><span class="q">' + (p ? "Opened by 29 of 32 crew. 3 haven't seen V3 yet." : "Now Canal, E2, then Studio 3. Unit base moved, showers after 3.") + "</span></button>" +
     (p ? '<button class="ppc" data-findcrew><span class="part">Find crew · camera first</span><b>Who\'s free Thursday?</b><span class="q">Search the directory, see Available, Pencilled or Booked, and send a hold.</span><span class="go">Search crew <span aria-hidden="true">→</span></span></button>'
        : '<button class="ppc" data-passport><span class="part">Crew passport</span><b>Filled in once</b><span class="q">Bank, UTR, NI, address, next of kin, vegetarian. On 3 jobs this month.</span><span class="tag ok">Findable</span></button>') + "</div>";
-}
-function callSheet() {
-  var p = isProd();
-  return '<div class="top"><span class="q">Canal promo · day 1</span><span class="tag amb">V3 · 21:14</span></div><h2>Tomorrow\'s call sheet.</h2><div class="sum ot">' + CSH.map(function (r) { return "<div><span class=\"q\">" + r[0] + "</span><span>" + (r[2] ? '<s class="q">' + r[2] + "</s> " : "") + '<span' + (r[2] ? ' class="late"' : "") + ">" + r[1] + "</span></span></div>"; }).join("") + "</div>" +
-    '<div class="part">On this job</div><div class="rows"><div class="row static"><span>Schedule</span><span class="q">PDF</span></div><div class="row static"><span>Risk assessment</span><span class="q">PDF</span></div><div class="row static"><span>Map and parking</span><span class="q">Link</span></div><div class="row static"><span>Start pack</span><span class="tag ok">Filled from passport</span></div></div>' +
-    '<p class="q">V1 posted by the producer, V2 by the PM, V3 by the coordinator. Every version is kept.</p>' +
-    (p ? '<div class="acts"><button class="btn solid" data-postv>Post V4</button><button class="btn" data-editlink>Share an edit link</button></div>' : '<div class="acts"><button class="btn solid wide" data-close>Got it</button></div>');
 }
 var DIRC = [["AR", "Ana R.", "1st AC · 12 commercials this year", "ok"], ["TW", "Tom W.", "1st AC · Alexa Mini, Venice", "pen"], ["PK", "Priya K.", "1st AC · 2nd unit drama", "ok"], ["LB", "Leon B.", "1st AC · music videos", "book"]];
 function findCrew() {
@@ -650,6 +635,297 @@ function passportSheet() {
   return '<div class="top"><span class="q">Crew passport</span><span class="tag ok">Findable</span></div><h2>Filled in once.</h2><div class="sum"><div><span class="q">Bank</span><span>Saved in your Drive</span></div><div><span class="q">UTR and NI</span><span>Added</span></div><div><span class="q">Address</span><span>Added</span></div><div><span class="q">Next of kin</span><span>Added</span></div><div><span class="q">Dietary</span><span>Vegetarian</span></div></div>' +
     '<div class="part">Who can see you</div><div class="sum"><div><span class="q">In the directory</span><span>On</span></div><div><span class="q">Rate card</span><span>Off</span></div><div><span class="q">Shared with a job</span><span>Only once you accept</span></div></div>' +
     '<p class="q">Producers see your role, credits and Available, Pencilled or Booked. Your diary is in Crew Pro, with no 10%, ever.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>';
+}
+
+/* ---------- the producer's job: award to advance, crew and start packs, the unit wrap, sign-off, pay run, client extras, permits, call sheet versions, rights ---------- */
+/* One sample job, kept with the rest of the sample data so every step can be tried and undone with Reset. */
+function pjSample() {
+  var t = today(), sh = iso(addDays(t, 1));
+  var C = [["c1", "Ana Reyes", "1st AC, focus puller", "Self-employed", 340, [1, 1, 1]], ["c2", "Priya Kaur", "2nd AC, clapper loader", "Self-employed", 20, [1, 0, 1]], ["c3", "Sam Carter", "Gaffer", "Self-employed", 205, [1, 1, 1]], ["c4", "Leon Brooks", "Spark", "Self-employed", 120, [1, 1, 0]], ["c5", "Kit Morgan", "Sound recordist", "PAYE", 260, [1, 1, 1]], ["c6", "Jo Fenn", "Key grip", "Loan-out", 160, [0, 1, 1]], ["c7", "Mia Okafor", "HMU artist", "Self-employed", 300, [1, 1, 1]], ["c8", "Ade Cole", "Runner", "PAYE", 80, [1, 1, 1]]];
+  return {
+    name: "Canal promo", client: "Brightside", brand: "Fieldwear", accounts: "accounts@brightside.example", budget: 84000, shoot: sh, days: 2, terms: "APA", split: 50, payDays: 30, pshoot: iso(addDays(t, 24)),
+    award: null, crew: C.map(function (c) { return { id: c[0], n: c[1], grade: c[2], pay: c[3], h: c[4], email: first(c[1]).toLowerCase() + "@crew.example", sp: c[5], call: "", wrap: "" }; }),
+    unit: { call: "07:00", lunch: "1 hour", wrap: "19:00" }, ask: null, wrap: null, sign: {}, run: null,
+    extras: [{ id: "x1", what: "Dusk shot on the canal: 2 hrs overtime for the unit, plus the drone", amt: 5220, st: "sent" }],
+    permits: ["child", "isl", "parks"],
+    cs: [{ v: 1, by: "Producer", f: { Call: "07:00", Location: "Canal, E2", "Unit base": "Wharf Rd car park", Lunch: "13:00", Weather: "Dry, 14°" } }, { v: 2, by: "PM", f: { Call: "07:00", Location: "Canal, E2", "Unit base": "Studio 3 car park", Lunch: "13:00", Weather: "Dry, 14°" } }, { v: 3, by: "Coordinator", f: { Call: "06:30", Location: "Canal, E2, then Studio 3", "Unit base": "Studio 3 car park", Lunch: "12:30", Weather: "Showers after 3" } }],
+    rights: [{ id: "r1", what: "Talent usage, online, UK", ends: iso(addDays(t, 27)) }, { id: "r2", what: "Music licence, social cutdowns", ends: iso(addDays(t, 85)) }, { id: "r3", what: "Drone footage, all media", ends: "" }]
+  };
+}
+function pj() { if (!D.pj) D.pj = pjSample(); return D.pj; }
+function pjSave() { demoSave(); }
+function crewRate(c) { return cardRate(cardOf(pj().terms === "Bectu" ? "TV drama" : "APA"), c.grade) || 0; }
+function pjTerms() { return pj().terms === "Bectu" ? "TV drama" : "APA"; }
+function crewDay(c, wrapAt) { var u = pj().unit; return calcDay({ date: pj().shoot, call: c.call || u.call, wrap: wrapAt || c.wrap || u.wrap, lunch: u.lunch, lunchAt: "12:30", type: "Normal" }, { rate: crewRate(c), terms: pjTerms(), grade: c.grade }); }
+function nextFri() { var d = addDays(today(), 1); while (d.getDay() !== 5) d = addDays(d, 1); return d; }
+function ics(name, ev) {
+  var f = function (d) { return iso(d).replace(/-/g, ""); };
+  saveFile(name + ".ics", "text/calendar", "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Eltio Systems//EN\r\n" + ev.map(function (e) { return "BEGIN:VEVENT\r\nUID:" + uid() + "@eltio.systems\r\nDTSTAMP:" + f(today()) + "T000000Z\r\nDTSTART;VALUE=DATE:" + f(e[0]) + "\r\nDTEND;VALUE=DATE:" + f(addDays(e[0], 1)) + "\r\nSUMMARY:" + e[1].replace(/[,;]/g, " ") + "\r\nEND:VEVENT\r\n"; }).join("") + "END:VCALENDAR\r\n");
+}
+function copyText(t) { try { navigator.clipboard.writeText(t); } catch (e) {} }
+
+/* The job, step by step, on the producer's home. */
+function pjCard() {
+  var P = pj(), w = signRows().filter(function (x) { return x.st !== "ok"; }).length, missing = P.crew.filter(function (c) { return c.sp.indexOf(0) >= 0; }).length;
+  var due = permitList().filter(function (p) { return daysBetween(today(), p.by) <= 7; }).length, ext = P.extras.filter(function (x) { return x.st === "sent"; }).length, soon = P.rights.filter(function (r) { return r.ends && daysBetween(today(), parse(r.ends)) <= 30; }).length;
+  var steps = [
+    ["award", "Award", P.award ? "Advance " + money(P.award.adv) + " drafted" : "Forward the award email", P.award ? "ok" : "amb", "The advance and balance invoices drafted, with the dates in your calendar."],
+    ["crew", "Crew and start packs", P.crew.length + " booked · " + (missing ? missing + " packs missing" : "all packs in"), missing ? "amb" : "ok", "Grades and rates from the " + P.terms + " card. Missing bank, UTR or right to work chased in one email."],
+    ["permits", "Permits", due ? due + " to apply for this week" : "On track", due ? "amb" : "ok", "Each council's lead time, counted back from the shoot."],
+    ["cs", "Call sheet", "V" + P.cs.length + " · one link", "", "Every version kept, what changed lit up, sent by WhatsApp or email."],
+    ["wrap", "On the day", P.wrap ? "Wrapped " + P.wrap.at : P.ask ? "Ask sent, run to " + P.ask.to : "Tap wrap once for everyone", P.wrap ? "ok" : "", "Every crew member's overtime at their own grade, from one wrap time."],
+    ["sign", "Sign-off", P.wrap ? (w ? w + " waiting" : "All signed off") : "After wrap", P.wrap && w ? "amb" : P.wrap ? "ok" : "", "Timesheet and invoice approved together, in your order."],
+    ["run", "Pay run", P.run ? "Paid " + nice(P.run.paid) : P.wrap ? "Ready to check" : "After sign-off", P.run ? "ok" : P.wrap ? "amb" : "", "Every crew invoice checked against the timesheet. The odd one out gets a polite query."],
+    ["extras", "Client extras", ext ? ext + " waiting for " + P.client : "None waiting", ext ? "amb" : "ok", "Cost it, send it, the agency says yes in one tap. Logged to the balance invoice."],
+    ["rights", "Rights and usage", soon ? soon + " ending within 30 days" : "Nothing ending soon", soon ? "amb" : "ok", "End dates with reminders at 90, 60 and 30 days, and the renewal quote drafted."]
+  ];
+  return '<div class="diary pjc"><div class="dia-h"><span class="part">Run the job · ' + esc(P.name) + " for " + esc(P.client) + '</span><span class="q">' + esc(P.terms) + " terms · " + money(P.budget) + '</span></div><div class="rows">' + steps.map(function (s) {
+    return '<button class="row" data-pj="' + s[0] + '"><span>' + esc(s[1]) + '</span><span class="tag' + (s[3] ? " " + s[3] : "") + '">' + esc(s[2]) + '</span><span class="sub">' + esc(s[4]) + "</span></button>";
+  }).join("") + "</div></div>";
+}
+
+/* Award: forward the email, the advance and balance are drafted. */
+var AWARD_MAIL = "Hi both,\n\nGreat news, Fieldwear have approved the Canal promo. Please go ahead at the quoted £84,000, two shoot days. Our payment terms are 50% on award and the balance 30 days after delivery.\n\nInvoices to accounts@brightside.example, PO BS-2291.\n\nThanks,\nRosa, Brightside";
+function awardSheet() {
+  var P = pj();
+  if (P.award) return '<div class="top"><span class="q">Award · ' + esc(P.client) + '</span><span class="tag ok">Drafted</span></div><h2>' + esc(P.name) + ", " + money(P.budget) + '.</h2><div class="rows">' +
+    '<div class="row static"><span>Advance, ' + P.split + '% <span class="q">· due ' + nice(P.award.advDue) + '</span></span><span class="tag ink">' + money(P.award.adv) + '</span></div>' +
+    '<div class="row static"><span>Balance <span class="q">· due ' + nice(P.award.balDue) + (extrasOk() ? ", with " + money(extrasOk()) + " of approved extras" : "") + '</span></span><span class="tag">' + money(P.award.bal + extrasOk()) + "</span></div></div>" +
+    '<div class="acts"><button class="btn solid" data-pjinv="adv">See the advance</button><button class="btn" data-pjinv="bal">See the balance</button><button class="btn" data-pjmail="award">Draft the email to accounts</button><button class="btn" data-pjics="award">Add dates to calendar</button></div>' +
+    '<p class="q">Drafts only. You send the email, and the invoices go into your accounts app as drafts once it\'s linked.</p><button class="lnk" data-pjreset="award">Start the award again</button>';
+  return '<div class="top"><span class="q">Award</span><span class="q">Forward it, or paste it here</span></div><h2>The award email.</h2><div class="field"><label for="aw-mail">The email from the agency</label><textarea id="aw-mail" rows="8">' + esc(AWARD_MAIL) + '</textarea></div><div class="acts"><button class="btn solid wide" data-pjread>Read the award</button></div><p class="q">In the pilot you forward it to your job\'s own address. Here, paste any award email and it picks out the budget, the split and the terms.</p>';
+}
+function readAward() {
+  var P = pj(), t = val("aw-mail"), m = /£\s?([\d,]+(?:\.\d+)?)(k)?/i.exec(t), sp = /(\d{2})\s?%/.exec(t), pd = /balance\s+(\d{1,3})\s+days/i.exec(t) || /(\d{1,3})\s+days/i.exec(t), ac = /[\w.+-]+@[\w-]+\.[\w.]+/.exec(t), po = /PO[\s:#-]*([A-Z0-9-]{3,})/i.exec(t);
+  if (m) P.budget = num(m[1]) * (m[2] ? 1000 : 1);
+  if (sp) P.split = +sp[1]; if (pd) P.payDays = +pd[1]; if (ac) P.accounts = ac[0]; if (po) P.po = po[1];
+  var adv = Math.round(P.budget * P.split / 100), sh = parse(P.shoot);
+  P.award = { at: iso(today()), adv: adv, bal: P.budget - adv, advDue: iso(addDays(today(), 7)), balDue: iso(addDays(sh, P.days - 1 + 14 + P.payDays)) };
+  pjSave(); openSheet(awardSheet()); render();
+  banner("Read it: " + money(P.budget) + ", " + P.split + "% on award. Advance and balance drafted.");
+}
+function extrasOk() { return pj().extras.filter(function (x) { return x.st === "ok"; }).reduce(function (a, x) { return a + x.amt; }, 0); }
+function pjInvoice(k) {
+  var P = pj(), A = P.award, adv = k === "adv", n = (D.settings.invoicePrefix || "INV") + "-" + today().getFullYear() + (adv ? "-031" : "-032");
+  invoicePDF({ number: n, issued: A.at, due: adv ? A.advDue : A.balDue, client: P.client, contact: P.accounts, amount: adv ? A.adv : A.bal + extrasOk(), notes: P.name + " for " + P.brand + (adv ? ", " + P.split + "% advance on award" : ", balance on delivery" + (extrasOk() ? " (includes " + money(extrasOk()) + " of approved extras)" : "")) + (P.po ? ", PO " + P.po : "") });
+}
+
+/* Crew list, grades on the job's card, start packs chased. */
+var SPN = ["Bank", "UTR", "Right to work"];
+function crewSheet() {
+  var P = pj(), card = P.terms === "Bectu" ? "Bectu" : "APA", miss = P.crew.filter(function (c) { return c.sp.indexOf(0) >= 0; });
+  return '<div class="top"><span class="q">Crew · ' + esc(P.name) + '</span><span class="q">' + P.crew.length + ' booked</span></div><h2>Your crew list.</h2>' +
+    '<div class="field"><span class="lab">Terms for this job</span>' + pills("pjterms", ["APA", "Bectu"], P.terms) + '<span class="q">Every rate below comes from the ' + card + " card for that grade.</span></div>" +
+    '<div class="rows">' + P.crew.map(function (c) {
+      return '<div class="row static sg-r">' + av({ ini: inis(c.n), h: c.h }) + '<span class="sg-t">' + esc(c.n) + ", " + esc(c.grade) + '<span class="q">' + (crewRate(c) ? money(crewRate(c)) + " a day" : "own deal") + " · " + esc(c.pay) + '</span><span class="chips">' + SPN.map(function (n, i) { return '<i class="' + (c.sp[i] ? "" : "on") + '">' + (c.sp[i] ? "✓ " : "") + n + "</i>"; }).join("") + "</span></span></div>";
+    }).join("") + "</div>" +
+    '<div class="part">Add someone</div><div class="grid2">' + field("cr-n", "Name", "", "text", "e.g. Tom West") + '<div class="field"><label for="cr-g">Grade</label><select id="cr-g">' + gradeOpts(card, "") + "</select></div></div>" +
+    '<div class="acts">' + (miss.length ? '<button class="btn solid" data-pjchase>Chase ' + miss.length + " missing start pack" + (miss.length > 1 ? "s" : "") + "</button>" : '<span class="tag ok">Every start pack is in</span>') + '<button class="btn" data-pjadd>Add to the crew</button><button class="btn" data-findcrew>Find crew</button></div>' +
+    '<p class="q">Start packs fill from each person\'s crew passport. Right to work and status checks stay with a named person on your side.</p>';
+}
+function chaseStartPacks() {
+  var miss = pj().crew.filter(function (c) { return c.sp.indexOf(0) >= 0; });
+  compose(miss.map(function (c) { return c.email; }).join(","), pj().name + ": your start pack", "Hi all,\n\nBefore " + dayLabel(pj().shoot) + ", could you fill in what's missing from your start pack? It takes a minute from the link.\n\n" + miss.map(function (c) { return "- " + first(c.n) + ": " + SPN.filter(function (n, i) { return !c.sp[i]; }).join(", "); }).join("\n") + "\n\nThanks!" + sign());
+}
+
+/* Permits counted back from the shoot. Lead times differ by council, so each is checked against theirs. */
+var PERMITS = [["child", "Child performance licence", 21, 0], ["city", "City of London, most filming", 21, 0], ["isl", "Islington, bay suspensions", 10, 1], ["parks", "Royal Parks, with a drone", 7, 1], ["wm", "Westminster, small unit", 3, 1]];
+function permitList() { var P = pj(), sh = parse(P.pshoot || P.shoot); return PERMITS.filter(function (p) { return P.permits.indexOf(p[0]) >= 0; }).map(function (p) { return { k: p[0], n: p[1], by: p[3] ? workBack(sh, p[2]) : addDays(sh, -p[2]), lead: p[2] + (p[3] ? " working days" : " days") }; }); }
+function permitSheet() {
+  var P = pj();
+  return '<div class="top"><span class="q">Permits · ' + esc(P.name) + '</span><span class="q">Counted back from the shoot</span></div><h2>When to apply.</h2>' + field("pm-date", "Location shoot date", P.pshoot, "date") +
+    '<div class="rows">' + PERMITS.map(function (p) {
+      var on = P.permits.indexOf(p[0]) >= 0, by = p[3] ? workBack(parse(P.pshoot), p[2]) : addDays(parse(P.pshoot), -p[2]), left = daysBetween(today(), by);
+      return '<button class="row" data-pjpermit="' + p[0] + '"><span><i class="ck' + (on ? " on" : "") + '"></i>' + esc(p[1]) + '</span><span class="tag' + (on ? (left < 0 ? " amb" : left <= 7 ? " amb" : " ok") : "") + '">' + (on ? (left < 0 ? "Late, call them" : "Apply by " + esc(dayLabel(iso(by)))) : "Not needed") + '</span><span class="sub">' + p[2] + (p[3] ? " working days" : " days") + " before the shoot</span></button>";
+    }).join("") + '</div><div class="acts"><button class="btn solid" data-pjics="permits">Add the deadlines to calendar</button></div><p class="q">Lead times are a guide. Each council and park sets its own, so check theirs before you rely on a date. Applications stay with a named person.</p>';
+}
+
+/* Call sheet: every version kept, what changed lit up, one link. */
+var CSF = ["Call", "Location", "Unit base", "Lunch", "Weather"];
+function callSheet(vi) {
+  var P = pj(), p = isProd(), i = vi == null ? P.cs.length - 1 : vi, V = P.cs[i], prev = P.cs[i - 1], ch = prev ? CSF.filter(function (k) { return prev.f[k] !== V.f[k]; }).length : 0;
+  return '<div class="top"><span class="q">' + esc(P.name) + " · " + esc(dayLabel(P.shoot)) + '</span><span class="tag' + (ch ? " amb" : "") + '">V' + V.v + (ch ? " · " + ch + " changed" : "") + "</span></div><h2>Tomorrow's call sheet.</h2>" +
+    '<div class="pills">' + P.cs.map(function (x, k) { return '<button type="button" class="pill" data-csv="' + k + '" aria-pressed="' + (k === i) + '">V' + x.v + "</button>"; }).join("") + "</div>" +
+    '<div class="sum ot">' + CSF.map(function (k) { var was = prev && prev.f[k] !== V.f[k] ? prev.f[k] : ""; return '<div><span class="q">' + k + "</span><span>" + (was ? '<s class="q">' + esc(was) + "</s> " : "") + '<span' + (was ? ' class="late"' : "") + ">" + esc(V.f[k]) + "</span></span></div>"; }).join("") + "</div>" +
+    '<p class="q">V' + V.v + " posted by the " + esc(V.by.toLowerCase()) + ". " + (P.cs.length > 1 ? "Every version is kept. " : "") + "Opened by 29 of 32 crew.</p>" +
+    (p ? '<div class="acts"><button class="btn solid" data-pjv4>Make V' + (P.cs.length + 1) + '</button><button class="btn" data-pjsend="wa">Send by WhatsApp</button><button class="btn" data-pjsend="mail">Send by email</button><button class="btn" data-editlink>Share an edit link</button></div>' : '<div class="acts"><button class="btn solid wide" data-close>Got it</button></div>');
+}
+function csForm() {
+  var P = pj(), L = P.cs[P.cs.length - 1].f;
+  return "<h2>V" + (P.cs.length + 1) + " of the call sheet.</h2><p class=\"q\">Change what's changed. Everyone gets the same link, with the changes lit up.</p>" + CSF.map(function (k, i) { return field("cs-" + i, k, L[k]); }).join("") + '<div class="acts"><button class="btn solid wide" data-pjpost>Post it</button></div>';
+}
+function csText() { var P = pj(), V = P.cs[P.cs.length - 1], prev = P.cs[P.cs.length - 2]; return P.name + ", " + dayLabel(P.shoot) + ", call sheet V" + V.v + "\n" + CSF.map(function (k) { return k + ": " + V.f[k] + (prev && prev.f[k] !== V.f[k] ? " (changed)" : ""); }).join("\n") + "\nhttps://eltio.systems/cs/canal-promo"; }
+
+/* On the day: ask the unit to run on, then one wrap for everyone. */
+function wrapSheet() {
+  var P = pj(), u = P.unit, base = P.crew.reduce(function (a, c) { return a + crewDay(c).total; }, 0);
+  if (P.wrap) return '<div class="top"><span class="q">' + esc(P.name) + " · day 1</span><span class=\"tag ok\">Wrapped " + esc(P.wrap.at) + '</span></div><h2>Everyone\'s day, done.</h2><div class="rows">' + P.crew.map(function (c) {
+    var r = crewDay(c, P.wrap.at), ot = r.lines.filter(function (l) { return /Overtime|After midnight|Early call/.test(l[0]); });
+    return '<div class="row static"><span>' + esc(c.n) + ' <span class="q">· ' + esc(c.grade) + '</span></span><span class="tag ink">' + pounds(r.total) + '</span><span class="sub">' + esc(ot.length ? ot.map(function (l) { return l[0]; }).join(", ") : "No overtime") + "</span></div>";
+  }).join("") + '</div><div class="sum"><div><span class="q">Unit total</span><span>' + pounds(P.crew.reduce(function (a, c) { return a + crewDay(c, P.wrap.at).total; }, 0)) + '</span></div><div><span class="q">Overtime in it</span><span>' + pounds(P.crew.reduce(function (a, c) { return a + crewDay(c, P.wrap.at).total; }, 0) - base) + '</span></div></div><div class="acts"><button class="btn solid" data-pj="sign">Go to sign-off</button><button class="lnk" data-pjreset="wrap">Undo the wrap</button></div>';
+  return '<div class="top"><span class="q">' + esc(P.name) + " · day 1 · " + esc(P.terms) + ' terms</span><span class="q">' + P.crew.length + ' crew</span></div><h2>The unit, on one clock.</h2>' +
+    '<div class="grid2">' + field("u-call", "Unit call", u.call, "time") + field("u-wrap", "Scheduled wrap", u.wrap, "time") + "</div>" +
+    '<div class="part">Ask to run on</div><div class="grid2">' + field("u-to", "Run to", P.ask ? P.ask.to : hm(tm(u.wrap) + 60), "time") + '<div class="field"><span class="lab">What it costs</span><b id="u-cost" class="big">' + pounds(askCost(P.ask ? P.ask.to : hm(tm(u.wrap) + 60))) + "</b></div></div>" +
+    (P.ask ? '<div class="rows"><div class="row static"><span>' + (P.crew.length - 2) + " in, 2 want a word</span><span class=\"tag amb\">" + esc(P.ask.to) + '</span><span class="sub">Kit Morgan and Ade Cole asked to talk to the producer.</span></div></div><div class="acts"><button class="btn" data-pjtalk>Message the two</button></div>' : '<div class="acts"><button class="btn" data-pjask>Send the ask to all ' + P.crew.length + "</button></div>") +
+    '<div class="part">Wrap</div>' + field("u-at", "Unit wrap", P.ask ? P.ask.to : u.wrap, "time") + '<div class="acts"><button class="btn solid wide" data-pjwrap>Tap wrap for everyone</button></div><p class="q">Each person\'s overtime is worked out at their own grade on the ' + esc(P.terms) + " card. Anyone released early or called early can be changed after.</p>";
+}
+function askCost(to) { var P = pj(); return P.crew.reduce(function (a, c) { return a + crewDay(c, to).total - crewDay(c).total; }, 0); }
+
+/* Sign-off rows: from the wrap once there is one, the sample ones before. */
+function chainOf(c) { var g = c.grade, d = /AC|DIT|Camera/.test(g) ? "Camera HoD" : /Spark|Gaffer|Best boy/.test(g) ? "Gaffer" : /grip/i.test(g) ? "Key grip" : "PM"; return d === "PM" ? ["PM"] : [d, "PM"]; }
+function signRows() {
+  var P = D.pj;
+  if (!P || !P.wrap) return SIGN;
+  return P.crew.map(function (c) { var s = P.sign[c.id] || (P.sign[c.id] = { st: "", step: 0, note: "" }), r = crewDay(c, P.wrap.at); return { id: c.id, who: c.n, role: c.grade, days: "Day 1, wrap " + P.wrap.at, amt: Math.round(r.total * 100) / 100, h: c.h, pay: c.pay, chain: chainOf(c), st: s.st, step: s.step, note: s.note, email: c.email }; });
+}
+function signCard() {
+  var R = signRows(), w = R.filter(function (x) { return x.st !== "ok"; }).length;
+  return '<div class="diary sign"><div class="dia-h"><span class="part">Sign-offs · timesheet and invoice together</span><span class="tag' + (w ? " amb" : " ok") + '">' + (w ? w + " waiting" : "All signed off") + "</span></div>" + R.slice(0, 4).map(signRow).join("") + (R.length > 4 ? '<button class="lnk" data-pj="sign">See all ' + R.length + "</button>" : "") + '<p class="q">The order is set once per job. Everyone in the chain gets one link and one tap, no login.</p></div>';
+}
+function signRow(x) {
+  var step = x.step == null ? x.chain.length : x.step, atYou = step >= x.chain.length;
+  return '<div class="sg-r">' + av({ ini: inis(x.who), h: x.h }) + '<span class="sg-t">' + esc(x.who) + ", " + esc(x.role) + '<span class="q">' + esc(x.days) + " · invoice " + pounds(x.amt) + " drafted from the timesheet</span>" + chainHtml(x.chain.concat(["You"]), x.st === "ok" ? x.chain.length + 1 : step) + (x.note ? '<span class="q">Your note: ' + esc(x.note) + "</span>" : "") + "</span>" +
+    (x.st === "ok" ? '<span class="tag ok">Approved and invoiced</span>' : x.st === "back" ? '<span class="sg-a"><span class="tag amb">Sent back</span><button class="btn sm" data-signfix="' + x.id + '">They fixed it</button></span>' : !atYou ? '<span class="sg-a"><button class="btn sm" data-signstep="' + x.id + '">Tap as ' + esc(x.chain[step]) + '</button><button class="btn sm ghost" data-nudge="' + esc(x.chain[step]) + '">Nudge</button></span>' : '<span class="sg-a"><button class="btn sm solid" data-signok="' + x.id + '">Approve both</button><button class="btn sm" data-signback="' + x.id + '">Send back</button></span>') + "</div>";
+}
+function signSheet() { var R = signRows(); return "<h2>Sign-off.</h2><p class=\"q\">Each person's timesheet and the invoice made from it, approved together.</p>" + R.map(signRow).join("") + '<div class="acts"><button class="btn solid wide" data-close>Done</button></div>'; }
+function signItem(id) { var P = D.pj; if (P && P.wrap && P.sign[id]) return P.sign[id]; return SIGN.find(function (x) { return x.id === id; }); }
+function backSheet(id) { var x = signRows().find(function (r) { return r.id === id; }); return "<h2>Send back to " + esc(first(x.who)) + ".</h2><p class=\"q\">Say what to fix. Their invoice waits until it's done.</p>" + '<div class="field"><textarea id="sb-note" rows="3">Could you check the wrap time? The unit wrapped at ' + esc(D.pj && D.pj.wrap ? D.pj.wrap.at : "20:00") + ".</textarea></div>" + '<div class="acts"><button class="btn solid wide" data-signbackgo="' + esc(id) + '">Send it back</button></div>'; }
+
+/* Pay run: every crew invoice read and checked against its signed timesheet. */
+function runRows() {
+  var P = pj();
+  return P.crew.map(function (c, i) { var r = crewDay(c, P.wrap.at), t = Math.round(r.total * 100) / 100, claim = i === 3 ? t + 26.25 : t; return { c: c, t: t, claim: claim, paye: c.pay === "PAYE", ok: Math.abs(claim - t) < 0.5 }; });
+}
+function runSheet() {
+  var P = pj();
+  if (!P.wrap) return "<h2>Pay run.</h2><p class=\"q\">It fills in once the unit has wrapped and the timesheets are signed off. Start with the wrap.</p><div class=\"acts\"><button class=\"btn solid wide\" data-pj=\"wrap\">Go to the wrap</button></div>";
+  var R = runRows(), inv = R.filter(function (x) { return !x.paye; }), tot = inv.reduce(function (a, x) { return a + (x.ok ? x.claim : x.t); }, 0), q = R.filter(function (x) { return !x.ok; });
+  return '<div class="top"><span class="q">Pay run · ' + esc(P.name) + '</span><span class="tag' + (P.run ? " ok" : "") + '">' + (P.run ? "Paid " + nice(P.run.paid) : "Friday " + nice(iso(nextFri()))) + "</span></div><h2>" + inv.length + " invoices, " + (inv.length - q.length) + " match.</h2>" +
+    '<div class="rows">' + R.map(function (x) { return '<div class="row static"><span>' + esc(x.c.n) + ' <span class="q">· ' + (x.paye ? "PAYE, to the payroll bureau" : "invoiced " + pounds(x.claim)) + "</span></span>" + (x.paye ? '<span class="tag">Payroll</span>' : x.ok ? '<span class="tag ok">Matches</span>' : '<span class="tag amb">' + pounds(x.claim - x.t) + ' over</span><span class="sub">Their invoice has 30 more minutes of overtime than the signed timesheet. <button class="lnk" data-pjquery="' + x.c.id + '">Draft the query</button></span>') + "</div>"; }).join("") + "</div>" +
+    '<div class="sum"><div><span class="q">To pay Friday</span><span>' + pounds(tot) + '</span></div><div><span class="q">Held for a query</span><span>' + pounds(q.reduce(function (a, x) { return a + x.claim - x.t; }, 0)) + "</span></div></div>" +
+    '<div class="acts">' + (P.run ? '<button class="btn" data-pjpayfile>Download the payment file again</button>' : '<button class="btn solid" data-pjrun>Approve the run</button>') + '<button class="btn" data-export="payroll">Payroll bureau CSV</button></div><p class="q">Systems never moves money. The payment file goes into your bank\'s bulk payments, and PAYE crew go to your payroll bureau.</p>';
+}
+function payFile() { var rows = [["Name", "Sort code", "Account", "Amount", "Reference"]].concat(runRows().filter(function (x) { return !x.paye; }).map(function (x) { return [x.c.n, "from passport", "from passport", (Math.round(x.t * 100) / 100).toFixed(2), "CANAL " + x.c.id.toUpperCase()]; })); saveFile(stamp() + "-pay-run.csv", "text/csv", rows.map(function (r) { return r.join(","); }).join("\n")); }
+
+/* Client extras: cost it, the agency approves in one tap, it rides on the balance invoice. */
+function extrasSheet() {
+  var P = pj();
+  return '<div class="top"><span class="q">Extras · ' + esc(P.client) + '</span><span class="q">' + money(extrasOk()) + ' approved</span></div><h2>The client says yes in one tap.</h2><div class="rows">' + P.extras.map(function (x) {
+    return '<div class="row static"><span>' + esc(x.what) + '</span><span class="tag' + (x.st === "ok" ? " ok" : x.st === "no" ? "" : x.st === "sent" ? " amb" : " ink") + '">' + pounds(x.amt) + " · " + (x.st === "ok" ? "approved" : x.st === "no" ? "declined" : x.st === "sent" ? "waiting" : "draft") + '</span><span class="sub">' + (x.st === "sent" ? '<button class="lnk" data-pjagency="' + x.id + '">See what ' + esc(P.client) + ' sees</button> · <button class="lnk" data-pjcopy="' + x.id + '">Copy their link</button>' : x.st === "" ? '<button class="lnk" data-pjsendx="' + x.id + '">Send to ' + esc(P.client) + "</button>" : x.st === "ok" ? "On the balance invoice" : "Not on the invoice") + "</span></div>";
+  }).join("") + '</div><div class="part">Cost a new one</div><div class="grid2">' + field("ex-what", "What it is", "", "text", "e.g. A second location, half day") + field("ex-amt", "Cost (£)", "", "number", "", ' inputmode="decimal"') + '</div><div class="acts"><button class="btn solid" data-pjaddx>Add it</button></div><p class="q">The agency opens one link, no login, and taps Approve. It\'s logged against the budget and added to the balance invoice.</p>';
+}
+function agencySheet(id) {
+  var P = pj(), x = P.extras.find(function (e) { return e.id === id; });
+  return '<div class="top"><span class="q">What ' + esc(P.client) + ' sees · no login</span><span class="q">eltio.systems/a/' + esc(id) + "</span></div><h2>" + esc(P.name) + ": an extra to approve.</h2>" + '<div class="sum"><div><span class="q">What</span><span>' + esc(x.what) + '</span></div><div><span class="q">Cost</span><span>' + pounds(x.amt) + ' + VAT</span></div><div><span class="q">Asked by</span><span>' + esc(D.settings.name || "The producer") + "</span></div></div>" +
+    '<div class="acts"><button class="btn solid" data-pjapprove="' + id + '">Approve</button><button class="btn" data-pjdecline="' + id + '">Not this time</button></div><p class="q">Approving adds it to the balance invoice for ' + esc(P.brand) + ".</p>";
+}
+
+/* Rights and usage: end dates with reminders, and the renewal quote drafted. */
+function rightsSheet() {
+  var P = pj();
+  return '<div class="top"><span class="q">Rights and usage · ' + esc(P.name) + '</span><span class="q">' + P.rights.length + ' tracked</span></div><h2>What ends when.</h2><div class="rows">' + P.rights.map(function (r) {
+    var left = r.ends ? daysBetween(today(), parse(r.ends)) : null;
+    return '<div class="row static"><span>' + esc(r.what) + '</span><span class="tag' + (left != null && left <= 30 ? " amb" : "") + '">' + (r.ends ? "Ends " + nice(r.ends) : "In perpetuity") + '</span><span class="sub">' + (r.ends ? '<span class="chips">' + [90, 60, 30].map(function (n) { return '<i class="' + (left <= n ? "on" : "") + '">' + n + "</i>"; }).join("") + "</span>" + (left <= 90 ? ' <button class="lnk" data-pjrenew="' + r.id + '">Draft the renewal quote</button>' : "") : "No reminder needed") + "</span></div>";
+  }).join("") + '</div><div class="part">Add one</div><div class="grid2">' + field("rt-what", "What it covers", "", "text", "e.g. Talent usage, TV, UK") + field("rt-end", "Ends", "", "date") + '</div><div class="acts"><button class="btn solid" data-pjaddr>Add it</button></div><p class="q">In the pilot the end dates are read from the signed contracts in your Drive.</p>';
+}
+var PJ_SHEETS = { award: awardSheet, crew: crewSheet, permits: permitSheet, cs: function () { return callSheet(); }, wrap: wrapSheet, sign: signSheet, run: runSheet, extras: extrasSheet, rights: rightsSheet };
+
+/* Producer clicks. Returns true when it handled the tap. */
+function pjClick(b) {
+  var d = b.dataset, P = mode === "demo" && isProd() ? pj() : null; if (!P) return false;
+  if (d.pj) { openSheet(PJ_SHEETS[d.pj]()); return true; }
+  if (b.hasAttribute("data-pjread")) { readAward(); return true; }
+  if (d.pjinv) { pjInvoice(d.pjinv); return true; }
+  if (d.pjmail === "award") { compose(P.accounts, P.name + ": advance invoice", "Hi,\n\nThanks for the award. Attached is our invoice for the " + P.split + "% advance on " + P.name + ", " + money(P.award.adv) + " plus VAT" + (P.po ? ", PO " + P.po : "") + ", due " + nice(P.award.advDue) + ".\n\nThe balance follows on delivery." + sign()); return true; }
+  if (d.pjics === "award") { ics("canal-promo-dates", [[parse(P.award.advDue), P.name + ": advance due"], [parse(P.shoot), P.name + ": shoot day 1"], [parse(P.award.balDue), P.name + ": balance due"]]); banner("Calendar file saved. Open it to add the three dates."); return true; }
+  if (d.pjics === "permits") { ics("canal-promo-permits", permitList().map(function (p) { return [p.by, "Apply: " + p.n]; })); banner("Calendar file saved with " + permitList().length + " deadlines."); return true; }
+  if (d.pjreset) { P[d.pjreset] = null; if (d.pjreset === "wrap") { P.sign = {}; P.run = null; P.ask = null; } pjSave(); openSheet(PJ_SHEETS[d.pjreset]()); render(); return true; }
+  if (d.pjpermit) { var i = P.permits.indexOf(d.pjpermit); if (i >= 0) P.permits.splice(i, 1); else P.permits.push(d.pjpermit); var nd = val("pm-date"); if (nd) P.pshoot = nd; pjSave(); openSheet(permitSheet()); render(); return true; }
+  if (b.hasAttribute("data-pjchase")) { chaseStartPacks(); banner("Drafted to everyone with something missing. Nothing sends until you tap send."); return true; }
+  if (b.hasAttribute("data-pjadd")) { var nm = val("cr-n"), gr = val("cr-g"); if (!nm || !gr) { banner("Add a name and a grade."); return true; } P.crew.push({ id: "c" + uid().slice(-5), n: nm, grade: gr, pay: "Self-employed", h: (nm.length * 47) % 360, email: first(nm).toLowerCase() + "@crew.example", sp: [0, 0, 0], call: "", wrap: "" }); pjSave(); openSheet(crewSheet()); render(); banner(first(nm) + " is on the crew list. Their start pack link is drafted."); return true; }
+  if (d.csv) { openSheet(callSheet(+d.csv)); return true; }
+  if (b.hasAttribute("data-pjv4") || b.hasAttribute("data-postv")) { openSheet(csForm()); return true; }
+  if (b.hasAttribute("data-pjpost")) { var L = P.cs[P.cs.length - 1].f, f = {}; CSF.forEach(function (k, i) { f[k] = val("cs-" + i) || L[k]; }); P.cs.push({ v: P.cs.length + 1, by: "Producer", f: f }); pjSave(); openSheet(callSheet()); render(); banner("V" + P.cs.length + " posted. Everyone's link now shows it, with what changed lit up."); return true; }
+  if (d.pjsend === "wa") { window.open("https://wa.me/?text=" + encodeURIComponent(csText()), "_blank", "noopener"); return true; }
+  if (d.pjsend === "mail") { compose(P.crew.map(function (c) { return c.email; }).join(","), P.name + ": call sheet V" + P.cs.length, csText() + sign()); return true; }
+  if (b.hasAttribute("data-pjask")) { P.unit.call = val("u-call") || P.unit.call; P.unit.wrap = val("u-wrap") || P.unit.wrap; P.ask = { to: val("u-to") || hm(tm(P.unit.wrap) + 60) }; pjSave(); openSheet(wrapSheet()); render(); banner("Sent to all " + P.crew.length + " at once. " + (P.crew.length - 2) + " said yes."); return true; }
+  if (b.hasAttribute("data-pjtalk")) { compose("kit@crew.example,ade@crew.example", P.name + ": running on", "Hi both,\n\nYou asked for a word about running to " + P.ask.to + ". Can you grab me by the monitor in five?" + sign()); return true; }
+  if (b.hasAttribute("data-pjwrap")) { P.unit.call = val("u-call") || P.unit.call; P.unit.wrap = val("u-wrap") || P.unit.wrap; var at = val("u-at") || P.unit.wrap; P.wrap = { at: at }; P.sign = {}; P.run = null; pjSave(); openSheet(wrapSheet()); render(); banner("Wrapped at " + at + ". " + P.crew.length + " timesheets drafted, each at their own grade."); return true; }
+  if (d.signstep) { var s1 = signItem(d.signstep); s1.step = (s1.step || 0) + 1; pjSave(); render(); if ($("sheet").classList.contains("on")) openSheet(signSheet()); return true; }
+  if (d.signok) { var s2 = signItem(d.signok); s2.st = "ok"; pjSave(); render(); if ($("sheet").classList.contains("on") && $("sheet").querySelector(".sg-r")) openSheet(signSheet()); banner("Timesheet and invoice approved. Into Friday's pay run."); return true; }
+  if (d.signback) { openSheet(backSheet(d.signback)); return true; }
+  if (d.signbackgo) { var s3 = signItem(d.signbackgo), r3 = signRows().find(function (x) { return x.id === d.signbackgo; }); s3.st = "back"; s3.note = val("sb-note"); pjSave(); closeSheet(); render(); compose(r3.email || "", P.name + ": your timesheet", "Hi " + first(r3.who) + ",\n\n" + s3.note + sign()); banner("Sent back to " + first(r3.who) + " with your note."); return true; }
+  if (d.signfix) { var s4 = signItem(d.signfix); s4.st = ""; s4.note = ""; pjSave(); render(); return true; }
+  if (d.pjquery) { var qc = P.crew.find(function (c) { return c.id === d.pjquery; }); compose(qc.email, P.name + ": your invoice", "Hi " + first(qc.n) + ",\n\nThanks for your invoice. It has 30 minutes more overtime than your signed timesheet, which has the unit wrap at " + P.wrap.at + ". Could you check and resend? The rest is going in Friday's run." + sign()); return true; }
+  if (b.hasAttribute("data-pjrun")) { P.run = { paid: iso(nextFri()) }; pjSave(); payFile(); openSheet(runSheet()); render(); banner("Run approved. The payment file is saved for your bank's bulk payments."); return true; }
+  if (b.hasAttribute("data-pjpayfile")) { payFile(); return true; }
+  if (b.hasAttribute("data-pjaddx")) { var w2 = val("ex-what"), a2 = num(val("ex-amt")); if (!w2 || !a2) { banner("Add what it is and what it costs."); return true; } P.extras.push({ id: "x" + uid().slice(-4), what: w2, amt: a2, st: "" }); pjSave(); openSheet(extrasSheet()); render(); return true; }
+  if (d.pjsendx) { P.extras.find(function (x) { return x.id === d.pjsendx; }).st = "sent"; pjSave(); openSheet(extrasSheet()); render(); banner("Sent to " + P.client + ". They get one link, no login."); return true; }
+  if (d.pjcopy) { copyText("https://eltio.systems/a/" + d.pjcopy); banner("Their link is copied."); return true; }
+  if (d.pjagency) { openSheet(agencySheet(d.pjagency)); return true; }
+  if (d.pjapprove || d.pjdecline) { var ex = P.extras.find(function (x) { return x.id === (d.pjapprove || d.pjdecline); }); ex.st = d.pjapprove ? "ok" : "no"; pjSave(); openSheet(extrasSheet()); render(); banner(d.pjapprove ? P.client + " approved it. " + money(ex.amt) + " is on the balance invoice." : P.client + " said not this time. Nothing is invoiced."); return true; }
+  if (d.pjrenew) { var rr = P.rights.find(function (x) { return x.id === d.pjrenew; }); compose(P.accounts, P.name + ": renewing " + rr.what.toLowerCase(), "Hi,\n\n" + rr.what + " on " + P.name + " ends on " + nice(rr.ends) + ". If you'd like to keep running it, we can renew for another year. I'll send the quote over." + sign()); return true; }
+  if (b.hasAttribute("data-pjaddr")) { var rw = val("rt-what"); if (!rw) { banner("Say what it covers."); return true; } P.rights.push({ id: "r" + uid().slice(-4), what: rw, ends: val("rt-end") }); pjSave(); openSheet(rightsSheet()); render(); return true; }
+  return false;
+}
+
+/* Bank statement: a CSV export from any UK bank, matched to unpaid invoices by amount or invoice number. No bank login. */
+var BANKROWS = [];
+function csvRows(t) {
+  return String(t).split(/\r?\n/).filter(function (l) { return l.trim(); }).map(function (l) { var out = [], cur = "", q = false; for (var i = 0; i < l.length; i++) { var ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if (ch === "," && !q) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map(function (x) { return x.trim(); }); });
+}
+/* Money in only: the first column that reads as a positive amount, the longest text as the description, any date as the date. */
+function readStatement(t) {
+  var R = csvRows(t); if (!R.length) return [];
+  var head = R[0].map(function (h) { return h.toLowerCase(); }), hasHead = head.some(function (h) { return /amount|paid in|credit|description|date/.test(h); }), rows = hasHead ? R.slice(1) : R;
+  var ai = head.findIndex(function (h) { return /paid in|credit|money in/.test(h); }); if (ai < 0) ai = head.findIndex(function (h) { return /amount|value/.test(h); });
+  return rows.map(function (r) {
+    var amt = ai >= 0 ? num(r[ai]) : r.map(num).find(function (n) { return n > 0; }) || 0, dt = r.find(function (x) { return /^\d{1,4}[-/]\d{1,2}[-/]\d{1,4}/.test(x); }) || "", desc = r.slice().sort(function (a, b) { return b.length - a.length; })[0] || "";
+    return { amt: amt, date: dt, desc: desc };
+  }).filter(function (x) { return x.amt > 0; });
+}
+function matchInv(row) { var open = outstanding(); return open.find(function (v) { return v.number && row.desc.toUpperCase().indexOf(String(v.number).toUpperCase()) >= 0; }) || open.find(function (v) { return Math.abs(num(v.amount) - row.amt) < 0.01; }) || null; }
+function sampleStatement() { var o = outstanding().slice(0, 2); return "Date,Description,Paid in,Paid out\n" + o.map(function (v, i) { return iso(addDays(today(), -i - 1)) + "," + (i ? "FASTER PAYMENT " + String(v.client).toUpperCase() : String(v.client).toUpperCase() + " " + v.number) + "," + num(v.amount).toFixed(2) + ","; }).join("\n") + "\n" + iso(addDays(today(), -3)) + ",TFL TRAVEL CHARGE,,12.80\n" + iso(addDays(today(), -4)) + ",REFUND KIT HIRE,45.00,"; }
+function bankSheet() {
+  var M = BANKROWS.map(function (r) { return { r: r, v: matchInv(r) }; }), hit = M.filter(function (x) { return x.v; });
+  return '<div class="top"><span class="q">Bank statement · CSV</span><span class="q">No bank login</span></div><h2>Who\'s paid you.</h2><p class="q">Download a CSV statement from your bank\'s app or website and drop it here. Payments in are matched to your unpaid invoices. Nothing leaves this device.</p>' +
+    '<div class="field"><label for="bk-file">Your statement (.csv)</label><input id="bk-file" type="file" accept=".csv,text/csv"></div>' +
+    (BANKROWS.length ? '<div class="part">' + BANKROWS.length + " payments in · " + hit.length + ' match</div><div class="rows">' + M.map(function (x, i) {
+      return '<div class="row static"><span>' + esc(x.r.desc) + ' <span class="q">· ' + esc(x.r.date) + '</span></span><span class="tag' + (x.v ? " ok" : "") + '">' + pounds(x.r.amt) + '</span><span class="sub">' + (x.v ? "Matches " + esc(x.v.number) + ", " + esc(x.v.client) + ' <button class="lnk" data-bankpaid="' + i + '">Mark paid</button>' : "No unpaid invoice for this amount") + "</span></div>";
+    }).join("") + "</div>" + (hit.length ? '<div class="acts"><button class="btn solid" data-bankall>Mark ' + hit.length + " paid</button></div>" : "") : '<div class="acts"><button class="btn" data-banksample>Try a sample statement</button></div>');
+}
+function markPaid(v, date) {
+  var d = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : iso(today());
+  if (mode === "demo") { v.paid = d; demoSave(); return Promise.resolve(); }
+  var o = Object.assign({}, v, { paid: d }); return upsert("Invoices", o);
+}
+
+/* Receipts: snap it, put it on the job, and it goes on that job's invoice. */
+function receiptSheet() {
+  var up = D.bookings.filter(function (b) { return b.status !== "Cancelled"; }).sort(function (a, b) { return a.start < b.start ? 1 : -1; }).slice(0, 12);
+  return "<h2>Add a receipt.</h2><p class=\"q\">Snap it or pick the photo. Put it on a job and it's added to that job's invoice.</p>" +
+    '<div class="field"><label for="rc-photo">Photo of the receipt</label><input id="rc-photo" type="file" accept="image/*" capture="environment"></div>' +
+    '<div class="grid2">' + field("rc-item", "What for", "", "text", "e.g. Batteries, parking") + field("rc-amt", "Amount (£)", "", "number", "", ' inputmode="decimal"') + "</div>" +
+    '<div class="field"><label for="rc-job">Job</label><select id="rc-job"><option value="">Not on a job</option>' + up.map(function (b) { return '<option value="' + esc(b.id) + '">' + esc((b.production || "Booking") + ", " + b.client + ", " + nice(b.start)) + "</option>"; }).join("") + "</select></div>" +
+    field("rc-date", "Date", iso(today()), "date") + '<div class="acts"><button class="btn solid wide" data-rcsave>Add it</button></div><p class="q">The photo stays on your phone; the line is saved with your expenses and goes in the accountant pack.</p>';
+}
+function saveReceipt() {
+  var amt = num(val("rc-amt")), item = val("rc-item"), f = $("rc-photo") && $("rc-photo").files[0];
+  if (!amt || !item) { banner("Add what it was for and the amount."); return; }
+  var o = { id: uid(), date: val("rc-date") || iso(today()), booking: val("rc-job"), item: item, amount: String(amt), notes: f ? "Receipt: " + f.name : "" };
+  closeSheet();
+  if (mode === "demo") { D.expenses.push(o); demoSave(); render(); banner("Added" + (o.booking ? " to that job's invoice" : "") + "."); return; }
+  upsert("Expenses", o).then(function () { banner("Added" + (o.booking ? " to that job's invoice" : "") + "."); });
+}
+function bankClick(b) {
+  var d = b.dataset;
+  if (d.link === "csv") { openSheet(bankSheet()); return true; }
+  if (b.hasAttribute("data-banksample")) { BANKROWS = readStatement(sampleStatement()); openSheet(bankSheet()); return true; }
+  if (d.bankpaid) { var r = BANKROWS[+d.bankpaid], v = matchInv(r); if (v) markPaid(v, r.date).then(function () { BANKROWS.splice(+d.bankpaid, 1); render(); openSheet(bankSheet()); banner(v.number + " marked paid."); }); return true; }
+  if (b.hasAttribute("data-bankall")) { var n = 0, P = Promise.resolve(); BANKROWS.slice().forEach(function (r) { var v = matchInv(r); if (v) { n++; P = P.then(function () { return markPaid(v, r.date); }); } }); P.then(function () { BANKROWS = BANKROWS.filter(function (r) { return !matchInv(r); }); render(); openSheet(bankSheet()); banner(n + " invoices marked paid."); }); return true; }
+  if (b.hasAttribute("data-addreceipt")) { openSheet(receiptSheet()); return true; }
+  if (b.hasAttribute("data-rcsave")) { saveReceipt(); return true; }
+  return false;
 }
 
 /* ---------- screens ---------- */
@@ -732,7 +1008,7 @@ function invoiceRow(v) { var od = !v.paid && parse(v.due) && parse(v.due) < toda
 function moneyScr() {
   var s = D.settings, open = outstanding().sort(function (a, b) { return a.due < b.due ? -1 : 1; }), paid = D.invoices.filter(function (v) { return v.paid; }).sort(function (a, b) { return a.paid < b.paid ? 1 : -1; });
   var r12 = rolling12(), od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0);
-  return '<div class="top"><span>Money</span><button class="lnk" data-addinvoice>New invoice</button></div><h2>What you\'re owed.</h2>' +
+  return '<div class="top"><span>Money</span><span class="db-l"><button class="lnk" data-addreceipt>Add a receipt</button><button class="lnk" data-addinvoice>New invoice</button><button class="lnk" data-link="csv">Match bank</button></span></div><h2>What you\'re owed.</h2>' +
     '<div class="part">Last 12 months</div>' + barChart(false) +
     '<div class="kpis"><div class="kpi"><b>' + money(owed()) + '</b><span class="q">Owed, ' + open.length + " invoice" + (open.length === 1 ? "" : "s") + '</span></div><div class="kpi' + (od ? " amb" : "") + '"><b>' + money(od) + '</b><span class="q">Overdue</span></div></div>' +
     '<div class="two"><div class="stack"><div class="part">Unpaid</div><div class="rows">' + (open.length ? open.map(invoiceRow).join("") : '<p class="empty">Nothing outstanding.</p>') + '</div><div class="part">Paid</div><div class="rows">' + (paid.length ? paid.slice(0, 10).map(invoiceRow).join("") : '<p class="empty">None yet.</p>') + "</div></div>" +
@@ -743,7 +1019,7 @@ function more() {
   return '<div class="top"><span>You</span><span></span></div><h2>' + esc(s.name || "Your account") + "</h2>" +
     '<div class="sum"><div><span class="q">Signed in</span><span>' + (mode === "demo" ? "Sample data, this browser only" : esc(G.email || "Google")) + '</span></div><div><span class="q">Your data</span><span>' + (mode === "demo" ? "Not saved to Drive" : "In your Google Drive") + '</span></div><div><span class="q">Grade</span><span>' + esc(s.grade || "Not picked yet") + '</span></div><div><span class="q">Day rate</span><span>' + money(num(s.rate)) + '</span></div><div><span class="q">Terms</span><span>' + esc(s.terms || 30) + ' days</span></div><div><span class="q">Email</span><span>' + esc(s.mail || "Gmail") + '</span></div><div><span class="q">Agent</span><span>' + (s.hasAgent === "Yes" ? esc(s.agent || "Yes") : "None") + "</span></div></div>" +
     (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-features><span>Everything Systems runs</span><span class="q">26</span><span class="sub">Advance invoices, crew checks, permits, rights, deliverables, the books.</span></button><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
-    '<div class="part">Linked</div><div class="rows"><button class="row" data-links=""><span>Accounts, bank and calendar</span><span class="q">' + (linked().length ? linked().length + " linked" : "None yet") + '</span><span class="sub">Xero, QuickBooks, FreeAgent, Monzo or any UK bank, Google or Apple Calendar.</span></button><button class="row" data-onbon><span>Set up your dashboard</span><span class="q">Checklist</span><span class="sub">Put the setup steps back on your home screen.</span></button></div>' +
+    '<div class="part">Linked</div><div class="rows"><button class="row" data-links=""><span>Accounts, bank and calendar</span><span class="q">' + (linked().length ? linked().length + " linked" : "None yet") + '</span><span class="sub">Xero, QuickBooks or FreeAgent, a CSV from your bank, Google or Apple Calendar.</span></button><button class="row" data-onbon><span>Set up your dashboard</span><span class="q">Checklist</span><span class="sub">Put the setup steps back on your home screen.</span></button></div>' +
     '<div class="rows"><button class="row" data-rates><span>Rate cards, every grade</span><span class="q">APA · Bectu</span><span class="sub">Pick your grade and the day rate fills in. Change it to your own deal any time.</span></button></div>' +
     '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
@@ -764,6 +1040,7 @@ function invoiceLines(v) {
   if (b && daysFor(b.id).length) sheetCalc(b).days.forEach(function (o) { o.r.lines.forEach(function (l) { L.push([dayLabel(o.x.date) + ", " + l[0], l[1]]); }); });
   else if (b) { L.push([(b.grade ? b.grade + ", " : "") + b.production + ", " + Math.max(1, num(b.days)) + " day" + (num(b.days) > 1 ? "s" : "") + " at " + money(num(b.rate)), num(b.rate) * Math.max(1, num(b.days))]); if (num(b.kit)) L.push(["Kit, " + Math.max(1, num(b.days)) + " day" + (num(b.days) > 1 ? "s" : ""), num(b.kit) * Math.max(1, num(b.days))]); }
   else L.push([v.notes || "Services", num(v.amount)]);
+  if (b) (D.expenses || []).filter(function (e) { return e.booking === b.id; }).forEach(function (e) { L.push(["Expense: " + e.item, num(e.amount)]); });
   return { b: b, L: L, net: L.reduce(function (a, l) { return a + l[1]; }, 0) };
 }
 function invoicePDF(v) {
@@ -791,7 +1068,7 @@ function exportAccountant() {
   saveFile(stamp() + "-for-your-accountant.xls", "application/vnd.ms-excel", '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' + ws + "</Workbook>");
 }
 /* Approved timesheets for a payroll bureau. Systems never runs payroll itself. */
-function exportPayroll() { var rows = [["Name", "Grade", "Engagement", "Job", "Days", "Gross", "Approved by", "Status"]].concat(SIGN.map(function (x) { return [x.who, x.role, x.pay, "Canal promo", x.days, x.amt, x.chain.concat(["Producer"]).join(" > "), x.st === "ok" ? "Approved" : "Waiting"]; })); saveFile(stamp() + "-payroll-bureau.csv", "text/csv", rows.map(function (r) { return r.map(function (v) { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\n")); }
+function exportPayroll() { var rows = [["Name", "Grade", "Engagement", "Job", "Days", "Gross", "Approved by", "Status"]].concat(signRows().map(function (x) { return [x.who, x.role, x.pay, "Canal promo", x.days, x.amt, x.chain.concat(["Producer"]).join(" > "), x.st === "ok" ? "Approved" : "Waiting"]; })); saveFile(stamp() + "-payroll-bureau.csv", "text/csv", rows.map(function (r) { return r.map(function (v) { v = String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(","); }).join("\n")); }
 function exportCSV() { var q = function (v) { return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; saveFile(stamp() + "-bookings.csv", "text/csv", [TABS.Bookings].concat(rowsOf("Bookings")).map(function (r) { return r.map(q).join(","); }).join("\n")); }
 /* Excel 2003 XML: opens in Excel, Numbers and Google Sheets, one worksheet per tab. */
 function exportXLS() {
@@ -828,7 +1105,7 @@ function bookingForm(b) {
 }
 function invoiceForm(v, fromBooking) {
   var s = D.settings, isNew = !v, t = today(), b = fromBooking;
-  v = v || { id: uid(), booking: b ? b.id : "", number: nextInvoiceNumber(), client: b ? b.client : "", contact: b ? b.contact : "", amount: b ? String(Math.round(bookingValue(b) * 100) / 100) : "", issued: iso(t), due: iso(addDays(t, num(s.terms) || 30)), paid: "", notes: b ? b.production + ", " + niceRange(b.start, b.end) + (b.po ? ", " + b.po : "") + (daysFor(b.id).length ? ", from your timesheet" : "") : "" };
+  v = v || { id: uid(), booking: b ? b.id : "", number: nextInvoiceNumber(), client: b ? b.client : "", contact: b ? b.contact : "", amount: b ? String(Math.round((bookingValue(b) + (D.expenses || []).filter(function (e) { return e.booking === b.id; }).reduce(function (t, e) { return t + num(e.amount); }, 0)) * 100) / 100) : "", issued: iso(t), due: iso(addDays(t, num(s.terms) || 30)), paid: "", notes: b ? b.production + ", " + niceRange(b.start, b.end) + (b.po ? ", " + b.po : "") + (daysFor(b.id).length ? ", from your timesheet" : "") : "" };
   var od = !v.paid && parse(v.due) && parse(v.due) < t;
   var acts = isNew ? "" : '<div class="acts">' + (od ? '<button class="btn solid" data-draft="chase" data-id="' + v.id + '">Write the chase</button>' : "") + (!v.paid ? '<button class="btn" data-markpaid="' + v.id + '">Mark as paid</button>' : '<button class="btn" data-markunpaid="' + v.id + '">Mark as unpaid</button>') + '<button class="btn" data-invpdf="' + v.id + '">See the invoice</button><button class="btn" data-draft="invoice" data-id="' + v.id + '">Email it</button></div>';
   return "<h2>" + (isNew ? "New invoice" : esc(v.number)) + "</h2>" + acts + '<input type="hidden" id="v-id" value="' + esc(v.id) + '"><input type="hidden" id="v-booking" value="' + esc(v.booking) + '">' +
@@ -1022,8 +1299,9 @@ function saveSetup() {
 document.addEventListener("click", function (e) {
   var b = e.target.closest("button,a"); if (!b) { if (e.target.id === "shade") closeSheet(); return; }
   var d = b.dataset;
-  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } liveCalc(); return; }
+  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
+  if (pjClick(b) || bankClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }
@@ -1119,8 +1397,8 @@ document.addEventListener("click", function (e) {
   if (d.delinvoice) { if (!confirm("Delete this invoice record?")) return; closeSheet(); remove("Invoices", d.delinvoice).then(function () { banner("Deleted."); }); return; }
 });
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") { if ($("tour")) endTour(); else closeSheet(); } });
-document.addEventListener("input", function (e) { var g = e.target.id && document.querySelector('select[data-rate="' + e.target.id + '"]'); if (g) gradeSync(g, false); if (e.target.closest && e.target.closest("#sheet")) liveCalc(); });
-document.addEventListener("change", function (e) { if (e.target.matches && e.target.matches("select[data-rate]")) { gradeSync(e.target, true); liveCalc(); } });
+document.addEventListener("input", function (e) { var g = e.target.id && document.querySelector('select[data-rate="' + e.target.id + '"]'); if (g) gradeSync(g, false); if (e.target.closest && e.target.closest("#sheet")) liveCalc(); if (e.target.id === "u-to" && $("u-cost") && tm(e.target.value) != null) $("u-cost").textContent = pounds(askCost(e.target.value)); });
+document.addEventListener("change", function (e) { if (e.target.matches && e.target.matches("select[data-rate]")) { gradeSync(e.target, true); liveCalc(); } if (e.target.id === "bk-file" && e.target.files[0]) { var fr = new FileReader(); fr.onload = function () { BANKROWS = readStatement(fr.result); var ls = linked(); if (ls.indexOf("csv") < 0) { ls.push("csv"); D.settings.links = ls.join("|"); if (mode === "demo") demoSave(); } openSheet(bankSheet()); banner(BANKROWS.length ? BANKROWS.length + " payments in read." : "No payments in found. Is it a CSV statement?"); }; fr.readAsText(e.target.files[0]); } if (e.target.id === "pm-date" && e.target.value && D.pj) { D.pj.pshoot = e.target.value; pjSave(); openSheet(permitSheet()); render(); } });
 /* Pick up changes made on another device when the app comes back into view. */
 document.addEventListener("visibilitychange", function () { if (!document.hidden) { paintSky(); refresh(); } });
 setInterval(paintSky, 5 * 60 * 1000);
@@ -1131,6 +1409,5 @@ var asJob = (location.search.match(/[?&]as=([a-z]+)/) || [])[1];
 if (!(asJob && startJob(asJob))) render();
 /* Returning user on this device: try a silent sign-in. If Google needs a tap, the welcome screen stays. */
 try { if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in")) startGoogle(true).catch(function () {}); } catch (e) {}
-})();
-
 setInterval(function () { document.querySelectorAll(".callin").forEach(function (e) { e.textContent = callIn(); }); }, 30000);
+})();

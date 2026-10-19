@@ -153,6 +153,30 @@
   if (io) new IntersectionObserver(function (es) { if (es[0].isIntersecting && !ibSeen) { ibSeen = true; ibPlay(); } }, { threshold: .35 }).observe($("#ib")); else ibSeen = true;
   $$(".ib-copy > *").forEach(function (el, i) { watch(el, i * 70); });
 
+
+  /* ---- the day, live: a countdown from the call sheet, then the day as production posts it ---- */
+  var dyKey = "prod", dyT = [], dyLeft = 14 * 3600 + 32 * 60 + 10, dyRun = false;
+  function hms(s) { var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return [h, m, x].map(function (n) { return String(n).padStart(2, "0"); }).join(":"); }
+  setInterval(function () { if (dyRun) return; dyLeft = Math.max(0, dyLeft - 1); $("#dyClock").textContent = hms(dyLeft); }, 1000);
+  function dyDay() {
+    var prod = dyKey === "prod" || dyKey === "pm", c = (ROLES[dyKey] && ROLES[dyKey].crew) || { band: 1.5, rate: 450 };
+    var last = prod ? ["Timesheets drafted", "32 crew, 18 on overtime, all from one wrap"] : ["Your timesheet is drafted", "1.5 hrs overtime at " + c.band + "x, " + gbp2(c.rate / 10 * c.band * 1.5)];
+    return [["06:30", "Call. The unit's on the clock", prod ? "31 of 32 checked in" : "You checked in at 06:24", ""], ["09:10", "Unit move to the bridge", "15 minutes, parking on Mare St", ""], ["13:05", "Lunch called", "One hour, back at 14:05", ""], ["18:00", "Running 30 minutes over", "Overtime starts at 18:30 for everyone", "amber"], ["19:45", "Wrap in 15", prod ? "Overtime so far £2,940" : "Kit back by 20:30", "amber"], ["20:00", "Wrap", last[0] + ". " + last[1], "red"]];
+  }
+  function dyReset() { dyT.forEach(clearTimeout); dyT = []; dyRun = false; $("#dy").classList.remove("ot"); $("#dyFeed").innerHTML = '<div class="dy-n"><span class="t">Yesterday</span><b>Call sheet read from your inbox</b><span>Day 1 call 06:30, in your diary with the countdown on</span></div>'; $("#dyLab").textContent = "Call in"; $("#dyClock").textContent = hms(dyLeft); $("#dyPlay").textContent = "Play the day"; }
+  function dyPlay() {
+    dyReset(); dyRun = true; $("#dyPlay").textContent = "Play it again"; $("#dyLab").textContent = "On the clock";
+    var D = dyDay(), feed = $("#dyFeed");
+    D.forEach(function (n, i) { dyT.push(setTimeout(function () {
+      $("#dyClock").textContent = n[0]; $("#dy").classList.toggle("ot", i >= 3);
+      if (i >= 3) $("#dyLab").textContent = i === 5 ? "Wrapped" : "Overtime";
+      feed.insertAdjacentHTML("afterbegin", '<div class="dy-n' + (n[3] ? " " + n[3] : "") + '"><span class="t">' + n[0] + "</span><b>" + n[1] + "</b><span>" + n[2] + "</span></div>");
+      var all = $$(".dy-n", feed); if (all.length > 3) all[all.length - 1].remove();
+    }, reduce ? 0 : 300 + i * 1100)); });
+  }
+  $("#dyPlay").addEventListener("click", function () { if (dyRun && $("#dyPlay").textContent === "Play it again") { dyPlay(); return; } dyPlay(); });
+  $$(".day-copy > *").forEach(function (el, i) { watch(el, i * 70); }); watch($("#dy"), 120);
+
   /* ---- both sides: one wrap drafts every crew invoice, and the producer's check already matches ---- */
   var BD = [["gaffer", "Gaffer", 450, 1.5], ["spark", "Spark", 350, 1.5], ["camera", "1st AC", 480, 1.25], ["sound", "Sound recordist", 520, 1.25]], bdKey = "prod", bdT = [];
   function bdDraw(state) {
@@ -401,6 +425,7 @@
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
+    dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();
     $("#ibP").textContent = (key === "prod" || key === "pm") ? "Systems reads your work email and turns it into the job. Awards, crew invoices, client extras and council questions are sorted as they land. You only see what needs you, with the reply already drafted." : "Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.";
     var tk = key === "other" ? guess(R.n) : key;

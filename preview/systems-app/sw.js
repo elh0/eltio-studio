@@ -1,5 +1,5 @@
 /* Keeps the app shell available offline. Google API calls always go to the network. */
-var CACHE = "eltio-systems-v13";
+var CACHE = "eltio-systems-v14";
 var SHELL = ["./", "index.html", "privacy.html", "terms.html", "app.css", "app.js", "jobs.js", "config.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", function (e) { e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); })); self.skipWaiting(); });
 self.addEventListener("activate", function (e) { e.waitUntil(caches.keys().then(function (k) { return Promise.all(k.filter(function (n) { return n !== CACHE; }).map(function (n) { return caches.delete(n); })); })); self.clients.claim(); });

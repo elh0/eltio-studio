@@ -18,6 +18,9 @@
   <span class="nav-l"><i class="dot" aria-hidden="true"></i><span class="lab" id="clock">London 00:00</span></span>
   <a class="mark" href="#top" aria-label="Systems, home"><span>S</span><span style="--g:.08em">y</span><span style="--g:.36em">st</span><span style="--g:.14em">e</span><span style="--g:.42em">ms</span></a>
   <span class="nav-r"><a class="lab nav-price" href="#prices">Prices</a><a class="as" href="#who" id="asBtn" aria-label="Change who you are"><span class="lab">As</span> <b id="asName">Producer</b></a><a class="pill sm" href="../systems-app/">Try it</a></span>
+  <nav class="jump" id="jump" aria-label="On this page"><div class="jump-in">
+  <a href="#signoff">Sign-off</a><a href="#dash">Dashboard</a><a href="#rates">Rates</a><a href="#invoices">Invoices</a><a href="#easy">How easy</a><a href="#day">On set</a><a href="#callsheet">Call sheets</a><a href="#passport">Crew</a><a href="#clients">Clients</a><a href="#prices">Prices</a><a href="#faq">Questions</a>
+</div></nav>
 </header>
 
 <main>
@@ -55,33 +58,65 @@
     </div>
   </section>
 
-  <!-- 1b. INBOX: back to back jobs, sorted from your email -->
+  <!-- 1c. ONE SIGN-OFF: timesheet and invoice approved together, in a set order -->
+  <section class="sgn" id="signoff">
+    <div class="sgn-copy">
+      <p class="lab">One sign-off · commercials, film and TV</p>
+      <h2 class="h2" id="sgH">Timesheet and invoice. One tap.</h2>
+      <p id="sgP">Timesheet, invoice and approval in one app.</p>
+    </div>
+    <div class="card sg" id="sg"></div>
+  </section>
+
   <!-- 1b. TRY IT: the dashboard it opens on (diary + offers for crew, the shoot for producers) -->
   <section class="dash" id="dash">
     <div class="card db" id="db"></div>
     <div class="dash-copy">
       <p class="lab">Try it free · opens on your dashboard</p>
       <h2 class="h2" id="dbH">Open it. Your week's already there.</h2>
-      <p id="dbP">Try it free and it opens on your own dashboard: the next two weeks, the holds you're on and the offers waiting. Tap accept and it's booked.</p>
+      <p id="dbP">Your fortnight, your holds, and offers from real people.</p>
       <a class="pill" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
     </div>
   </section>
 
-  <!-- 1c. ONE SIGN-OFF: timesheet and invoice approved together, in a set order -->
-  <section class="sgn" id="signoff">
-    <div class="sgn-copy">
-      <p class="lab">One sign-off · commercials, film and TV</p>
-      <h2 class="h2" id="sgH">Timesheet and invoice. One tap.</h2>
-      <p id="sgP">Your timesheet goes up the chain in order, HoD then PM then producer. Once it's signed off, your invoice is drafted from it. No timecard in one app and invoices in another.</p>
+  <!-- 1d. RATES: every grade's day rate built in -->
+  <section class="rates" id="rates">
+    <div class="rt-copy">
+      <p class="lab">Rate cards · APA and Pact/Bectu</p>
+      <h2 class="h2">Every rate, every grade, already in.</h2>
+      <p>Pick your grade and the day rate fills in. Change it to your deal.</p>
     </div>
-    <div class="card sg" id="sg"></div>
+    <div class="card rt" id="rt">
+      <div class="rt-c" role="radiogroup" aria-label="Rate card"><button type="button" role="radio" aria-checked="true" data-rc="APA commercials">Commercials</button><button type="button" role="radio" aria-checked="false" data-rc="Film and TV">Film and TV</button></div>
+      <label class="rt-f"><span class="lab">Your grade</span><select id="rtG" aria-label="Your grade"></select></label>
+      <div class="rt-o"><div><span class="lab">The card says</span><b id="rtCard">£480</b></div><label><span class="lab">Your deal</span><input id="rtDeal" inputmode="numeric" value="480" aria-label="Your day rate"></label></div>
+      <p class="rt-n" id="rtN">On the card.</p>
+      <p class="sp-note">Preview figures. Each is checked against the current card before launch.</p>
+    </div>
+  </section>
+
+  <!-- 1e. INVOICES: made from the timesheet, no accounts app needed -->
+  <section class="invs" id="invoices">
+    <div class="card iv" aria-hidden="true">
+      <div class="iv-h"><b>Invoice</b><span class="lab">INV-2026-014</span></div>
+      <div class="iv-r"><span>Thu 24 Oct, day rate</span><span>£480</span></div>
+      <div class="iv-r"><span>Overtime, 2 hrs at 1.25x</span><span>£120</span></div>
+      <div class="iv-r"><span>Kit, follow focus</span><span>£45</span></div>
+      <div class="iv-r t"><span>Total due</span><b>£645</b></div>
+      <div class="iv-f"><span class="lab">From your signed-off timesheet</span><span class="fmt"><i>PDF</i><i>Accountant pack</i></span></div>
+    </div>
+    <div class="iv-copy">
+      <p class="lab">Invoices</p>
+      <h2 class="h2">Invoiced from your timesheet.</h2>
+      <p>No Xero needed. One tap sends your accountant the whole year.</p>
+    </div>
   </section>
 
   <section class="inbox" id="inbox">
     <div class="ib-copy">
       <p class="lab">Your inbox</p>
       <h2 class="h2">Back to back, still on top.</h2>
-      <p id="ibP">Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.</p>
+      <p id="ibP">Your work email, sorted into diary, timesheets and invoices.</p>
       <p class="ib-sum" id="ibSum">Every email, sorted</p>
       <p class="sp-note">Rolling out with the pilot. Nothing is ever sent without you.</p>
     </div>
@@ -148,7 +183,6 @@
         <div class="shadow"></div>
       </div>
     </div>
-    <p class="after">Systems does the rest: the permits counted back, the start packs chased, the balance chased, the rights tracked.</p>
   </section>
 
   <!-- 2a. THE DAY, LIVE: the night before to the end-of-day summary, on one clock -->
@@ -156,7 +190,7 @@
     <div class="day-copy">
       <p class="lab">On the day · coming next</p>
       <h2 class="h2">The whole unit, on one clock.</h2>
-      <p id="dayP">The call sheet lands and your countdown, leave-by time and turnaround check are ready before you sleep. On the day the clock runs itself. If the shoot needs to go over, everyone gets the ask at once, and anyone who wants a word gets the producer, not a group chat.</p>
+      <p id="dayP">Call, leave-by and turnaround, ready the night before.</p>
     </div>
     <div class="card dy" id="dy">
       <div class="dy-top"><span class="lab" id="dyLab">Call in</span><b id="dyClock">14:32:10</b><span class="lab" id="dyWhere">Day 1 · Canal, E2 · call 06:30</span>
@@ -172,7 +206,7 @@
     <div class="both-copy">
       <p class="lab">Same shoot, both sides · coming next</p>
       <h2 class="h2">One wrap. Everyone's paid.</h2>
-      <p>The AD taps wrap once. Every crew member's timesheet and invoice is drafted from it, and the producer's check already matches, because it's the same record.</p>
+      <p>One tap at wrap drafts every timesheet and invoice.</p>
       <p class="both-tag">Wrap Thursday, paid Friday.</p>
     </div>
     <div class="card board" id="board">
@@ -188,12 +222,7 @@
     <div class="csh-copy">
       <p class="lab">Call sheets · in the pilot</p>
       <h2 class="h2">One link. Always the latest.</h2>
-      <p>Send your own call sheet as a link by WhatsApp or email. No app, no login. Post V2 and only what changed lights up, and everyone gets a ping.</p>
-      <ul class="ticks-list">
-        <li>Your PM or coordinator posts versions from an edit link. Rates stay hidden.</li>
-        <li>Schedule, risk assessment, maps and start pack live on the job, not in a group chat.</li>
-        <li>Every version is kept, so nobody had the old one. No call sheet? Build one in a minute.</li>
-      </ul>
+      <p>One link by WhatsApp or email. Only what changed lights up.</p>
     </div>
     <div class="card cs" id="cs">
       <div class="cs-top"><span class="lab">Canal promo · day 1</span><div class="cs-v" id="csV" role="tablist" aria-label="Versions"><button type="button" data-v="0">V1</button><button type="button" data-v="1">V2</button><button type="button" data-v="2" aria-selected="true">V3</button></div></div>
@@ -212,9 +241,7 @@
     <div class="pp-copy">
       <p class="lab">Crew passport · camera first</p>
       <h2 class="h2">Fill it in once. Get booked without the 10%.</h2>
-      <p>Bank, UTR, address, NI, dietary and next of kin go in once and carry onto every job. Start packs fill themselves, and nobody asks your dietary again.</p>
-      <p>Choose to be found. Producers see your role, credits and whether you're Available, Pencilled or Booked, never who for. They send a hold, you tap accept. Show your rate card only if you want to.</p>
-      <p class="both-tag">Your diary's in the &pound;4. No 10%, ever.</p>
+      <p>Your details go in once. Producers find you, and you keep the 10%.</p>
       <p class="sp-note">The directory opens with camera first: ACs, loaders and DITs. <a href="../systems-app/?as=camera">Join as camera &rarr;</a></p>
     </div>
   </section>
@@ -236,8 +263,8 @@
       <p class="sp-note">10% is a typical diary commission. Check your own terms.</p>
     </div>
     <div class="card offer" id="offer">
-      <div class="of-n" id="ofN"><span class="lab">Systems · now</span><b>Hold: Thu 24 Oct</b><span>1st AC on a car commercial, 2 days. Call sheet comes the night before.</span>
-        <div class="of-b"><button class="pill red" type="button" id="ofYes">Accept</button><button class="pill" type="button" id="ofNo">Not free</button></div></div>
+      <div class="of-n" id="ofN"><span class="of-p"><i class="av" style="--h:205">TH</i><span><b>Tom, Northlight Films</b><span class="lab">just now</span></span></span><span>"Hey, this one just popped in. 1st AC on a car commercial, Thu 24 and Fri 25. Free?"</span>
+        <div class="of-b"><button class="pill red" type="button" id="ofYes">I'm in</button><button class="pill" type="button" id="ofNo">Not this time</button></div></div>
       <div class="of-d" id="ofD" aria-live="polite">
         <span class="lab">Your diary</span>
         <div class="of-r"><span>Tue 22</span><span class="q">Free</span></div>
@@ -272,8 +299,7 @@
     <div class="cl-copy">
       <p class="lab">Your clients</p>
       <h2 class="h2">The client says yes in one tap.</h2>
-      <p>The agency asks for an extra on set. Cost it, send it from your phone, and they approve without a login. It's logged to the budget, so the balance invoice has no surprises.</p>
-      <p class="human"><i></i>Systems drafts. You send. Every message goes out from your own email, in your words.</p>
+      <p>Cost the extra on set. They approve without a login.</p>
     </div>
     <div class="cr" id="cr">
       <div class="cr-ask">“Any chance we can grab the canal shot after lunch?”<span class="lab">Agency producer · 14:20</span></div>
@@ -294,7 +320,7 @@
   <section class="more">
     <div class="more-h">
       <h2 class="h2">The rest is there when you need it.</h2>
-      <p>Tap one to see what it does.</p>
+      
     </div>
     <div class="chips" id="chips" role="tablist" aria-label="Features"></div>
     <div class="chip-out" id="chipOut" aria-live="polite"></div>
@@ -315,10 +341,10 @@
       <p class="lab">Where your work lives</p>
       <h2 class="h2">Kept for you. Out in a tap.</h2>
       <div class="dv">
-        <div class="dv-c" id="dvCrew"><span class="lab">Crew · your Google Drive</span><b>Your work dashboard.</b><p>Bookings, holds, invoices and timesheets live in your own Google Drive and feed the app. You never need to open Drive. Systems can only open the files it made.</p></div>
-        <div class="dv-c" id="dvProd"><span class="lab">Producers · hosted for you</span><b>Nothing to manage.</b><p>Your jobs, crew and money run on our servers. No sheets to set up or look after, and everyone on the job sees the same thing.</p></div>
+        <div class="dv-c" id="dvCrew"><span class="lab">Crew · your Google Drive</span><b>Your work dashboard.</b><p>In your own Google Drive. You never need to open it.</p></div>
+        <div class="dv-c" id="dvProd"><span class="lab">Producers · hosted for you</span><b>Nothing to manage.</b><p>On our servers. Nothing to set up.</p></div>
       </div>
-      <p class="dv-x"><span class="lab">Export from the app</span><span class="fmt"><i>CSV</i><i>Excel</i><i>PDF</i></span><span class="q">For your accountant, Xero or FreeAgent. Leave whenever you like and it all comes with you.</span></p>
+      <p class="dv-x"><span class="lab">Export from the app</span><span class="fmt"><i>CSV</i><i>Excel</i><i>PDF</i></span><span class="q">Leave whenever you like. It all comes with you.</span></p>
     </div>
   </section>
 
@@ -326,7 +352,7 @@
   <section class="price" id="prices">
     <div class="pr-h">
       <h2 class="h2">Cheap to start. Add what you need.</h2>
-      <p>Pick a plan, then add packs as the work grows. Monthly, cancel any month.</p>
+      <p>Monthly. Cancel any month.</p>
     </div>
     <div class="pr-plans" id="prPlans" role="radiogroup" aria-label="Plans">
       <button class="plan" data-p="crew" role="radio" aria-checked="false"><span class="lab">Crew</span><b>Free</b><span class="per">overtime and timesheets, every job</span><span class="inc">&pound;4 a month adds inbox sorting, invoices, chasing and your diary. No 10%, ever.</span></button>
@@ -365,6 +391,8 @@
       <details><summary>What about my agent?</summary><p>Keep them. Give your agent a link and they manage your holds and offers in Systems, while you see everything as it lands.</p></details>
       <details><summary>Is it a diary service?</summary><p>It does the diary part: availability, holds, offers and clash warnings. It's a flat &pound;4 a month with no commission, ever. Keep your agent if you have one and give them a link to manage your holds.</p></details>
       <details><summary>Who can see my passport?</summary><p>Nobody, until you choose to be found. Producers then see your role, credits and whether you're free. Bank, NI, address and dietary are only shared with a job you've accepted.</p></details>
+      <details><summary>Are the rates built in?</summary><p>Yes. Every grade's day rate from the APA commercials card and the Pact/Bectu film and TV cards. Pick your grade and it fills in, then change it to your own deal.</p></details>
+      <details><summary>Do I still need Xero or FreeAgent?</summary><p>Not to invoice. Systems makes your invoice from your signed-off timesheet and exports a year's pack for your accountant. If you file quarterly under Making Tax Digital, link Xero, QuickBooks or FreeAgent and it all flows across.</p></details>
       <details><summary>Commercials, film or TV?</summary><p>All three. Each job carries its own terms: APA for commercials, Pact/Bectu for film and TV drama, or your own flat rate. Long shoots run week by week, with timesheets and invoices signed off each week.</p></details>
       <details><summary>How do approvals work?</summary><p>The order is set once per job, for example HoD, then PM, then producer. Each person gets one link and taps Approve or Send back with a note. No logins. When the timesheet is signed off, the invoice is drafted from it and approved in the same tap.</p></details>
       <details><summary>What does it cost?</summary><p>Overtime and timesheets are free for crew. Crew Pro is &pound;4 a month, producers &pound;19, companies &pound;59, with packs on top only if you want them. A producer's first real job is free, and trying it with sample data needs no card.</p></details>

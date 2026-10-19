@@ -319,3 +319,4 @@ h3{font:500 19px/1.2 var(--disp)}
 .cf-in::placeholder{color:var(--q)}
 .cf-add{display:flex;gap:8px}.cf-add input{flex:1;min-width:0;border:0;padding:11px 14px;border-radius:12px;background:#20201E;outline:none;color:var(--fg)}
 .offer-r .mi{justify-self:start;padding:4px 0 0;font-size:13px;color:var(--fg);text-decoration:underline;text-underline-offset:3px;background:none;border:0;cursor:pointer}
+.exp{display:flex;gap:8px}.exp .btn{flex:1}

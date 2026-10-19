@@ -603,8 +603,31 @@ function more() {
     (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-features><span>Everything Systems runs</span><span class="q">26</span><span class="sub">Advance invoices, crew checks, permits, rights, deliverables, the books.</span></button><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
     '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
-    '<div class="part">Your data</div><p class="q">Everything is in one Google Sheet in your Drive, which you own and can edit or delete. Eltio can only see files this app made, and keeps no copy. Nothing is ever sent for you: drafts open in your own email.</p>' +
+    '<div class="part">Where your work lives</div>' + (roleKey() === "Producer"
+      ? '<div class="rows"><div class="row static"><span>Hosted for you</span><span class="tag ok">Nothing to manage</span><span class="sub">Your jobs, crew and money run on Eltio\'s servers. No sheets to set up or look after, and everyone on the job sees the same thing.</span></div></div>'
+      : '<div class="rows"><div class="row static"><span>Your work dashboard</span><span class="tag ok">In your Google Drive</span><span class="sub">Bookings, holds, invoices and timesheets live in your own Google Drive and feed this app. You never need to open Drive. Eltio can only see files this app made, and keeps no copy.</span></div></div>') +
+    '<div class="part">Export</div><div class="exp"><button class="btn" data-export="csv">CSV</button><button class="btn" data-export="xls">Excel</button><button class="btn" data-export="pdf">PDF</button></div><p class="q">For your accountant, Xero or FreeAgent. Excel has a tab each for bookings, invoices, expenses and timesheet days. Nothing is ever sent for you: drafts open in your own email.</p>' +
     '<div class="acts"><button class="btn" data-signout>' + (mode === "demo" ? "Leave sample data" : "Sign out") + "</button>" + (mode === "demo" ? '<button class="lnk" data-resetdemo>Reset sample data</button>' : "") + "</div>" + '<p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>';
+}
+
+/* ---------- export: CSV, Excel and PDF, made in the browser ---------- */
+function rowsOf(t) { return (D[KEY[t]] || []).map(function (r) { return TABS[t].map(function (c) { return r[c] == null ? "" : String(r[c]); }); }); }
+function saveFile(name, type, body) { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([body], { type: type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+function stamp() { return "eltio-systems-" + iso(today()); }
+function exportCSV() { var q = function (v) { return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; saveFile(stamp() + "-bookings.csv", "text/csv", [TABS.Bookings].concat(rowsOf("Bookings")).map(function (r) { return r.map(q).join(","); }).join("\n")); }
+/* Excel 2003 XML: opens in Excel, Numbers and Google Sheets, one worksheet per tab. */
+function exportXLS() {
+  var x = function (v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+  var ws = Object.keys(KEY).map(function (t) { return '<Worksheet ss:Name="' + t + '"><Table>' + [TABS[t]].concat(rowsOf(t)).map(function (r) { return "<Row>" + r.map(function (v) { var n = v !== "" && !isNaN(v) && !/^0\d/.test(v); return '<Cell><Data ss:Type="' + (n ? "Number" : "String") + '">' + x(v) + "</Data></Cell>"; }).join("") + "</Row>"; }).join("") + "</Table></Worksheet>"; }).join("");
+  saveFile(stamp() + ".xls", "application/vnd.ms-excel", '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' + ws + "</Workbook>");
+}
+/* PDF: a clean summary page, saved with the browser's own Save as PDF. */
+function exportPDF() {
+  var up = D.bookings.slice().sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+  var h = '<h1>' + esc(D.settings.name || "Systems") + '</h1><p>Exported ' + nice(iso(today())) + '</p><h2>Bookings</h2><table><tr><th>Date</th><th>Job</th><th>For</th><th>Status</th><th>Rate</th></tr>' + up.map(function (b) { return "<tr><td>" + niceRange(b.start, b.end) + "</td><td>" + esc(b.production) + "</td><td>" + esc(b.client) + "</td><td>" + esc(b.status) + "</td><td>£" + esc(b.rate) + "</td></tr>"; }).join("") + '</table><h2>Invoices</h2><table><tr><th>Number</th><th>For</th><th>Amount</th><th>Due</th><th>Paid</th></tr>' + D.invoices.map(function (v) { return "<tr><td>" + esc(v.number) + "</td><td>" + esc(v.client) + "</td><td>" + money(num(v.amount)) + "</td><td>" + nice(v.due) + "</td><td>" + (v.paid ? nice(v.paid) : "") + "</td></tr>"; }).join("") + "</table>";
+  var w = window.open("", "_blank"); if (!w) { banner("Allow pop-ups to save the PDF."); return; }
+  w.document.write('<!doctype html><meta charset="utf-8"><title>' + stamp() + '</title><style>body{font:13px/1.4 -apple-system,Helvetica,Arial,sans-serif;margin:32px;color:#111}h1{font-size:24px;margin:0}h2{font-size:15px;margin:28px 0 8px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #ddd}th{font-weight:500;color:#666}</style>' + h + "<script>onload=function(){print()}<\/script>");
+  w.document.close();
 }
 
 /* ---------- forms ---------- */
@@ -830,6 +853,7 @@ document.addEventListener("click", function (e) {
   if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
   if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
   if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
+  if (d.export) { if (d.export === "csv") exportCSV(); else if (d.export === "xls") exportXLS(); else exportPDF(); if (d.export !== "pdf") banner(d.export === "csv" ? "Bookings saved as a CSV." : "Saved as an Excel workbook."); return; }
   if (b.hasAttribute("data-offerinfo")) { openSheet(offerSheet(b.getAttribute("data-offerinfo"))); return; }
   if (b.hasAttribute("data-quick")) { var ta = $("of-msg"); if (ta) { ta.value = b.getAttribute("data-quick"); ta.focus(); } return; }
   if (b.hasAttribute("data-sendmsg")) { var m = $("bk-msg"); banner(m && m.value.trim() ? "Drafted. It's in your email drafts, ready to send." : "Write a message first."); return; }

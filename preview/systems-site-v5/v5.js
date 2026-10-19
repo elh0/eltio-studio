@@ -574,6 +574,8 @@
     bdKey = key; bdDraw();
     prPlan = key === "prod" || key === "pm" ? "producer" : "crew"; prDraw();
     dbSet(key === "prod" || key === "pm");
+    var pr = key === "prod" || key === "pm", dc = $("#dvCrew"), dp = $("#dvProd");
+    if (dc && dp) { dc.classList.toggle("on", !pr); dp.classList.toggle("on", pr); dc.parentNode.insertBefore(pr ? dp : dc, dc.parentNode.firstChild); $("#dvBar").textContent = pr ? "Hosted · your jobs" : "Your Google Drive · Work dashboard"; }
     if (R.rate) { $("#kcR").value = R.rate; kcDraw(); }
     dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();

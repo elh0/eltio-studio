@@ -274,6 +274,8 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .spot{padding-block:96px;display:grid;gap:36px}
 .sp-h{display:grid;gap:14px}
 .sp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;perspective:1400px}
+.sp-note{color:var(--q);font:400 12px/1.4 var(--mono);letter-spacing:.02em;margin-top:18px}
+#spH{max-width:22ch;text-wrap:balance}
 .sp{border-radius:18px;background:var(--ink2);box-shadow:inset 0 0 0 1px var(--hr);padding:22px;display:grid;gap:10px;align-content:start;animation:rise .5s var(--ease) both;transition:transform .5s var(--ease)}
 .sp:hover{transform:rotateX(4deg) rotateY(-4deg) translateY(-4px)}
 .sp h3{font:400 clamp(24px,2.4vw,30px)/1.08 var(--disp);letter-spacing:-.02em;text-wrap:balance}

@@ -70,7 +70,7 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 @media (max-width:900px){
   .hero{grid-template-columns:minmax(0,1fr);min-height:0;padding-block:40px 24px}
   .float{height:500px}
-  .float-in{scale:.82}
+  .float-in{scale:.85}
 }
 
 /* easy: three taps, one phone turning in 3D */
@@ -236,3 +236,29 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
   .ln,.cview,.ok-stamp,.chip-out *{animation:none}
 }
 .mob-screen .scr p{color:var(--ink);max-width:none}
+
+/* run it as */
+.who{margin-top:28px;display:grid;gap:10px}
+.who-pills{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px;scroll-padding-inline:16px}
+.who-pills::-webkit-scrollbar{display:none}
+.who-pills button{flex:none;min-height:40px;padding:0 15px;border:0;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px rgba(242,242,239,.25);color:var(--paper);font:400 15px/1 var(--body);cursor:pointer;transition:background .2s,color .2s,box-shadow .2s}
+.who-pills button:hover{box-shadow:inset 0 0 0 1px var(--paper)}
+.who-pills button[aria-checked="true"]{background:var(--tally);color:#fff;box-shadow:none}
+@media (min-width:901px){.who-pills{flex-wrap:wrap;margin-inline:0;padding-inline:0;max-width:560px}}
+.as{display:inline-flex;align-items:center;gap:8px;text-decoration:none;min-height:40px;padding:0 4px}
+.as b{font:500 15px/1 var(--body);border-bottom:1px solid rgba(242,242,239,.4);padding-bottom:2px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.as:hover b{border-color:var(--paper)}
+@media (max-width:600px){.as .lab{display:none}.as b{max-width:96px;font-size:14px}}
+/* phones: keep the floating cards inside the screen */
+@media (max-width:600px){
+  .float{height:440px}
+  .float-in{scale:.7}
+  .fl{width:300px}
+}
+.pill{white-space:nowrap}
+#who{scroll-margin-top:90px}
+@media (max-width:600px){
+  .nav{grid-template-columns:auto 1fr}
+  .nav-l{display:none}
+  .nav-r{gap:12px}
+}

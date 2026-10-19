@@ -205,24 +205,30 @@
   zo.innerHTML = '<div class="cg-zb"></div><div class="cg-zi"></div><button type="button" class="cg-zx" aria-label="Close">Close</button>';
   root.appendChild(zo);
   var zi = zo.querySelector('.cg-zi'), zopen = null, zt = null;
-  function zfit(w, h) { var pad = innerWidth < 760 ? 14 : 44, W = innerWidth - 2 * pad, H = innerHeight - 2 * pad, s = Math.min(W / w, H / h); return s; }
+  // 20:17: drawn at its full size (not a small copy blown up, so it stays sharp), and anything phone-shaped is shown
+  // in a whole phone, dark body and bezel, never as a bare crop. The move is the reverse: start shrunk onto the tile.
+  var zfrom = null;
   function zoomIn(el) {
     if (zopen) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
     var c = el.cloneNode(true); c.classList.add('cg-zc'); c.removeAttribute('loading');
     var ov = arr(el.querySelectorAll('video')).concat(el.tagName === 'VIDEO' ? [el] : []), cv = arr(c.querySelectorAll('video')).concat(c.tagName === 'VIDEO' ? [c] : []);
     cv.forEach(function (v, k) { v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.autoplay = true; try { v.currentTime = ov[k] ? ov[k].currentTime : 0; } catch (e) {} var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); });
     arr(c.querySelectorAll('img')).forEach(function (i) { i.loading = 'eager'; });
-    zi.innerHTML = ''; zi.appendChild(c);
-    zi.style.width = r.width + 'px'; zi.style.height = r.height + 'px'; zi.style.left = r.left + 'px'; zi.style.top = r.top + 'px';
-    var s = zfit(r.width, r.height), tx = (innerWidth - r.width * s) / 2 - r.left, ty = (innerHeight - r.height * s) / 2 - r.top;
-    zi.style.transition = 'none'; zi.style.transform = 'none';
+    var a = r.width / r.height, phone = a < .75, pad = innerWidth < 760 ? 18 : 44, W = innerWidth - 2 * pad, H = innerHeight - 2 * pad, k = phone ? .04 : 0;
+    var sw = Math.min(W / (1 + 2 * k), H / (1 / a + 2 * k)), sh = sw / a, b = sw * k, fw = sw + 2 * b, fh = sh + 2 * b;
+    zi.innerHTML = ''; zi.className = 'cg-zi' + (phone ? ' ph' : ''); zi.appendChild(c);
+    zi.style.padding = b + 'px'; zi.style.borderRadius = phone ? (sw * .15 + b) + 'px' : '';
+    c.style.borderRadius = phone ? (sw * .15) + 'px' : '';
+    var fx = (innerWidth - fw) / 2, fy = (innerHeight - fh) / 2;
+    zi.style.width = fw + 'px'; zi.style.height = fh + 'px'; zi.style.left = fx + 'px'; zi.style.top = fy + 'px';
+    zfrom = function (rr) { var s = rr.width / sw; return 'translate(' + (rr.left - b * s - fx).toFixed(1) + 'px,' + (rr.top - b * s - fy).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; };
+    zi.style.transition = 'none'; zi.style.transform = zfrom(r);
     zo.classList.add('on'); zopen = el; el.style.visibility = 'hidden'; hold = null;
-    requestAnimationFrame(function () { requestAnimationFrame(function () { zi.style.transition = ''; zi.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; zo.classList.add('in'); }); });
+    requestAnimationFrame(function () { requestAnimationFrame(function () { zi.style.transition = ''; zi.style.transform = 'none'; zo.classList.add('in'); }); });
   }
   function zoomOut() {
     if (!zopen) return; var el = zopen; zopen = null;
-    var r = el.getBoundingClientRect(); zi.style.left = r.left + 'px'; zi.style.top = r.top + 'px'; zi.style.width = r.width + 'px'; zi.style.height = r.height + 'px';
-    zo.classList.remove('in'); zi.style.transform = 'none';
+    zo.classList.remove('in'); zi.style.transform = zfrom(el.getBoundingClientRect());
     var done = function () { zo.classList.remove('on'); zi.innerHTML = ''; el.style.visibility = ''; zi.removeEventListener('transitionend', done); clearTimeout(zt); };
     zi.addEventListener('transitionend', done); zt = setTimeout(done, reduce ? 0 : 700);
   }

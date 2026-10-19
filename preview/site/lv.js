@@ -6,13 +6,35 @@
   try { if (window.frameElement && window.frameElement.hasAttribute('data-ghost')) return; } catch (e) {}
   var html = document.documentElement; html.classList.add('lv', 'lv' + V);
 
-  // what each project shows: a phone-shaped loop (or a wide one for Grip) and three screens to fan out
   var A = [
-    { loop: 'video/w/os-site-m', shots: ['video/w/os-app-m.jpg', 'video/w/os-site-m.jpg', 'video/w/os-sun-m.jpg'] },
-    { loop: 'video/m/1-climb', wide: true, shots: ['video/m/1-compare.jpg', 'video/m/1-climb.jpg', 'video/m/1-lidar-scan.jpg'] },
-    { loop: 'video/w/lw-site-m', shots: ['img/lw/s-camera.webp', 'img/lw/s-plan.webp', 'img/lw/s-send.webp'] },
-    { loop: 'video/w/ag-site-m', shots: ['img/ag/home-fullStack-dusk.webp', 'img/ag/home-fullStack-day.webp', 'img/ag/home-fullStack-night.webp'] },
-    { still: 'video/m/4-morning-brief.jpg', shots: ['video/m/4-jobs.jpg', 'video/m/4-morning-brief.jpg', 'video/m/4-on-set.jpg'] }
+    // 19 Oct: real app screens, clicked through one after another, each with a line saying what it is
+    { ar: '1600/739', wide: true, seq: [
+      ['img/os/s-start.webp', 'Projects and recces, each with its next good light'],
+      ['img/os/s-cam.webp', 'The sun path drawn over the live camera'],
+      ['img/os/s-portrait.webp', 'Grid, level, portrait'],
+      ['img/os/s-list.webp', 'A shot list, with the time each shot is lit']] },
+    { seq: [
+      ['img/gr/film.webp', 'Film a climb from behind, hips in frame'],
+      ['img/gr/review.webp', 'Three notes on your technique, timed to the clip'],
+      ['img/gr/notes.webp', 'Say what helped and what did not'],
+      ['img/gr/sets.webp', 'Fresh sets at the gyms you follow'],
+      ['img/gr/gyms.webp', '33 London gyms to start with']] },
+    { seq: [
+      ['video/w/lw-ar-real-m', 'The AR: point at the floor, tap, and a lamp is tagged'],
+      ['img/lw/s-camera.webp', 'Camera first, then each lamp from where it stands'],
+      ['img/lw/s-three.webp', 'Three lamps, aimed'],
+      ['img/lw/s-plan.webp', 'The plan draws itself from the scan'],
+      ['img/lw/s-send.webp', 'Out as a gaffer sheet, a plan or a text list']] },
+    { seq: [
+      ['img/ag/home-fullStack-day.webp', 'A home screen with four apps and the weather'],
+      ['img/ag/home-fullStack-dusk.webp', 'The sky follows the time of day'],
+      ['img/ag/home-fullStack-night.webp', 'Night'],
+      ['img/ag/breathe-inhale.webp', 'Three breaths to open the apps that pull at you']] },
+    { seq: [
+      ['img/sy/home.webp', 'Money first: what is in, what is owed, what needs you'],
+      ['img/sy/jobs.webp', 'Every job, bid to wrap'],
+      ['img/sy/onset.webp', 'On set, the clock runs and crew see their hours'],
+      ['img/sy/files.webp', 'Sheets built in your own Drive']] }
   ];
   var ACC = ['#FF5A1F', '#4A74FF', '#FFC21A', '#E8956A', '#4F7348'];
 
@@ -22,6 +44,11 @@
     'html.lv .eltio.alt-plx.lp .x-frame{aspect-ratio:4/5!important;overflow:hidden}',
     'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 24px 40px -22px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.06)}',
     'html.lv .lv-ph.w{aspect-ratio:698/350;border-radius:7%/14%}',
+    'html.lv .lv-ph img,html.lv .lv-ph video{position:absolute;inset:0}',
+    'html.lv .lv-ph .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-ph .lv-s.on{opacity:1}',
+    'html.lv .lv-ph video{opacity:0;transition:opacity .4s}html.lv .lv-ph .lv-vid video{opacity:1}',
+    'html.lv .lv-cap{position:absolute;left:8%;right:8%;bottom:4.5%;text-align:center;font:400 11px/1.35 ui-monospace,"Geist Mono",monospace;letter-spacing:.01em;color:rgba(20,20,18,.55);opacity:0;transform:translateY(4px);transition:opacity .5s ease .2s,transform .5s ease .2s}',
+    'html.lv .x-p.lv-play .lv-cap{opacity:1;transform:none}',
     'html.lv .lv-ph img,html.lv .lv-ph video{display:block;width:100%;height:100%;object-fit:cover}',
     'html.lv .x-frame .k2{z-index:2;transition:transform .9s cubic-bezier(.2,.8,.2,1)}',
 
@@ -70,8 +97,8 @@
     'html.lv5 .eltio.alt-plx.lp .x-txt,html.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
     'html.lv5 .x-frame .k2,html.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
     'html.lv5 .x-p.lv-on .x-frame>.k2,html.lv6 .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
-    'html.lv5 .lv-ph,html.lv6 .lv-ph{left:50%;top:50%;height:80%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:84%}',
+    'html.lv5 .lv-ph,html.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
     'html.lv5 .x-p.lv-on .lv-ph,html.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
     'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;transition:opacity .6s ease}',
@@ -82,52 +109,75 @@
     'html.lv .x-p.lv-play .lv-sp{opacity:0}',
     // each app's own opening screen, the way the app shows it (not the cover on white)
     'html.lv .lv-sp.s0{background:#0B0B0A}html.lv .lv-sp.s0 .lock{color:#F3F3F0!important;white-space:nowrap}html.lv .lv-sp.s0 .k2-rest{transform:scale(.95)!important}',
-    'html.lv .lv-sp.s1{background:#000}html.lv .lv-ph.w .lv-sp.s1 .k2-rest{transform:scale(.6)!important}',
+    'html.lv .lv-sp.s1{background:#000}html.lv .lv-sp.s1 .k2-rest{transform:scale(.7)!important}',
     'html.lv .lv-sp.s2{background:#0E0E0D}html.lv .lv-sp.s2 svg{filter:invert(1)}html.lv .lv-sp.s2 .k2-rest{transform:scale(1.25)!important}',
     'html.lv .lv-sp.s3{background:#121211}html.lv .lv-sp.s3 .ag-wm{filter:invert(1)}',
     'html.lv .lv-sp.s4{background:#F3F3F0}'
   ].join('\n');
   document.head.appendChild(css);
 
-  function ph(src, wide, cls) {
-    var d = document.createElement('span'); d.className = 'lv-ph' + (wide ? ' w' : '') + (cls ? ' ' + cls : '');
-    if (/\.(jpg|webp)$/.test(src)) { var i = new Image(); i.src = src; i.alt = ''; i.loading = 'lazy'; d.appendChild(i); }
+  function vid(src, w) {
+    var v = document.createElement('video'); v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'none';
+    ['webm', 'mp4'].forEach(function (x) { var s = document.createElement('source'); s.src = src + '.' + x; s.type = 'video/' + x; v.appendChild(s); });
+    v.addEventListener('playing', function () { w.classList.add('lv-vid'); });
+    return v;
+  }
+  function ph(a, cls) {
+    var d = document.createElement('span'); d.className = 'lv-ph' + (a.wide ? ' w' : '') + (cls ? ' ' + cls : '');
+    if (a.ar) d.style.aspectRatio = a.ar;
+    function im(src, c) { var i = new Image(); i.src = src; i.alt = ''; i.decoding = 'async'; if (c) i.className = c; d.appendChild(i); return i; }
+    if (a.seq) {
+      a.seq.forEach(function (x, k) {
+        var w = document.createElement('span'); w.className = 'lv-s' + (k ? '' : ' on'); d.appendChild(w);
+        var i = new Image(); i.src = /\.(jpg|webp)$/.test(x[0]) ? x[0] : x[0] + '.jpg'; i.alt = ''; i.decoding = 'async'; w.appendChild(i);
+        if (!/\.(jpg|webp)$/.test(x[0])) w.appendChild(vid(x[0], w));
+      });
+      d._seq = a.seq;
+    }
+    else if (a.still) im(a.still);
     else {
-      var v = document.createElement('video'); v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.preload = 'none';
-      v.poster = src + '.jpg';
-      ['webm', 'mp4'].forEach(function (x) { var s = document.createElement('source'); s.src = src + '.' + x; s.type = 'video/' + x; v.appendChild(s); });
-      d.appendChild(v);
+      im(a.loop + '.jpg'); d.appendChild(vid(a.loop, d));
     }
     return d;
   }
+
+  function play(v) { if (v.preload === 'none') { v.preload = 'auto'; v.load(); } var p = v.play(); if (p && p.catch) p.catch(function () {}); }
 
   function go() {
     var cards = [].slice.call(document.querySelectorAll('.eltio.lp .x-list .x-p'));
     if (!cards.length) return;
     cards.forEach(function (c) {
       var i = +c.getAttribute('data-i'), a = A[i], f = c.querySelector('.x-frame'); if (!a || !f) return;
-      if (V === 3) a.shots.forEach(function (s, k) { var p = ph(s, a.wide, 'f' + k); p.style.zIndex = k === 1 ? 1 : 0; f.appendChild(p); });
-      else {
-        var p = ph(a.loop || a.still, a.wide); f.appendChild(p);
-        if (V >= 5) {
-          // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
-          var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
-          if (k2) sp.appendChild(k2.cloneNode(true)); p.appendChild(sp);
-          c.style.setProperty('--k', cards.indexOf(c));
-        }
+      var p = ph(a); f.appendChild(p);
+      var cap = document.createElement('span'); cap.className = 'lv-cap'; cap.textContent = a.seq ? a.seq[0][1] : (a.cap || ''); f.appendChild(cap); c._lvCap = cap;
+      if (V >= 5) {
+        // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
+        var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
+        if (k2) sp.appendChild(k2.cloneNode(true)); p.appendChild(sp);
+        c.style.setProperty('--k', cards.indexOf(c));
       }
     });
+
+    // click through a sequence while its card plays
+    function step(c) {
+      var p = c.querySelector('.lv-ph'); if (!p || !p._seq) return;
+      var ims = p.querySelectorAll('.lv-s'), n = (p._k || 0) + 1; if (n >= ims.length) n = 0; p._k = n;
+      ims.forEach(function (i, k) { i.classList.toggle('on', k === n); var v = i.querySelector('video'); if (v) { if (k === n) play(v); else v.pause(); } });
+      c._lvCap.textContent = p._seq[n][1];
+      c._lvHold = p.querySelector('.lv-s.on video') ? 2 : 0; // the AR take gets a few beats
+    }
 
     // play a loop only while its card is on screen
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
-        var c = e.target, v = c.querySelector('video');
+        var c = e.target, v = c.querySelector('.lv-s.on video, .lv-ph>video');
         var on = e.intersectionRatio > .55;
         if (on !== c.classList.contains('lv-on')) {
           c.classList.toggle('lv-on', on); clearTimeout(c._lvT);
-          if (on) c._lvT = setTimeout(function () { c.classList.add('lv-play'); }, 1500); else c.classList.remove('lv-play');
+          clearInterval(c._lvI);
+          if (on) c._lvT = setTimeout(function () { c.classList.add('lv-play'); c._lvI = setInterval(function () { if (c._lvHold) c._lvHold--; else step(c); }, 2600); }, 1500); else c.classList.remove('lv-play');
         }
-        if (v) { if (e.intersectionRatio > .3) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause(); }
+        if (v) { if (e.intersectionRatio > .3) play(v); else v.pause(); }
       });
     }, { threshold: [0, .3, .55, .8] });
     cards.forEach(function (c) { io.observe(c); });

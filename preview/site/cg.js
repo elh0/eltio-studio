@@ -199,4 +199,39 @@
   try { sessionStorage.removeItem('cg-p'); } catch (e) {}
   if (hp && first[+hp[1]] >= 0) { history.replaceState(null, '', location.pathname + location.search); holdAt(first[+hp[1]]); } else scrollTo(0, 0);
   tick(); dbg(hp ? 'opened at ' + hp[1] : 'no project given');
+  // 18:31: tap any phone, loop or window to see it big. The piece itself grows from where it sits to fill the
+  // screen (one transform, so it is one smooth move on phones and desktop), and shrinks back on tap or Escape.
+  var zo = document.createElement('div'); zo.className = 'cg-zoom';
+  zo.innerHTML = '<div class="cg-zb"></div><div class="cg-zi"></div><button type="button" class="cg-zx" aria-label="Close">Close</button>';
+  root.appendChild(zo);
+  var zi = zo.querySelector('.cg-zi'), zopen = null, zt = null;
+  function zfit(w, h) { var pad = innerWidth < 760 ? 14 : 44, W = innerWidth - 2 * pad, H = innerHeight - 2 * pad, s = Math.min(W / w, H / h); return s; }
+  function zoomIn(el) {
+    if (zopen) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+    var c = el.cloneNode(true); c.classList.add('cg-zc'); c.removeAttribute('loading');
+    var ov = arr(el.querySelectorAll('video')).concat(el.tagName === 'VIDEO' ? [el] : []), cv = arr(c.querySelectorAll('video')).concat(c.tagName === 'VIDEO' ? [c] : []);
+    cv.forEach(function (v, k) { v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.autoplay = true; try { v.currentTime = ov[k] ? ov[k].currentTime : 0; } catch (e) {} var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); });
+    arr(c.querySelectorAll('img')).forEach(function (i) { i.loading = 'eager'; });
+    zi.innerHTML = ''; zi.appendChild(c);
+    zi.style.width = r.width + 'px'; zi.style.height = r.height + 'px'; zi.style.left = r.left + 'px'; zi.style.top = r.top + 'px';
+    var s = zfit(r.width, r.height), tx = (innerWidth - r.width * s) / 2 - r.left, ty = (innerHeight - r.height * s) / 2 - r.top;
+    zi.style.transition = 'none'; zi.style.transform = 'none';
+    zo.classList.add('on'); zopen = el; el.style.visibility = 'hidden'; hold = null;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { zi.style.transition = ''; zi.style.transform = 'translate(' + tx.toFixed(1) + 'px,' + ty.toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; zo.classList.add('in'); }); });
+  }
+  function zoomOut() {
+    if (!zopen) return; var el = zopen; zopen = null;
+    var r = el.getBoundingClientRect(); zi.style.left = r.left + 'px'; zi.style.top = r.top + 'px'; zi.style.width = r.width + 'px'; zi.style.height = r.height + 'px';
+    zo.classList.remove('in'); zi.style.transform = 'none';
+    var done = function () { zo.classList.remove('on'); zi.innerHTML = ''; el.style.visibility = ''; zi.removeEventListener('transitionend', done); clearTimeout(zt); };
+    zi.addEventListener('transitionend', done); zt = setTimeout(done, reduce ? 0 : 700);
+  }
+  root.addEventListener('click', function (e) {
+    if (zopen) { e.preventDefault(); zoomOut(); return; }
+    if (e.target.closest('a, button')) return;
+    var el = e.target.closest('.cg-ph, .cg-in > .cg-emb, .cg-elw .x-win, .cg-vid'); if (!el) return;
+    e.preventDefault(); zoomIn(el);
+  });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape' && zopen) zoomOut(); });
+  addEventListener('resize', function () { if (zopen) zoomOut(); });
 })();

@@ -127,66 +127,165 @@
   var sheet = $(".sheet");
   if (io) new IntersectionObserver(function (es) { sheet.classList.toggle("flat", es[0].isIntersecting); }, { threshold: .5 }).observe(sheet);
 
-  /* ---- run it as: the hero cards, the three taps and the wrap follow your job ---- */
-  function card(c, red) { return '<div class="fl' + (red ? " red" : "") + '" style="--z:' + c.z + ';--x:' + c.x + ';--y:' + c.y + ';--r:' + c.r + '"><div class="fl-top"><span class="lab">' + c.l + '</span><span class="tag' + (c.tc ? " " + c.tc : "") + '">' + c.t + '</span></div><span class="fl-s">' + c.s + "</span><b>" + c.b + "</b></div>"; }
+  /* ---- run it as: the whole page follows your job ---- */
+  function card(c, i) { var p = POS[i]; return '<div class="fl' + (i === 2 ? " red" : "") + '" style="--z:' + p.z + ';--x:' + p.x + ';--y:' + p.y + ';--r:' + p.r + '"><div class="fl-top"><span class="lab">' + c[0] + '</span><span class="tag' + (i === 1 ? " ok" : i === 2 ? " paper" : "") + '">' + c[1] + '</span></div><span class="fl-s">' + c[2] + "</span><b>" + c[3] + "</b></div>"; }
   var POS = [{ z: "60px", x: "-40px", y: "-150px", r: "-6deg" }, { z: "0px", x: "60px", y: "0px", r: "4deg" }, { z: "140px", x: "-20px", y: "150px", r: "-3deg" }];
-  function row(a, b, cls) { return '<div class="scr-row' + (cls ? " " + cls : "") + '"><span>' + a + "</span><b>" + b + "</b></div>"; }
+  function rows(list) { return list.map(function (r) { return '<div class="scr-row' + (r[2] ? " " + r[2] : "") + '"><span>' + r[0] + "</span><b>" + r[1] + "</b></div>"; }).join(""); }
   function scard(l, b, q) { return '<div class="scr-card"><span class="lab">' + l + "</span><b>" + b + '</b><span class="scr-q">' + q + "</span></div>"; }
   function scr(lab, body, btn, red) { return '<div class="scr"><span class="lab">' + lab + "</span>" + body + '<span class="scr-btn' + (red ? " red" : "") + '">' + btn + "</span></div>"; }
-  function wrapTap(n) { return scr("Day 2 · call 06:30", '<div class="scr-big">20:30</div><span class="scr-q c">Wrap, logged for ' + n + "</span>" + scard("On overtime", "18 crew", "Worked out at each person's band"), "Wrap", 1); }
-  var PAY = scr("Pay run · Friday", row("30 invoices match", "£21,480") + row("2 queries drafted", "−£26.25", "amber") + row("Paid in 7 days", "APA terms", "q"), "Approve the run");
-  var CREW = { gaffer: ["Gaffer", 450, 1.5, "Lighting package", 120], grip: ["Grip", 420, 1.5, "Dolly and track", 150], camera: ["1st AC", 480, 1.25, "Focus kit", 85], sound: ["Sound recordist", 520, 1.25, "Sound package", 200], art: ["Art director", 400, 1.5, "Props van", 60] };
-  var ROLES = {
-    prod: { n: "Producer", lede: "Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.",
-      cards: [{ l: "Award · 09:12", t: "Drafted", s: "Advance invoice, 50%", b: "£42,000" }, { l: "Crew invoices · 32", t: "30 match", tc: "ok", s: "Into the 7-day run", b: "£21,480" }, { l: "On set · 14:31", t: "Approved", tc: "paper", s: "The canal shot, by the agency", b: "+£5,220" }],
-      taps: [["Forward the award email.", "The 50% advance and the balance are drafted, with the dates in your calendar.", scr("Inbox · 09:12", '<p class="scr-mail">Re: Sportswear spot<br><b>We\'d love to go with you.</b></p>' + scard("Advance, 50%", "£42,000.00", "Due 7 days before the shoot"), "Send the invoice")],
-        ["Tap wrap.", "Once a day, for the whole unit. Every crew member's overtime is worked out.", wrapTap("32 crew")],
-        ["Approve the pay run.", "Every crew invoice is read and checked first. The odd one out gets a polite query.", PAY]] },
-    pm: { n: "Production manager", lede: "Permits, start packs, holds and the pay run, without keeping any of it in your head.",
-      cards: [{ l: "Start packs · 14 crew", t: "3 to chase", tc: "ok", s: "Bank, UTR, right to work", b: "11 of 14" }, { l: "Permits", t: "This week", s: "Westminster, 3 working days", b: "8 days" }, { l: "Holds · Tue, Wed", t: "Booked", tc: "paper", s: "Northbound Films, confirmed", b: "32 crew" }],
-      taps: [["Add the shoot date.", "Every permit and licence deadline is counted back from it, with the urgent ones first.", scr("Shoot in 26 days", row("Child licence", "apply now", "amber") + row("City of London", "by 29 Oct") + row("Westminster", "by 12 Nov"), "Start the applications")],
-        ["Drop in the crew list.", "Start packs go out and get chased: bank details, UTR, right to work.", scr("Start packs · 14 crew", row("Back and complete", "11") + row("Sound recordist, UTR", "chase", "amber") + row("Runner, right to work", "chase", "amber"), "Send the chasers")],
-        ["Approve the pay run.", "Every crew invoice is checked against the deal before it goes in the 7-day run.", PAY]] },
-    dir: { n: "Director", lede: "Holds from every company in one diary, with fees and your rep's cut kept straight.",
-      cards: [{ l: "12 to 14 Nov", t: "Clash", s: "Two first pencils on the 13th", b: "3 holds" }, { l: "Sportswear spot", t: "Statement", tc: "ok", s: "To you, after 20% commission", b: "£4,800" }, { l: "Awards", t: "12 days", tc: "paper", s: "Craft entry, credits drafted", b: "Enter" }],
-      taps: [["Forward the hold email.", "Every pencil from every company lands in one diary, and clashes are caught.", scr("12 to 14 Nov", row("Northbound Films", "1st · 12, 13") + row("Field &amp; Co", "1st · 13, 14", "amber") + row("Low Tide", "2nd · 14", "q"), "Ask Northbound to confirm")],
-        ["Confirm the job.", "The booking note is written and the fee statement set up, with your rep's cut.", scr("Sportswear spot", scard("To you", "£4,800.00", "Fee £6,000, rep 20%"), "Send the booking note")],
-        ["Enter the awards.", "Deadlines tracked, with credits for every job ready to paste in.", scr("Entries · 3 open", row("UK music video awards", "12 days", "amber") + row("Craft awards", "26 days") + row("European festival", "41 days", "q"), "Open the entry")]] },
-    hod: { n: "Head of department", lede: "Your whole department's hours and kit on one sheet, ready to send up.",
-      cards: [{ l: "Lighting · wrap 20:00", t: "4 crew", s: "Department total", b: "£2,172.50" }, { l: "Kit · 3 days", t: "Ready", tc: "ok", s: "Lighting package", b: "£360" }, { l: "Days 3 and 4", t: "Check", tc: "paper", s: "Rest between days", b: "7.5 hrs" }],
-      taps: [["Add your team.", "Each person's rate and band, set once for the job.", scr("Lighting · 4 crew", row("Gaffer", "£450 · 1.5x") + row("Rigging gaffer", "£400 · 1.5x") + row("Desk op, spark", "£380, £350"), "Save the team")],
-        ["Tap wrap.", "One wrap time, and every person's day is worked out at their band.", wrapTap("your team")],
-        ["Send the department sheet.", "Hours, overtime and kit hire in one sheet for the production.", scr("Lighting · Day 2", scard("Department", "£2,172.50", "4 crew, wrap 20:00"), "Send to production")]] }
+  var PAY = scr("Pay run · Friday", rows([["30 invoices match", "£21,480"], ["2 queries drafted", "−£26.25", "amber"], ["Paid in 7 days", "APA terms", "q"]]), "Approve the run");
+  var CREW_CHIPS = [["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
+  var PROD_CHIPS = [["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
+
+  /* crew jobs: a rate, a band, the kit they bring, and three things made for them */
+  var CREW = {
+    dop: { n: "DOP", plural: "DOPs", rate: 950, band: 1, kit: ["Camera package", 450], spot: [
+      ["Your camera package, hired right.", "Owner-op kit on the invoice by the day, with the insurance certificate sent with the booking note.", [["Camera package, 3 days", "£1,350"], ["Insurance cert", "sent", "q"], ["Cross-hire lenses", "PO drafted", "amber"]]],
+      ["Prep, recce and shoot days.", "Each priced at its own rate, so the recce never gets lost in the shoot days.", [["Recce, half day", "£475"], ["Prep at the rental house", "£475"], ["Shoot, 2 days", "£1,900"]]],
+      ["Book your camera team.", "Hold your 1st AC, 2nd AC and DIT under the job, and confirm them all in one go.", [["1st AC", "1st pencil", "amber"], ["2nd AC", "Booked"], ["DIT", "Booked"]]]] },
+    gaffer: { n: "Gaffer", plural: "gaffers", rate: 450, band: 1.5, kit: ["Lighting package", 120], spot: [
+      ["Your sparks on one sheet.", "Each person's rate and band, one wrap time, the department total ready to send up.", [["Gaffer, £450", "£618.75"], ["Best boy, £400", "£550.00"], ["Spark, £350", "£481.25"]]],
+      ["The genny and the cross-hire.", "Kit you own and kit you hire, each on its own line with the return date tracked.", [["Lighting package, 3 days", "£360"], ["Genny, cross-hired", "back Fri", "amber"], ["Van, 92 miles at 45p", "£41.40"]]],
+      ["Turnaround, flagged.", "A late wrap into an early call is spotted before it happens again.", [["Wrap, day 3", "23:30"], ["Call, day 4", "07:00"], ["Rest", "7.5 hrs", "amber"]]]] },
+    spark: { n: "Spark", plural: "sparks", rate: 350, band: 1.5, kit: null, spot: [
+      ["Overtime you'd have missed.", "The pre-rig, the late wrap and the late break, all worked out at your band.", [["Day rate", "£350.00"], ["Overtime, 3 hrs at 1.5x", "£157.50"], ["Late break", "£10.00"]]],
+      ["Rig days and shoot days.", "Rigging days priced at their own rate, logged as you go.", [["Rig day", "£350"], ["Shoot, 2 days", "£700"], ["De-rig", "£350"]]],
+      ["Paid in 7 days.", "APA terms say crew are paid within a week. If it slips, the chase is drafted for you.", [["INV-2026-021", "£1,567.50"], ["Due", "today", "amber"], ["Chase 1", "drafted", "q"]]]] },
+    grip: { n: "Grip", plural: "grips", rate: 420, band: 1.5, kit: ["Dolly and track", 150], spot: [
+      ["The dolly gets paid too.", "Dolly, track and the jib, each by the day, on the same invoice as your hours.", [["Dolly and track, 2 days", "£300"], ["Jib, 1 day", "£180"], ["Van, 60 miles", "£27.00"]]],
+      ["Rigging days counted.", "Car rigs and pre-rigs logged at their own rate, not lost in the shoot.", [["Car rig day", "£420"], ["Shoot, 2 days", "£840"], ["Overtime", "£157.50", "amber"]]],
+      ["Turnaround, flagged.", "Short rest between days is spotted, with a note to the production drafted.", [["Wrap, day 1", "22:00"], ["Call, day 2", "06:00"], ["Rest", "8 hrs", "amber"]]]] },
+    camera: { n: "1st AC", plural: "camera assistants", rate: 480, band: 1.25, kit: ["Focus kit", 85], spot: [
+      ["Prep day at the rental house.", "Checkout days priced and logged, so they're on the invoice, not forgotten.", [["Prep, rental house", "£480"], ["Shoot, 2 days", "£960"], ["Wrap out", "half day"]]],
+      ["Focus kit and the truck miles.", "Your kit by the day and the camera truck mileage, added for you.", [["Focus kit, 3 days", "£255"], ["Truck, 120 miles", "£54.00"], ["Parking, receipt", "£18.00"]]],
+      ["Your band, worked out.", "At your rate the band is 1.25x. Systems knows that, so the overtime is right.", [["Overtime, 2 hrs", "£120.00"], ["After midnight", "3x", "amber"], ["Late break", "£10.00"]]]] },
+    sound: { n: "Sound recordist", plural: "sound recordists", rate: 520, band: 1.25, kit: ["Sound package", 200], spot: [
+      ["Your package, on every invoice.", "Mixer, radio mics and timecode boxes hired by the day, beside your hours.", [["Sound package, 2 days", "£400"], ["Extra radio mics, 4", "£80"], ["Timecode boxes", "£40"]]],
+      ["Batteries and consumables.", "Snap the receipt and it goes on the job's invoice.", [["Batteries", "£34.50"], ["Lav tape and covers", "£21.00"], ["On INV-2026-030", "added", "q"]]],
+      ["Paid in 7 days.", "If the invoice slips past due, a polite chase is drafted in your name.", [["INV-2026-030", "£1,760.00"], ["Overdue", "3 days", "amber"], ["Chase 1", "drafted", "q"]]]] },
+    dit: { n: "DIT", plural: "DITs", rate: 450, band: 1.5, kit: ["DIT cart", 250], spot: [
+      ["The cart by the day.", "Your cart, monitors and readers on the invoice, with the hire dates tracked.", [["DIT cart, 2 days", "£500"], ["Shuttle drives, 4", "receipt"], ["Monitor, cross-hire", "£90"]]],
+      ["Offload after wrap.", "The hour you spend offloading after the unit wraps is overtime too.", [["Unit wrap", "20:00"], ["Offload done", "21:15"], ["Overtime, 1.25 hrs", "£84.38", "amber"]]],
+      ["Drives and media.", "Drives bought for the job go on as receipts, so they're paid back.", [["4TB drives, 3", "£297.00"], ["Card readers", "£45.00"], ["On the invoice", "added", "q"]]]] },
+    art: { n: "Art director", plural: "art directors", rate: 400, band: 1.5, kit: ["Props van", 60], spot: [
+      ["The float, settled.", "Every receipt snapped against the float, with what's left worked out to the penny.", [["Float issued", "£500.00"], ["Receipts, 14", "£457.90"], ["To return", "£42.10", "amber"]]],
+      ["Prep and build days.", "Prep, build, shoot and strike, each at its own rate.", [["Prep, 2 days", "£800"], ["Build day", "£400"], ["Strike", "£400"]]],
+      ["Your buyers and props team.", "Hold and book your team under the job, and send their hours up as one sheet.", [["Props buyer", "Booked"], ["Set dresser", "1st pencil", "amber"], ["Standby props", "Booked"]]]] },
+    costume: { n: "Costume designer", plural: "costume teams", rate: 400, band: 1.5, kit: ["Costume kit", 40], spot: [
+      ["Fittings, logged.", "Every fitting is prep time, logged against the job so it gets paid.", [["Fitting, lead actor", "2 hrs"], ["Fitting, 4 extras", "3 hrs"], ["Prep total", "1.5 days", "amber"]]],
+      ["Float and receipts.", "Shop on the float, snap the receipts, and the balance works itself out.", [["Float issued", "£800.00"], ["Receipts, 9", "£612.40"], ["Left", "£187.60"]]],
+      ["Returns, before the refund window shuts.", "Every item bought to return is listed with its shop and its last day.", [["Coat, Selfridges", "by 2 Nov", "amber"], ["Boots, 2 pairs", "by 5 Nov"], ["Returned", "£214.00", "q"]]]] },
+    hmu: { n: "Hair and make-up", plural: "hair and make-up artists", rate: 380, band: 1.5, kit: ["Kit fee", 35], spot: [
+      ["Your kit fee, every day.", "The kit fee goes on by the day, beside your hours.", [["Kit fee, 3 days", "£105"], ["Products, receipt", "£48.20"], ["On the invoice", "added", "q"]]],
+      ["Early calls, priced.", "A 05:00 call before the unit is an early call, and it's worked out for you.", [["Your call", "05:00"], ["Unit call", "07:00"], ["Early call, 2 hrs", "£114.00", "amber"]]],
+      ["Your assistants on one sheet.", "Book your team under the job and send their days up together.", [["Make-up assistant", "Booked"], ["Hair stylist", "1st pencil", "amber"], ["Dailies, 3", "Booked"]]]] },
+    locations: { n: "Locations manager", plural: "locations teams", rate: 400, band: 1.5, kit: null, spot: [
+      ["The permit clock.", "Every borough, Royal Parks and road closure deadline counted back from the shoot.", [["Royal Parks", "apply now", "amber"], ["Westminster", "by 12 Nov"], ["Parking bay suspension", "by 14 Nov"]]],
+      ["Fees and deposits.", "Every location fee, deposit and refund tracked per location.", [["House, NW3", "£2,500"], ["Deposit", "£500 back", "amber"], ["Unit base, car park", "£300"]]],
+      ["Letters to the neighbours.", "Drop letters drafted with dates, times and your number, ready to print.", [["Letters, 40 houses", "drafted"], ["Parking notice", "drafted"], ["Recce photos", "in Drive", "q"]]]] },
+    runner: { n: "Runner", plural: "runners", rate: 180, band: 1.5, kit: null, spot: [
+      ["Every day, logged.", "Call, lunch and wrap logged, so you know exactly what you're owed.", [["Day 1", "07:00 to 19:30"], ["Day 2", "06:30 to 21:00"], ["Overtime", "£54.00", "amber"]]],
+      ["Mileage and parking.", "Every pick-up and drop-off logged with the miles and the receipts.", [["Pick-ups, 64 miles", "£28.80"], ["Parking, receipts", "£22.00"], ["Fuel", "receipt", "q"]]],
+      ["Paid on time.", "If the invoice slips, a polite chase is drafted in your name.", [["INV-2026-004", "£464.80"], ["Due", "today", "amber"], ["Chase 1", "drafted", "q"]]]] },
+    editor: { n: "Editor", plural: "editors", rate: 450, band: 1, kit: ["Edit suite", 150], post: true, spot: [
+      ["Weeks and days.", "Weekly rates, extra days and weekends, each worked out right.", [["Offline, 2 weeks", "£4,500"], ["Extra day", "£450"], ["Saturday, 1.5x", "£675", "amber"]]],
+      ["Versions, signed off.", "Every cut and who approved it, so the last-minute v9 is a paid change.", [["v6", "agency notes"], ["v7", "approved, 14:02"], ["v8, new script", "extra day", "amber"]]],
+      ["The suite and the kit.", "Suite hire and drives on the same invoice as your weeks.", [["Suite, 10 days", "£1,500"], ["Drives, 2", "£180"], ["On the invoice", "added", "q"]]]] }
   };
-  Object.keys(CREW).forEach(function (k) {
-    var c = CREW[k], ot = 3 * (c[1] / 10) * c[2], days = 3 * c[1] + 3 * ot + 30, tot = days + c[4] * 3 + 41.4;
-    ROLES[k] = { n: c[0], crew: c, lede: "Your days, overtime, kit and miles on one invoice, worked out from the call sheet and the wrap.",
-      cards: [{ l: "Next week", t: "1st pencil", s: "Northbound Films, Tue and Wed", b: "2 days" }, { l: "Day 2 · wrap 20:30", t: c[2] + "x band", tc: "ok", s: "Overtime, 3 hrs", b: gbp2(ot) }, { l: "INV-2026-015", t: "Ready", tc: "paper", s: "Days, " + c[3].toLowerCase() + " and miles", b: gbp(Math.round(tot)) }],
-      taps: [["Log the hold.", "Pencils logged by who and when. Confirm one and the booking note is written.", scr("Next week", row("Northbound Films", "Tue, Wed") + row("Moved to 1st pencil", "today", "amber") + row("Confirm by Friday", "drafted", "q"), "Send the booking note")],
-        ["Tap wrap.", "Your overtime at your band, the late break and turnaround, worked out for you.", scr("Day 2 · call 06:30", '<div class="scr-big">20:30</div>' + scard("Overtime, 3 hrs at " + c[2] + "x", gbp2(ot), c[0] + ", £" + c[1] + " day"), "Wrap", 1)],
-        ["Send the invoice.", "Days, overtime, your " + c[3].toLowerCase() + " and the miles, on one invoice.", scr("INV-2026-015 · draft", row("3 days and overtime", gbp(Math.round(days))) + row(c[3] + ", 3 days", gbp(c[4] * 3)) + row("Mileage, 92 miles", "£41.40", "q"), "Send the invoice")]] };
-  });
-  var ORDER = ["prod", "pm", "dir", "hod", "gaffer", "grip", "camera", "sound", "art"], role = "prod";
-  try { var saved = localStorage.getItem("sys-role"); if (ROLES[saved]) role = saved; } catch (e) {}
-  var pills = $("#whoPills");
-  pills.innerHTML = ORDER.map(function (k) { return '<button type="button" role="radio" data-r="' + k + '">' + ROLES[k].n + "</button>"; }).join("");
-  function render(k) {
-    var R = ROLES[k]; role = k;
-    try { localStorage.setItem("sys-role", k); } catch (e) {}
-    $$("button", pills).forEach(function (b) { b.setAttribute("aria-checked", b.getAttribute("data-r") === k ? "true" : "false"); });
+  function crewRole(k) {
+    var c = CREW[k], hr = c.rate / 10, ot = 3 * hr * c.band, kitT = c.kit ? c.kit[1] * 3 : 0, days = 3 * c.rate + 3 * ot + 30, tot = days + kitT + 41.4;
+    var kitTxt = c.kit ? c.kit[0].toLowerCase() : "miles";
+    return { n: c.n, crew: c, h1: c.n + " admin, made easy.", lede: c.post ? "Your weeks, versions and suite hire on one invoice, with every sign-off kept." : "Your days, overtime, " + (c.kit ? kitTxt + " " : "") + "and miles on one invoice, worked out from the call sheet and the wrap.",
+      fine: "For UK crew. No card, no call, no download.",
+      cards: c.post ? [["Offline · week 2", "Booked", "Sportswear spot", "10 days"], ["v7", "Approved", "Signed off by the agency, 14:02", "Locked"], ["INV-2026-040", "Ready", "Weeks, suite and drives", gbp(4500 + 1500 + 180)]]
+        : [["Next week", "1st pencil", "Northbound Films, Tue and Wed", "2 days"], ["Day 2 · wrap 20:30", c.band + "x band", "Overtime, 3 hrs", gbp2(ot)], ["INV-2026-015", "Ready", "Days, " + kitTxt + (c.kit ? " and miles" : ""), gbp(Math.round(tot))]],
+      taps: [["Log the hold.", "Pencils logged by who and when. Confirm one and the booking note is written.", scr("Next week", rows([["Northbound Films", "Tue, Wed"], ["Moved to 1st pencil", "today", "amber"], ["Confirm by Friday", "drafted", "q"]]), "Send the booking note")],
+        c.post ? ["Log the cut.", "Every version and who signed it off, so a late change is a paid day.", scr("Sportswear spot · offline", rows([["v6", "agency notes"], ["v7", "approved", "q"], ["v8, new script", "extra day", "amber"]]), "Add the extra day")]
+          : ["Tap wrap.", "Your overtime at your band, the late break and turnaround, worked out for you.", scr("Day 2 · call 06:30", '<div class="scr-big">20:30</div>' + scard("Overtime, 3 hrs at " + c.band + "x", gbp2(ot), c.n + ", £" + c.rate + " day"), "Wrap", 1)],
+        ["Send the invoice.", "Days, overtime" + (c.kit ? ", your " + kitTxt : "") + " and the miles, on one invoice.", scr("INV-2026-015 · draft", rows([[c.post ? "2 weeks" : "3 days and overtime", gbp(c.post ? 4500 : Math.round(days))], c.kit ? [c.kit[0] + (c.post ? ", 10 days" : ", 3 days"), gbp(c.post ? 1500 : kitT)] : ["Mileage, 92 miles", "£41.40"], ["Due in 7 days", "APA terms", "q"]]), "Send the invoice")]],
+      wrap: !c.post, spot: { lab: "Made for " + c.plural, h: "Things only " + c.plural + " need.", items: c.spot }, chips: CREW_CHIPS };
+  }
+  var ROLES = {
+    prod: { n: "Producer", h1: "Production admin, made easy.", lede: "Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.",
+      fine: "For UK production companies and producers. No card, no call, no download.",
+      cards: [["Award · 09:12", "Drafted", "Advance invoice, 50%", "£42,000"], ["Crew invoices · 32", "30 match", "Into the 7-day run", "£21,480"], ["On set · 14:31", "Approved", "The canal shot, by the agency", "+£5,220"]],
+      taps: [["Forward the award email.", "The 50% advance and the balance are drafted, with the dates in your calendar.", scr("Inbox · 09:12", '<p class="scr-mail">Re: Sportswear spot<br><b>We\'d love to go with you.</b></p>' + scard("Advance, 50%", "£42,000.00", "Due 7 days before the shoot"), "Send the invoice")],
+        ["Tap wrap.", "Once a day, for the whole unit. Every crew member's overtime is worked out.", scr("Day 2 · call 06:30", '<div class="scr-big">20:30</div><span class="scr-q c">Wrap, logged for 32 crew</span>' + scard("On overtime", "18 crew", "Worked out at each person's band"), "Wrap", 1)],
+        ["Approve the pay run.", "Every crew invoice is read and checked first. The odd one out gets a polite query.", PAY]],
+      wrap: true, client: true, chips: PROD_CHIPS },
+    pm: { n: "Production manager", h1: "Production admin, made easy.", lede: "Permits, start packs, holds and the pay run, without keeping any of it in your head.",
+      fine: "For UK production companies and producers. No card, no call, no download.",
+      cards: [["Start packs · 14 crew", "3 to chase", "Bank, UTR, right to work", "11 of 14"], ["Permits", "This week", "Westminster, 3 working days", "8 days"], ["Holds · Tue, Wed", "Booked", "Northbound Films, confirmed", "32 crew"]],
+      taps: [["Add the shoot date.", "Every permit and licence deadline is counted back from it, with the urgent ones first.", scr("Shoot in 26 days", rows([["Child licence", "apply now", "amber"], ["City of London", "by 29 Oct"], ["Westminster", "by 12 Nov"]]), "Start the applications")],
+        ["Drop in the crew list.", "Start packs go out and get chased: bank details, UTR, right to work.", scr("Start packs · 14 crew", rows([["Back and complete", "11"], ["Sound recordist, UTR", "chase", "amber"], ["Runner, right to work", "chase", "amber"]]), "Send the chasers")],
+        ["Approve the pay run.", "Every crew invoice is checked against the deal before it goes in the 7-day run.", PAY]],
+      wrap: true, spot: { lab: "Made for production managers", h: "The office, without the spreadsheet.", items: [
+        ["Call sheets that log the day.", "Call times and locations are read from your call sheet, so every crew day is known.", [["Unit call", "06:30"], ["Location", "Canal, E2"], ["Crew on the sheet", "32"]]],
+        ["Holds, confirmed in writing.", "Confirm or release every pencil with one tap, and the notes go out in your name.", [["Gaffer", "Confirmed"], ["Grip", "Released", "q"], ["Sound", "1st pencil", "amber"]]],
+        ["The payroll hand-off.", "PAYE grades turned into your bureau's input file, so nobody types it twice.", [["PAYE grades", "6"], ["Deal memos signed", "6 of 6"], ["Bureau file", "ready", "amber"]]]] }, chips: PROD_CHIPS },
+    dir: { n: "Director", h1: "Director admin, made easy.", lede: "Holds from every company in one diary, with fees and your rep's cut kept straight.",
+      fine: "For UK directors. No card, no call, no download.",
+      cards: [["12 to 14 Nov", "Clash", "Two first pencils on the 13th", "3 holds"], ["Sportswear spot", "Statement", "To you, after 20% commission", "£4,800"], ["Awards", "12 days", "Craft entry, credits drafted", "Enter"]],
+      taps: [["Forward the hold email.", "Every pencil from every company lands in one diary, and clashes are caught.", scr("12 to 14 Nov", rows([["Northbound Films", "1st · 12, 13"], ["Field &amp; Co", "1st · 13, 14", "amber"], ["Low Tide", "2nd · 14", "q"]]), "Ask Northbound to confirm")],
+        ["Confirm the job.", "The booking note is written and the fee statement set up, with your rep's cut.", scr("Sportswear spot", scard("To you", "£4,800.00", "Fee £6,000, rep 20%"), "Send the booking note")],
+        ["Enter the awards.", "Deadlines tracked, with credits for every job ready to paste in.", scr("Entries · 3 open", rows([["UK music video awards", "12 days", "amber"], ["Craft awards", "26 days"], ["European festival", "41 days", "q"]]), "Open the entry")]],
+      wrap: false, spot: { lab: "Made for directors", h: "Things only directors need.", items: [
+        ["Treatments, tracked.", "Every pitch, its deadline and whether you got it, in one list.", [["Sportswear, pitch", "due Thu", "amber"], ["Bank campaign", "won"], ["Music video", "lost", "q"]]],
+        ["Fees and statements.", "Fee, rep's commission and what lands in your account, per job.", [["Director's fee", "£6,000.00"], ["Rep, 20%", "−£1,200.00"], ["To you", "£4,800.00"]]],
+        ["Credits, ready to paste.", "One credits sheet per job, for awards, Vimeo and press.", [["Credits", "24 names"], ["Music", "licensed"], ["Copied", "1 tap", "q"]]]] }, chips: CREW_CHIPS }
+  };
+  Object.keys(CREW).forEach(function (k) { ROLES[k] = crewRole(k); });
+  ROLES.hod = crewRole("gaffer");
+  var PICK = ["prod", "pm", "dir", "dop", "gaffer", "spark", "grip", "camera", "sound", "dit", "art", "costume", "hmu", "locations", "editor", "runner"];
+  var GUESS = [[/line producer|producer|exec/, "prod"], [/production (manager|coord)|coordinator|\bpm\b|\bad\b|assistant director|1st ad|first ad|script sup/, "pm"], [/dop|\bdp\b|cinematographer|director of photography|camera op|steadicam|operator/, "dop"], [/director/, "dir"], [/gaffer|best boy/, "gaffer"], [/spark|electric|rigger|lighting/, "spark"], [/grip|dolly|crane/, "grip"], [/focus|\bac\b|camera ass|clapper|loader|camera/, "camera"], [/\bdit\b|data|media/, "dit"], [/sound|boom|mixer|audio/, "sound"], [/art|design|set dress|props|buyer|construct|scenic|graphic/, "art"], [/costume|wardrobe|stylist|dresser/, "costume"], [/make|hair|hmu|mua|prosthetic/, "hmu"], [/location|unit manager|marshal/, "locations"], [/edit|colou?r|vfx|grade|post|online|motion|anim/, "editor"], [/runner|\bpa\b|assistant|driver/, "runner"]];
+  function guess(t) { t = t.toLowerCase(); for (var i = 0; i < GUESS.length; i++) if (GUESS[i][0].test(t)) return GUESS[i][1]; return "runner"; }
+  function custom(name) {
+    var base = guess(name), R = Object.assign({}, ROLES[base]), nice = name.trim().replace(/\s+/g, " ").slice(0, 32);
+    nice = nice.charAt(0).toUpperCase() + nice.slice(1);
+    R.n = nice; if (base !== "prod" && base !== "pm") R.h1 = nice + " admin, made easy.";
+    if (R.spot) R.spot = { lab: "Made for you", h: "Things a " + nice.toLowerCase() + " needs.", items: R.spot.items };
+    return R;
+  }
+
+  var pills = $("#whoPills"), other = $("#whoOther"), otherIn = $("#whoIn");
+  pills.innerHTML = PICK.map(function (k) { return '<button type="button" role="radio" data-r="' + k + '">' + ROLES[k].n + "</button>"; }).join("") + '<button type="button" role="radio" data-r="other">Something else</button>';
+  var chips = $("#chips"), out = $("#chipOut"), CH = [];
+  function pickChip(i) { var f = CH[i]; $$("button", chips).forEach(function (b, j) { b.setAttribute("aria-selected", j === i ? "true" : "false"); }); out.innerHTML = '<span class="lab">' + (f[2] ? "In the app now" : "Coming in the pilot") + "</span><h3>" + f[0] + "</h3><p>" + f[1] + "</p>"; }
+  function spotCard(it) { return '<article class="sp"><h3>' + it[0] + "</h3><p>" + it[1] + '</p><div class="sp-scr">' + rows(it[2]) + "</div></article>"; }
+  var cur0 = null;
+  function render(key, R) {
+    R = R || ROLES[key];
+    try { localStorage.setItem("sys-role", key === "other" ? "other:" + R.n : key); } catch (e) {}
+    $$("button", pills).forEach(function (b) { b.setAttribute("aria-checked", b.getAttribute("data-r") === key ? "true" : "false"); });
+    other.hidden = key !== "other";
+    var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
-    $("#lede").textContent = R.lede;
-    inner.innerHTML = R.cards.map(function (c, i) { var p = POS[i]; return card({ l: c.l, t: c.t, tc: c.tc, s: c.s, b: c.b, z: p.z, x: p.x, y: p.y, r: p.r }, i === 2); }).join("");
+    var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);
+    $("#lede").textContent = R.lede; $("#fine").textContent = R.fine;
+    inner.innerHTML = R.cards.map(card).join("");
     $("#phone .ph-screens").innerHTML = R.taps.map(function (t) { return t[2]; }).join("");
     taps.forEach(function (el, i) { $("h3", el).textContent = R.taps[i][0]; $("p", el).textContent = R.taps[i][1]; var m = $(".mob-screen", el); m.innerHTML = R.taps[i][2]; $(".scr", m).classList.add("on"); });
     setTap(cur < 0 ? 0 : cur, true);
-    var c = R.crew || CREW.gaffer; RATE = c[1]; HR = RATE / 10; BAND = c[2];
-    $("#liveWho").textContent = (R.crew ? "You, " + c[0].toLowerCase() : "Your gaffer") + " · £" + c[1] + " · APA";
+    $(".wrap").hidden = !R.wrap;
+    var c = R.crew || CREW.gaffer; RATE = c.rate; HR = RATE / 10; BAND = c.band;
+    $("#liveWho").textContent = (R.crew ? "You, " + R.n.toLowerCase() : "Your gaffer") + " · £" + c.rate + " · APA";
     $("#wrapH").textContent = R.crew ? "You wrapped late. What are you owed?" : "They wrapped late. What do you owe?";
     $("#wrapP").textContent = R.crew ? "Drag the wrap. Your overtime at your band, worked out before you invoice." : "Drag the wrap. This is how every crew invoice is checked, on APA terms, before you pay it.";
     last = RATE; drawLive();
+    $("#clients").hidden = !R.client;
+    var sp = $("#spot"); sp.hidden = !R.spot;
+    if (R.spot) { $("#spLab").textContent = R.spot.lab; $("#spH").textContent = R.spot.h; $("#spGrid").innerHTML = R.spot.items.map(spotCard).join(""); $$(".sp", sp).forEach(function (el, i) { el.style.animationDelay = i * 90 + "ms"; }); }
+    CH = R.chips; chips.innerHTML = CH.map(function (f, i) { return '<button role="tab" type="button" aria-selected="false" data-i="' + i + '">' + (f[2] ? "<i></i>" : "") + f[0] + "</button>"; }).join("");
+    $$("button", chips).forEach(function (b) { b.addEventListener("click", function () { pickChip(+b.getAttribute("data-i")); }); });
+    pickChip(0);
   }
-  $$("button", pills).forEach(function (b) { b.addEventListener("click", function () { render(b.getAttribute("data-r")); }); });
-  render(role);
-
+  $$("button", pills).forEach(function (b) { b.addEventListener("click", function () {
+    var k = b.getAttribute("data-r");
+    if (k === "other") { other.hidden = false; $$("button", pills).forEach(function (x) { x.setAttribute("aria-checked", x === b ? "true" : "false"); }); otherIn.focus(); return; }
+    render(k);
+  }); });
+  other.addEventListener("submit", function (e) { e.preventDefault(); var v = otherIn.value.trim(); if (v) render("other", custom(v)); });
+  var start = "prod";
+  try { var saved = localStorage.getItem("sys-role") || ""; if (saved.indexOf("other:") === 0) { otherIn.value = saved.slice(6); render("other", custom(saved.slice(6))); start = null; } else if (ROLES[saved] && PICK.indexOf(saved) > -1) start = saved; } catch (e) {}
+  if (start) render(start);
 })();

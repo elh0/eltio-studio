@@ -24,16 +24,19 @@
   <!-- 1. HERO: one line, one button, three cards floating in space -->
   <section class="hero">
     <div class="hero-copy">
-      <h1>Production admin, made easy.</h1>
+      <h1 id="h1">Production admin, made easy.</h1>
       <p class="lede" id="lede">Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.</p>
       <div class="acts">
         <a class="pill" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
         <a class="pill ghost" href="#easy">See how easy <span aria-hidden="true">↓</span></a>
       </div>
-      <p class="fine">For UK production companies and producers. No card, no call, no download.</p>
+      <p class="fine" id="fine">For UK production companies and producers. No card, no call, no download.</p>
       <div class="who" id="who">
         <span class="lab">Run it as</span>
         <div class="who-pills" role="radiogroup" aria-label="Your job" id="whoPills"></div>
+        <form class="who-other" id="whoOther" hidden><label class="sr" for="whoIn">Your job</label><input id="whoIn" list="jobs" placeholder="Type your job, like colourist" autocomplete="off" maxlength="40"><button class="pill sm" type="submit">Go <span aria-hidden="true">→</span></button>
+          <datalist id="jobs"><option value="Colourist"><option value="Focus puller"><option value="Steadicam operator"><option value="Best boy"><option value="Rigger"><option value="Props buyer"><option value="Set dresser"><option value="Production designer"><option value="Stylist"><option value="1st AD"><option value="Script supervisor"><option value="Production coordinator"><option value="Line producer"><option value="VFX artist"><option value="Unit driver"><option value="Location marshal"><option value="Boom operator"><option value="Wardrobe assistant"></datalist>
+        </form>
       </div>
     </div>
     <div class="float" id="float" aria-hidden="true">
@@ -147,6 +150,12 @@
       <button class="pill full" id="crBtn" type="button">Cost it</button>
       <button class="again" id="crReset" type="button" hidden>Start again</button>
     </div>
+  </section>
+
+  <!-- 4b. MADE FOR YOU: three things only this job needs -->
+  <section class="spot" id="spot" hidden>
+    <div class="sp-h"><p class="lab" id="spLab">Made for you</p><h2 class="h2" id="spH">Things only you need.</h2></div>
+    <div class="sp-grid" id="spGrid"></div>
   </section>
 
   <!-- 5. EVERYTHING ELSE: one at a time, never a wall -->

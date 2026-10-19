@@ -3,7 +3,7 @@
    width (cqi), times --cvs for a bigger or smaller word. Out & Scout the sun rises and stays, then again; Grip the
    fingertip presses the i; Lampwerk flickers on, holds, off; Aglo its sky with a small sun rising behind the word;
    Systems one word that breaks into Sy ste ms and closes. */
-.cv { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0A; container-type: size; overflow: hidden; --cvs: 1; }
+.cv { position: absolute; inset: 0; display: grid; place-items: center; color: inherit; container-type: size; overflow: hidden; --cvs: 1; }
 .cv svg { display: block; height: auto; overflow: visible; }
 /* Out & Scout */
 .cv-os .lock { font-family: "Geist", system-ui, sans-serif; font-weight: 400; letter-spacing: -.03em; word-spacing: .3em; white-space: nowrap; line-height: 1; text-transform: none; font-size: calc(4.2cqi * var(--cvs)) !important; }

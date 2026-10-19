@@ -304,4 +304,4 @@ html { -webkit-tap-highlight-color: transparent; }
    page phones and the app splash screens); here only the tile. */
 .eltio.cg .cg-logo .k2-wf, .eltio.cg .cg-logo .k2-tag { display: none !important; }
 .eltio.cg .cg-logo .x-frame:hover .k2-rest, .eltio.cg .cg-logo .k2.on .k2-rest { opacity: 1; transform: none; filter: none; }
-.eltio.cg .cg-cvt .cg-in > .cv { position: absolute; inset: 0; }
+.eltio.cg .cg-cvt .cg-in > .cv { position: absolute; inset: 0; color: #0B0B0A; }

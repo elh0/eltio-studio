@@ -235,6 +235,94 @@
         ["Credits, ready to paste.", "One credits sheet per job, for awards, Vimeo and press.", [["Credits", "24 names"], ["Music", "licensed"], ["Copied", "1 tap", "q"]]]] }, chips: CREW_CHIPS }
   };
   Object.keys(CREW).forEach(function (k) { ROLES[k] = crewRole(k); });
+  /* per-job copy from the crew pain points research: the headline, the pain, and three things only that job needs */
+  var COPY = {
+    prod: { h1: "Get paid before you pay out.", lede: "The advance drafted from the award email, what the agency owes beside what crew are owed, and every chase waiting in your Gmail drafts.",
+      pain: "Crew paid in days. Agency in weeks.", spot: [
+      ["The holdback checklist.", "Every licence, assignment and release the agency could hold the last payment over, with a request drafted to each supplier still missing one.", [["Music licence", "signed"], ["Location release, NW3", "chase drafted", "amber"], ["Talent buyout", "signed"]]],
+      ["Your cash gap, by job.", "Crew and suppliers due on short terms, next to client money due on long terms, from the invoices already checked.", [["Crew and kit, due Fri", "−£21,480"], ["Advance, received", "£42,000"], ["Balance, due 30 days", "£42,000", "amber"]]],
+      ["The cover sheet pack.", "Insurance schedule, wrap insurance and PL cover for each job in your Drive, ready to attach to permits and kit hire.", [["PL cover sheet", "in Drive"], ["Wrap insurance", "client's", "q"], ["Kit hire request", "attached"]]]] },
+    pm: { h1: "One crew list, every form.", lede: "Enter each crew member once. Their start pack, deal memo, call sheet line and invoice check are drafted from it, for you to read and send.",
+      pain: "The same crew list, typed five times.", spot: [
+      ["Start packs by status.", "A different pack for PAYE, loan-out and self-employed crew, with a status statement drafted for each contractor who needs one.", [["PAYE, 6 crew", "P45 asked"], ["Loan-out, 3", "status drafted", "amber"], ["Self-employed, 5", "sent"]]],
+      ["The borough permit clock.", "Each borough's own lead time for the permit, the bays and the drone, counted down, with the cover sheet each one needs.", [["Camden permit", "apply by Fri", "amber"], ["Bay suspension", "by 12 Nov"], ["Drone notice", "by 14 Nov"]]],
+      ["The float register.", "Who signed for which float, what's still out, and which envelopes aren't reconciled yet, across every department.", [["Art, £500", "£42.10 out", "amber"], ["Costume, £800", "settled"], ["Locations, £300", "settled"]]]] },
+    dir: { h1: "Know what each pitch cost you.", lede: "A running record of every treatment you write, what it cost and which dates you're pencilled for, with your fee invoice drafted the day a job awards.",
+      pain: "Treatments are free. Making them isn't.", spot: [
+      ["The pitch cost log.", "Hours, writers, designers and image costs against each treatment, so you see what winning the work really cost.", [["Sportswear, treatment", "3 days"], ["Designer, references", "£250", "amber"], ["Result", "won"]]],
+      ["Pencils across companies.", "Every date pencilled by every company or rep in one diary, with the release terms each one agreed.", [["Northbound Films", "1st · 12, 13"], ["Field &amp; Co", "1st · 13", "amber"], ["Low Tide", "2nd · 14", "q"]]],
+      ["The fee and the split.", "Your fee invoice and a statement of the rep's or company's share, written down before the money moves.", [["Director's fee", "£6,000.00"], ["Rep, 20%", "−£1,200.00"], ["To you", "£4,800.00"]]]] },
+    dop: { h1: "Kit and prep days, on the bill.", lede: "Your camera package and your recce, prep and tech recce days on their own lines, checked against your terms, with the invoice drafted for you.",
+      pain: "The recce and the kit get lost.", spot: [
+      ["Camera package lines.", "Body, lenses, monitoring and wireless saved with a day rate each, added for the days they were on the job.", [["Body and lenses, 3 days", "£1,350"], ["Wireless video", "£180"], ["Cross-hire zoom", "PO drafted", "amber"]]],
+      ["Every prep day, its own type.", "Recce, tech recce, pre-light, prep and grade attendance, each logged with its own day length.", [["Recce", "half day"], ["Tech recce", "1 day"], ["Grade attendance", "1 day", "amber"]]],
+      ["The kit cover sheet.", "Your insurance certificate, kit values and serials attached to each booking, so whose policy it's on is settled before the shoot.", [["Insurance cert", "attached"], ["Kit list, serials", "attached"], ["Production cover", "asked", "amber"]]]] },
+    gaffer: { h1: "Your whole crew's week, done.", lede: "Enter the unit call and wrap once, add who pre-called or went early, and every spark's timesheet and the department invoice are drafted on the right terms.",
+      pain: "A whole team, three overtime grades.", spot: [
+      ["The team timesheet.", "Each person's day built from one unit call and wrap, plus the pre-call riggers and the spark who went early.", [["Unit call, wrap", "07:00 to 20:30"], ["Rigging spark, pre-call", "05:30", "amber"], ["Spark, released", "18:00", "q"]]],
+      ["Mixed deals, one invoice.", "Your own deal and each spark's rate on one department invoice, or one invoice each if production wants them split.", [["Gaffer, own deal", "£1,856.25"], ["Best boy", "£1,650.00"], ["Sparks, 2", "£2,887.50"]]],
+      ["Lighting kit lines.", "Your lamps, distro and cable as a saved kit list, priced by the day on its own line.", [["Lamps, 3 days", "£360"], ["Distro and cable", "£90"], ["Genny, cross-hired", "back Fri", "amber"]]]] },
+    spark: { h1: "Rig day or shoot day, sorted.", lede: "Systems knows a rig day from a shoot day, catches a broken turnaround from last night's wrap, and drafts the timesheet with the rule shown on each line.",
+      pain: "Last night's wrap, this morning's call.", spot: [
+      ["Rig and shoot rates.", "Rigging, prep and shoot days each at their own rate, and the new rates if the job runs past 1 September.", [["Rig day", "£350"], ["Shoot, 2 days", "£700"], ["De-rig", "£350"]]],
+      ["The turnaround catch.", "The gap from your last wrap to your next call, measured, with any broken turnaround on the sheet and the rule it used.", [["Wrap, day 3", "23:30"], ["Call, day 4", "07:00"], ["Rest", "7.5 hrs", "amber"]]],
+      ["Your engager log.", "Who booked you and for how many days over the last 12 months, the record you need if your status is ever questioned.", [["Engagers, 12 months", "14"], ["Days worked", "126"], ["Longest booking", "9 days", "q"]]]] },
+    grip: { h1: "Your kit is part of the job.", lede: "Your dolly, track and heads on their own invoice lines, a record of the kit you supplied in your Drive, and a chase drafted if you're paid late.",
+      pain: "The dolly works as hard as you do.", spot: [
+      ["The grip kit register.", "Dollies, track, heads and cranes with serials and values, and the ones you used added to each job's invoice.", [["Dolly, 2 days", "£300"], ["Track, 40ft", "£60"], ["Remote head", "£220"]]],
+      ["Supplied kit, on record.", "A note of the substantial kit you provided on each job, filed in your Drive to back up your self-employed status.", [["Sportswear spot", "dolly, track"], ["Canal promo", "jib", "q"], ["Filed", "in Drive"]]],
+      ["Sub-hire lines.", "Kit you cross-hired from a rental house as its own line, with the hire paperwork attached.", [["Crane, cross-hire", "£450"], ["Hire note", "attached", "q"], ["Back to the house", "Mon", "amber"]]]] },
+    camera: { h1: "Camera wrap isn't your wrap.", lede: "Log the time you actually finished, not just camera wrap, and the timesheet is drafted on your own grade's overtime with the working shown.",
+      pain: "Camera wraps. You're still packing.", spot: [
+      ["Your own wrap time.", "Your wrap after de-rig and kit return, next to the unit wrap, so the difference is on the sheet.", [["Camera wrap", "20:00"], ["Your wrap", "21:10"], ["Overtime", "1.25 hrs", "amber"]]],
+      ["Overtime at your grade.", "The loader's or focus puller's own grade applied, so a shared sheet never gives everyone one multiplier.", [["Focus puller", "1.25x"], ["Loader", "1.5x"], ["After midnight", "3x", "amber"]]],
+      ["Small kit fees.", "Monitors, follow focus and batteries saved as a kit fee you can add to any day.", [["Follow focus", "£45"], ["Monitor and batteries", "£40"], ["On the invoice", "added", "q"]]]] },
+    dit: { h1: "Drives, cart and hours, billed.", lede: "Your cart, software and every drive you bought for the job on separate lines, with receipts filed in your Drive and the invoice drafted for you.",
+      pain: "The offload ends after everyone's gone.", spot: [
+      ["The media recharge log.", "Each drive and shuttle you bought, with its receipt, added to the invoice as a recharge.", [["4TB drives, 3", "£297.00"], ["Shuttles, 2", "£180.00"], ["Receipts", "in Drive", "q"]]],
+      ["Cart and software.", "Your cart, monitoring and software as a daily kit line, apart from your labour.", [["DIT cart, 2 days", "£500"], ["Grading software", "£60"], ["Monitor, cross-hire", "£90", "amber"]]],
+      ["The data wrap.", "When the last backup finished after unit wrap, so the extra time is on your sheet.", [["Unit wrap", "20:00"], ["Last backup", "21:15"], ["Overtime", "1.25 hrs", "amber"]]]] },
+    sound: { h1: "Every channel on every invoice.", lede: "Build your kit package once, by the channel, and it goes on every invoice next to your day rate, with the cancellation terms written into the booking.",
+      pain: "Every radio mic is kit. Bill it.", spot: [
+      ["Your package, by the channel.", "Radio mics, IEMs, extra booms and timecode priced per item, and each job's kit line built from what you took.", [["Radio mics, 6 channels", "£210"], ["Extra boom", "£15"], ["Timecode boxes, 3", "£45"]]],
+      ["Your licence, shared out.", "Your radio mic licence spread across the jobs you used it on, so it's never quietly absorbed.", [["Licence, this year", "split"], ["Jobs this month", "6"], ["Per job", "added", "q"]]],
+      ["Pencils and drops, on record.", "Who pencilled you, when they released you and how much notice they gave, with the cancellation invoice drafted where the terms allow.", [["Pencil, Tue", "Field &amp; Co"], ["Released", "Mon 18:00", "amber"], ["Cancellation", "drafted", "q"]]]] },
+    editor: { h1: "Version 7 wasn't in the quote.", lede: "The rounds of notes your quote included, counted against the rounds you've done, with the extra line drafted when a cut runs past them, to send or hold.",
+      pain: "One more round of notes. Then another.", spot: [
+      ["The rounds counter.", "Rounds included and rounds used, for each cut, with a polite out-of-scope note drafted when they run over.", [["Rounds in the quote", "3"], ["Rounds done", "5", "amber"], ["Out-of-scope note", "drafted", "q"]]],
+      ["Suite and storage.", "Your own edit seat, storage or room as a weekly kit line on the same invoice.", [["Edit seat, 2 weeks", "£300"], ["Storage, 8TB", "£80"], ["On the invoice", "added", "q"]]],
+      ["The extra day log.", "Late nights and extra days against a day-rate deal, so the invoice matches the edit, not the quote.", [["Quoted", "8 days"], ["Worked", "10 days", "amber"], ["Saturday", "1 day"]]]] },
+    art: { h1: "Balance the float before wrap.", lede: "Snap each receipt at the till. It's coded to the set, your float balance is kept, and a missing one is flagged while the shop can still reprint it.",
+      pain: "Lose a receipt, pay it yourself.", spot: [
+      ["Your float, live.", "Cash plus receipts against the float you signed for, every day of the job.", [["Float signed for", "£500.00"], ["Receipts, 14", "£457.90"], ["Cash in hand", "£42.10", "amber"]]],
+      ["Receipt to set.", "Each receipt coded to the set, the item and the budget line, and filed in your Drive before the thermal paper fades.", [["Kitchen, dressing", "£86.40"], ["Bedroom, lamps", "£54.00"], ["Card slip, no items", "ask shop", "amber"]]],
+      ["Box rental and prep, flagged.", "Your box rental added to the invoice, and any prep or wrap days your contract tries to fold in, flagged.", [["Box rental, 5 days", "£150"], ["Prep, 2 days", "on the deal"], ["Strike day", "not in deal", "amber"]]]] },
+    costume: { h1: "Never miss a returns window.", lede: "Every buy logged with its receipt and the shop's returns deadline. See what's due back this week, with the paperwork kept until the last refund lands.",
+      pain: "The shoot wraps. The returns pile doesn't.", spot: [
+      ["The returns countdown.", "Each shop's returns window, and what must go back by when, even after wrap.", [["Coat, Selfridges", "by 2 Nov", "amber"], ["Boots, 2 pairs", "by 5 Nov"], ["Returned", "£214.00", "q"]]],
+      ["Every item, by character.", "Bought, on approval, worn on camera or going back, so nothing that's been on camera goes back to the shop.", [["Lead, coat", "on camera"], ["Lead, scarf", "returning", "amber"], ["Extras, 4 shirts", "on approval"]]],
+      ["Refunds, flagged.", "Any refund that lands on a personal card instead of the production card, flagged so the float still balances.", [["Refund, boots", "£89.00"], ["Landed on", "your card", "amber"], ["Float", "adjusted", "q"]]]] },
+    hmu: { h1: "Kit fee here, consumables there.", lede: "Your weekly box rate on the invoice and the products you bought for each actor on a separate claim with receipts, so neither gets swallowed by the other.",
+      pain: "Kit and products, lumped into one.", spot: [
+      ["Your weekly box rate.", "Your agreed box rate added for each week worked, pro rata for part weeks.", [["Box rate, week 1", "£175"], ["Week 2, 3 days", "£105"], ["On the invoice", "added", "q"]]],
+      ["Consumables by cast.", "Products and receipts logged against each cast member, and the claim to production drafted.", [["Lead actor", "£48.20"], ["Supporting, 2", "£31.50"], ["Claim", "drafted", "q"]]],
+      ["The extra hour, counted.", "TV drama days built on 10+1+1, so early calls and overtime start in the right place.", [["Your call", "05:00"], ["Unit call", "07:00"], ["Early call", "2 hrs", "amber"]]]] },
+    locations: { h1: "Every permit clock in one place.", lede: "Add a location and that council's permit, bay and letter deadlines count down, with the residents' letter drafted and before-and-after photos kept.",
+      pain: "Every council, its own deadline.", spot: [
+      ["The council clock.", "Permit, bay suspension, the residents' letter drop and the council copy, counted down by each council's own rules.", [["Permit, Westminster", "apply now", "amber"], ["Bay suspension", "by 12 Nov"], ["Residents' letters", "drop by 14 Nov"]]],
+      ["Before and after.", "Timestamped photos of each room or street, before and after, paired up for the reinstatement check.", [["Hallway", "before, after"], ["Kitchen", "before, after"], ["Front garden", "after missing", "amber"]]],
+      ["Fees and deposits.", "Parking paid upfront, location fees and deposits, who paid them, and which deposits are still owed back.", [["House, NW3", "£2,500"], ["Deposit", "£500 owed back", "amber"], ["Bays, 2 streets", "paid", "q"]]]] },
+    runner: { h1: "Every hour and receipt counted.", lede: "Log your call, your wrap and anything you paid for, and it becomes a timesheet with your hours written down and your receipts attached, ready to send.",
+      pain: "A day rate with no hours on it.", spot: [
+      ["Hours on a day rate.", "Your real call and wrap against a day rate with no stated hours, so the long days are on paper when you ask about overtime.", [["Day 1", "07:00 to 19:30"], ["Day 2", "06:30 to 21:00"], ["Hours, 2 days", "27.5", "amber"]]],
+      ["PAYE or invoice?", "Whether a runner booking is likely to be PAYE or invoiced, with the rule explained. Production makes the call.", [["Booking", "2 days"], ["Likely", "PAYE", "amber"], ["Start form", "drafted", "q"]]],
+      ["Receipts, paid back.", "Lunches, fuel and parking you paid for, snapped and added, so nothing comes out of your own pocket.", [["Lunch run", "£64.20"], ["Parking", "£22.00"], ["Fuel", "£18.00", "q"]]]] }
+  };
+  Object.keys(COPY).forEach(function (k) {
+    var c = COPY[k], R = ROLES[k];
+    R.h1 = c.h1; R.lede = c.lede;
+    R.spot = { lab: "Made for " + (R.crew ? R.crew.plural : k === "prod" ? "producers" : k === "pm" ? "production managers" : "directors"), h: c.pain, items: c.spot };
+  });
   ROLES.hod = crewRole("gaffer");
   var PICK = ["prod", "pm", "dir", "dop", "gaffer", "spark", "grip", "camera", "sound", "dit", "art", "costume", "hmu", "locations", "editor", "runner"];
   var GUESS = [[/line producer|producer|exec/, "prod"], [/production (manager|coord)|coordinator|\bpm\b|\bad\b|assistant director|1st ad|first ad|script sup/, "pm"], [/dop|\bdp\b|cinematographer|director of photography|camera op|steadicam|operator/, "dop"], [/director/, "dir"], [/gaffer|best boy/, "gaffer"], [/spark|electric|rigger|lighting/, "spark"], [/grip|dolly|crane/, "grip"], [/focus|\bac\b|camera ass|clapper|loader|camera/, "camera"], [/\bdit\b|data|media/, "dit"], [/sound|boom|mixer|audio/, "sound"], [/art|design|set dress|props|buyer|construct|scenic|graphic/, "art"], [/costume|wardrobe|stylist|dresser/, "costume"], [/make|hair|hmu|mua|prosthetic/, "hmu"], [/location|unit manager|marshal/, "locations"], [/edit|colou?r|vfx|grade|post|online|motion|anim/, "editor"], [/runner|\bpa\b|assistant|driver/, "runner"]];
@@ -243,7 +331,7 @@
     var base = guess(name), R = Object.assign({}, ROLES[base]), nice = name.trim().replace(/\s+/g, " ").slice(0, 32);
     nice = nice.charAt(0).toUpperCase() + nice.slice(1);
     R.n = nice; if (base !== "prod" && base !== "pm") R.h1 = nice + " admin, made easy.";
-    if (R.spot) R.spot = { lab: "Made for you", h: "Things a " + nice.toLowerCase() + " needs.", items: R.spot.items };
+    if (R.spot) R.spot = { lab: "Made for you", h: R.spot.h, items: R.spot.items };
     return R;
   }
 

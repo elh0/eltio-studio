@@ -299,3 +299,40 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-tile.cg-ink { --tile: #0E0E0D; --mk: rgba(243,243,240,.35); color: #F3F3F0; }
 .eltio.cg .cg-ink .k2, .eltio.cg .cg-ink .k2 .lock { color: #F3F3F0 !important; }
 .eltio.cg .cg-ink .cg-ag-cov, .eltio.cg .cg-ink .cg-sy-cov { color: #F3F3F0; }
+
+/* 19 Oct: animated covers, no hover wireframes. One 12 s loop per cover: the wordmark comes in on paper, holds, the
+   tile turns black and holds, then it starts again. Each project moves in its own way: Out & Scout bounces in,
+   Grip is written, Lampwerk flickers on like a lamp warming up, Aglo and Systems carry a moving sky. CSS and SVG only. */
+.eltio.cg .cg-logo .k2-wf, .eltio.cg .cg-logo .k2-tag { display: none !important; }
+.eltio.cg .cg-logo .x-frame:hover .k2-rest, .eltio.cg .cg-logo .k2.on .k2-rest { opacity: 1; transform: none; filter: none; }
+.eltio.cg .cg-cvt .cg-in > .cg-cv { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0A; background: var(--tile); animation: cvbg 12s ease-in-out infinite; }
+@keyframes cvbg { 0%, 54% { background: var(--tile); color: #0B0B0A; } 60%, 93% { background: #0B0B0A; color: #F3F3F0; } 100% { background: var(--tile); color: #0B0B0A; } }
+.eltio.cg .cg-cv svg { display: block; height: auto; overflow: visible; }
+@keyframes cvfade { 0% { opacity: 0; } 6% { opacity: 1; } 95% { opacity: 1; } 97%, 100% { opacity: 0; } }
+/* Out & Scout: the letters bounce up one by one, the sun comes up last */
+.eltio.cg .cg-cv-os .lock { font-size: 8.5cqi !important; color: currentColor; }
+.eltio.cg .cg-cv-os .lock .c { display: inline-block; white-space: pre; animation: cvup 12s cubic-bezier(.3, .9, .3, 1) infinite; animation-delay: calc(var(--i) * .06s); }
+.eltio.cg .cg-cv-os .lock .sd { display: inline-block; animation: cvsun 12s cubic-bezier(.3, .9, .3, 1) infinite; }
+@keyframes cvup { 0% { transform: translateY(1.1em); opacity: 0; } 1% { opacity: 1; } 5% { transform: translateY(-.14em); } 7.5% { transform: none; } 95% { transform: none; opacity: 1; } 97%, 100% { transform: translateY(1.1em); opacity: 0; } }
+@keyframes cvsun { 0%, 7% { transform: translateY(1.6em); opacity: 0; } 8% { opacity: 1; } 12% { transform: translateY(-.25em); } 14.5% { transform: none; } 95% { transform: none; opacity: 1; } 97%, 100% { transform: translateY(1.6em); opacity: 0; } }
+/* Grip: each letter is traced, then filled; the fingertip drops onto the i */
+.eltio.cg .cg-cv-gr svg { width: 26cqi; }
+.eltio.cg .cg-cv-gr .g { fill: #4A74FF; stroke: #4A74FF; stroke-width: 14; stroke-linejoin: round; animation: cvwrite 12s linear infinite; animation-delay: calc(var(--i) * .3s); }
+@keyframes cvwrite { 0% { stroke-dasharray: 1; stroke-dashoffset: 1; fill-opacity: 0; opacity: 1; } 7% { stroke-dasharray: 1; stroke-dashoffset: 0; fill-opacity: 0; } 10% { stroke-dasharray: 1; stroke-dashoffset: 0; fill-opacity: 1; } 95% { stroke-dasharray: 1; stroke-dashoffset: 0; fill-opacity: 1; opacity: 1; } 97%, 100% { stroke-dasharray: 1; stroke-dashoffset: 0; fill-opacity: 1; opacity: 0; } }
+.eltio.cg .cg-cv-gr .tip { animation: cvtip 12s cubic-bezier(.3, .9, .3, 1) infinite; }
+@keyframes cvtip { 0%, 10% { transform: translateY(-300px); opacity: 0; } 11% { opacity: 1; } 14% { transform: translateY(50px); } 16% { transform: none; } 95% { transform: none; opacity: 1; } 97%, 100% { transform: translateY(-300px); opacity: 0; } }
+/* Lampwerk: the letters flicker on like tubes warming up, with the yellow gel behind them */
+.eltio.cg .cg-cv-lw svg { width: 44cqi; position: relative; }
+.eltio.cg .cg-cv-lw .l { fill: currentColor; animation: cvflick 12s steps(1, end) infinite; animation-delay: calc(var(--i) * .11s); }
+@keyframes cvflick { 0% { opacity: 0; } 1.6% { opacity: .55; } 2.2% { opacity: 0; } 3% { opacity: .8; } 3.5% { opacity: .12; } 4.3% { opacity: 1; } 5.1% { opacity: .35; } 5.8% { opacity: 1; } 96.5% { opacity: 1; } 97%, 100% { opacity: 0; } }
+.eltio.cg .cg-cv-lw .glow { position: absolute; inset: 0; background: radial-gradient(ellipse 48% 42% at 50% 50%, rgba(255, 216, 74, .6), rgba(255, 216, 74, 0) 70%); opacity: .25; animation: cvglow 12s ease-in-out infinite; }
+@keyframes cvglow { 0% { opacity: 0; } 2.5% { opacity: .45; } 3.5% { opacity: .08; } 5.5% { opacity: .6; } 18% { opacity: .22; } 54% { opacity: .22; } 60% { opacity: .5; } 94% { opacity: .5; } 97%, 100% { opacity: 0; } }
+/* Aglo: a sky moves through the letters, the half sun rises */
+.eltio.cg .cg-cv-ag svg { width: 30cqi; }
+.eltio.cg .cg-cv-ag .w { animation: cvfade 12s infinite; }
+.eltio.cg .cg-cv-ag .sun { animation: cvrise 12s cubic-bezier(.2, .7, .2, 1) infinite; }
+@keyframes cvrise { 0% { transform: translateY(330px); opacity: 0; } 2% { opacity: 1; } 11% { transform: none; } 95% { transform: none; opacity: 1; } 97%, 100% { transform: translateY(330px); opacity: 0; } }
+/* Systems: the same idea, a slow sky across the whole word */
+.eltio.cg .cg-cv-sy svg { width: 46cqi; }
+.eltio.cg .cg-cv-sy .w { animation: cvfade 12s infinite; }
+@media (prefers-reduced-motion: reduce) { .eltio.cg .cg-cv, .eltio.cg .cg-cv * { animation: none !important; } }

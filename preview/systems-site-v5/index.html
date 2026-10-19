@@ -198,6 +198,36 @@
     </div>
   </section>
 
+  <!-- 2e. KEEP THE 10%: commission calculator + an offer landing -->
+  <section class="keep" id="keep">
+    <div class="keep-copy">
+      <p class="lab">For crew · do the maths</p>
+      <h2 class="h2">What does your diary cost you?</h2>
+      <div class="card kc">
+        <label class="slider"><span class="kc-l"><span class="lab">Day rate</span><b id="kcRate">&pound;450</b></span><input type="range" id="kcR" min="150" max="1200" step="10" value="450" aria-label="Day rate"></label>
+        <label class="slider"><span class="kc-l"><span class="lab">Days a year</span><b id="kcDays">120</b></span><input type="range" id="kcD" min="20" max="240" step="5" value="120" aria-label="Days worked a year"></label>
+        <div class="kc-out">
+          <div><span class="lab">A diary service, at 10%</span><b id="kcFee">&pound;5,400</b></div>
+          <div><span class="lab">Systems Crew Pro</span><b>&pound;48</b></div>
+        </div>
+        <p class="kc-keep">You keep <b id="kcKeep">&pound;5,352</b> a year.</p>
+      </div>
+      <p class="sp-note">10% is a typical diary commission. Check your own terms.</p>
+    </div>
+    <div class="card offer" id="offer">
+      <div class="of-n" id="ofN"><span class="lab">Systems · now</span><b>Hold: Thu 24 Oct</b><span>1st AC on a car commercial, 2 days. Call sheet comes the night before.</span>
+        <div class="of-b"><button class="pill red" type="button" id="ofYes">Accept</button><button class="pill" type="button" id="ofNo">Not free</button></div></div>
+      <div class="of-d" id="ofD" aria-live="polite">
+        <span class="lab">Your diary</span>
+        <div class="of-r"><span>Tue 22</span><span class="q">Free</span></div>
+        <div class="of-r"><span>Wed 23</span><span class="q">Pencil: music video</span></div>
+        <div class="of-r" id="ofDay"><span>Thu 24</span><span class="q">Free</span></div>
+        <div class="of-r" id="ofDay2"><span>Fri 25</span><span class="q">Free</span></div>
+      </div>
+      <button class="again" id="ofAgain" type="button" hidden>Play it again</button>
+    </div>
+  </section>
+
   <!-- 3. THE LIVE THING: drag the wrap -->
   <section class="wrap">
     <div class="wrap-copy">
@@ -308,6 +338,8 @@
       <details><summary>Can it read my bank statements?</summary><p>If you want. Export a CSV from your bank, drop it in your Systems folder in Google Drive, and payments are matched to invoices. There's no bank login, and you can skip it completely.</p></details>
       <details><summary>Who sees my hours and overtime?</summary><p>You, and the production you're working for on that job. Nobody else.</p></details>
       <details><summary>Is it free for crew?</summary><p>Overtime and timesheets are free on every job, for good. If a producer runs the job on Systems, you use everything on it free. &pound;4 a month adds your inbox, invoices, chasing and diary across all your jobs.</p></details>
+      <details><summary>I have a diary service. Can I keep it?</summary><p>Yes. Systems sits alongside it, and holds you take through them still show in your diary. Plenty of people try both for a while and keep whichever earns its money.</p></details>
+      <details><summary>What about my agent?</summary><p>Keep them. Give your agent a link and they manage your holds and offers in Systems, while you see everything as it lands.</p></details>
       <details><summary>Is it a diary service?</summary><p>It does the diary part: availability, holds, offers and clash warnings. It's a flat &pound;4 a month with no commission, ever. Keep your agent if you have one and give them a link to manage your holds.</p></details>
       <details><summary>Who can see my passport?</summary><p>Nobody, until you choose to be found. Producers then see your role, credits and whether you're free. Bank, NI, address and dietary are only shared with a job you've accepted.</p></details>
       <details><summary>Commercials, TV or both?</summary><p>Both. Each job carries its own terms: APA for commercials, Pact/Bectu for drama, or your own flat rate.</p></details>

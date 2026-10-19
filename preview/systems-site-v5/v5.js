@@ -489,6 +489,24 @@
   }).join("");
   $("#dirRows").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b || b.classList.contains("sent")) return; b.classList.add("sent"); b.textContent = "Hold sent"; });
 
+
+  /* ---- keep the 10%: drag your rate and days ---- */
+  function gbp0(n) { return "\u00a3" + Math.round(n).toLocaleString("en-GB"); }
+  function kcDraw() {
+    var r = +$("#kcR").value, d = +$("#kcD").value, fee = r * d * .1;
+    $("#kcRate").textContent = gbp0(r); $("#kcDays").textContent = d; $("#kcFee").textContent = gbp0(fee); $("#kcKeep").textContent = gbp0(Math.max(0, fee - 48));
+    $("#kcR").setAttribute("aria-valuetext", gbp0(r)); $("#kcD").setAttribute("aria-valuetext", d + " days");
+  }
+  $("#kcR").addEventListener("input", kcDraw); $("#kcD").addEventListener("input", kcDraw); kcDraw();
+  function ofTake(yes) {
+    $("#offer").classList.add("took"); $("#ofAgain").hidden = false;
+    ["#ofDay", "#ofDay2"].forEach(function (id, i) { var r = $(id); r.classList.add("in"); r.style.animationDelay = (reduce ? 0 : 200 + i * 120) + "ms"; $(".q", r).textContent = yes ? "Booked: car commercial" : "Free"; if (!yes) r.classList.remove("in"); });
+  }
+  $("#ofYes").addEventListener("click", function () { ofTake(true); });
+  $("#ofNo").addEventListener("click", function () { ofTake(false); });
+  $("#ofAgain").addEventListener("click", function () { $("#offer").classList.remove("took"); $("#ofAgain").hidden = true; ["#ofDay", "#ofDay2"].forEach(function (id) { var r = $(id); r.classList.remove("in"); $(".q", r).textContent = "Free"; }); });
+  $$(".keep-copy > *").forEach(function (el, i) { watch(el, i * 70); }); watch($("#offer"), 120);
+
   /* ---- prices: a plan, then packs on top ---- */
   var PLANS = { crew: 0, producer: 19, company: 59 };
   var PACKS = {
@@ -522,13 +540,15 @@
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
     prPlan = key === "prod" || key === "pm" ? "producer" : "crew"; prDraw();
+    if (R.rate) { $("#kcR").value = R.rate; kcDraw(); }
     dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();
     $("#ibP").textContent = (key === "prod" || key === "pm") ? "Systems reads your work email and turns it into the job. Awards, crew invoices, client extras and council questions are sorted as they land. You only see what needs you, with the reply already drafted." : "Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.";
     var tk = key === "other" ? guess(R.n) : key;
     $$('a[href*="systems-app/"]').forEach(function (l) { if (!/\.html/.test(l.getAttribute("href"))) l.href = l.href.split("?")[0] + "?as=" + tk; });
-    var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);
-    $("#lede").textContent = R.lede; $("#fine").textContent = R.fine;
+    var gk = key === "other" ? guess(R.n) : key, crewH = ["prod", "pm", "dir"].indexOf(gk) < 0, H1 = crewH ? "Your diary. Minus the 10%." : R.h1;
+    var h1 = $("#h1"); if (h1.textContent !== H1) { h1.textContent = H1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", H1.length > 26);
+    $("#lede").textContent = crewH ? "Holds, offers and availability in one place. Producers find you, you tap accept. " + R.h1 : R.lede; $("#fine").textContent = R.fine;
     inner.innerHTML = R.cards.map(card).join("");
     $("#phone .ph-screens").innerHTML = R.taps.map(function (t) { return t[2]; }).join("");
     taps.forEach(function (el, i) { $("h3", el).textContent = R.taps[i][0]; $("p", el).textContent = R.taps[i][1]; var m = $(".mob-screen", el); m.innerHTML = R.taps[i][2]; $(".scr", m).classList.add("on"); });

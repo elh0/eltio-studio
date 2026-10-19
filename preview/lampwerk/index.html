@@ -338,6 +338,37 @@ input[type=range]:disabled { opacity: .35; }
 .sh-toast::before { content: "> "; color: var(--gel); }
 #sh-send:disabled { opacity: .5; }
 @media (max-width: 560px) { .slot { margin: 0 -6px; } .stamp { right: 12px; bottom: 40px; font-size: 9px; } .tk-track span { padding: 12px 18px; font-size: 12px; } }
+/* ---------- price ---------- */
+.pr-top { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.pr-top .lead { max-width: 34em; margin: 0; color: var(--tm); }
+.pr-top .segs { margin: 0; }
+.pr-top .segs small { color: var(--gel); margin-left: 6px; font: 500 11px var(--mono); }
+.tiers { display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 12px; align-items: stretch; }
+.tier { position: relative; background: var(--p1); border: 1px solid var(--ln); border-radius: 10px; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.tier .hd { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--ln); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--tm); }
+.tier .hd .led { width: 8px; height: 8px; border-radius: 50%; background: var(--p3); box-shadow: inset 0 0 0 1px var(--ln2); }
+.tier .bd { padding: 18px 14px 14px; display: grid; gap: 14px; flex: 1; align-content: start; position: relative; z-index: 1; }
+.tier .amt { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.tier .amt b { font: 500 clamp(44px, 9vw, 64px)/.95 var(--sans); letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
+.tier .amt > span { color: var(--tm); font-size: 14px; }
+.tier .note { margin: 0; color: var(--tm); font-size: 14px; line-height: 1.5; }
+.tier ul { list-style: none; margin: 0; padding: 0; }
+.tier li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 9px 0; border-top: 1px solid var(--ln); font-size: 14px; line-height: 1.35; }
+.tier li .n { font: 500 11px/1.6 var(--mono); color: var(--tf); }
+.tier .ft { padding: 12px 14px; border-top: 1px solid var(--ln); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; color: var(--tm); font-size: 13px; position: relative; z-index: 1; }
+.tier .ft .btn { padding: 10px 14px; font-size: 14px; }
+.tier.pro { border-color: rgba(255,194,26,.35); }
+.tier.pro .hd { color: var(--t); }
+.tier.pro .hd .led { background: var(--gel); box-shadow: 0 0 10px var(--gel), 0 0 2px var(--gel); }
+.tier.pro li .n { color: var(--gel); }
+.tier.pro .btn { background: var(--gel); color: #0B0B0A; }
+.tier.pro::before { content: ""; position: absolute; left: 50%; top: -40px; width: 140%; height: 120%; transform: translateX(-50%); background: radial-gradient(50% 60% at 50% 0%, rgba(255,194,26,.2), rgba(255,194,26,.05) 55%, rgba(255,194,26,0) 75%); opacity: .55; transition: opacity .6s var(--ease); pointer-events: none; }
+.tier.pro.lit::before { opacity: 1; }
+.tier .amt b .ct { display: inline-block; transition: opacity .25s, transform .35s var(--ease); }
+.tier .amt b .ct.sw { opacity: 0; transform: translateY(-6px); }
+.pr-small { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 14px; color: var(--tm); font-size: 13px; }
+.pr-small a { color: var(--t); }
+@media (max-width: 900px) { .tiers { grid-template-columns: 1fr; } .tier.pro { order: -1; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } html { scroll-behavior: auto; } .paper .rv { opacity: 1; transform: none; } .draw use { stroke-dashoffset: 0; } }
 </style>
 
@@ -351,7 +382,7 @@ input[type=range]:disabled { opacity: .35; }
 
 <header class="top">
   <a class="brand" href="#plot" aria-label="Lampwerk"><svg class="mark" style="height:22px;width:14.8px;color:var(--t)" viewBox="0 0 648 960" aria-hidden="true"><use href="#mark"/></svg><span class="wm">Lampwerk</span></a>
-  <nav class="tabs" id="tabs"><a href="#plot" class="cur">Plot</a><a href="#ar">AR</a><a href="#features">Features</a><a href="#compare">Compare</a><a href="#sheet">Sheet</a></nav>
+  <nav class="tabs" id="tabs"><a href="#plot" class="cur">Plot</a><a href="#ar">AR</a><a href="#features">Features</a><a href="#compare">Compare</a><a href="#sheet">Sheet</a><a href="#price">Price</a></nav>
   <span class="sp"></span>
   <span class="stat mono"><i></i>Offline ready · 230 V</span>
   <a class="btn ghost" href="support/">Support</a>
@@ -482,6 +513,53 @@ input[type=range]:disabled { opacity: .35; }
       </div>
     </div>
   </div>
+</section>
+
+<section class="sec" id="price">
+  <div class="sh"><h2>Price</h2><span class="tag">Plot free · Pro for the send</span></div>
+  <div class="pr-top">
+    <p class="lead">Plotting by hand is free, with no limit on plots or lamps. Pro is for the jobs where the plan leaves your phone: the gaffer sheet, AR tagging and the live link.</p>
+    <div class="segs" id="pr-bill" role="group" aria-label="Billing"><button type="button" data-b="yr" aria-pressed="true">Yearly<small>−42%</small></button><button type="button" data-b="mo" aria-pressed="false">Monthly</button></div>
+  </div>
+  <div class="tiers">
+    <article class="tier">
+      <div class="hd"><span>Free</span><span class="led" aria-hidden="true"></span></div>
+      <div class="bd">
+        <div class="amt"><b>£0</b><span>for good</span></div>
+        <p class="note">Everything you need to plot a set by hand.</p>
+        <ul>
+          <li><span class="n">01</span>Hand plotting, unlimited plots</li>
+          <li><span class="n">02</span>The full lamp library</li>
+          <li><span class="n">03</span>Live lux, amps and circuits</li>
+          <li><span class="n">04</span>Landscape plan view</li>
+        </ul>
+      </div>
+      <div class="ft">No account to make.</div>
+    </article>
+    <article class="tier pro lit" id="pr-pro">
+      <div class="hd"><span>Pro</span><span class="led" aria-hidden="true"></span></div>
+      <div class="bd">
+        <div class="amt"><b><span class="ct" id="pr-amt">£34.99</span></b><span id="pr-per">a year, about £2.92 a month</span></div>
+        <p class="note">Try it free for 7 days. Cancel any time in your Apple settings.</p>
+        <ul>
+          <li><span class="n">01</span>Gaffer sheet as a PDF, an image or text</li>
+          <li><span class="n">02</span>AR tagging: scan the set, tag the lamps</li>
+          <li><span class="n">03</span>Live link: the gaffer opens it, no app</li>
+          <li><span class="n">04</span>New-set layout from the talent mark and camera</li>
+        </ul>
+      </div>
+      <div class="ft"><a class="btn" href="mailto:hello@eltio.studio?subject=Lampwerk%20beta">Ask for a test invite</a><span>7 days free</span></div>
+    </article>
+    <article class="tier">
+      <div class="hd"><span>Beta testers</span><span class="led" aria-hidden="true"></span></div>
+      <div class="bd">
+        <div class="amt"><b>£0</b><span>first year of Pro</span></div>
+        <p class="note">Gaffers and DPs on the beta get their first year of Pro free when Lampwerk launches. The app tells you how to claim it.</p>
+      </div>
+      <div class="ft"><a class="btn ghost" href="mailto:hello@eltio.studio?subject=Lampwerk%20beta">Join the beta</a></div>
+    </article>
+  </div>
+  <div class="pr-small"><span>Kit hire house or production company? <a href="mailto:hello@eltio.studio?subject=Lampwerk%20team%20price">Ask about a team price</a></span></div>
 </section>
 
 <section class="sec" id="end">
@@ -704,7 +782,7 @@ function drawSheet(){var on=S.items.filter(isOn);$("#sh-shot").textContent="SETU
 if("IntersectionObserver" in window&&!RM){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){Array.prototype.forEach.call(e.target.querySelectorAll(".rv"),function(r,i){r.style.transitionDelay=(i*.12)+"s"});e.target.classList.add("in");io.disconnect()}})},{threshold:.25});io.observe($("#paper"))}else $("#paper").classList.add("in");
 
 /* ---------- tabs follow the scroll ---------- */
-var secs=["plot","ar","features","compare","sheet"];
+var secs=["plot","ar","features","compare","sheet","price"];
 addEventListener("scroll",function(){var y=innerHeight*.35,cur="plot";secs.forEach(function(id){var e=document.getElementById(id);if(e&&e.getBoundingClientRect().top<y)cur=id});Array.prototype.forEach.call(document.querySelectorAll("#tabs a"),function(a){a.classList.toggle("cur",a.getAttribute("href")==="#"+cur)})},{passive:true});
 
 /* ---------- boot ---------- */
@@ -1133,4 +1211,17 @@ if(!RM)render();
 
 <script src="end.js" defer></script>
 <script src="extra.js" defer></script>
+<script>
+/* price: yearly / monthly */
+(function(){
+  var amt=document.getElementById("pr-amt"),per=document.getElementById("pr-per"),bs=document.querySelectorAll("#pr-bill button");
+  if(!amt)return;
+  var T={yr:["£34.99","a year, about £2.92 a month"],mo:["£4.99","a month"]};
+  bs.forEach(function(b){b.addEventListener("click",function(){
+    bs.forEach(function(o){o.setAttribute("aria-pressed",o===b?"true":"false")});
+    amt.classList.add("sw");
+    setTimeout(function(){amt.textContent=T[b.dataset.b][0];per.textContent=T[b.dataset.b][1];amt.classList.remove("sw")},180);
+  })});
+})();
+</script>
 </body></html>

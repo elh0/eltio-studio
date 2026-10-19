@@ -696,7 +696,7 @@ html.plx-ink .mo-cur { visibility: hidden; }
 .eltio.alt-plx .x-ph-in .k2-ag .ag-ic { box-shadow: 0 0 0 1px #3a3a37; }
 
 /* 16 Oct: Systems. Eltio's own back office: the name in Inter Tight and the six soft part colours from the app */
-.eltio .sy-wm { display: block; height: auto; fill: currentColor; aspect-ratio: 7483 / 1928; }
+.eltio .sy-wm { display: block; height: auto; fill: currentColor; aspect-ratio: 5318 / 995; }
 .eltio .sy-segs { display: flex; gap: 1.2cqi; width: 100%; }
 .eltio .sy-segs i { flex: 1; height: 1.4cqi; min-height: 3px; border-radius: 9px; }
 .eltio .k2-sy { display: grid; justify-items: center; gap: 4cqi; color: #0B0B0A; width: 44cqi; }

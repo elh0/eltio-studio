@@ -73,7 +73,13 @@
     // the picker (preview only)
     '.cg-pick{position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:99;display:flex;gap:4px;font:11px/1 ui-monospace,monospace;background:rgba(255,255,248,.92);padding:4px;border:1px solid rgba(11,11,10,.12);border-radius:999px}' +
     '.cg-pick button{all:unset;cursor:pointer;padding:6px 10px;border-radius:999px;color:#8A8A83}.cg-pick button.on{background:#0B0B0A;color:#fff}' +
-    'html.cg-open .cg-pick{display:none}';
+    'html.cg-open .cg-pick{display:none}' +
+    // 16:50 opening a project: its wordmark motion, big, like the app opening, then the page under it
+    '.cg-sp{position:fixed;inset:0;z-index:2147483602;display:grid;place-items:center;background:#0B0B0A;opacity:0;visibility:hidden;transition:opacity .7s ' + E + ',visibility 0s .7s}' +
+    '.cg-sp.on{opacity:1;visibility:visible;transition:opacity .2s ease}' +
+    '.cg-spb{position:relative;width:min(78vw,520px);aspect-ratio:3/2}.cg-sp .cv{--cvs:1.6}' +
+    '.cg-sp.s0{background:#0B0B0A}.cg-sp.s0 .cg-spb{width:min(90vw,760px)}.cg-sp.s0 .cv{--cvs:2.6;color:#F3F3F0}.cg-sp.s1{background:#000}.cg-sp.s2{background:#0E0E0D}.cg-sp.s2 .cv{color:#EDEDEA}' +
+    '.cg-sp.s3{background:linear-gradient(180deg,#9BB7D9,#CCD3DA 70%)}.cg-sp.s3 .ag-sky{background:none;animation:none}.cg-sp.s4{background:#F3F3F0}.cg-sp.s4 .cv{color:#0B0B0A}';
   document.head.appendChild(st);
 
   var last = 0, wantAt = null, busy = false;
@@ -96,8 +102,18 @@
     if (r) { html.style.setProperty('--ox', (r.left + r.width / 2) + 'px'); html.style.setProperty('--oy', (r.top + r.height / 2) + 'px'); }
     html.classList.add('cg-open');
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, fly = null, fired = false;
+    var sp = null, spAt = Date.now(), tpl = document.querySelector('.x-p[data-i="' + to + '"] .cv-tpl');
+    if (tpl && tpl.firstElementChild && !reduce) {
+      sp = document.createElement('div'); sp.className = 'cg-sp s' + to;
+      var box = document.createElement('div'); box.className = 'cg-spb'; var cv = tpl.firstElementChild.cloneNode(true); cv.classList.add('cv-quick'); box.appendChild(cv); sp.appendChild(box);
+      document.body.appendChild(sp); void sp.offsetWidth; sp.classList.add('on');
+    }
+    function doneSp() {
+      if (!sp) return; var s = sp; sp = null;
+      setTimeout(function () { s.classList.remove('on'); setTimeout(function () { if (s.parentNode) s.parentNode.removeChild(s); }, 900); }, Math.max(0, 2100 - (Date.now() - spAt)));
+    }
     function go(d) {
-      if (fired) return; fired = true; wantAt = null;
+      if (fired) return; fired = true; wantAt = null; doneSp();
       if (fly && d) {
         var k = d.w / r.width, ty = d.y + d.h / 2 - r.height * k / 2;
         fly.style.transform = 'translate(' + d.x + 'px,' + ty + 'px) scale(' + k + ')';

@@ -60,18 +60,13 @@ var OS = window.OS = {
 OS.shots.forEach(function (s) { s.word = lightWord(s.tm, HEAD); });
 
 /* ---------- HUD ---------- */
-var hudNow = $("#hud-now"), hudGold = $("#hud-gold"), openT = $("#open-t"), openR = $("#open-r");
+var hudNow = $("#hud-now"), hudGold = $("#hud-gold");
 function hud() {
   var m = nowMin(), s = sunAt(m), ph = phase(s.el, m);
   hudNow.textContent = hm(m) + " · " + (s.el < -6 ? "Sun down" : ph);
   hudGold.textContent = g ? "Golden " + hm(g[0]) + "–" + hm(g[1]) : "";
-  openT.textContent = s.el < -6 ? ph : s.el < 6 ? ph : "Sun " + Math.round(s.el) + "° up";
-  openR.textContent = "Knole Park · " + hm(m) + (g && m < g[0] ? " · golden in " + fmtIn(g[0] - m) : "");
 }
 function fmtIn(d) { d = Math.round(d); return d < 60 ? d + " min" : Math.floor(d / 60) + " h " + ("0" + d % 60).slice(-2); }
-var openL = $("#open-l");
-function lbl() { openL.textContent = innerWidth < 900 ? "9:16 · 24 mm" : "2.39 · 35 mm"; }
-lbl(); addEventListener("resize", lbl);
 hud(); setInterval(hud, 30000);
 
 /* ---------- chapters: which one is on, and how far through ---------- */
@@ -127,7 +122,13 @@ function take() {
   slCount();
   OS.emit("shot");
   /* from the photograph, a shot takes you into the viewfinder */
-  if (OS.chapter < 0) setTimeout(function () { $("#frame").scrollIntoView({ behavior: RM ? "auto" : "smooth" }); }, RM ? 0 : 380);
+  if (OS.chapter < 0) setTimeout(goFrame, RM ? 0 : 380);
+}
+function frameTop() { return $("#frame").getBoundingClientRect().top + scrollY; }
+function goFrame() {
+  var y = frameTop(); scrollTo({ top: y, behavior: RM ? "auto" : "smooth" });
+  /* if a smooth scroll gets cut short, finish the move */
+  setTimeout(function () { if (scrollY < frameTop() - innerHeight * .3) scrollTo({ top: frameTop(), behavior: "instant" }); }, 1400);
 }
 shutter.addEventListener("click", take);
 addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && e.target === document.body) { e.preventDefault(); take(); } });

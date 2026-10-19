@@ -2,9 +2,10 @@
 // ?lv=1..4 (views.html links them). Phones only; the cards keep their covers and still open the project on a tap.
 (function () {
   var m = /[?&]lv=(\d)/.exec(location.search), V = m ? +m[1] : 6; // 06 Float was picked (19 Oct); ?lv=0 turns it off
-  if (!V || innerWidth > 760) return;
+  if (!V) return;
   try { if (window.frameElement && window.frameElement.hasAttribute('data-ghost')) return; } catch (e) {}
-  var html = document.documentElement; html.classList.add('lv', 'lv' + V);
+  // 19 Oct: the same floating phones on desktop, in place of the hover wireframes
+  var D = innerWidth > 760, html = document.documentElement; html.classList.add('lv', 'lv' + V, D ? 'lv-d' : 'lv-m');
 
   var A = [
     // 19 Oct: real app screens, clicked through one after another, each with a line saying what it is
@@ -41,67 +42,72 @@
   var css = document.createElement('style');
   css.textContent = [
     // shared: a taller tile so there is room for the work, and phones drawn like the project pages
-    'html.lv .eltio.alt-plx.lp .x-frame{aspect-ratio:4/5!important;overflow:hidden}',
+    'html.lv-m .eltio.alt-plx.lp .x-frame{aspect-ratio:4/5!important;overflow:hidden}',
         'html.lv .lv-ph{position:absolute;aspect-ratio:600/1298;border-radius:13%/6%;overflow:hidden;background:#0E0E0D;box-shadow:0 34px 56px -24px rgba(0,0,0,.5),0 10px 18px -10px rgba(0,0,0,.28),0 0 0 .5px rgba(0,0,0,.18);isolation:isolate;transform:translateZ(0)}',
     'html.lv .lv-ph.w{aspect-ratio:698/350;border-radius:7%/14%}',
     'html.lv .lv-scr{position:absolute;inset:var(--b,6px);border-radius:var(--sr,24px);overflow:hidden;background:#000;isolation:isolate;transform:translateZ(0);-webkit-mask-image:-webkit-radial-gradient(#fff,#000)}',
     'html.lv .lv-scr img,html.lv .lv-scr video{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     'html.lv .lv-scr .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-scr .lv-s.on{opacity:1}',
     'html.lv .lv-scr video{opacity:0;transition:opacity .4s}html.lv .lv-scr .lv-vid video{opacity:1}',
-    // the caption: a small pill under the phone, never behind it (the phone stops at 84% of the tile)
-    'html.lv .lv-cap{position:absolute;left:50%;bottom:5%;transform:translateX(-50%) translateY(6px);max-width:92%;box-sizing:border-box;padding:8px 13px;border:.5px solid rgba(20,20,18,.24);border-radius:999px;background:#fffff8;font:400 10px/1 ui-monospace,"Geist Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:rgba(20,20,18,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .35s ease,transform .5s ease}',
-    'html.lv .x-p.lv-play .lv-cap{opacity:1;transform:translateX(-50%)}',
-    'html.lv .lv-cap.lv-swap{opacity:0;transition:opacity .2s ease}',
 'html.lv .x-frame .k2{z-index:2;transition:transform .9s cubic-bezier(.2,.8,.2,1)}',
 
+    // desktop: the wordmark shrinks away and the phone floats in its place, no wireframe, no hover trick
+    'html.lv .k2-wf,html.lv .k2-tag{display:none!important}',
+    'html.lv .x-frame:hover .k2-rest{opacity:1;transform:none;filter:none}',
+    'html.lv-d .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv-d .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
+    'html.lv-d .lv-ph{left:50%;top:50%;height:90%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv-d .lv-ph.w{height:auto;width:92%}',
+    'html.lv-d .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
+
     // 1 Stack: each card pins under the bar and the next slides over it; the one underneath sinks back
-    'html.lv1 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:30vh!important}',
-    'html.lv1 .eltio.alt-plx.lp .x-p{position:sticky!important;top:64px;padding-bottom:28px!important;background:var(--paper,#fffff8)}',
-    'html.lv1 .eltio.alt-plx.lp .x-p .x-pin{transform-origin:50% 0;will-change:transform,filter}',
-    'html.lv1 .lv-ph{left:50%;bottom:-14%;width:44%;translate:-50% 0}',
-    'html.lv1 .x-frame .k2{transform:translateY(-30%) scale(.8)}',
-    'html.lv1 .lv-ph.w{width:78%;bottom:8%}',
+    'html.lv-m.lv1 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:30vh!important}',
+    'html.lv-m.lv1 .eltio.alt-plx.lp .x-p{position:sticky!important;top:64px;padding-bottom:28px!important;background:var(--paper,#fffff8)}',
+    'html.lv-m.lv1 .eltio.alt-plx.lp .x-p .x-pin{transform-origin:50% 0;will-change:transform,filter}',
+    'html.lv-m.lv1 .lv-ph{left:50%;bottom:-14%;width:44%;translate:-50% 0}',
+    'html.lv-m.lv1 .x-frame .k2{transform:translateY(-30%) scale(.8)}',
+    'html.lv-m.lv1 .lv-ph.w{width:78%;bottom:8%}',
 
     // 2 Live: the wordmark lifts, and the project itself rises into the tile and plays
-    'html.lv2 .lv-ph{left:50%;top:100%;width:46%;translate:-50% 0;transition:top 1.1s cubic-bezier(.2,.8,.2,1)}',
-    'html.lv2 .lv-ph.w{width:82%}',
-    'html.lv2 .x-p.lv-on .lv-ph{top:30%}',
-    'html.lv2 .x-p.lv-on .lv-ph.w{top:44%}',
-    'html.lv2 .x-p.lv-on .x-frame .k2{transform:translateY(-34%) scale(.72)}',
+    'html.lv-m.lv2 .lv-ph{left:50%;top:100%;width:46%;translate:-50% 0;transition:top 1.1s cubic-bezier(.2,.8,.2,1)}',
+    'html.lv-m.lv2 .lv-ph.w{width:82%}',
+    'html.lv-m.lv2 .x-p.lv-on .lv-ph{top:30%}',
+    'html.lv-m.lv2 .x-p.lv-on .lv-ph.w{top:44%}',
+    'html.lv-m.lv2 .x-p.lv-on .x-frame .k2{transform:translateY(-34%) scale(.72)}',
 
     // 3 Fan: three screens open out from behind the wordmark as the card crosses the screen
-    'html.lv3 .lv-ph{left:50%;top:38%;width:36%;transform-origin:50% 120%;will-change:transform}',
-    'html.lv3 .lv-ph.w{width:64%;top:52%;transform-origin:50% 160%}',
-    'html.lv3 .x-frame .k2{transform:translateY(-30%) scale(.8)}',
+    'html.lv-m.lv3 .lv-ph{left:50%;top:38%;width:36%;transform-origin:50% 120%;will-change:transform}',
+    'html.lv-m.lv3 .lv-ph.w{width:64%;top:52%;transform-origin:50% 160%}',
+    'html.lv-m.lv3 .x-frame .k2{transform:translateY(-30%) scale(.8)}',
 
     // 4 Reel: one project per screen, the page taking on each project\'s colour, a big counter that keeps count
-    'html.lv4{scroll-snap-type:y proximity}',
-    'html.lv4 .eltio.alt-plx.lp .x-list{gap:0!important;padding:0!important}',
-    'html.lv4 .eltio.alt-plx.lp .x-p{min-height:100svh;scroll-snap-align:start;display:flex!important;flex-direction:column;justify-content:center;padding:72px 16px 40px!important;box-sizing:border-box}',
-    'html.lv4 .eltio.alt-plx.lp .x-frame{aspect-ratio:auto!important;height:62svh;background:transparent!important}',
-    'html.lv4 .lv-ph{left:50%;bottom:0;width:38%;translate:-50% 0}',
-    'html.lv4 .lv-ph.w{width:74%;bottom:6%}',
-    'html.lv4 .x-frame .k2{transform:translateY(-26%)}',
-    'html.lv4 .lv-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;transition:background-color .6s}',
-    'html.lv4 .eltio.alt-plx.lp{background:transparent!important}',
-    'html.lv4 body{background:transparent!important}',
-    'html.lv4 .lv-big{position:fixed;right:16px;top:58px;z-index:5;text-align:right;font:400 56px/0.9 ui-monospace,"Geist Mono",monospace;letter-spacing:-.04em;color:rgba(20,20,18,.9);pointer-events:none;opacity:0;transition:opacity .4s}',
-    'html.lv4 .lv-big small{display:block;font-size:11px;letter-spacing:0;margin-top:8px;text-transform:uppercase}',
-    'html.lv4.lv-in .lv-big{opacity:1}',
+    'html.lv-m.lv4{scroll-snap-type:y proximity}',
+    'html.lv-m.lv4 .eltio.alt-plx.lp .x-list{gap:0!important;padding:0!important}',
+    'html.lv-m.lv4 .eltio.alt-plx.lp .x-p{min-height:100svh;scroll-snap-align:start;display:flex!important;flex-direction:column;justify-content:center;padding:72px 16px 40px!important;box-sizing:border-box}',
+    'html.lv-m.lv4 .eltio.alt-plx.lp .x-frame{aspect-ratio:auto!important;height:62svh;background:transparent!important}',
+    'html.lv-m.lv4 .lv-ph{left:50%;bottom:0;width:38%;translate:-50% 0}',
+    'html.lv-m.lv4 .lv-ph.w{width:74%;bottom:6%}',
+    'html.lv-m.lv4 .x-frame .k2{transform:translateY(-26%)}',
+    'html.lv-m.lv4 .lv-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;transition:background-color .6s}',
+    'html.lv-m.lv4 .eltio.alt-plx.lp{background:transparent!important}',
+    'html.lv-m.lv4 body{background:transparent!important}',
+    'html.lv-m.lv4 .lv-big{position:fixed;right:16px;top:58px;z-index:5;text-align:right;font:400 56px/0.9 ui-monospace,"Geist Mono",monospace;letter-spacing:-.04em;color:rgba(20,20,18,.9);pointer-events:none;opacity:0;transition:opacity .4s}',
+    'html.lv-m.lv4 .lv-big small{display:block;font-size:11px;letter-spacing:0;margin-top:8px;text-transform:uppercase}',
+    'html.lv-m.lv4.lv-in .lv-big{opacity:1}',
     'html.cg-open .lv-big,html.cg-open .lv-bg{display:none}',
     // 5 Stack, refined (19 Oct: less bulky, the logo lands ON the phone, the whole phone in view, floating)
     // 6 Float: the same cards without pinning, drifting at their own pace
-    'html.lv5 .eltio.alt-plx.lp .x-list,html.lv6 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:24vh!important}',
-    'html.lv5 .eltio.alt-plx.lp .x-p{position:sticky!important;top:calc(60px + var(--k) * 9px);padding-bottom:22px!important}',
-    'html.lv6 .eltio.alt-plx.lp .x-p{padding-bottom:56px!important}',
-    'html.lv5 .eltio.alt-plx.lp .x-pin,html.lv6 .eltio.alt-plx.lp .x-pin{transform-origin:50% 0;will-change:transform,opacity;background:#fffff8;border-radius:22px}',
-    'html.lv5 .eltio.alt-plx.lp .x-frame,html.lv6 .eltio.alt-plx.lp .x-frame{border-radius:22px;background:#F1F1EC!important;box-shadow:0 1px 0 rgba(0,0,0,.03),0 30px 60px -40px rgba(0,0,0,.35)}',
-    'html.lv5 .eltio.alt-plx.lp .x-txt,html.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
-    'html.lv5 .x-frame .k2,html.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv5 .x-p.lv-on .x-frame>.k2,html.lv6 .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
-    'html.lv5 .lv-ph,html.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv5 .lv-ph.w,html.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
-    'html.lv5 .x-p.lv-on .lv-ph,html.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
+    'html.lv-m.lv5 .eltio.alt-plx.lp .x-list,html.lv-m.lv6 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:24vh!important}',
+    'html.lv-m.lv5 .eltio.alt-plx.lp .x-p{position:sticky!important;top:calc(60px + var(--k) * 9px);padding-bottom:22px!important}',
+    'html.lv-m.lv6 .eltio.alt-plx.lp .x-p{padding-bottom:56px!important}',
+    'html.lv-m.lv5 .eltio.alt-plx.lp .x-pin,html.lv-m.lv6 .eltio.alt-plx.lp .x-pin{transform-origin:50% 0;will-change:transform,opacity;background:#fffff8;border-radius:22px}',
+    'html.lv-m.lv5 .eltio.alt-plx.lp .x-frame,html.lv-m.lv6 .eltio.alt-plx.lp .x-frame{border-radius:22px;background:#F1F1EC!important;box-shadow:0 1px 0 rgba(0,0,0,.03),0 30px 60px -40px rgba(0,0,0,.35)}',
+    'html.lv-m.lv5 .eltio.alt-plx.lp .x-txt,html.lv-m.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
+    'html.lv-m.lv5 .x-frame .k2,html.lv-m.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv-m.lv5 .x-p.lv-on .x-frame>.k2,html.lv-m.lv6 .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
+    'html.lv-m.lv5 .lv-ph,html.lv-m.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    'html.lv-m.lv5 .lv-ph.w,html.lv-m.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
+    'html.lv-m.lv5 .x-p.lv-on .lv-ph,html.lv-m.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
     'html.lv .lv-sp{position:absolute;inset:0;z-index:3;background:#fffff8;transition:opacity .6s ease}',
     'html.lv .lv-sp .k2{position:absolute;inset:0;border:0!important;background:none!important;opacity:1!important;transform:none!important}',
@@ -160,7 +166,6 @@
     cards.forEach(function (c) {
       var i = +c.getAttribute('data-i'), a = A[i], f = c.querySelector('.x-frame'); if (!a || !f) return;
       var p = ph(a); f.appendChild(p);
-      var cap = document.createElement('span'); cap.className = 'lv-cap'; cap.textContent = a.seq ? a.seq[0][1] : (a.cap || ''); f.appendChild(cap); c._lvCap = cap;
       if (V >= 5) {
         // the cover's own wordmark, again, as the phone's opening screen: the big one shrinks away as this arrives
         var sp = document.createElement('span'); sp.className = 'lv-sp s' + i; var k2 = f.querySelector('.k2');
@@ -174,7 +179,6 @@
       var p = c.querySelector('.lv-ph'); if (!p || !p._seq) return;
       var ims = p.querySelectorAll('.lv-s'), n = (p._k || 0) + 1; if (n >= ims.length) n = 0; p._k = n;
       ims.forEach(function (i, k) { i.classList.toggle('on', k === n); var v = i.querySelector('video'); if (v) { if (k === n) play(v); else v.pause(); } });
-      var cap = c._lvCap; cap.classList.add('lv-swap'); setTimeout(function () { cap.textContent = p._seq[n][1]; cap.classList.remove('lv-swap'); }, 220);
       c._lvHold = p.querySelector('.lv-s.on video') ? 2 : 0; // the AR take gets a few beats
     }
 
@@ -247,7 +251,7 @@
       }
       requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+    if (!D) requestAnimationFrame(frame);
   }
   // after load, so the covers drawn by script (the Lampwerk mark) are there to copy
   if (document.readyState !== 'complete') addEventListener('load', go); else go();

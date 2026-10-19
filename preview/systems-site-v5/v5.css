@@ -469,3 +469,8 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .db-r>span{display:grid;gap:2px;min-width:0}.db-r .q{color:var(--q);font-size:13px}
 .db-r .pill{min-height:36px;font-size:14px;padding:0 14px}
 @media (max-width:900px){.dash{grid-template-columns:minmax(0,1fr);padding-block:64px}.dash-copy{order:-1}}
+.db-mi{justify-self:start;margin-top:4px;padding:0;background:none;border:0;color:var(--paper);font:400 13px/1.3 var(--body);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.db-info{grid-column:1/-1;display:grid;gap:10px}
+.db-dm{margin:0;display:grid;gap:4px;padding:12px 14px;border-radius:14px 14px 14px 4px;background:rgba(242,242,239,.07);font-size:14px;line-height:1.45}
+.db-kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:14px}.db-kv span{color:var(--q)}.db-kv b{font-weight:400;text-align:right}.db-kv i{font-style:normal;font:400 10px/1 var(--mono);color:var(--q);margin-left:6px}
+.db-rp{margin:0;font-size:13px;color:var(--q)}

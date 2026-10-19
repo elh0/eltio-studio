@@ -28,7 +28,7 @@ function paintSky() { var p = phase(); document.documentElement.dataset.sky = p;
 
 /* ---------- data shape (also the columns of each sheet tab) ---------- */
 var TABS = {
-  Bookings: ["id", "start", "end", "client", "production", "contact", "status", "rate", "days", "agent", "notes", "terms", "kit", "extra", "po"],
+  Bookings: ["id", "start", "end", "client", "production", "contact", "status", "rate", "days", "agent", "notes", "terms", "kit", "extra", "po", "message", "fields"],
   Invoices: ["id", "booking", "number", "client", "contact", "amount", "issued", "due", "paid", "notes"],
   Expenses: ["id", "date", "booking", "item", "amount", "notes"],
   Days: ["id", "booking", "date", "type", "call", "lunchAt", "lunch", "wrap", "miles", "adjust", "source", "notes"],
@@ -405,7 +405,9 @@ function startJob(k) {
   mode = "demo"; D = sample();
   var s = D.settings; s.name = "Sam Carter"; s.role = j.role === "DP or HOD" ? "DP" : j.role; s.rate = j.rate; s.job = j.k; s.work = "Both";
   D.bookings.forEach(function (b) { if (b.rate === "650") b.rate = j.rate; if (j.kit && b.id === "b6") b.kit = j.kit; if (!j.kit) b.kit = ""; });
-  D.offers = j.k === "prod" || j.k === "pm" ? [] : OFFERS.map(function (o) { return { id: o[0], start: iso(addDays(today(), o[1])), days: o[2], client: o[3], production: o[4], via: o[5] }; });
+  D.offers = j.k === "prod" || j.k === "pm" ? [] : OFFERS.map(function (o) { return { id: o[0], start: iso(addDays(today(), o[1])), days: o[2], client: o[3], production: o[4], via: o[5], from: o[6], message: o[7], loc: o[8], call: o[9], dp: o[10], dir: o[11], rate: j.rate }; });
+  s.fields = (FSUG[j.k] || ["Parking"]).slice(0, 2).join("|");
+  D.bookings.forEach(function (b) { if (b.id === "b2") b.message = "Pencilling you for this one. The band are waiting on the label and should know by Wednesday."; if (b.id === "b3") b.message = "Second hold, behind another job. We'll let you know either way by Friday."; });
   flag("eltio-systems-tour-1", "1");
   demoSave(); S.tab = "home"; closeSheet(); render(); return true;
 }
@@ -422,7 +424,30 @@ function jobSheet(i) {
 
 
 /* ---------- the dashboard you open on: your diary and offers (crew), your shoot (producers) ---------- */
-var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory"], ["o2", 4, "2", "Northlight Films", "Car commercial", "Via your agent"]];
+var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory", "Maya, producer", "Hi Sam, found you in the directory. One day on a sportswear spot, two cameras on a stage in E2. Could you hold it until Thursday? Happy to send the treatment.", "Canal St Studios, E2", "07:00", "Jonah A.", "Mara Q."], ["o2", 4, "2", "Northlight Films", "Car commercial", "Via your agent", "Your agent, for Northlight", "Northlight want you for two days on a car commercial in Kent. Day two is a night shoot on the seafront. They asked if you can do a recce the Friday before.", "Margate seafront, Kent", "05:30", "Ade O.", "Lena K."]];
+/* Who you'd answer to on the job, by department. */
+function keyLab() { var k = (job() || {}).k; return ["camera", "dit", "gaffer", "spark", "grip"].indexOf(k) >= 0 ? "DP" : "Director"; }
+var FSUG = { camera: ["Camera body", "Lenses", "Media", "2nd AC"], dit: ["Media", "LUT", "Drives"], gaffer: ["Lamps", "Genny", "Rigging day"], spark: ["Lamps", "Rigging day"], grip: ["Dolly", "Crane"], sound: ["Radio mics", "Timecode"], dop: ["Camera package", "Gaffer"], art: ["Build days", "Budget"], costume: ["Fittings", "Budget"], hmu: ["Talent", "Wigs"] };
+/* Your own fields are kept in Settings as one line, names split by | */
+function myFields() { var v = D.settings.fields; return !v ? [] : Array.isArray(v) ? v : String(v).split("|").filter(Boolean); }
+function fieldSug() { var k = (job() || {}).k, have = myFields(); return (FSUG[k] || ["Parking", "Catering"]).concat(["Parking"]).filter(function (x, i, a) { return a.indexOf(x) === i && have.indexOf(x) < 0; }); }
+function parseF(v) { if (!v) return {}; if (typeof v === "object") return v; try { return JSON.parse(v) || {}; } catch (e) { return {}; } }
+function cfRows(f, editable) { var mine = myFields(); return '<div class="sum cf">' + (mine.length ? mine.map(function (n) { return '<div><span class="q">' + esc(n) + '</span>' + (editable ? '<input class="cf-in" data-cf="' + esc(n) + '" value="' + esc(f[n] || "") + '" placeholder="Add">' : "<span>" + esc(f[n] || "") + "</span>") + "</div>"; }).join("") : '<div><span class="q">Add what you track on every job. It saves into your sheet.</span></div>') + "</div>"; }
+/* The job in full: the producer's message, the details, your own fields. Used for offers, holds and bookings. */
+function infoBlock(x, editable) {
+  var f = parseF(x.fields);
+  return (x.message ? '<div class="dm"><span class="part">' + esc(x.from || "From the producer") + '</span><p>' + esc(x.message) + "</p></div>" : "") +
+    (x.loc ? '<div class="sum"><div><span class="q">Where</span><span>' + esc(x.loc) + '</span></div><div><span class="q">Call</span><span>' + esc(x.call) + '</span></div><div><span class="q">' + keyLab() + '</span><span>' + esc(keyLab() === "DP" ? x.dp : x.dir) + '</span></div><div><span class="q">Rate</span><span>£' + esc(x.rate || D.settings.rate) + " a day, APA</span></div></div>" : "") +
+    '<div class="part">Your fields</div>' + cfRows(f, editable) +
+    (editable ? '<div class="cf-add"><input id="cf-new" placeholder="New field, e.g. Camera body" autocomplete="off"><button class="btn sm" data-addfield>Add</button></div><div class="pills">' + fieldSug().slice(0, 4).map(function (n) { return '<button type="button" class="pill" data-addfield="' + esc(n) + '">+ ' + esc(n) + "</button>"; }).join("") + "</div>" : "");
+}
+function readFields(base) { var f = parseF(base); document.querySelectorAll("#sheet .cf-in").forEach(function (el) { var v = el.value.trim(); if (v) f[el.getAttribute("data-cf")] = v; else delete f[el.getAttribute("data-cf")]; }); return JSON.stringify(f); }
+function offerSheet(id) {
+  var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return "";
+  return '<div class="top"><span class="q">Offer · ' + esc(o.via) + '</span><span class="tag">' + niceRange(o.start, num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "") + '</span></div><h2>' + esc(o.production) + ", " + esc(o.client) + ".</h2>" + infoBlock(o, true) +
+    '<div class="part">Reply</div><div class="field"><textarea id="of-msg" rows="3" placeholder="Add a message to go with your answer"></textarea></div><div class="pills">' + ["Sounds great, see you there.", "Can you send the treatment?", "Can I hold it until Friday?"].map(function (q) { return '<button type="button" class="pill" data-quick="' + esc(q) + '">' + esc(q) + "</button>"; }).join("") + "</div>" +
+    '<div class="acts"><button class="btn solid" data-accept="' + o.id + '">Accept</button><button class="btn" data-pencil="' + o.id + '">Hold</button><button class="btn" data-decline="' + o.id + '">No</button></div><p class="q">Your answer and message go back as a draft. Nothing sends until you tap send.</p>';
+}
 var DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 function onDay(d) {
   var k = iso(d), b = D.bookings.find(function (x) { return x.status !== "Cancelled" && x.start <= k && (x.end || x.start) >= k; });
@@ -437,7 +462,7 @@ function diaryCard() {
   return '<div class="diary"><div class="dia-h"><span class="part">Your diary · next two weeks</span><span class="key"><i class="bk"></i>Booked <i class="pn"></i>Hold <i class="of"></i>Offer</span></div><div class="days">' + cells + '</div><div class="dia-f"><span class="q">' + free + " days free · producers see Available</span>" + '<button class="lnk" data-passport>Who sees this</button></div>' +
     (O.length ? '<div class="offers"><div class="part">Offers · ' + O.length + "</div>" + O.map(function (o) {
       var d = parse(o.start);
-      return '<div class="offer-r"><span class="dt"><b>' + d.getDate() + "</b>" + MON[d.getMonth()] + '</span><span class="up-t">' + esc(o.production) + ", " + esc(o.days) + (o.days === "1" ? " day" : " days") + '<span class="q">' + esc(o.client) + " · " + esc(o.via) + '</span></span><span class="of-a"><button class="btn sm solid" data-accept="' + o.id + '">Accept</button><button class="btn sm" data-pencil="' + o.id + '">Hold</button><button class="btn sm ghost" data-decline="' + o.id + '" aria-label="Decline">No</button></span></div>';
+      return '<div class="offer-r"><span class="dt"><b>' + d.getDate() + "</b>" + MON[d.getMonth()] + '</span><span class="up-t">' + esc(o.production) + ", " + esc(o.days) + (o.days === "1" ? " day" : " days") + '<span class="q">' + esc(o.client) + " · " + esc(o.via) + '</span><button class="lnk mi" data-offerinfo="' + o.id + '">More info, message the producer</button></span><span class="of-a"><button class="btn sm solid" data-accept="' + o.id + '">Accept</button><button class="btn sm" data-pencil="' + o.id + '">Hold</button><button class="btn sm ghost" data-decline="' + o.id + '" aria-label="Decline">No</button></span></div>';
     }).join("") + "</div>" : '<p class="q dia-done">No offers waiting. Producers can find you in the directory.</p>') + "</div>";
 }
 var SHOOT = [["Sound recordist", "", "open"], ["2nd AC", "Offer sent to Priya K.", "wait"], ["Spark", "Pencilled: Leon B.", "pen"], ["Gaffer", "Booked: Sam C.", "ok"], ["1st AC", "Booked: Ana R.", "ok"]];
@@ -450,10 +475,12 @@ function shootCard() {
 function dashTop() { if (mode !== "demo" || !job()) return ""; return isProd() ? shootCard() : diaryCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
+  var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
+  if (inSheet) closeSheet();
   D.offers = D.offers.filter(function (x) { return x.id !== id; });
-  if (st) D.bookings.push({ id: uid(), start: o.start, end: num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "", client: o.client, production: o.production, contact: "producer@example.com", status: st, rate: D.settings.rate, days: o.days, agent: /agent/.test(o.via) ? "yes" : "", notes: "", terms: "APA" });
+  if (st) D.bookings.push({ message: o.message, fields: fl, notes: [o.loc, o.call ? "call " + o.call : "", o.dp ? keyLab() + " " + (keyLab() === "DP" ? o.dp : o.dir) : ""].filter(Boolean).join(", "), id: uid(), start: o.start, end: num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "", client: o.client, production: o.production, contact: "producer@example.com", status: st, rate: D.settings.rate, days: o.days, agent: /agent/.test(o.via) ? "yes" : "", terms: "APA" });
   demoSave(); render();
-  banner(st === "Confirmed" ? "Booked. It's in your diary and the producer has your passport." : st ? "Held. The producer sees you as Pencilled." : "Declined. A polite no is drafted for you.");
+  banner((st === "Confirmed" ? "Booked. It's in your diary and the producer has your passport." : st ? "Held. The producer sees you as Pencilled." : "Declined. A polite no is drafted for you.") + (reply ? " Your message is drafted with it." : ""));
 }
 
 /* ---------- the shared job: call sheet link, crew passport, directory (sample data) ---------- */
@@ -584,7 +611,7 @@ function more() {
 function bookingForm(b) {
   var s = D.settings, isNew = !b; b = b || { id: uid(), start: iso(addDays(today(), 7)), end: "", client: "", production: "", contact: "", status: "First hold", rate: s.rate || "", days: "1", agent: "", notes: "", terms: s.work === "TV and film" ? "TV drama" : ["Director", "Producer"].indexOf(roleKey()) >= 0 ? "Flat day" : "APA", kit: "", extra: "", po: "" };
   var acts = isNew ? "" : '<div class="acts">' + (isHold(b) ? '<button class="btn" data-draft="hold" data-id="' + b.id + '">Ask to confirm</button>' : "") + (b.status === "Confirmed" && !isDone(b) ? '<button class="btn" data-draft="confirm" data-id="' + b.id + '">Send booking confirmation</button>' : "") + (b.status === "Confirmed" && b.terms !== "Flat day" ? '<button class="btn' + (isDone(b) ? " solid" : "") + '" data-timesheet="' + b.id + '">Timesheet' + (daysFor(b.id).length ? ", " + daysFor(b.id).length + " day" + (daysFor(b.id).length > 1 ? "s" : "") : "") + "</button>" : "") + (isDone(b) && !invoiced(b.id) && !isPaye(b) ? '<button class="btn" data-invoicefor="' + b.id + '">Make the invoice</button>' : "") + "</div>";
-  return '<h2>' + (isNew ? "Add a booking" : esc(b.production || "Booking")) + "</h2>" + acts + '<input type="hidden" id="b-id" value="' + esc(b.id) + '">' +
+  return '<h2>' + (isNew ? "Add a booking" : esc(b.production || "Booking")) + "</h2>" + acts + infoBlock(b, true) + (isHold(b) && !isNew ? '<div class="part">Message the producer</div><div class="field"><textarea id="bk-msg" rows="2" placeholder="Ask a question or nudge them to confirm"></textarea></div><div class="acts"><button class="btn" data-sendmsg="' + b.id + '">Draft the message</button></div>' : "") + '<input type="hidden" id="b-id" value="' + esc(b.id) + '">' +
     '<div class="grid2">' + field("b-production", "What is it?", b.production, "text", "Commercial, music video…") + field("b-client", "Who for?", b.client, "text", "Production company") + "</div>" +
     field("b-contact", "Their email", b.contact, "email", "producer@company.com") +
     '<div class="grid2">' + field("b-start", "First day", b.start, "date") + field("b-end", "Last day (if more than one)", b.end, "date") + "</div>" +
@@ -803,6 +830,18 @@ document.addEventListener("click", function (e) {
   if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
   if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
   if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
+  if (b.hasAttribute("data-offerinfo")) { openSheet(offerSheet(b.getAttribute("data-offerinfo"))); return; }
+  if (b.hasAttribute("data-quick")) { var ta = $("of-msg"); if (ta) { ta.value = b.getAttribute("data-quick"); ta.focus(); } return; }
+  if (b.hasAttribute("data-sendmsg")) { var m = $("bk-msg"); banner(m && m.value.trim() ? "Drafted. It's in your email drafts, ready to send." : "Write a message first."); return; }
+  if (b.hasAttribute("data-addfield")) {
+    var nm = (b.getAttribute("data-addfield") || ($("cf-new") || {}).value || "").trim().replace(/\|/g, " "); if (!nm) return;
+    var keep = {}; document.querySelectorAll("#sheet .cf-in").forEach(function (el) { keep[el.getAttribute("data-cf")] = el.value; });
+    D.settings.fields = myFields().filter(function (x) { return x !== nm; }).concat([nm]).join("|");
+    if (mode === "demo") demoSave(); else change("Settings", function () {}).catch(function () {});
+    var box = document.querySelector("#sheet .cf"); if (box) { var tmp = document.createElement("div"); tmp.innerHTML = cfRows(keep, true); box.replaceWith(tmp.firstChild); }
+    if ($("cf-new")) $("cf-new").value = ""; if (b.getAttribute("data-addfield")) b.remove();
+    var ni = Array.prototype.find.call(document.querySelectorAll("#sheet .cf-in"), function (el) { return el.getAttribute("data-cf") === nm; }); if (ni) ni.focus(); return;
+  }
   if (b.hasAttribute("data-accept")) { takeOffer(b.getAttribute("data-accept"), "Confirmed"); return; }
   if (b.hasAttribute("data-pencil")) { takeOffer(b.getAttribute("data-pencil"), "Pencil"); return; }
   if (b.hasAttribute("data-decline")) { takeOffer(b.getAttribute("data-decline"), ""); return; }
@@ -845,6 +884,7 @@ document.addEventListener("click", function (e) {
     var start = val("b-start"); if (!start) { banner("Add the first day."); return; }
     var end = val("b-end"), days = val("b-days") || (end && parse(end) ? String(daysBetween(parse(start), parse(end)) + 1) : "1");
     var o = { id: val("b-id"), start: start, end: end && end !== start ? end : "", client: val("b-client"), production: val("b-production"), contact: val("b-contact"), status: picked("status") || "First hold", rate: val("b-rate"), days: days, agent: picked("viaAgent") === "Yes" ? "yes" : "", notes: val("b-notes"), terms: picked("terms") || "APA", kit: val("b-kit"), extra: picked("terms") === "TV drama" && picked("extra") === "Yes" ? "yes" : "", po: val("b-po") };
+    var was = D.bookings.find(function (x) { return x.id === o.id; }); o.message = was ? was.message || "" : ""; o.fields = readFields(was && was.fields);
     closeSheet(); upsert("Bookings", o).then(function () { banner("Booking saved."); }); return;
   }
   if (d.delbooking) { if (!confirm("Delete this booking?")) return; closeSheet(); remove("Bookings", d.delbooking).then(function () { banner("Deleted."); }); return; }

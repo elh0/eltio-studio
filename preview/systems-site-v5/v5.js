@@ -532,7 +532,7 @@
   prDraw();
 
   /* Try it: the dashboard it opens on. Crew get their diary and an offer, producers their shoot. */
-  var dbEl = $("#db"), dbProd = false, dbTook = "", dbFill = 0, DBW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"], DBM = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+  var dbEl = $("#db"), dbProd = false, dbTook = "", dbInfo = false, dbFill = 0, DBW = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"], DBM = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
   function dbDraw() {
     if (!dbEl) return;
     var t = new Date(); t.setHours(0, 0, 0, 0);
@@ -542,7 +542,8 @@
       var cells = ""; for (var i = 0; i < 14; i++) { var d = at(i), m = mark[i] || ""; cells += '<div class="db-d' + (i ? "" : " now") + (m ? " " + m : "") + '"><span>' + DBW[d.getDay()] + "</span><b>" + d.getDate() + '</b><i class="' + (m ? "k-" + m : "") + '"></i></div>'; }
       var od = at(2);
       dbEl.innerHTML = '<div class="db-h"><span class="lab">Your diary · next two weeks</span><span class="db-key"><span><i class="k-bk"></i>Booked</span><span><i class="k-pn"></i>Hold</span><span><i class="k-of"></i>Offer</span></span></div><div class="db-days">' + cells + "</div>" +
-        '<div class="db-of"><span class="dt"><b>' + od.getDate() + "</b>" + DBM[od.getMonth()] + '</span><span class="t">Sportswear spot, 1 day<span class="q">Halde Films · found you in the directory</span></span>' +
+        '<div class="db-of"><span class="dt"><b>' + od.getDate() + "</b>" + DBM[od.getMonth()] + '</span><span class="t">Sportswear spot, 1 day<span class="q">Halde Films · found you in the directory</span>' + (dbTook === "" ? '<button type="button" class="db-mi" data-dbi>' + (dbInfo ? "Less" : "More info, message the producer") + "</button>" : "") + "</span>" +
+        (dbInfo && dbTook === "" ? '<div class="db-info"><p class="db-dm"><span class="lab">Maya, producer</span>Found you in the directory. One day, two cameras on a stage in E2. Could you hold it until Thursday?</p><div class="db-kv"><span>DP</span><b>Jonah A.</b><span>Call</span><b>07:00, Canal St Studios</b><span>Camera body</span><b>Alexa 35 <i>your field</i></b></div><p class="db-rp">Reply: "Can you send the treatment?"</p></div>' : "") +
         (dbTook === "" ? '<span class="db-b"><button class="pill" data-db="Confirmed">Accept</button><button class="pill gh" data-db="Pencil">Hold</button><button class="pill gh" data-db="No">No</button></span>'
           : '<span class="db-done"><span>' + (dbTook === "Confirmed" ? "Booked. It's in your diary." : dbTook === "Pencil" ? "Held. They see you as Pencilled." : "Declined. A polite no is drafted.") + '</span><button type="button" data-db="">Again</button></span>') + "</div>";
     } else {
@@ -553,11 +554,12 @@
   }
   if (dbEl) dbEl.addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
-    if (b.hasAttribute("data-db")) { dbTook = b.getAttribute("data-db"); dbDraw(); }
+    if (b.hasAttribute("data-db")) { dbTook = b.getAttribute("data-db"); dbInfo = false; dbDraw(); }
+    if (b.hasAttribute("data-dbi")) { dbInfo = !dbInfo; dbDraw(); }
     if (b.hasAttribute("data-dbf")) { dbFill = Math.min(3, dbFill + 1); dbDraw(); }
   });
   function dbSet(prod) {
-    dbProd = prod; dbTook = ""; dbFill = 0; dbDraw();
+    dbProd = prod; dbTook = ""; dbInfo = false; dbFill = 0; dbDraw();
     $("#dbH").textContent = prod ? "Open it. Your shoot's already there." : "Open it. Your week's already there.";
     $("#dbP").textContent = prod ? "Try it free and it opens on your own dashboard: tomorrow's shoot, who's booked, who's pencilled, who hasn't replied, and the roles still to fill." : "Try it free and it opens on your own dashboard: the next two weeks, the holds you're on and the offers waiting. Tap accept and it's booked.";
   }

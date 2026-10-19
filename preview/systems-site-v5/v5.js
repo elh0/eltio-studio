@@ -636,19 +636,20 @@
 })();
 /* Rate cards on the site (same figures as the app) and the section menu. */
 (function () {
-/* Rate cards: a day rate for every grade, so crew pick their grade and the rate fills in. Preview figures: check each against the current card before launch. 0 = own deal. */
+/* Rate cards: a day rate for every grade, so the rate fills in once the grade is picked. Row: [department, grade, day rate, overtime multiplier (0 = by day rate), 1 if the figure is from the current card]. 0 rate = own deal.
+   APA: card from 1 September 2026 where marked; the rest are preview figures to check against the card. Bectu: preview figures to check against the current Pact/Bectu cards. */
 var RATES = {
-  "APA commercials": { basis: "10 hour day plus an hour's lunch", rows: [
-    ["Camera", "Director of photography", 0], ["Camera", "Camera operator", 650], ["Camera", "1st AC, focus puller", 480], ["Camera", "2nd AC, clapper loader", 380], ["Camera", "DIT", 450], ["Camera", "Video playback", 380], ["Camera", "Camera trainee", 200],
-    ["Lighting", "Gaffer", 560], ["Lighting", "Best boy", 480], ["Lighting", "Desk op", 512], ["Lighting", "Spark", 443], ["Lighting", "Genny op", 443],
-    ["Grip", "Key grip", 520], ["Grip", "Grip", 440], ["Grip", "Assistant grip", 360],
-    ["Sound", "Sound recordist", 520], ["Sound", "Boom op", 400], ["Sound", "Sound assistant", 300],
-    ["Art", "Production designer", 0], ["Art", "Art director", 450], ["Art", "Standby props", 380], ["Art", "Props", 350], ["Art", "Art assistant", 250],
-    ["Costume", "Costume designer", 450], ["Costume", "Costume supervisor", 380], ["Costume", "Costume assistant", 300],
-    ["Hair and make-up", "HMU designer", 450], ["Hair and make-up", "HMU artist", 380], ["Hair and make-up", "HMU assistant", 280],
-    ["Production", "Production manager", 450], ["Production", "Production coordinator", 300], ["Production", "1st AD", 600], ["Production", "2nd AD", 400], ["Production", "3rd AD", 300], ["Production", "Location manager", 400], ["Production", "Unit manager", 300], ["Production", "Runner", 180],
-    ["Post", "Editor", 450], ["Post", "Assistant editor", 280]] },
-  "Film and TV": { basis: "Pact/Bectu, 10 hours plus lunch, a day of the weekly rate", rows: [
+  "APA": { basis: "10 hours plus an hour's lunch, or 9 continuous", rows: [
+    ["Camera", "Director of photography", 0, 1], ["Camera", "Camera operator", 656, 1.25, 1], ["Camera", "1st AC, focus puller", 575, 1.25, 1], ["Camera", "2nd AC, clapper loader", 448, 1.5, 1], ["Camera", "DIT", 527, 1.25, 1], ["Camera", "Video playback", 391, 0], ["Camera", "Camera trainee", 206, 0],
+    ["Lighting", "Gaffer", 585, 1.25, 1], ["Lighting", "Best boy", 494, 0], ["Lighting", "Desk op", 527, 0], ["Lighting", "Spark", 457, 1.5, 1], ["Lighting", "Genny op", 457, 0],
+    ["Grip", "Key grip", 575, 1.25, 1], ["Grip", "Grip", 526, 1.25, 1], ["Grip", "Assistant grip", 371, 0],
+    ["Sound", "Sound recordist", 536, 0], ["Sound", "Boom op", 412, 0], ["Sound", "Sound assistant", 309, 0],
+    ["Art", "Production designer", 0, 0], ["Art", "Art director", 464, 0], ["Art", "Standby props", 391, 0], ["Art", "Props", 361, 0], ["Art", "Art assistant", 258, 0],
+    ["Costume", "Costume designer", 464, 0], ["Costume", "Costume supervisor", 391, 0], ["Costume", "Costume assistant", 309, 0],
+    ["Hair and make-up", "HMU designer", 464, 0], ["Hair and make-up", "HMU artist", 391, 0], ["Hair and make-up", "HMU assistant", 288, 0],
+    ["Production", "Production manager", 464, 0], ["Production", "Production coordinator", 309, 0], ["Production", "1st AD", 618, 0], ["Production", "2nd AD", 412, 0], ["Production", "3rd AD", 309, 0], ["Production", "Location manager", 412, 0], ["Production", "Unit manager", 309, 0], ["Production", "Runner", 245, 1, 1],
+    ["Post", "Editor", 464, 0], ["Post", "Assistant editor", 288, 0]] },
+  "Bectu": { basis: "Pact/Bectu film and TV, 10 hours plus lunch, a day of the weekly rate", rows: [
     ["Camera", "Director of photography", 0], ["Camera", "Camera operator", 560], ["Camera", "1st AC, focus puller", 420], ["Camera", "2nd AC, clapper loader", 320], ["Camera", "DIT", 380], ["Camera", "Video playback", 320], ["Camera", "Camera trainee", 180],
     ["Lighting", "Gaffer", 470], ["Lighting", "Best boy", 400], ["Lighting", "Desk op", 420], ["Lighting", "Spark", 360], ["Lighting", "Genny op", 360],
     ["Grip", "Key grip", 450], ["Grip", "Grip", 380], ["Grip", "Assistant grip", 310],
@@ -660,11 +661,11 @@ var RATES = {
     ["Post", "Editor", 420], ["Post", "Assistant editor", 250]] }
 };
   var rt = document.getElementById("rt"); if (!rt) return;
-  var G = document.getElementById("rtG"), deal = document.getElementById("rtDeal"), card = "APA commercials", N = document.getElementById("rtN"), C = document.getElementById("rtCard");
+  var G = document.getElementById("rtG"), deal = document.getElementById("rtDeal"), card = "APA", N = document.getElementById("rtN"), C = document.getElementById("rtCard"), SRC = document.getElementById("rtSrc");
   var BY = { camera: "1st AC, focus puller", spark: "Spark", grip: "Grip", sound: "Sound recordist", dit: "DIT", gaffer: "Gaffer", art: "Art director", costume: "Costume supervisor", hmu: "HMU artist", locations: "Location manager", runner: "Runner", editor: "Editor", dop: "Camera operator", prod: "Spark", pm: "Spark", dir: "1st AD" };
   function rateOf(g) { var r = RATES[card].rows.filter(function (x) { return x[1] === g; })[0]; return r ? r[2] : 0; }
   function fill(g) { var dep = "", h = ""; RATES[card].rows.forEach(function (r) { if (r[0] !== dep) { h += (dep ? "</optgroup>" : "") + '<optgroup label="' + r[0] + '">'; dep = r[0]; } h += '<option' + (r[1] === g ? " selected" : "") + ">" + r[1] + "</option>"; }); G.innerHTML = h + "</optgroup>"; if (!G.value) G.selectedIndex = 2; }
-  function note() { var c = rateOf(G.value), d = Math.round(Number(deal.value) || 0) - c; C.textContent = c ? "£" + c : "Own deal"; N.textContent = !c ? "Own deal. Put in what you agreed." : !d ? "On the card." : "£" + Math.abs(d) + (d > 0 ? " above" : " below") + " the card. Overtime is worked out from your deal."; }
+  function note() { var c = rateOf(G.value), d = Math.round(Number(deal.value) || 0) - c, row = RATES[card].rows.filter(function (x) { return x[1] === G.value; })[0] || []; C.textContent = c ? "£" + c : "Own deal"; if (SRC) SRC.textContent = card === "APA" ? (row[4] ? "APA card from 1 September 2026" + (row[3] ? ", overtime " + row[3] + "x." : ".") : "Preview figure, checked against the APA card before launch.") : "Preview figure, checked against the current Bectu card before launch."; N.textContent = !c ? "Own deal. Put in what you agreed." : !d ? "On the card." : "£" + Math.abs(d) + (d > 0 ? " above" : " below") + " the card. Overtime is worked out from your deal."; }
   function pick(fillDeal) { var c = rateOf(G.value); if (fillDeal && c) deal.value = c; note(); }
   rt.addEventListener("click", function (e) { var b = e.target.closest("[data-rc]"); if (!b) return; card = b.getAttribute("data-rc"); rt.querySelectorAll("[data-rc]").forEach(function (x) { x.setAttribute("aria-checked", String(x === b)); }); fill(G.value); pick(true); });
   G.addEventListener("change", function () { pick(true); }); deal.addEventListener("input", note);

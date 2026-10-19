@@ -205,19 +205,20 @@ function todo() {
    summarised in our research; they still need checking against the source PDFs. Every line shows its working and
    the person can add an adjustment, so the timesheet stays their own declaration. */
 var TERMS = ["APA", "TV drama", "Flat day"];
-/* Rate cards: a day rate for every grade, so crew pick their grade and the rate fills in. Preview figures: check each against the current card before launch. 0 = own deal. */
+/* Rate cards: a day rate for every grade, so the rate fills in once the grade is picked. Row: [department, grade, day rate, overtime multiplier (0 = by day rate), 1 if the figure is from the current card]. 0 rate = own deal.
+   APA: card from 1 September 2026 where marked; the rest are preview figures to check against the card. Bectu: preview figures to check against the current Pact/Bectu cards. */
 var RATES = {
-  "APA commercials": { basis: "10 hour day plus an hour's lunch", rows: [
-    ["Camera", "Director of photography", 0], ["Camera", "Camera operator", 650], ["Camera", "1st AC, focus puller", 480], ["Camera", "2nd AC, clapper loader", 380], ["Camera", "DIT", 450], ["Camera", "Video playback", 380], ["Camera", "Camera trainee", 200],
-    ["Lighting", "Gaffer", 560], ["Lighting", "Best boy", 480], ["Lighting", "Desk op", 512], ["Lighting", "Spark", 443], ["Lighting", "Genny op", 443],
-    ["Grip", "Key grip", 520], ["Grip", "Grip", 440], ["Grip", "Assistant grip", 360],
-    ["Sound", "Sound recordist", 520], ["Sound", "Boom op", 400], ["Sound", "Sound assistant", 300],
-    ["Art", "Production designer", 0], ["Art", "Art director", 450], ["Art", "Standby props", 380], ["Art", "Props", 350], ["Art", "Art assistant", 250],
-    ["Costume", "Costume designer", 450], ["Costume", "Costume supervisor", 380], ["Costume", "Costume assistant", 300],
-    ["Hair and make-up", "HMU designer", 450], ["Hair and make-up", "HMU artist", 380], ["Hair and make-up", "HMU assistant", 280],
-    ["Production", "Production manager", 450], ["Production", "Production coordinator", 300], ["Production", "1st AD", 600], ["Production", "2nd AD", 400], ["Production", "3rd AD", 300], ["Production", "Location manager", 400], ["Production", "Unit manager", 300], ["Production", "Runner", 180],
-    ["Post", "Editor", 450], ["Post", "Assistant editor", 280]] },
-  "Film and TV": { basis: "Pact/Bectu, 10 hours plus lunch, a day of the weekly rate", rows: [
+  "APA": { basis: "10 hours plus an hour's lunch, or 9 continuous", rows: [
+    ["Camera", "Director of photography", 0, 1], ["Camera", "Camera operator", 656, 1.25, 1], ["Camera", "1st AC, focus puller", 575, 1.25, 1], ["Camera", "2nd AC, clapper loader", 448, 1.5, 1], ["Camera", "DIT", 527, 1.25, 1], ["Camera", "Video playback", 391, 0], ["Camera", "Camera trainee", 206, 0],
+    ["Lighting", "Gaffer", 585, 1.25, 1], ["Lighting", "Best boy", 494, 0], ["Lighting", "Desk op", 527, 0], ["Lighting", "Spark", 457, 1.5, 1], ["Lighting", "Genny op", 457, 0],
+    ["Grip", "Key grip", 575, 1.25, 1], ["Grip", "Grip", 526, 1.25, 1], ["Grip", "Assistant grip", 371, 0],
+    ["Sound", "Sound recordist", 536, 0], ["Sound", "Boom op", 412, 0], ["Sound", "Sound assistant", 309, 0],
+    ["Art", "Production designer", 0, 0], ["Art", "Art director", 464, 0], ["Art", "Standby props", 391, 0], ["Art", "Props", 361, 0], ["Art", "Art assistant", 258, 0],
+    ["Costume", "Costume designer", 464, 0], ["Costume", "Costume supervisor", 391, 0], ["Costume", "Costume assistant", 309, 0],
+    ["Hair and make-up", "HMU designer", 464, 0], ["Hair and make-up", "HMU artist", 391, 0], ["Hair and make-up", "HMU assistant", 288, 0],
+    ["Production", "Production manager", 464, 0], ["Production", "Production coordinator", 309, 0], ["Production", "1st AD", 618, 0], ["Production", "2nd AD", 412, 0], ["Production", "3rd AD", 309, 0], ["Production", "Location manager", 412, 0], ["Production", "Unit manager", 309, 0], ["Production", "Runner", 245, 1, 1],
+    ["Post", "Editor", 464, 0], ["Post", "Assistant editor", 288, 0]] },
+  "Bectu": { basis: "Pact/Bectu film and TV, 10 hours plus lunch, a day of the weekly rate", rows: [
     ["Camera", "Director of photography", 0], ["Camera", "Camera operator", 560], ["Camera", "1st AC, focus puller", 420], ["Camera", "2nd AC, clapper loader", 320], ["Camera", "DIT", 380], ["Camera", "Video playback", 320], ["Camera", "Camera trainee", 180],
     ["Lighting", "Gaffer", 470], ["Lighting", "Best boy", 400], ["Lighting", "Desk op", 420], ["Lighting", "Spark", 360], ["Lighting", "Genny op", 360],
     ["Grip", "Key grip", 450], ["Grip", "Grip", 380], ["Grip", "Assistant grip", 310],
@@ -228,14 +229,19 @@ var RATES = {
     ["Production", "Production manager", 420], ["Production", "Production coordinator", 280], ["Production", "1st AD", 520], ["Production", "2nd AD", 360], ["Production", "3rd AD", 270], ["Production", "Location manager", 380], ["Production", "Unit manager", 290], ["Production", "Runner", 160],
     ["Post", "Editor", 420], ["Post", "Assistant editor", 250]] }
 };
-function cardOf(t) { return t === "TV drama" || t === "TV and film" ? "Film and TV" : "APA commercials"; }
+function cardOf(t) { return t === "TV drama" || t === "TV and film" ? "Bectu" : "APA"; }
+function cardRow(card, g) { return RATES[card].rows.find(function (x) { return x[1] === g; }) || null; }
+/* Terms are stored as before; Pact/Bectu film and TV shows as Bectu. */
+var TLAB = { "TV drama": "Bectu" };
+function tlab(t) { return TLAB[t] || t; }
 function cardRate(card, g) { var r = RATES[card].rows.find(function (x) { return x[1] === g; }); return r ? r[2] : null; }
 function gradeOpts(card, cur) { var h = '<option value="">Pick a grade</option>', dep = ""; RATES[card].rows.forEach(function (r) { if (r[0] !== dep) { h += (dep ? "</optgroup>" : "") + '<optgroup label="' + esc(r[0]) + '">'; dep = r[0]; } h += '<option value="' + esc(r[1]) + '"' + (r[1] === cur ? " selected" : "") + ">" + esc(r[1]) + (r[2] ? ", £" + r[2] : ", own deal") + "</option>"; }); return h + "</optgroup>"; }
 function gradeNote(card, g, rate) {
   if (!g) return "Pick it and the " + card + " rate fills in. Change it to your own deal any time.";
   var c = cardRate(card, g), d = num(rate) - (c || 0);
   if (!c) return "Own deal on the " + card + " card. Put in what you agreed.";
-  return card + " card: £" + c + " a day, " + RATES[card].basis + "." + (rate !== "" && rate != null && Math.abs(d) >= 1 ? " Your deal is £" + Math.abs(d) + (d > 0 ? " above" : " below") + " the card." : "") + " Preview figure, to check against the current card.";
+  var row = cardRow(card, g), ot = row && row[3] ? " Overtime " + row[3] + "x." : "";
+  return card + " card: £" + c + " a day, " + RATES[card].basis + "." + ot + (rate !== "" && rate != null && Math.abs(d) >= 1 ? " Your deal is £" + Math.abs(d) + (d > 0 ? " above" : " below") + " the card." : "") + (row && row[4] ? " From the APA card, 1 Sept 2026." : " Preview figure, to check against the current card.");
 }
 function gradeField(id, label, card, cur, rateId, rate) { return '<div class="field"><label for="' + id + '">' + label + '</label><select id="' + id + '" data-rate="' + rateId + '" data-card="' + esc(card) + '">' + gradeOpts(card, cur) + '</select><span class="q gnote" id="' + id + '-n">' + esc(gradeNote(card, cur, rate)) + "</span></div>"; }
 /* Grade picked: fill the day rate from the card. Rate typed: say how the deal sits against the card. */
@@ -248,11 +254,11 @@ function swapCard(id, card) { var sel = $(id); if (!sel || sel.dataset.card === 
 function rateSheet(card) {
   card = card || cardOf(D.settings.work === "TV and film" ? "TV drama" : "APA"); var me = D.settings.grade, dep = "";
   return "<h2>Rate cards</h2><p class=\"q\">Every grade, already in. Tap yours and it becomes your day rate. You can always change it to your own deal.</p>" + pills("rcard", Object.keys(RATES), card) +
-    '<p class="note">' + esc(RATES[card].basis) + ". Preview figures: each one gets checked against the current card before launch.</p>" +
-    '<div class="rows rc">' + RATES[card].rows.map(function (r) { var h = r[0] !== dep ? '<div class="row static rc-d"><span class="part">' + esc(r[0]) + "</span></div>" : ""; dep = r[0]; return h + '<button class="row rc-r" data-usegrade="' + esc(r[1]) + '" data-card="' + esc(card) + '"><span>' + esc(r[1]) + "</span>" + (me === r[1] ? '<span class="tag ok">You</span>' : "") + '<span class="q">' + (r[2] ? "£" + r[2] : "own deal") + "</span></button>"; }).join("") + "</div>" +
+    '<p class="note">' + esc(RATES[card].basis) + ". " + (card === "APA" ? "Figures marked ✓ are from the card. The rest are preview figures, checked before launch." : "Preview figures: each one gets checked against the current card before launch.") + "</p>" +
+    '<div class="rows rc">' + RATES[card].rows.map(function (r) { var h = r[0] !== dep ? '<div class="row static rc-d"><span class="part">' + esc(r[0]) + "</span></div>" : ""; dep = r[0]; return h + '<button class="row rc-r" data-usegrade="' + esc(r[1]) + '" data-card="' + esc(card) + '"><span>' + esc(r[1]) + "</span>" + (me === r[1] ? '<span class="tag ok">You</span>' : "") + '<span class="q">' + (r[2] ? "£" + r[2] : "own deal") + (r[4] ? " ✓" : "") + "</span></button>"; }).join("") + "</div>" +
     '<div class="acts"><button class="btn wide" data-close>Done</button></div>';
 }
-var TERMN = { "APA": "APA crew terms (commercials)", "TV drama": "Pact/Bectu TV drama (PAYE)", "Flat day": "Flat day rate, all in" };
+var TERMN = { "APA": "APA crew terms (commercials)", "TV drama": "Bectu: Pact/Bectu film and TV drama (PAYE)", "Flat day": "Flat day rate, all in" };
 var LUNCH = { "APA": ["1 hour", "30 min", "None"], "TV drama": ["1 hour", "Semi-continuous", "Continuous"], "Flat day": ["1 hour", "30 min", "None"] };
 var DAYTYPE = { "APA": ["Normal", "Bank holiday", "Prep or recce"], "TV drama": ["Normal", "6th day"], "Flat day": ["Normal"] };
 var SOURCES = ["Call sheet", "AD's times", "My own"];
@@ -263,12 +269,17 @@ function roundUp(m, inc) { return Math.ceil(m / inc) * inc; }
 function hrs(m) { var h = Math.round(m / 60 * 100) / 100; return h + (h === 1 ? " hr" : " hrs"); }
 function pounds(n) { return "£" + (Math.round(n * 100) / 100).toLocaleString("en-GB", { minimumFractionDigits: n % 1 ? 2 : 0, maximumFractionDigits: 2 }); }
 function dayLabel(s) { var d = parse(s); return d ? DOW[d.getDay()] + " " + nice(s) : ""; }
-/* APA overtime rate depends on the day rate band. */
-function apaBand(rate) { return rate <= 458 ? { m: 1.5, t: "up to £458" } : rate <= 696 ? { m: 1.25, t: "£459 to £696" } : { m: 1, t: "£697 and up" }; }
+/* APA overtime grade: set per grade on the card (Grade I 1.5x, II 1.25x, III 1x); for a grade we don't have, worked out from the day rate. */
+var OTG = { 1.5: "Grade I", 1.25: "Grade II", 1: "Grade III" };
+function apaBand(rate, grade) {
+  var row = grade ? cardRow("APA", grade) : null;
+  if (row && row[3]) return { m: row[3], t: OTG[row[3]] + " for " + grade };
+  var m = rate <= 472 ? 1.5 : rate <= 717 ? 1.25 : 1; return { m: m, t: OTG[m] + " by your day rate" };
+}
 function termsLine(b) {
   var R = num(b.rate), hr = R / 10;
-  if (b.terms === "APA") { var a = apaBand(R); return "APA crew terms. Your day rate is in the " + a.t + " band, so overtime is " + a.m + "x the hourly rate (" + pounds(hr * a.m) + " an hour), in half hours. 10 hour day plus an hour's lunch."; }
-  if (b.terms === "TV drama") return "Pact/Bectu TV drama. Overtime at 1.5x (" + pounds(Math.min(70, Math.max(35, hr * 1.5))) + " an hour, kept between £35 and £70), in quarter hours. 10 hour day plus lunch, 9.5 semi-continuous, 9 continuous" + (b.extra ? ", plus your additional contracted hour" : "") + ".";
+  if (b.terms === "APA") { var a = apaBand(R, b.grade); return "APA crew terms. Overtime is " + a.t + ", " + a.m + "x the hourly rate (" + pounds(hr * a.m) + " an hour), in half hours, and 3x from midnight to 05:00. 10 hours plus an hour's lunch, or 9 hours continuous."; }
+  if (b.terms === "TV drama") return "Bectu, Pact/Bectu film and TV drama. Overtime at 1.5x (" + pounds(Math.min(70, Math.max(35, hr * 1.5))) + " an hour, kept between £35 and £70), in quarter hours. 10 hour day plus lunch, 9.5 semi-continuous, 9 continuous" + (b.extra ? ", plus your additional contracted hour" : "") + ".";
   return "Flat day rate, all in. Hours are logged as a record; no overtime is added unless you add it.";
 }
 function calcDay(x, b) {
@@ -287,11 +298,11 @@ function calcDay(x, b) {
       var mult = x.type === "Bank holiday" || dow === 0 ? 2 : dow === 6 ? 1.5 : 1;
       L.push([mult === 1 ? "Day rate" : (mult === 2 ? (dow === 0 ? "Sunday" : "Bank holiday") : "Saturday") + " day rate at " + mult + "x", R * mult]);
       if (mult === 2 && dow === 0) F.push("Sunday rate: some summaries say 1.5x, not 2x. Check your deal.");
-      var band = apaBand(R), otr = hr * band.m;
+      var band = apaBand(R, b.grade), otr = hr * band.m;
       if (c < 420) { var p = roundUp(420 - c, 30); L.push(["Early call, " + hrs(p) + " before 07:00 at " + band.m + "x", p / 60 * otr]); }
       var start = c >= 660 && c < 1020 ? 660 : c;
       if (start !== c) F.push("Late call: the day is counted from 11:00.");
-      var ots = start + 600 + lunchM, ot = Math.max(0, w - ots);
+      var ots = start + (lunchM ? 600 + lunchM : 540), ot = Math.max(0, w - ots);
       if (ot > 0) {
         var after = Math.max(0, w - Math.max(ots, 1440)), norm = ot - after;
         if (norm > 0) { var n = roundUp(norm, 30); L.push(["Overtime from " + hm(ots) + ", " + hrs(n) + " at " + band.m + "x", n / 60 * otr]); }
@@ -389,7 +400,7 @@ var TABN = { home: "Home", bookings: "Bookings", money: "Money", more: "You" };
 function banner(t) { var b = $("banner"); b.textContent = t; b.classList.add("on"); clearTimeout(banner.t); banner.t = setTimeout(function () { b.classList.remove("on"); }, 2600); }
 function openSheet(h) { $("sheet").innerHTML = '<span class="grab"></span>' + h; $("sheet").classList.add("on"); $("shade").classList.add("on"); var f = $("sheet").querySelector("input,button"); if (f && window.innerWidth >= 900) f.focus(); }
 function closeSheet() { $("sheet").classList.remove("on"); $("shade").classList.remove("on"); }
-function pills(name, opts, cur) { return '<div class="pills" data-group="' + name + '">' + opts.map(function (o) { return '<button type="button" class="pill" data-pick="' + esc(name) + '" data-v="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(o) + "</button>"; }).join("") + "</div>"; }
+function pills(name, opts, cur) { return '<div class="pills" data-group="' + name + '">' + opts.map(function (o) { return '<button type="button" class="pill" data-pick="' + esc(name) + '" data-v="' + esc(o) + '" aria-pressed="' + (cur === o) + '">' + esc(name === "terms" || name === "cterms" ? tlab(o) : o) + "</button>"; }).join("") + "</div>"; }
 function field(id, label, val, type, ph, extra) { return '<div class="field"><label for="' + id + '">' + label + '</label><input id="' + id + '" name="' + id + '" type="' + (type || "text") + '" value="' + esc(val) + '" placeholder="' + esc(ph || "") + '" autocomplete="off"' + (extra || "") + "></div>"; }
 function val(id) { var e = $(id); return e ? e.value.trim() : ""; }
 function picked(name) { var b = $("sheet").querySelector('[data-pick="' + name + '"][aria-pressed="true"]') || document.querySelector('main [data-pick="' + name + '"][aria-pressed="true"]'); return b ? b.dataset.v : ""; }
@@ -450,9 +461,9 @@ function job() { var k = D && D.settings && D.settings.job; return JOBS.find(fun
 function startJob(k) {
   var j = JOBS.find(function (x) { return x.k === k; }); if (!j) return false;
   mode = "demo"; D = sample();
-  var s = D.settings; s.name = "Sam Carter"; s.addr = "Unit 4, 12 Canal Yard, London E2 9AB"; s.bank = "Sort code 12-34-56, account 12345678 (sample)"; s.role = j.role === "DP or HOD" ? "DP" : j.role; s.rate = j.rate; s.job = j.k; s.work = "Both";
-  D.bookings.forEach(function (b) { if (b.rate === "650") b.rate = j.rate; if (j.kit && b.id === "b6") b.kit = j.kit; if (!j.kit) b.kit = ""; });
-  D.offers = j.k === "prod" || j.k === "pm" ? [] : OFFERS.map(function (o) { return { id: o[0], start: iso(addDays(today(), o[1])), days: o[2], client: o[3], production: o[4], via: o[5], from: o[6], message: o[7], loc: o[8], call: o[9], dp: o[10], dir: o[11], rate: j.rate }; });
+  var s = D.settings; s.name = "Sam Carter"; s.addr = "Unit 4, 12 Canal Yard, London E2 9AB"; s.bank = "Sort code 12-34-56, account 12345678 (sample)"; s.role = j.role === "DP or HOD" ? "DP" : j.role; s.rate = j.rate; s.job = j.k; s.work = "Both"; s.grade = JOBGRADE[j.k] || ""; var gr = s.grade && cardRate("APA", s.grade); if (gr) s.rate = String(gr);
+  D.bookings.forEach(function (b) { if (b.rate === "650") { b.rate = s.rate; b.grade = s.grade; } if (j.kit && b.id === "b6") b.kit = j.kit; if (!j.kit) b.kit = ""; });
+  D.offers = j.k === "prod" || j.k === "pm" ? [] : OFFERS.map(function (o) { var t = o[0] === "o2" ? "TV drama" : "APA", c = s.grade ? cardRate(cardOf(t), s.grade) : 0; return { id: o[0], start: iso(addDays(today(), o[1])), days: o[2], client: o[3], production: o[4], via: o[5], from: o[6], message: o[7], loc: o[8], call: o[9], dp: o[10], dir: o[11], terms: t, rate: c || j.rate }; });
   s.fields = (FSUG[j.k] || ["Parking"]).slice(0, 2).join("|");
   D.bookings.forEach(function (b) { if (b.id === "b2") b.message = "Pencilling you for this one. The band are waiting on the label and should know by Wednesday."; if (b.id === "b3") b.message = "Second hold, behind another job. We'll let you know either way by Friday."; });
   flag("eltio-systems-tour-1", "1");
@@ -471,7 +482,9 @@ function jobSheet(i) {
 
 
 /* ---------- the dashboard you open on: your diary and offers (crew), your shoot (producers) ---------- */
-var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory", "Maya, producer", "Hi Sam, found you in the directory. One day on a sportswear spot, two cameras on a stage in E2. Could you hold it until Thursday? Happy to send the treatment.", "Canal St Studios, E2", "07:00", "Jonah A.", "Mara Q."], ["o2", 4, "2", "Northlight Films", "Car commercial", "Via your agent", "Your agent, for Northlight", "Northlight want you for two days on a car commercial in Kent. Day two is a night shoot on the seafront. They asked if you can do a recce the Friday before.", "Margate seafront, Kent", "05:30", "Ade O.", "Lena K."]];
+/* Each sample job's grade on the card, so its rate comes from the card. */
+var JOBGRADE = { camera: "1st AC, focus puller", gaffer: "Gaffer", spark: "Spark", grip: "Grip", sound: "Sound recordist", dit: "DIT", art: "Art director", costume: "Costume designer", hmu: "HMU artist", locations: "Location manager", runner: "Runner", editor: "Editor" };
+var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory", "Maya, producer", "Hi Sam, found you in the directory. One day on a sportswear spot, two cameras on a stage in E2. Could you hold it until Thursday? Happy to send the treatment.", "Canal St Studios, E2", "07:00", "Jonah A.", "Mara Q."], ["o2", 4, "2", "Northlight Films", "Drama, second unit", "Via your agent", "Your agent, for Northlight", "Northlight want you for two days of second unit on their drama in Kent, on Bectu terms. Day two is a night shoot on the seafront. They asked if you can do a recce the Friday before.", "Margate seafront, Kent", "05:30", "Ade O.", "Lena K."]];
 /* The person behind each offer, so it reads like someone asking, not a form. */
 var PEOPLE = {
   o1: { n: "Maya Lindqvist", s: "Maya", ini: "ML", h: 18, role: "Producer, Halde Films", bio: "Produces sportswear and music films, mostly on stage in east London. Small crews, proper lunches, wraps on time.", made: "Fieldwear spring spot, Canal promo, Low Tide 'Haze'", know: "Ana R. and Leon B. have worked with her", pays: "In 9 days, on average" },
@@ -492,7 +505,7 @@ function cfRows(f, editable) { var mine = myFields(); return '<div class="sum cf
 function infoBlock(x, editable) {
   var f = parseF(x.fields);
   return (x.message ? '<div class="dm">' + (PEOPLE[x.id] ? '<span class="dm-h">' + av(PEOPLE[x.id]) + '<span class="part">' + esc(PEOPLE[x.id].s) + ", just now</span></span>" : '<span class="part">' + esc(x.from || "From the producer") + "</span>") + '<p>' + esc(x.message) + "</p></div>" : "") +
-    (x.loc ? '<div class="sum"><div><span class="q">Where</span><span>' + esc(x.loc) + '</span></div><div><span class="q">Call</span><span>' + esc(x.call) + '</span></div><div><span class="q">' + keyLab() + '</span><span>' + esc(keyLab() === "DP" ? x.dp : x.dir) + '</span></div><div><span class="q">Rate</span><span>£' + esc(x.rate || D.settings.rate) + " a day, APA</span></div></div>" : "") +
+    (x.loc ? '<div class="sum"><div><span class="q">Where</span><span>' + esc(x.loc) + '</span></div><div><span class="q">Call</span><span>' + esc(x.call) + '</span></div><div><span class="q">' + keyLab() + '</span><span>' + esc(keyLab() === "DP" ? x.dp : x.dir) + '</span></div><div><span class="q">Rate</span><span>£' + esc(x.rate || D.settings.rate) + " a day, " + esc(tlab(x.terms || "APA")) + " terms</span></div></div>" : "") +
     '<div class="part">Your fields</div>' + cfRows(f, editable) +
     (editable ? '<div class="cf-add"><input id="cf-new" placeholder="New field, e.g. Camera body" autocomplete="off"><button class="btn sm" data-addfield>Add</button></div><div class="pills">' + fieldSug().slice(0, 4).map(function (n) { return '<button type="button" class="pill" data-addfield="' + esc(n) + '">+ ' + esc(n) + "</button>"; }).join("") + "</div>" : "");
 }
@@ -603,7 +616,7 @@ function takeOffer(id, st) {
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
   if (inSheet) closeSheet();
   D.offers = D.offers.filter(function (x) { return x.id !== id; });
-  if (st) D.bookings.push({ message: o.message, fields: fl, notes: [o.loc, o.call ? "call " + o.call : "", o.dp ? keyLab() + " " + (keyLab() === "DP" ? o.dp : o.dir) : ""].filter(Boolean).join(", "), id: uid(), start: o.start, end: num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "", client: o.client, production: o.production, contact: "producer@example.com", status: st, rate: D.settings.rate, days: o.days, agent: /agent/.test(o.via) ? "yes" : "", terms: "APA" });
+  if (st) D.bookings.push({ message: o.message, fields: fl, notes: [o.loc, o.call ? "call " + o.call : "", o.dp ? keyLab() + " " + (keyLab() === "DP" ? o.dp : o.dir) : ""].filter(Boolean).join(", "), id: uid(), start: o.start, end: num(o.days) > 1 ? iso(addDays(parse(o.start), num(o.days) - 1)) : "", client: o.client, production: o.production, contact: "producer@example.com", status: st, rate: o.rate || D.settings.rate, grade: D.settings.grade || "", days: o.days, agent: /agent/.test(o.via) ? "yes" : "", terms: o.terms || "APA" });
   demoSave(); render();
   var who = PEOPLE[id] ? PEOPLE[id].s : "The producer";
   banner((st === "Confirmed" ? "You're in. It's in your diary, and " + who + " gets your yes and your passport." : st ? "Held. " + who + " sees you as Pencilled." : "A kind no is drafted to " + who + ", so the door stays open.") + (reply ? " Your message is drafted with it." : ""));
@@ -731,7 +744,7 @@ function more() {
     '<div class="sum"><div><span class="q">Signed in</span><span>' + (mode === "demo" ? "Sample data, this browser only" : esc(G.email || "Google")) + '</span></div><div><span class="q">Your data</span><span>' + (mode === "demo" ? "Not saved to Drive" : "In your Google Drive") + '</span></div><div><span class="q">Grade</span><span>' + esc(s.grade || "Not picked yet") + '</span></div><div><span class="q">Day rate</span><span>' + money(num(s.rate)) + '</span></div><div><span class="q">Terms</span><span>' + esc(s.terms || 30) + ' days</span></div><div><span class="q">Email</span><span>' + esc(s.mail || "Gmail") + '</span></div><div><span class="q">Agent</span><span>' + (s.hasAgent === "Yes" ? esc(s.agent || "Yes") : "None") + "</span></div></div>" +
     (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-features><span>Everything Systems runs</span><span class="q">26</span><span class="sub">Advance invoices, crew checks, permits, rights, deliverables, the books.</span></button><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
     '<div class="part">Linked</div><div class="rows"><button class="row" data-links=""><span>Accounts, bank and calendar</span><span class="q">' + (linked().length ? linked().length + " linked" : "None yet") + '</span><span class="sub">Xero, QuickBooks, FreeAgent, Monzo or any UK bank, Google or Apple Calendar.</span></button><button class="row" data-onbon><span>Set up your dashboard</span><span class="q">Checklist</span><span class="sub">Put the setup steps back on your home screen.</span></button></div>' +
-    '<div class="rows"><button class="row" data-rates><span>Rate cards, every grade</span><span class="q">APA · Pact/Bectu</span><span class="sub">Pick your grade and the day rate fills in. Change it to your own deal any time.</span></button></div>' +
+    '<div class="rows"><button class="row" data-rates><span>Rate cards, every grade</span><span class="q">APA · Bectu</span><span class="sub">Pick your grade and the day rate fills in. Change it to your own deal any time.</span></button></div>' +
     '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
     '<div class="part">Where your work lives</div>' + (roleKey() === "Producer"
@@ -865,8 +878,8 @@ function dayForm(b, x) {
 /* Producers: check one crew day against the rules before paying an invoice. Nothing is saved. */
 function checkForm() {
   return "<h2>Check a crew day</h2><p class=\"q\">Put in what's on their timesheet. Nothing here is saved.</p>" +
-    gradeField("c-grade", "Their grade", "APA commercials", "Spark", "c-rate", "443") +
-    '<div class="grid2">' + field("c-rate", "Their day rate (£)", "443", "number", "", ' inputmode="numeric"') + field("c-claim", "They invoiced for this day (£)", "", "number", "", ' inputmode="decimal"') + "</div>" +
+    gradeField("c-grade", "Their grade", "APA", "Spark", "c-rate", "457") +
+    '<div class="grid2">' + field("c-rate", "Their day rate (£)", "457", "number", "", ' inputmode="numeric"') + field("c-claim", "They invoiced for this day (£)", "", "number", "", ' inputmode="decimal"') + "</div>" +
     '<div class="field"><span class="lab">Terms</span>' + pills("cterms", TERMS, "APA") + "</div>" + field("c-date", "Date", iso(today()), "date") +
     '<div class="grid2">' + field("c-call", "Call", "07:00", "time") + field("c-wrap", "Wrap", "20:30", "time") + "</div>" +
     '<div class="field"><span class="lab">Lunch</span>' + pills("clunch", ["1 hour", "30 min", "None"], "1 hour") + "</div>" + field("c-lunchAt", "Lunch called at", "", "time") +
@@ -875,7 +888,7 @@ function checkForm() {
 }
 function liveCheck() {
   var c = $("ccalc"); if (!c) return;
-  var b = { rate: val("c-rate"), terms: picked("cterms") || "APA", kit: val("c-kit") }, r = calcDay({ date: val("c-date"), call: val("c-call"), wrap: val("c-wrap"), lunch: picked("clunch") || "1 hour", lunchAt: val("c-lunchAt"), miles: val("c-miles"), type: "Normal" }, b), claim = num(val("c-claim"));
+  var b = { rate: val("c-rate"), grade: val("c-grade"), terms: picked("cterms") || "APA", kit: val("c-kit") }, r = calcDay({ date: val("c-date"), call: val("c-call"), wrap: val("c-wrap"), lunch: picked("clunch") || "1 hour", lunchAt: val("c-lunchAt"), miles: val("c-miles"), type: "Normal" }, b), claim = num(val("c-claim"));
   var diff = claim ? claim - r.total : 0;
   c.innerHTML = calcHtml(r) + (claim ? '<p class="note' + (Math.abs(diff) >= 1 ? " amb" : "") + '">' + (Math.abs(diff) < 1 ? "Their invoice matches." : "Their invoice is " + pounds(Math.abs(diff)) + (diff > 0 ? " over" : " under") + " what the rules work out.") + "</p>" : "");
 }

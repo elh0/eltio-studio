@@ -18,9 +18,21 @@
 
   /* ---- timecode in the nav follows the shoot day; the line under it fills as you scroll ---- */
   var steps = $$("[data-tc]"), tc = $("#tc b"), prog = $("#prog");
+  /* the stuck app screen beside "How it works" holds a copy of each step's card */
+  var stack = $("#devStack"), dots = $("#devDots"), devTc = $("#devTc"), cur = -1;
+  steps.forEach(function (el, i) { var m = $(".mini", el).cloneNode(true); m.setAttribute("data-i", i); stack.appendChild(m); dots.insertAdjacentHTML("beforeend", "<i></i>"); });
+  function setStep(i) {
+    if (i === cur) return; cur = i;
+    $$(".mini", stack).forEach(function (m, j) { m.classList.toggle("on", j === i); });
+    $$("i", dots).forEach(function (d, j) { d.classList.toggle("on", j === i); });
+    steps.forEach(function (el, j) { el.classList.toggle("cur", j === i); });
+    devTc.textContent = steps[i].getAttribute("data-tc");
+  }
+  setStep(0);
   function onScroll() {
-    var mid = innerHeight * 0.5, t = "Award";
-    steps.forEach(function (el) { if (el.getBoundingClientRect().top < mid) t = el.getAttribute("data-tc"); });
+    var mid = innerHeight * 0.5, t = "Award", si = 0;
+    steps.forEach(function (el, i) { if (el.getBoundingClientRect().top < mid) { t = el.getAttribute("data-tc"); si = i; } });
+    setStep(si);
     if (tc.textContent !== t) tc.textContent = t;
     var h = document.documentElement.scrollHeight - innerHeight; prog.style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
   }
@@ -39,7 +51,9 @@
   watch($("#live"), 200);
   $$(".sec-h, .nums-after, .all-h p, .drive-copy > *, .close > *").forEach(function (el) { watch(el); });
   $$(".num").forEach(function (el, i) { watch(el, i * 90); });
-  $$(".step").forEach(function (s) { $$(".when, .what, .mini", s).forEach(function (el, i) { watch(el, i * 80); }); });
+  $$(".step").forEach(function (s) { $$(".mini", s).forEach(function (el) { watch(el, 160); }); });
+  $$(".cl-h > *, .cr-copy > *, .cl").forEach(function (el, i) { watch(el, (i % 3) * 80); });
+  watch($("#cr"), 160);
   $$(".sheet, .qa details").forEach(function (el, i) { watch(el, (i % 6) * 60); });
 
   /* ---- the live thing: drag the wrap ---- */
@@ -64,6 +78,42 @@
   /* a gentle hint that it moves, once, if nobody has touched it */
   var touched = false; wrap.addEventListener("pointerdown", function () { touched = true; });
   if (!reduce) setTimeout(function () { if (touched) return; var s = [2, 4, 6, 4, 2, 0], i = 0; (function step() { if (touched || i >= s.length) return; wrap.value = s[i++]; drawLive(); setTimeout(step, 420); })(); }, 1600);
+
+  /* ---- the client's extra: cost it, send it, they approve, it's logged ---- */
+  var CR = [["32 crew, 2 hrs overtime at 1.5x", 3840], ["Canal location fee", 1200], ["Unit move, van and parking", 180]], crTot = 5220;
+  var crBtn = $("#crBtn"), crBody = $("#crBody"), crTag = $("#crTag"), crLab = $("#crLab"), crReset = $("#crReset"), crS = 0;
+  function crStep() {
+    crS++;
+    if (crS === 1) {
+      crTag.textContent = "Costed"; crLab.textContent = "On set · 14:22"; crBody.innerHTML = '<div data-rows></div><div class="bigline"><span class="lab">The extra</span><b data-t>£0</b></div>';
+      var R = $("[data-rows]", crBody); CR.forEach(function (x, i) { later(function () { R.insertAdjacentHTML("beforeend", '<div class="ln"><span>' + x[0] + "</span><b>" + gbp2(x[1]) + "</b></div>"); }, 150 + i * 300); });
+      later(function () { countUp($("[data-t]", crBody), crTot, function (v) { return gbp2(v); }, 700); }, 1050);
+      crBtn.textContent = "Send it for approval";
+    } else if (crS === 2) {
+      crTag.textContent = "Sent"; crLab.textContent = "On set · 14:23";
+      crBody.innerHTML = '<p class="lab" style="margin-bottom:8px">What the agency sees, no login</p><div class="client-view"><span class="lab">Northbound Films · Sportswear spot</span><b style="font:400 20px/1.2 var(--disp)">Canal shot after lunch: ' + gbp2(crTot) + '</b><span>Two hours' + "'" + ' overtime for the unit, the location fee and the unit move.</span><div class="opts"><span class="yes">Approve</span><span>Ask a question</span></div></div>';
+      crBtn.textContent = "The agency taps approve";
+    } else if (crS === 3) {
+      var y = $(".opts .yes", crBody); if (y) y.classList.add("tap");
+      later(function () {
+        crTag.textContent = "Approved"; crTag.className = "tag ok"; crLab.textContent = "On set · 14:31";
+        crBody.innerHTML = kv("Approved by", "Sam, agency producer") + kv("When", "14:31, in writing") + kv("Logged to", "Locations line") + '<div class="bigline"><span class="lab">Budget now</span><b data-t>£84,000</b></div>';
+        countUp($("[data-t]", crBody), 84000 + crTot, function (v) { return gbp2(Math.round(v)); }, 900);
+        crBtn.hidden = true; crReset.hidden = false;
+      }, 450);
+    }
+  }
+  crBtn.addEventListener("click", crStep);
+  crReset.addEventListener("click", function () { crS = 0; crBody.innerHTML = ""; crTag.textContent = "Asked"; crTag.className = "tag amber"; crLab.textContent = "On set · 14:20"; crBtn.textContent = "Cost it"; crBtn.hidden = false; crReset.hidden = true; crBtn.focus(); });
+
+  /* ---- client features, one card at a time ---- */
+  var track = $("#clTrack"), cards = $$(".cl", track), clCount = $("#clCount");
+  function clIdx() { var x = track.scrollLeft, best = 0; cards.forEach(function (c, i) { if (Math.abs(c.offsetLeft - track.offsetLeft - x) < Math.abs(cards[best].offsetLeft - track.offsetLeft - x)) best = i; }); return best; }
+  function clGo(i) { i = Math.max(0, Math.min(cards.length - 1, i)); track.scrollTo({ left: cards[i].offsetLeft - track.offsetLeft, behavior: reduce ? "auto" : "smooth" }); }
+  function clUpd() { var i = clIdx(), end = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4; clCount.textContent = (end ? cards.length : i + 1) + " / " + cards.length; $("#clPrev").disabled = i === 0 && track.scrollLeft < 4; $("#clNext").disabled = end; }
+  $("#clPrev").addEventListener("click", function () { clGo(clIdx() - 1); });
+  $("#clNext").addEventListener("click", function () { clGo(clIdx() + 1); });
+  track.addEventListener("scroll", clUpd, { passive: true }); addEventListener("resize", clUpd); clUpd();
 
   /* ---- roles ---- */
   function kv(a, b, cls) { return '<div class="kv' + (cls ? " " + cls : "") + '"><span>' + a + "</span><b>" + b + "</b></div>"; }
@@ -160,15 +210,26 @@
   };
   Object.keys(CREW).forEach(function (k) { var c = CREW[k]; ROLES[k] = { h: c.h, p: c.p, d: ["holds", { f: "ot", r: c }, { f: "ckit", r: c }] }; });
   function demo(id) { return typeof id === "string" ? DEMOS[id] : DEMOS[id.f](id.r); }
-  var panel = $("#rolePanel"), current = null;
+  var panel = $("#rolePanel"), current = null, at = 0;
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
   function showRole(k) {
-    clearTimers(); current = k; var r = ROLES[k];
-    panel.innerHTML = '<div class="role-lead"><h3>' + r.h + "</h3><p>" + r.p + '</p></div><div class="demos">' + r.d.map(function (id, i) { var d = demo(id); return '<div class="card demo" data-i="' + i + '"><h4>' + d.h + '</h4><p class="say">' + d.s + "</p>" + d.html + "</div>"; }).join("") + "</div>";
+    current = k; var r = ROLES[k];
+    panel.innerHTML = '<div class="role-lead"><h3>' + r.h + "</h3><p>" + r.p + '</p></div><div class="player"><ol class="idx">' + r.d.map(function (id, i) { return '<li><button type="button" data-n="' + i + '"><span>' + pad(i + 1) + "</span>" + demo(id).h + "</button></li>"; }).join("") + '</ol><div class="stage"><div id="stageCard"></div><div class="stage-nav"><span class="lab" id="stageN"></span><button type="button" class="btn ghost sm next" id="stageNext"></button></div></div></div>';
     $$(".tabs button").forEach(function (b) { b.setAttribute("aria-selected", b.getAttribute("data-role") === k ? "true" : "false"); });
-    $$(".demo", panel).forEach(function (el, i) { el.classList.add("rv"); el.style.transitionDelay = i * 90 + "ms"; requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add("on"); }); }); });
-    if (seen) runDemos();
+    $$(".idx button", panel).forEach(function (b) { b.addEventListener("click", function () { showFeat(+b.getAttribute("data-n")); }); });
+    $("#stageNext").addEventListener("click", function () { showFeat((at + 1) % r.d.length); });
+    showFeat(0);
   }
-  function runDemos() { var r = ROLES[current]; $$(".demo", panel).forEach(function (el, i) { later(function () { demo(r.d[i]).run(el); }, i * 250); }); }
+  function showFeat(i) {
+    clearTimers(); at = i; var r = ROLES[current], d = demo(r.d[i]), n = r.d.length;
+    var box = $("#stageCard"); box.innerHTML = '<div class="card demo rv"><h4>' + d.h + '</h4><p class="say">' + d.s + "</p>" + d.html + "</div>";
+    var el = $(".demo", box); requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add("on"); }); });
+    $$(".idx button", panel).forEach(function (b, j) { b.setAttribute("aria-current", j === i ? "true" : "false"); });
+    $("#stageN").textContent = pad(i + 1) + " / " + pad(n);
+    $("#stageNext").textContent = i < n - 1 ? "Next: " + demo(r.d[i + 1]).h.toLowerCase() : "Back to the first";
+    if (seen) later(function () { d.run(el); }, 250);
+  }
+  function runDemos() { var r = ROLES[current], el = $("#stageCard .demo"); if (el) demo(r.d[at]).run(el); }
   var seen = false;
   $$(".tabs button").forEach(function (b) { b.addEventListener("click", function () { if (b.getAttribute("data-role") !== current) showRole(b.getAttribute("data-role")); }); });
   $(".tabs").addEventListener("keydown", function (e) { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; var bs = $$(".tabs button"), i = bs.findIndex(function (b) { return b.getAttribute("aria-selected") === "true"; }); i = (i + (e.key === "ArrowRight" ? 1 : bs.length - 1)) % bs.length; bs[i].focus(); bs[i].click(); });
@@ -184,7 +245,12 @@
     { g: "Rights and delivery", f: [["Rights and usage register", "Usage terms pulled from signed contracts, with reminders at 90, 60 and 30 days."], ["Deliverables and clock numbers", "Versions, ratios, clock numbers, Clearcast stage and delivery deadlines from the air date."], ["Music video credits sheet", "One credits and ISRC record per video, ready for Vevo, awards and press."], ["Contract clause memo", "Flags payment terms over 60 days, GenAI, IP and indemnity clauses against the APA standard."], ["Awards calendar", "Entry deadlines for the big craft awards, with credits drafted."]] },
     { g: "Books and jobs", f: [["Job set-up in the books", "Each job made a tracking category in Xero, pushed to card and receipt tools, mapped to budget lines."], ["Overage and change requests", "A costed change email to the agency, with written approval logged to the budget line."], ["Kit quotes, POs and returns", "Hire quotes compared, POs drafted, return dates tracked and hire invoices matched."], ["Bids and budget versions", "Bids, pitch costs and outcomes logged, with a what-changed note between versions."], ["Wrap and audit pack", "Invoices, POs, timesheets and receipts gathered per budget line for the cost consultant."]] }
   ];
-  $("#feat").innerHTML = FEAT.map(function (g) { return '<div class="fg"><h3>' + g.g + "</h3>" + g.f.map(function (f) { return '<div class="fi"><div class="t"><b>' + f[0] + '</b><span class="tag' + (f[2] ? "" : " soft") + '">' + (f[2] ? "In the app" : "Company pilot") + "</span></div><p>" + f[1] + "</p></div>"; }).join("") + "</div>"; }).join("");
-  $("#feat").insertAdjacentHTML("beforeend", '<div class="fg next"><h3>Coming next</h3>' + [["Same shoot, both sides", "Crew and producer on one job, so the signed-off timesheet is the one that gets checked and paid."], ["Bank feeds", "Payments matched to invoices on their own, through Open Banking."], ["Xero and FreeAgent", "Invoices and expenses sent straight to the books you already use."], ["Bectu rate cards", "Grade minimums checked as you set your rate."], ["Ask for a job", "Something your office does every week that isn\'t here? It can be built for your accounts."]].map(function (f) { return '<div class="fi"><div class="t"><b>' + f[0] + '</b><span class="tag soft">Next</span></div><p>' + f[1] + "</p></div>"; }).join("") + "</div>");
-  $$(".fg").forEach(function (el, i) { watch(el, (i % 3) * 80); });
+  FEAT[4].f.splice(2, 0, ["Client approvals", "Extras costed on set and approved by the client with one tap, no login, logged to the budget line."], ["Client status link", "One page per job showing the agency where it is and what's waiting on them."]);
+  FEAT[0].f.splice(3, 0, ["Client notes", "Each client's PO rules, accounts inbox and payment run day, used on every invoice."]);
+  function fi(f, tag, soft) { return '<div class="fi"><div class="t"><b>' + f[0] + '</b><span class="tag' + (soft ? " soft" : "") + '">' + tag + "</span></div><p>" + f[1] + "</p></div>"; }
+  var featEl = $("#feat"); featEl.classList.add("fold");
+  featEl.innerHTML = FEAT.map(function (g, gi) { return "<details" + (gi ? "" : " open") + "><summary><h3>" + g.g + '</h3><span class="peek">' + g.f.length + " · " + g.f.slice(0, 3).map(function (f) { return f[0]; }).join(", ") + '</span></summary><div class="items">' + g.f.map(function (f) { return fi(f, f[2] ? "In the app" : "Company pilot", !f[2]); }).join("") + "</div></details>"; }).join("");
+  var total = FEAT.reduce(function (n, g) { return n + g.f.length; }, 0); $(".all .sec-h").textContent = total + " jobs, one place.";
+  featEl.insertAdjacentHTML("beforeend", '<details class="next"><summary><h3>Coming next</h3><span class="peek">Same shoot both sides, bank feeds, Xero and FreeAgent</span></summary><div class="items">' + [["Same shoot, both sides", "Crew and producer on one job, so the signed-off timesheet is the one that gets checked and paid."], ["Bank feeds", "Payments matched to invoices on their own, through Open Banking."], ["Xero and FreeAgent", "Invoices and expenses sent straight to the books you already use."], ["Bectu rate cards", "Grade minimums checked as you set your rate."], ["Ask for a job", "Something your office does every week that isn\'t here? It can be built for your accounts."]].map(function (f) { return fi(f, "Next", 1); }).join("") + "</div></details>");
+  $$(".fold details").forEach(function (el, i) { watch(el, i * 60); });
 })();

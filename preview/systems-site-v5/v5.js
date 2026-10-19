@@ -468,7 +468,7 @@
   var PACKS = {
     crew: [["Bank matching", 2], ["Calendar sync", 2], ["Receipt scanning", 2]],
     producer: [["Live day", 6], ["Bank matching", 2], ["Permits", 4], ["Rights and usage", 6]],
-    company: [["Bank matching", 2], ["Permits", 4], ["Extra person", 8], ["Wrap books", 6]]
+    company: [["Bank matching", 2], ["Permits", 4], ["Extra person", 8], ["Big shoots, 60+ crew", 20]]
   };
   var prPlan = "producer", prOn = {};
   function prDraw() {
@@ -479,11 +479,12 @@
   function prSum() {
     var t = PLANS[prPlan]; PACKS[prPlan].forEach(function (p, i) { if (prOn[prPlan + i]) t += p[1]; });
     var b = $("#prTot"); b.textContent = "\u00a3" + t; b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump");
+    $("#prFine").innerHTML = prPlan === "crew" ? "One overtime hour on a &pound;450 day is &pound;67.50. That's more than a year of Crew." : "Catch one missed overtime hour on a &pound;450 day, &pound;67.50, and the month has paid for itself.";
     var d = t * 12 / 365; $("#prDay").textContent = "about " + (d < 1 ? Math.round(d * 100) + "p" : "\u00a3" + d.toFixed(2)) + " a day";
   }
   $$("#prPlans .plan").forEach(function (b) { b.addEventListener("click", function () { prPlan = b.getAttribute("data-p"); prDraw(); }); });
   $("#prPacks").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; var k = prPlan + b.getAttribute("data-i"); prOn[k] = !prOn[k]; b.setAttribute("aria-pressed", prOn[k] ? "true" : "false"); prSum(); });
-  $$(".pr-h > *, .pr-build, .price .sp-note").forEach(function (el, i) { watch(el, (i % 4) * 70); }); $$("#prPlans .plan").forEach(function (el, i) { watch(el, i * 80); });
+  $$(".pr-h > *, .pr-build, .pr-fine, .pr-perks li, .price .sp-note").forEach(function (el, i) { watch(el, (i % 4) * 70); }); $$("#prPlans .plan").forEach(function (el, i) { watch(el, i * 80); });
   prDraw();
 
   function render(key, R) {

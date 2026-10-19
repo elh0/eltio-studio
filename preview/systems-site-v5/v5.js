@@ -128,6 +128,31 @@
   if (io) new IntersectionObserver(function (es) { sheet.classList.toggle("flat", es[0].isIntersecting); }, { threshold: .5 }).observe(sheet);
 
 
+
+  /* ---- inbox: every email from back-to-back jobs, sorted into the right place ---- */
+  var IB_X = { dop: ["Rental house", "Camera package quote", "Added as a kit line"], gaffer: ["Best boy", "Team hours, day 2", "Team timesheet updated"], spark: ["Northbound Films", "Rig day on Friday?", "Rig rate applied"], grip: ["Rental house", "Crane cross-hire", "Sub-hire line added"], camera: ["2nd AC", "Kit back at 21:10", "Your own wrap logged"], sound: ["Northbound Films", "Six radio mics?", "Channels on the kit line"], dit: ["Northbound Films", "Two more drives", "Recharge logged, receipt filed"], art: ["Props hire", "Return by Friday", "Float updated, return in diary"], costume: ["Selfridges", "Refund, £89.00", "Return logged, float balanced"], hmu: ["Northbound Films", "Cast list updated", "Consumables split by cast"], locations: ["Camden Council", "Permit approved", "Residents' letter drafted"], runner: ["Northbound Films", "Fuel and parking?", "Receipts on your timesheet"], editor: ["Agency", "v8 notes", "Round 4 of 3, extra drafted"] };
+  function ibFor(k) {
+    if (k === "prod" || k === "pm") return [["Agency", "We'd love to go with you", "Award, advance drafted"], ["Gaffer", "INV-021, 2 days", "Checked, matches APA", "ok"], ["Spark", "Invoice, 2 days", "£26.25 over, query drafted"], ["Agency", "Can we add the canal shot?", "Extra costed, link ready"], ["Westminster Council", "Question on your permit", "Reply drafted, needs you", "you"]];
+    if (k === "dir") return [["Northbound Films", "Pencil for the 13th?", "Hold logged, rep copied"], ["Field & Co", "First pencil, 13 and 14", "Clash flagged"], ["Your rep", "Fee statement, sportswear", "£4,800 to you, checked", "ok"], ["Low Tide", "Treatment due Thursday", "In your diary"], ["Field & Co", "Can you confirm by Friday?", "Reply drafted, needs you", "you"]];
+    var x = IB_X[k] || ["Northbound Films", "Kit list for Tuesday?", "Kit list attached"];
+    return [["Northbound Films", "Hold for Tue and Wed?", "Pencil logged"], ["Field & Co", "Call sheet, day 1", "Call 06:30, in your diary"], ["Low Tide", "Shoot moved to Thursday", "Moved, clash flagged"], [x[0], x[1], x[2]], ["Northbound Films", "Remittance, £1,770", "Paid, invoice closed", "ok"], ["Field & Co", "Free on the 14th?", "Reply drafted, needs you", "you"]];
+  }
+  var ibT = [], ibKey = "prod", ibSeen = false;
+  function ibPlay() {
+    ibT.forEach(clearTimeout); ibT = [];
+    var L = ibFor(ibKey), rows = $("#ibRows"), sorted = 0;
+    rows.innerHTML = L.map(function (r) { return '<div class="ib-r"><span class="lab">' + r[0].replace("&", "&amp;") + '</span><span class="s">' + r[1] + '</span><span class="tag new">New</span></div>'; }).join("");
+    $("#ibSum").textContent = L.length + " in · 0 sorted";
+    $$(".ib-r", rows).forEach(function (el, i) {
+      var r = L[i];
+      ibT.push(setTimeout(function () { el.classList.add("in"); }, reduce ? 0 : 200 + i * 380));
+      ibT.push(setTimeout(function () { var g = $(".tag", el); g.className = "tag" + (r[3] ? " " + r[3] : ""); g.textContent = r[2]; if (r[3] !== "you") sorted++; $("#ibSum").textContent = L.length + " in · " + sorted + " sorted" + (i === L.length - 1 ? " · 1 needs you" : ""); }, reduce ? 0 : 900 + i * 380));
+    });
+  }
+  $("#ibAgain").addEventListener("click", ibPlay);
+  if (io) new IntersectionObserver(function (es) { if (es[0].isIntersecting && !ibSeen) { ibSeen = true; ibPlay(); } }, { threshold: .35 }).observe($("#ib")); else ibSeen = true;
+  $$(".ib-copy > *").forEach(function (el, i) { watch(el, i * 70); });
+
   /* ---- both sides: one wrap drafts every crew invoice, and the producer's check already matches ---- */
   var BD = [["gaffer", "Gaffer", 450, 1.5], ["spark", "Spark", 350, 1.5], ["camera", "1st AC", 480, 1.25], ["sound", "Sound recordist", 520, 1.25]], bdKey = "prod", bdT = [];
   function bdDraw(state) {
@@ -376,6 +401,8 @@
     var sel = $('[data-r="' + key + '"]', pills); if (sel && pills.scrollWidth > pills.clientWidth) pills.scrollTo({ left: sel.offsetLeft - 16, behavior: "smooth" });
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
+    ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();
+    $("#ibP").textContent = (key === "prod" || key === "pm") ? "Systems reads your work email and turns it into the job. Awards, crew invoices, client extras and council questions are sorted as they land. You only see what needs you, with the reply already drafted." : "Systems reads your work email and turns it into your diary, timesheets and invoices. Holds, call sheets, changes and payments are sorted as they land. You only see what needs you, with the reply already drafted.";
     var tk = key === "other" ? guess(R.n) : key;
     $$('a[href*="systems-app/"]').forEach(function (l) { if (!/\.html/.test(l.getAttribute("href"))) l.href = l.href.split("?")[0] + "?as=" + tk; });
     var h1 = $("#h1"); if (h1.textContent !== R.h1) { h1.textContent = R.h1; h1.classList.remove("swap"); void h1.offsetWidth; h1.classList.add("swap"); } h1.classList.toggle("long", R.h1.length > 26);

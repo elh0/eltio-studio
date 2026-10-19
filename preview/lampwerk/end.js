@@ -177,7 +177,7 @@ function build(){
   renderer.outputColorSpace=T.SRGBColorSpace;
   renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   var scene=new T.Scene();
-  var cam=new T.PerspectiveCamera(30,1,.1,100);cam.position.set(0,0,34);
+  var cam=new T.PerspectiveCamera(30,1,8,400);cam.position.set(0,0,34);
 
   /* a studio for reflections: dark room, three softboxes that follow the switches */
   var pm=new T.PMREMGenerator(renderer),envRT=null;
@@ -217,14 +217,14 @@ function build(){
   var body=new T.Mesh(new T.ExtrudeGeometry(rshape(T,Wd-bev*2,Hd-bev*2,R-bev),{depth:D,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:6,curveSegments:24}),frameMat);
   body.position.z=-D/2;inner.add(body);
   var glass=new T.MeshPhysicalMaterial({color:0x020202,metalness:0,roughness:.05,clearcoat:1,clearcoatRoughness:.02});
-  var front=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),glass);front.position.z=D/2+bev+.002;inner.add(front);
+  var front=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),glass);front.position.z=D/2+bev+.03;inner.add(front);
   var sc=document.createElement("canvas");sc.width=780;sc.height=1688;
   var tex=new T.CanvasTexture(sc);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=8;
   var sw=Wd-1.1,sh=Hd-1.1,sg=new T.ShapeGeometry(rshape(T,sw,sh,R-.5),24);planeUV(sg,sw,sh);
-  var screen=new T.Mesh(sg,new T.MeshBasicMaterial({map:tex,toneMapped:false}));screen.position.z=D/2+bev+.006;inner.add(screen);
-  var shine=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),new T.MeshPhysicalMaterial({color:0x000000,transparent:true,opacity:.18,roughness:.04,metalness:0,clearcoat:1}));shine.position.z=D/2+bev+.01;inner.add(shine);
+  var screen=new T.Mesh(sg,new T.MeshBasicMaterial({map:tex,toneMapped:false}));screen.position.z=D/2+bev+.08;screen.renderOrder=1;inner.add(screen);
+  var shine=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),new T.MeshPhysicalMaterial({color:0x000000,transparent:true,opacity:.18,roughness:.04,metalness:0,clearcoat:1,depthWrite:false}));shine.position.z=D/2+bev+.14;shine.renderOrder=2;inner.add(shine);
   var backMat=new T.MeshPhysicalMaterial({color:0x22221f,metalness:.2,roughness:.55,clearcoat:.4,clearcoatRoughness:.4});
-  var bk=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),backMat);bk.position.z=-D/2-bev-.002;bk.rotation.y=Math.PI;inner.add(bk);
+  var bk=new T.Mesh(new T.ShapeGeometry(rshape(T,Wd-.15,Hd-.15,R-.1),24),backMat);bk.position.z=-D/2-bev-.03;bk.rotation.y=Math.PI;inner.add(bk);
   /* camera plateau and lenses */
   var plat=new T.Mesh(new T.ExtrudeGeometry(rshape(T,6.4,6.4,1.5),{depth:.16,bevelEnabled:true,bevelThickness:.06,bevelSize:.06,bevelSegments:3,curveSegments:16}),new T.MeshPhysicalMaterial({color:0x2b2a27,metalness:.3,roughness:.25,clearcoat:.8}));
   plat.rotation.y=Math.PI;plat.position.set(Wd/2-4.0,Hd/2-4.0,-D/2-bev);inner.add(plat);

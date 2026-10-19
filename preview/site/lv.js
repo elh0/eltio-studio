@@ -9,31 +9,31 @@
   var A = [
     // 19 Oct: real app screens, clicked through one after another, each with a line saying what it is
     { ar: '1588/727', wide: true, seq: [
-      ['img/os/s-start.webp', 'Projects and recces, each with its next good light'],
+      ['img/os/s-start.webp', 'Projects, each with its next good light'],
       ['img/os/s-cam.webp', 'The sun path drawn over the live camera'],
       ['img/os/s-portrait.webp', 'Grid, level, portrait'],
-      ['img/os/s-list.webp', 'A shot list, with the time each shot is lit']] },
+      ['img/os/s-list.webp', 'The shot list, timed to the light']] },
     { seq: [
       ['img/gr/film.webp', 'Film a climb from behind, hips in frame'],
-      ['img/gr/review.webp', 'Three notes on your technique, timed to the clip'],
+      ['img/gr/review.webp', 'Three notes, timed to the clip'],
       ['img/gr/notes.webp', 'Say what helped and what did not'],
       ['img/gr/sets.webp', 'Fresh sets at the gyms you follow'],
       ['img/gr/gyms.webp', '33 London gyms to start with']] },
     { seq: [
-      ['video/w/lw-ar-real-m', 'The AR: point at the floor, tap, and a lamp is tagged'],
-      ['img/lw/s-camera.webp', 'Camera first, then each lamp from where it stands'],
+      ['video/w/lw-ar-real-m', 'Point at the floor, tap: a lamp is tagged'],
+      ['img/lw/s-camera.webp', 'Camera first, then each lamp where it stands'],
       ['img/lw/s-three.webp', 'Three lamps, aimed'],
       ['img/lw/s-plan.webp', 'The plan draws itself from the scan'],
-      ['img/lw/s-send.webp', 'Out as a gaffer sheet, a plan or a text list']] },
+      ['img/lw/s-send.webp', 'Out as a gaffer sheet, plan or text list']] },
     { seq: [
       ['img/ag/home-fullStack-day.webp', 'A home screen with four apps and the weather'],
       ['img/ag/home-fullStack-dusk.webp', 'The sky follows the time of day'],
       ['img/ag/home-fullStack-night.webp', 'Night'],
-      ['img/ag/breathe-inhale.webp', 'Three breaths to open the apps that pull at you']] },
+      ['img/ag/breathe-inhale.webp', 'Instagram opens after three breaths']] },
     { seq: [
-      ['img/sy/home.webp', 'Money first: what is in, what is owed, what needs you'],
+      ['img/sy/home.webp', 'Money first: in, owed, and what needs you'],
       ['img/sy/jobs.webp', 'Every job, bid to wrap'],
-      ['img/sy/onset.webp', 'On set, the clock runs and crew see their hours'],
+      ['img/sy/onset.webp', 'On set: the clock runs, crew see their hours'],
       ['img/sy/files.webp', 'Sheets built in your own Drive']] }
   ];
   var ACC = ['#FF5A1F', '#4A74FF', '#FFC21A', '#E8956A', '#4F7348'];
@@ -48,6 +48,10 @@
     'html.lv .lv-scr img,html.lv .lv-scr video{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}',
     'html.lv .lv-scr .lv-s{position:absolute;inset:0;opacity:0;transition:opacity .7s ease}html.lv .lv-scr .lv-s.on{opacity:1}',
     'html.lv .lv-scr video{opacity:0;transition:opacity .4s}html.lv .lv-scr .lv-vid video{opacity:1}',
+    // the caption: a small pill under the phone, never behind it (the phone stops at 84% of the tile)
+    'html.lv .lv-cap{position:absolute;left:50%;bottom:5%;transform:translateX(-50%) translateY(6px);max-width:92%;box-sizing:border-box;padding:8px 13px;border:.5px solid rgba(20,20,18,.24);border-radius:999px;background:#fffff8;font:400 10px/1 ui-monospace,"Geist Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:rgba(20,20,18,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .35s ease,transform .5s ease}',
+    'html.lv .x-p.lv-play .lv-cap{opacity:1;transform:translateX(-50%)}',
+    'html.lv .lv-cap.lv-swap{opacity:0;transition:opacity .2s ease}',
 'html.lv .x-frame .k2{z-index:2;transition:transform .9s cubic-bezier(.2,.8,.2,1)}',
 
     // 1 Stack: each card pins under the bar and the next slides over it; the one underneath sinks back
@@ -170,7 +174,7 @@
       var p = c.querySelector('.lv-ph'); if (!p || !p._seq) return;
       var ims = p.querySelectorAll('.lv-s'), n = (p._k || 0) + 1; if (n >= ims.length) n = 0; p._k = n;
       ims.forEach(function (i, k) { i.classList.toggle('on', k === n); var v = i.querySelector('video'); if (v) { if (k === n) play(v); else v.pause(); } });
-      c._lvCap.textContent = p._seq[n][1];
+      var cap = c._lvCap; cap.classList.add('lv-swap'); setTimeout(function () { cap.textContent = p._seq[n][1]; cap.classList.remove('lv-swap'); }, 220);
       c._lvHold = p.querySelector('.lv-s.on video') ? 2 : 0; // the AR take gets a few beats
     }
 

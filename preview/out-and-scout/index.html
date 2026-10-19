@@ -2,8 +2,8 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0E0D0B">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -330,6 +330,79 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
   .pstage { aspect-ratio: .82; }
   .pstage .ph.P { width: 56%; }
 }
+
+/* dawn: the page comes up from blue hour */
+.dawn { position: fixed; inset: 0; z-index: 100; pointer-events: none; background: linear-gradient(180deg, #05070F 0%, #0B1024 55%, #1A1E33 100%); display: grid; place-items: center; }
+.dawn .hz { position: absolute; left: 0; right: 0; top: 62%; height: 1px; background: rgba(239,237,230,.25); }
+.dawn .su { position: absolute; left: 50%; top: 62%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 40px 10px rgba(255,90,31,.35); }
+.dawn .wd { position: absolute; left: var(--g); bottom: 40px; color: rgba(239,237,230,.6); }
+.dawn.go { animation: dawn 2.6s var(--e) forwards; }
+.dawn.go .su { animation: rise 2.2s var(--e) forwards; }
+.dawn.go .hz { animation: hz 1.2s .2s var(--e) both; }
+@keyframes rise { from { transform: translateY(70px) scale(.6); opacity: 0; } 40% { opacity: 1; } to { transform: translateY(-140px) scale(1); } }
+@keyframes hz { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes dawn { 0%, 55% { opacity: 1; } 100% { opacity: 0; } }
+
+/* the cursor is a head torch */
+.torch { position: fixed; left: 0; top: 0; width: 640px; height: 640px; z-index: 1; pointer-events: none; border-radius: 50%; background: radial-gradient(closest-side, rgba(239,237,230,.07), rgba(239,237,230,.025) 45%, rgba(239,237,230,0)); opacity: 0; transition: opacity .6s var(--e); mix-blend-mode: screen; }
+.torch.on { opacity: 1; }
+
+/* the route behind the page */
+.bgtrail { position: absolute; top: 0; left: 0; width: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
+.bgtrail svg { display: block; }
+.bgtrail path, .bgtrail circle { fill: none; stroke: rgba(239,237,230,.14); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tr-contour path { stroke: rgba(239,237,230,.055); }
+.tr-cross { stroke: rgba(239,237,230,.1) !important; }
+.tr-route { stroke: rgba(239,237,230,.3) !important; stroke-width: 1.2 !important; stroke-dasharray: 1000; stroke-dashoffset: 1000; stroke-linecap: round; }
+.tr-north path { fill: rgba(239,237,230,.3); stroke: none; }
+.bgtrail text { font: 400 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; fill: rgba(239,237,230,.35); }
+.tr-mark { opacity: 0; transition: opacity .8s var(--e); }
+.tr-mark.on { opacity: 1; }
+.tr-mark circle { fill: var(--ink); stroke: rgba(239,237,230,.6); stroke-width: 1.2; }
+.tr-fov { stroke: rgba(239,237,230,.2); }
+.tr-arc { stroke: rgba(239,237,230,.12); }
+body > *:not(.bgtrail):not(.grain):not(.torch):not(.dawn) { position: relative; z-index: 2; }
+body { position: relative; }
+
+/* the places strip: today's sun, live */
+.places { margin: 20vh 0 0; border-block: 1px solid var(--line); overflow: hidden; }
+.pl-track { display: flex; width: max-content; animation: run 90s linear infinite; }
+.places:hover .pl-track { animation-play-state: paused; }
+.pl-track span { display: inline-flex; align-items: center; gap: 10px; padding: 14px 26px; font: 400 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--q); border-right: 1px solid var(--line); white-space: nowrap; }
+.pl-track b { font-weight: 400; color: var(--paper); }
+.pl-track i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--faint); }
+.pl-track i.lit { background: var(--sun); border-color: var(--sun); box-shadow: 0 0 10px rgba(255,90,31,.6); }
+.places .cap2 { display: flex; justify-content: space-between; gap: 16px; padding: 10px var(--g); border-bottom: 1px solid var(--line); }
+
+/* sending the PDF */
+.film.sent .pp { transition: transform .8s cubic-bezier(.5,0,.8,.4), opacity .8s !important; transform: translate(90cqw, -60cqh) rotate(12deg) scale(.4) !important; opacity: 0 !important; }
+.ftoast { display: flex; align-items: center; gap: 10px; min-height: 1.6em; margin-top: 10px; opacity: 0; transform: translateY(4px); transition: opacity .3s, transform .3s; }
+.ftoast.show { opacity: 1; transform: none; }
+.ftoast i { width: 7px; height: 7px; border-radius: 50%; background: var(--sun); flex: none; }
+#fsend { all: unset; cursor: pointer; border: 1px solid var(--paper); border-radius: 999px; padding: 7px 12px; color: var(--paper); }
+#fsend:disabled { opacity: .5; }
+#fsend:focus-visible { outline: 1px solid var(--paper); outline-offset: 2px; }
+
+/* the phone at the end */
+.endrow { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.5fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
+.end-stage { position: relative; height: min(78vh, 720px); height: min(78svh, 720px); min-height: 460px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: radial-gradient(70% 60% at 50% 60%, #171614, var(--ink) 75%); }
+.end-stage canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: pan-y; outline-offset: -3px; }
+.end-stage.held canvas { cursor: grabbing; }
+.end-stage .hint2 { position: absolute; left: 14px; bottom: 12px; pointer-events: none; transition: opacity .4s; }
+.end-stage.held .hint2 { opacity: 0; }
+.end-stage .fb { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; color: var(--q); }
+.end-stage.no3d .fb { display: flex; } .end-stage.no3d canvas, .end-stage.no3d .hint2 { display: none; }
+.daytl { display: grid; gap: 10px; }
+.daytl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: none; margin: 0; cursor: ew-resize; }
+.daytl input[type=range]::-webkit-slider-runnable-track { height: 1px; background: var(--faint); }
+.daytl input[type=range]::-moz-range-track { height: 1px; background: var(--faint); }
+.daytl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -6.5px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px rgba(255,90,31,.18); }
+.daytl input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--sun); box-shadow: 0 0 0 4px rgba(255,90,31,.18); }
+.daytl .tlr { display: flex; justify-content: space-between; gap: 12px; }
+.daytl button { all: unset; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--q); }
+.daytl button:focus-visible { outline: 1px solid var(--paper); outline-offset: 3px; }
+.end-read { font-size: clamp(17px, 1.6vw, 21px); letter-spacing: -.01em; }
+@media (max-width: 860px) { .endrow { grid-template-columns: 1fr; } .endrow .end-stage { order: -1; height: min(110vw, 70vh); height: min(110vw, 70svh); min-height: 0; } .pl-track span { padding: 12px 18px; } }
 @media (prefers-reduced-motion: reduce) {
   .rv { opacity: 1; transform: none; transition: none; } .run div, .grain, .photo.open img { animation: none; }
   .ph *, .pp, .pstage .ph { transition: none !important; animation: none !important; }
@@ -338,11 +411,14 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 </head>
 <body>
 <div class="grain" aria-hidden="true"></div>
+<div class="dawn" id="dawn" aria-hidden="true"><span class="hz"></span><span class="su"></span><span class="wd mono">Blue hour · waiting for the sun</span></div>
+<div class="torch" id="torch" aria-hidden="true"></div>
+<div class="bgtrail" id="bgtrail" aria-hidden="true"></div>
 <header class="top"><a class="lock" href="#top" id="top">Out &amp; Sc<i class="sd"></i>out</a><a class="mono" href="#join">Get a test invite</a></header>
 
 <section class="photo open">
   <img srcset="img/blue-hour-s.jpg 1024w, img/blue-hour.jpg 2048w" sizes="100vw" src="img/blue-hour.jpg" alt="Three people in head torches on a hillside before sunrise, one framing the mountains on a phone.">
-  <div class="say"><span class="mono" style="color:rgba(239,237,230,.75)">For the ones who go out early</span><h1>Out before first light.</h1><p>A viewfinder for the recce. Frame the shot at your real lens, read the light, and come home with the shot list.</p></div>
+  <div class="say"><span class="mono" style="color:rgba(239,237,230,.75)">For the ones who go out early</span><h1>Out before first light.</h1><p>A viewfinder for the recce. Frame the shot at your real lens, read the light, and come home with the shot list already written.</p></div>
 </section>
 
 <div class="run" aria-hidden="true"><div>
@@ -363,7 +439,7 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 </section>
 
 <section class="feat big" id="app">
-  <div class="txt rv"><span class="mono q">Viewfinder</span><h2>Open it. Frame it. Shoot it.</h2><p>Pick a recce and tap Open camera. Step through the lenses in your kit, pick the frame lines and press the shutter. Each shot is saved with a number, a caption, the lens, the time and the light. Try it below.</p></div>
+  <div class="txt rv"><span class="mono q">Viewfinder</span><h2>Shoot the recce at your real lens.</h2><p>Pick a recce and tap Open camera. Step through the lenses in your kit, pick the frame lines and press the shutter. Each shot is saved with a number, a caption, the lens, the time and the light. Try it below.</p></div>
   <div class="stage rv" style="--d:.1s">
     <div id="vf1" role="application" aria-label="A working line drawing of the Out & Scout viewfinder. Tap Open camera, change lens and frame lines, and press the shutter."></div>
     <div class="hint mono q"><span>Tap the lens · ▾ for frame lines · ··· for Sun Path and Grid</span><span><button type="button" id="vf1replay">Start again</button></span></div>
@@ -384,7 +460,7 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 </section>
 
 <section class="feat" id="light">
-  <div class="txt rv"><span class="mono q">Light read</span><h2>Read the light before it arrives.</h2><p>The app keeps the way the camera faced with every shot, so it can tell you when it will be backlit, side lit or front lit, and the best time to be there. This is the plan and the day strip from a Detailed shot card.</p></div>
+  <div class="txt rv"><span class="mono q">Light read</span><h2>Know when it'll be backlit.</h2><p>Every shot remembers which way the camera faced, so the app can tell you when it will be backlit, side lit or front lit, and the best time to be there. This is the plan and the day strip from a Detailed shot card.</p></div>
   <div class="stage rv" style="--d:.1s">
     <div class="wide lw" id="lw" aria-label="Top-down plan of the camera and the sun, with the light read and the day strip. Drag round the ring to turn the camera."></div>
     <div class="hint mono q"><span>Drag round the ring to turn the camera</span><span>Drag the strip for the time</span></div>
@@ -392,7 +468,7 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 </section>
 
 <section class="feat" id="portrait">
-  <div class="txt rv"><span class="mono q">Portrait</span><h2>Upright, when the shot is.</h2><p>Tap ↻ Portrait for vertical work. The whole layout turns: the frame, the ratios for upright work (9:16, 4:5, 1:1 and 16:9), the lens and the shutter. Tap ↻ Landscape to go back.</p></div>
+  <div class="txt rv"><span class="mono q">Portrait</span><h2>Shooting vertical.</h2><p>Tap ↻ Portrait for vertical work. The whole layout turns: the frame, the ratios for upright work (9:16, 4:5, 1:1 and 16:9), the lens and the shutter. Tap ↻ Landscape to go back.</p></div>
   <div class="stage rv" style="--d:.1s">
     <div class="pstage" id="pst"></div>
     <div class="hint mono q"><span id="pcap">Landscape</span><span>Plays on its own · tap to take over</span></div>
@@ -400,7 +476,7 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 </section>
 
 <section class="feat big" id="list">
-  <div class="txt rv"><span class="mono q">Shot List</span><h2>Edit the shots. Send the list.</h2><p>Every shot lands in the Shot List with its still, caption, lens, time and light. Open one to add notes or change its frame lines, drag them into order under Edit, then tap Export. Shots you took in the viewfinder above are here too.</p></div>
+  <div class="txt rv"><span class="mono q">Shot List</span><h2>Sort the shots, then send them.</h2><p>Every shot lands in the Shot List with its still, caption, lens, time and light. Open one to add notes or change its frame lines, drag them into order under Edit, then tap Export. Shots you took in the viewfinder above are here too.</p></div>
   <div class="stage rv" style="--d:.1s">
     <div id="sl1" role="application" aria-label="A working line drawing of the Shot List and the Export sheet."></div>
     <div class="hint mono q"><span>Tap a shot to open it · Edit to reorder · Export for the PDF</span></div>
@@ -411,7 +487,29 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
   <div class="txt rv"><span class="mono q">Export</span><h2>The shot list, page by page.</h2><p>Detailed opens with a plan for the day in the order the light comes round, gives each scene a page with its map and the sun, then a card per shot: the frame, the light, when to be there and room for notes. Summary is one line per shot. Photos only is just the frames.</p></div>
   <div class="stage rv" style="--d:.1s">
     <div class="film" id="film" role="img" aria-label="Line drawings of the exported PDF, page by page."></div>
-    <div class="fbar mono q"><span class="tiers2" id="ftier"></span><span class="arr"><button type="button" id="fprev" aria-label="Previous page">←</button><span id="fpage">shot-list.pdf</span><button type="button" id="fnext" aria-label="Next page">→</button></span></div>
+    <div class="fbar mono q"><span class="tiers2" id="ftier"></span><span class="arr"><button type="button" id="fprev" aria-label="Previous page">←</button><span id="fpage">shot-list.pdf</span><button type="button" id="fnext" aria-label="Next page">→</button></span><button type="button" id="fsend">Send it</button></span></div>
+    <p class="mono q ftoast" id="ftoast" aria-live="polite"></p>
+  </div>
+</section>
+
+<div class="places" id="places" aria-label="Today's sun at ten places">
+  <div class="cap2 mono q"><span>Today's sun · ten places we go</span><span>Orange dot · sun up right now</span></div>
+  <div class="pl-track"></div>
+</div>
+
+<section class="feat" id="end">
+  <div class="txt rv">
+    <span class="mono q">The day, on the phone</span>
+    <h2>Watch the light come round.</h2>
+    <p>The real sun for Knole Park today, moved over a phone running the viewfinder. Drag the time and the light on the phone, the sky in the picture and the read all change together. Drag the phone to turn it.</p>
+    <div class="daytl">
+      <span class="end-read" id="end-read"></span>
+      <input type="range" id="end-time" min="300" max="1260" step="1" value="420" aria-label="Time of day">
+      <div class="tlr mono q"><span id="end-log"></span><button type="button" id="end-play">Play the day</button></div>
+    </div>
+  </div>
+  <div class="stage rv" style="--d:.1s">
+    <div class="end-stage" id="end-stage"><canvas id="end-cv" tabindex="0" role="img" aria-label="A 3D iPhone running Out & Scout, lit by the sun as it moves through today. Drag or use the arrow keys to turn it."></canvas><span class="hint2 mono q">Drag to turn</span><div class="fb mono">Your browser can't show the 3D phone.</div></div>
   </div>
 </section>
 
@@ -426,5 +524,7 @@ footer { padding: 16vh var(--g) calc(28px + env(safe-area-inset-bottom, 0px)); }
 <footer class="mono q fl"><span>Out &amp; Scout (2026)</span><span><a href="support/">Support</a> · <a href="privacy/">Privacy</a></span></footer>
 
 <script src="app.js"></script>
+<script src="end.js" defer></script>
+<script src="extra.js" defer></script>
 </body>
 </html>

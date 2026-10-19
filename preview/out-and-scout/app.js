@@ -1040,6 +1040,7 @@
   SunWidget($('#sunw'));
   LightWidget($('#lw'));
   window.OS_FILM = Film($('#film'));
+  window.OS_SUN = { sunAt: sunAt, RISE: RISE, SET: SET, golden: golden, nowMin: nowMin, hm: hm, phase: phase, cls: cls, rel: rel, KT: KT, lat: LAT, lon: LON };
 
   // reveal on scroll, the glacier's slow push in
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });

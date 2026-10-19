@@ -273,3 +273,14 @@ h3{font:500 19px/1.2 var(--disp)}
 .dirr>span:nth-child(2){display:grid;gap:2px;min-width:0}.dirr .sub{font-size:13px}
 .sheet s{text-decoration:line-through}
 @media (min-width:900px){.share{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+
+/* Opening screen: the word softly breaks into Sy ste ms, holds, closes up */
+.splash{position:fixed;inset:0;z-index:99;display:grid;place-items:center;background:#0E0E0D;color:#F3F3F0;transition:opacity .45s ease;cursor:default}
+.splash.out{opacity:0;pointer-events:none}
+.swm{font:400 clamp(30px,7vw,52px)/1 "Familjen Grotesk",system-ui,sans-serif;letter-spacing:-.01em;white-space:nowrap;opacity:0;transition:opacity .5s ease}
+.splash.go .swm{opacity:1}
+.swm span{display:inline-block}
+.swm span+span{margin-left:0}
+.splash.go .swm span+span{animation:sybreak 2.5s cubic-bezier(.4,0,.2,1) .15s both}
+@keyframes sybreak{0%,8%{margin-left:0}42%,70%{margin-left:var(--g)}100%{margin-left:0}}
+@media (prefers-reduced-motion:reduce){.splash.go .swm span+span{animation:none;margin-left:var(--g)}}

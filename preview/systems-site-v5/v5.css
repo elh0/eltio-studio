@@ -436,3 +436,10 @@ main>section,.foot{padding-inline:max(16px,env(safe-area-inset-left));max-width:
 .dy-meter b{font:400 14px/1 var(--mono);font-variant-numeric:tabular-nums}
 .dy-ask{display:flex;gap:8px;flex-wrap:wrap}
 .offer .again{color:var(--q)}
+
+/* Wordmark: arrives as one word, spreads into Sy ste ms once; closes a little on hover */
+.mark span+span{margin-left:var(--g);transition:margin-left .6s cubic-bezier(.4,0,.2,1)}
+.mark span+span{animation:markopen 1.4s cubic-bezier(.4,0,.2,1) .5s both}
+@keyframes markopen{from{margin-left:0}to{margin-left:var(--g)}}
+@media (hover:hover){.mark:hover span+span{animation:none;margin-left:calc(var(--g)*.35)}}
+@media (prefers-reduced-motion:reduce){.mark span+span{animation:none;transition:none}}

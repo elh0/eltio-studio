@@ -154,27 +154,51 @@
   $$(".ib-copy > *").forEach(function (el, i) { watch(el, i * 70); });
 
 
-  /* ---- the day, live: a countdown from the call sheet, then the day as production posts it ---- */
-  var dyKey = "prod", dyT = [], dyLeft = 14 * 3600 + 32 * 60 + 10, dyRun = false;
+  /* ---- the day, live: the night before to the end-of-day summary. The clock runs itself; going over is one ask to everyone ---- */
+  var dyKey = "prod", dyT = [], dyLeft = 14 * 3600 + 32 * 60 + 10, dyRun = false, dyWait = null;
   function hms(s) { var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return [h, m, x].map(function (n) { return String(n).padStart(2, "0"); }).join(":"); }
   setInterval(function () { if (dyRun) return; dyLeft = Math.max(0, dyLeft - 1); $("#dyClock").textContent = hms(dyLeft); }, 1000);
-  function dyDay() {
-    var prod = dyKey === "prod" || dyKey === "pm", c = (ROLES[dyKey] && ROLES[dyKey].crew) || { band: 1.5, rate: 450 };
-    var last = prod ? ["Timesheets drafted", "32 crew, 18 on overtime, all from one wrap"] : ["Your timesheet is drafted", "1.5 hrs overtime at " + c.band + "x, " + gbp2(c.rate / 10 * c.band * 1.5)];
-    return [["06:30", "Call. The unit's on the clock", prod ? "31 of 32 checked in" : "You checked in at 06:24", ""], ["09:10", "Unit move to the bridge", "15 minutes, parking on Mare St", ""], ["13:05", "Lunch called", "One hour, back at 14:05", ""], ["18:00", "Running 30 minutes over", "Overtime starts at 18:30 for everyone", "amber"], ["19:45", "Wrap in 15", prod ? "Overtime so far £2,940" : "Kit back by 20:30", "amber"], ["20:00", "Wrap", last[0] + ". " + last[1], "red"]];
+  function dyNote(t, h, p, cls) {
+    var feed = $("#dyFeed"); feed.insertAdjacentHTML("afterbegin", '<div class="dy-n' + (cls ? " " + cls : "") + '"><span class="t">' + t + "</span><b>" + h + "</b><span>" + p + "</span></div>");
+    var all = $$(".dy-n", feed); if (all.length > 3) all[all.length - 1].remove();
   }
-  function dyReset() { dyT.forEach(clearTimeout); dyT = []; dyRun = false; $("#dy").classList.remove("ot"); $("#dyFeed").innerHTML = '<div class="dy-n"><span class="t">Yesterday</span><b>Call sheet read from your inbox</b><span>Day 1 call 06:30, in your diary with the countdown on</span></div>'; $("#dyLab").textContent = "Call in"; $("#dyClock").textContent = hms(dyLeft); $("#dyPlay").textContent = "Play the day"; }
+  function dyMeter(v, max, txt) { $("#dyMeter").hidden = false; $("#dyBar").style.width = Math.min(100, v / max * 100) + "%"; $("#dyOT").textContent = txt; }
+  function dyCrew() { var c = (ROLES[dyKey] && ROLES[dyKey].crew) || { band: 1.5, rate: 450 }; return { band: c.band, ot: c.rate / 10 * c.band * 1.5 }; }
+  function dyReset() {
+    dyT.forEach(clearTimeout); dyT = []; clearTimeout(dyWait); dyRun = false; $("#dy").classList.remove("ot"); $("#dyAsk").hidden = true; $("#dyMeter").hidden = true; $("#dyBar").style.width = "0";
+    $("#dyFeed").innerHTML = ""; dyNote("21:14", "Tomorrow's call sheet is in", "Call 06:30, Canal, E2. 10.5 hrs after tonight's wrap, so turnaround's fine.");
+    $("#dyLab").textContent = "Call in"; $("#dyClock").textContent = hms(dyLeft); $("#dyPlay").textContent = "Play the day"; $("#dyPlay").hidden = false;
+  }
+  function at(ms, fn) { dyT.push(setTimeout(fn, reduce ? 0 : ms)); }
   function dyPlay() {
-    dyReset(); dyRun = true; $("#dyPlay").textContent = "Play it again"; $("#dyLab").textContent = "On the clock";
-    var D = dyDay(), feed = $("#dyFeed");
-    D.forEach(function (n, i) { dyT.push(setTimeout(function () {
-      $("#dyClock").textContent = n[0]; $("#dy").classList.toggle("ot", i >= 3);
-      if (i >= 3) $("#dyLab").textContent = i === 5 ? "Wrapped" : "Overtime";
-      feed.insertAdjacentHTML("afterbegin", '<div class="dy-n' + (n[3] ? " " + n[3] : "") + '"><span class="t">' + n[0] + "</span><b>" + n[1] + "</b><span>" + n[2] + "</span></div>");
-      var all = $$(".dy-n", feed); if (all.length > 3) all[all.length - 1].remove();
-    }, reduce ? 0 : 300 + i * 1100)); });
+    dyReset(); dyRun = true; $("#dyPlay").hidden = true;
+    var prod = dyKey === "prod" || dyKey === "pm", c = dyCrew();
+    at(300, function () { $("#dyLab").textContent = "Leave by"; $("#dyClock").textContent = "05:50"; dyNote("05:15", "Leave by 05:50", "34 minutes to Canal, E2 in this morning's traffic."); });
+    at(1500, function () { $("#dyLab").textContent = "On the clock"; $("#dyClock").textContent = "06:30"; dyNote("06:30", "Call. The clock's running", prod ? "Every crew day started from one unit call." : "Started from the unit call. Nothing to log."); });
+    at(2700, function () { $("#dyClock").textContent = "13:05"; dyNote("13:05", "Lunch", "One hour, back at 14:05. On time, so no late break."); dyMeter(0, 1, prod ? "£0 of £4,000" : "0 hrs"); });
+    at(3900, function () {
+      $("#dyClock").textContent = "18:10"; $("#dy").classList.add("ot"); $("#dyLab").textContent = "Going over?";
+      dyNote("18:10", prod ? "You asked the unit to run to 20:00" : "Production asks to run to 20:00", prod ? "Sent to all 32 crew at once. No walking round the set." : "1.5 hrs at " + c.band + "x, " + gbp2(c.ot) + ". Say yes, or ask for a word.", "amber");
+      if (prod) at(1000, function () { dyNote("18:12", "29 in, 3 want a word", "The gaffer, best boy and 2nd AC. Their names are on your phone.", "amber"); dyGo(true, c.ot); });
+      else { $("#dyAsk").hidden = false; dyWait = setTimeout(function () { dyAnswer("in"); }, reduce ? 0 : 4000); }
+    });
   }
-  $("#dyPlay").addEventListener("click", function () { if (dyRun && $("#dyPlay").textContent === "Play it again") { dyPlay(); return; } dyPlay(); });
+  function dyAnswer(a) {
+    if (!dyRun || $("#dyAsk").hidden) return; clearTimeout(dyWait); $("#dyAsk").hidden = true;
+    dyNote("18:11", a === "in" ? "You're in" : "The producer's been told", a === "in" ? "Logged with the time you said yes." : "They'll find you on set. The ask stays open until you've talked.", a === "in" ? "" : "amber");
+    dyGo(false, dyCrew().ot);
+  }
+  function dyGo(prod, ot) {
+    at(1200, function () { $("#dyLab").textContent = "Overtime"; $("#dyClock").textContent = "19:15"; dyMeter(prod ? 1960 : .75, prod ? 4000 : 1.5, prod ? "£1,960 of £4,000" : "0.75 hrs"); });
+    at(2400, function () { $("#dyClock").textContent = "19:45"; dyNote("19:45", "Wrap in 15", prod ? "Kit back to the van by 20:30, drives to the DIT." : "Kit back by 20:30. Drives to the DIT before you go.", "amber"); });
+    at(3600, function () {
+      $("#dyLab").textContent = "Wrapped"; $("#dyClock").textContent = "20:00"; dyMeter(prod ? 2940 : 1.5, prod ? 4000 : 1.5, prod ? "£2,940 of £4,000" : "1.5 hrs, " + gbp2(ot));
+      dyNote("20:00", "End of day", prod ? "32 crew, 18 on overtime, £2,940. Timesheets drafted, and the same summary sent to the crew." : "13.5 hrs with 1.5 overtime, timesheet drafted. Tomorrow's call is 07:30, turnaround fine.", "red");
+      $("#dyPlay").hidden = false; $("#dyPlay").textContent = "Play it again";
+    });
+  }
+  $("#dyPlay").addEventListener("click", dyPlay);
+  $$("#dyAsk button").forEach(function (b) { b.addEventListener("click", function () { dyAnswer(b.getAttribute("data-a")); }); });
   $$(".day-copy > *").forEach(function (el, i) { watch(el, i * 70); }); watch($("#dy"), 120);
 
   /* ---- both sides: one wrap drafts every crew invoice, and the producer's check already matches ---- */
@@ -210,8 +234,8 @@
   function scard(l, b, q) { return '<div class="scr-card"><span class="lab">' + l + "</span><b>" + b + '</b><span class="scr-q">' + q + "</span></div>"; }
   function scr(lab, body, btn, red) { return '<div class="scr"><span class="lab">' + lab + "</span>" + body + '<span class="scr-btn' + (red ? " red" : "") + '">' + btn + "</span></div>"; }
   var PAY = scr("Pay run · Friday", rows([["30 invoices match", "£21,480"], ["2 queries drafted", "−£26.25", "amber"], ["Paid in 7 days", "APA terms", "q"]]), "Approve the run");
-  var CREW_CHIPS = [["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
-  var PROD_CHIPS = [["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
+  var CREW_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and payments are matched to invoices. No bank login. Skip it if you prefer.", 0], ["Holds and pencils", "Every pencil logged by who and when. Confirm one and the booking note is written.", 1], ["Booking notes", "Rate, hours, overtime and cancellation confirmed in writing, every time.", 1], ["Overtime", "Your band, the half hours, the late break and after midnight, worked out from the call and wrap.", 1], ["Turnaround", "Short rest between days spotted, with a note to the production drafted.", 1], ["Invoices", "Days, overtime, kit and miles on one invoice, numbered and dated for you.", 1], ["Chasing", "A friendly nudge on day 7, a firmer one after, then the Late Payment Act. You tap send.", 1], ["Receipts", "Snap a receipt and it lands on the right job and the right invoice.", 0], ["VAT and tax dates", "Your rolling turnover against the VAT threshold, with Self Assessment dates.", 1], ["Your details, once", "Bank, UTR and right to work saved, so start packs take a tap.", 0]];
+  var PROD_CHIPS = [["Bank statements", "If you want, drop a CSV export from your bank into your Drive folder and client payments and crew runs are matched. No bank login. Skip it if you prefer.", 0], ["Permit clock", "Every borough, Royal Parks, drone and child-licence deadline counted back from your shoot date.", 0], ["Start packs", "Bank details, UTR and right to work chased from every crew member before day one.", 0], ["Chasing", "A friendly nudge, a firm one, then the Late Payment Act. Drafted for you to send.", 1], ["Holds and pencils", "First and second pencils logged, with confirm-or-release notes written for you.", 1], ["Status link", "One page per job showing the agency where it is and what's waiting on them.", 0], ["Client notes", "Each client's PO rules, accounts inbox and payment day, used on every invoice.", 0], ["Rights and usage", "Usage end dates from every contract, with a renewal quote drafted before they lapse.", 0], ["Cash forecast", "Thirteen weeks of money in and out across every open job.", 0], ["Wrap report", "Budget against actual, with every approved extra and who approved it.", 0], ["Kit and POs", "Hire quotes compared, POs drafted, return dates and hire invoices matched.", 0]];
 
   /* crew jobs: a rate, a band, the kit they bring, and three things made for them */
   var CREW = {

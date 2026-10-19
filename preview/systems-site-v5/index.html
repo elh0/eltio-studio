@@ -130,16 +130,18 @@
     <p class="after">Systems does the rest: the permits counted back, the start packs chased, the balance chased, the rights tracked.</p>
   </section>
 
-  <!-- 2a. THE DAY, LIVE: countdown from the call sheet, updates from production -->
+  <!-- 2a. THE DAY, LIVE: the night before to the end-of-day summary, on one clock -->
   <section class="day" id="day">
     <div class="day-copy">
       <p class="lab">On the day · coming next</p>
       <h2 class="h2">The whole unit, on one clock.</h2>
-      <p id="dayP">Your call time comes from the call sheet in your inbox, so the countdown starts on its own. Production posts the day as it moves: lunch, a unit move, running over, wrap. Everyone sees the same times, so nobody has to argue about overtime later.</p>
+      <p id="dayP">The call sheet lands and your countdown, leave-by time and turnaround check are ready before you sleep. On the day the clock runs itself. If the shoot needs to go over, everyone gets the ask at once, and anyone who wants a word gets the producer, not a group chat.</p>
     </div>
     <div class="card dy" id="dy">
-      <div class="dy-top"><span class="lab" id="dyLab">Call in</span><b id="dyClock">14:32:10</b><span class="lab" id="dyWhere">Day 1 · Canal, E2 · call 06:30</span></div>
+      <div class="dy-top"><span class="lab" id="dyLab">Call in</span><b id="dyClock">14:32:10</b><span class="lab" id="dyWhere">Day 1 · Canal, E2 · call 06:30</span>
+        <div class="dy-meter" id="dyMeter" hidden><span class="lab" id="dyMLab">Overtime</span><i><s id="dyBar"></s></i><b id="dyOT">£0</b></div></div>
       <div class="dy-feed" id="dyFeed"></div>
+      <div class="dy-ask" id="dyAsk" hidden><button class="pill paper" type="button" data-a="in">I'm in</button><button class="pill ghost" type="button" data-a="talk">Talk to the producer</button></div>
       <button class="pill red" type="button" id="dyPlay">Play the day</button>
     </div>
   </section>
@@ -238,7 +240,11 @@
     <div class="qa">
       <details><summary>Is it really that easy?</summary><p>Yes. Open it, pick Producer, and it walks you round with a sample job. No setup call, no training. If something isn't obvious, that's ours to fix.</p></details>
       <details><summary>Does it work with Xero?</summary><p>It sits beside Xero, FreeAgent or QuickBooks and does the film part they don't: crew days, overtime, permits, chasing in your name.</p></details>
-      <details><summary>Do my crew need it?</summary><p>No. Their invoices are read from email and checked either way.</p></details>
+      <details><summary>Does it read all my email?</summary><p>No. It reads work email from the productions, agents and suppliers you pick, and you can switch it off any time. It drafts replies. It never sends one for you.</p></details>
+      <details><summary>Do my crew need it?</summary><p>No. Their invoices are read from email and checked either way. The live day works best when the unit is on it, but anyone who isn't just hears the usual way.</p></details>
+      <details><summary>What if I don't want to go over?</summary><p>Tap "Talk to the producer". They're told who wants a word, and the ask stays open until you've spoken. The app saves the walk round the set, not the conversation.</p></details>
+      <details><summary>Can it read my bank statements?</summary><p>If you want. Export a CSV from your bank, drop it in your Systems folder in Google Drive, and payments are matched to invoices. There's no bank login, and you can skip it completely.</p></details>
+      <details><summary>Who sees my hours and overtime?</summary><p>You, and the production you're working for on that job. Nobody else.</p></details>
       <details><summary>Commercials, TV or both?</summary><p>Both. Each job carries its own terms: APA for commercials, Pact/Bectu for drama, or your own flat rate.</p></details>
       <details><summary>What does it cost?</summary><p>It's free to try now. Prices will be on this page before anyone is asked to pay anything.</p></details>
     </div>
@@ -251,7 +257,7 @@
 </main>
 
 <footer class="foot">
-  <span class="q">The easy back office for production. Made in London.</span>
+  <span class="q">Every job sorted. Every day on one clock.</span>
   <span class="flinks"><a href="../systems-app/privacy.html">Privacy</a><a href="../systems-app/terms.html">Terms</a></span>
 </footer>
 

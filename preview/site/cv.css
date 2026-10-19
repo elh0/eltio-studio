@@ -1,4 +1,4 @@
-/* Wordmark motion. The locked wordmark with one soft thing moving, for covers, phone opening screens and app splash
+/* Wordmark motion. Sizes retuned 19 Oct 17:30 (Elliot: Out & Scout was too small, the rest a touch smaller, all about one size). The locked wordmark with one soft thing moving, for covers, phone opening screens and app splash
    screens. CSS and SVG only. Put the markup in a box with position:relative and a size; everything scales from the box
    width (cqi), times --cvs for a bigger or smaller word. Out & Scout the sun rises and stays, then again; Grip the
    fingertip presses the i; Lampwerk flickers on, holds, off; Aglo its sky with a small sun rising behind the word;
@@ -6,25 +6,25 @@
 .cv { position: absolute; inset: 0; display: grid; place-items: center; color: inherit; container-type: size; overflow: hidden; --cvs: 1; }
 .cv svg { display: block; height: auto; overflow: visible; }
 /* Out & Scout */
-.cv-os .lock { font-family: "Geist", system-ui, sans-serif; font-weight: 400; letter-spacing: -.03em; word-spacing: .3em; white-space: nowrap; line-height: 1; text-transform: none; font-size: calc(4.2cqi * var(--cvs)) !important; }
+.cv-os .lock { font-family: "Geist", system-ui, sans-serif; font-weight: 400; letter-spacing: -.03em; word-spacing: .3em; white-space: nowrap; line-height: 1; text-transform: none; font-size: calc(3.4cqi * var(--cvs)) !important; }
 .cv-os .lock .sd { display: inline-block; width: .22em; height: .22em; border-radius: 50%; background: #FF5A1F; vertical-align: .55em; margin: 0 .5em 0 .45em; animation: cvsun 12s ease-in-out infinite; }
 @keyframes cvsun { 0% { transform: translateY(.9em); opacity: 0; } 6% { opacity: 1; } 45% { transform: none; } 86% { transform: none; opacity: 1; } 95%, 100% { transform: translateY(.9em); opacity: 0; } }
 /* Grip */
-.cv-gr svg { width: calc(15.8cqi * var(--cvs)); }
+.cv-gr svg { width: calc(12cqi * var(--cvs)); }
 .cv-gr .tip { animation: cvcrimp 6s ease-in-out infinite; }
 @keyframes cvcrimp { 0%, 60% { transform: none; } 72% { transform: translateY(44px); } 80% { transform: translateY(44px); } 92%, 100% { transform: none; } }
 /* Lampwerk */
-.cv-lw svg { width: calc(30cqi * var(--cvs)); }
+.cv-lw svg { width: calc(24cqi * var(--cvs)); }
 .cv-lw .w { fill: currentColor; animation: cvflick 10s ease-in-out infinite; }
 @keyframes cvflick { 0% { opacity: 0; } 2% { opacity: .5; } 3.5% { opacity: .08; } 5.5% { opacity: .85; } 7% { opacity: .3; } 9% { opacity: 1; } 78% { opacity: 1; } 86% { opacity: 0; } 100% { opacity: 0; } }
 /* Aglo */
 .cv-ag .ag-sky { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(180deg, #9BB7D9, #CCD3DA 70%); animation: cvsky 14s ease-in-out infinite; }
-.cv-ag .ag-sky .sun { position: absolute; left: 50%; top: 100%; width: calc(34cqi * var(--cvs)); height: calc(34cqi * var(--cvs)); translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 186, 130, .95), rgba(255, 210, 170, .5) 38%, rgba(255, 217, 184, 0)); animation: cvrise 14s ease-in-out infinite; }
-.cv-ag .ag-wm { position: relative; display: block; width: calc(24cqi * var(--cvs)); color: #121211; fill: currentColor; aspect-ratio: 2068 / 935; }
+.cv-ag .ag-sky .sun { position: absolute; left: 50%; top: 100%; width: calc(28cqi * var(--cvs)); height: calc(28cqi * var(--cvs)); translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 186, 130, .95), rgba(255, 210, 170, .5) 38%, rgba(255, 217, 184, 0)); animation: cvrise 14s ease-in-out infinite; }
+.cv-ag .ag-wm { position: relative; display: block; width: calc(18cqi * var(--cvs)); color: #121211; fill: currentColor; aspect-ratio: 2068 / 935; }
 @keyframes cvrise { 0% { top: 112%; opacity: 0; } 8% { opacity: 1; } 55% { top: 58%; } 85% { top: 58%; opacity: 1; } 94%, 100% { top: 112%; opacity: 0; } }
 @keyframes cvsky { 0%, 100% { filter: brightness(.96); } 55%, 85% { filter: brightness(1.03); } }
 /* Systems */
-.cv-sy svg { width: calc(32cqi * var(--cvs)); }
+.cv-sy svg { width: calc(25cqi * var(--cvs)); }
 .cv-sy .s { fill: currentColor; animation: cvbreak 12s cubic-bezier(.4, 0, .2, 1) infinite; }
 .cv-sy .s0 { --dx: 439px; } .cv-sy .s1 { --dx: 74px; } .cv-sy .s2 { --dx: -439px; }
 @keyframes cvbreak { 0%, 22% { transform: translateX(var(--dx)); } 48% { transform: none; } 78% { transform: none; } 100% { transform: translateX(var(--dx)); } }

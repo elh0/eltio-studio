@@ -24,7 +24,7 @@ function first(s) { return String(s || "").trim().split(/\s+/)[0] || ""; }
 /* ---------- sky follows the time of day ---------- */
 function phase() { var h = new Date().getHours(); return h >= 5 && h < 10 ? "dawn" : h < 16 ? "day" : h < 21 ? "dusk" : "night"; }
 function greet() { return { dawn: "Good morning", day: "Good afternoon", dusk: "Good evening", night: "Evening" }[phase()]; }
-function paintSky() { var p = phase(); document.documentElement.dataset.sky = p; var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = p === "night" ? "#0D1430" : "#F2F2EF"; }
+function paintSky() { var p = phase(); document.documentElement.dataset.sky = p; var m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = "#0E0E0D"; }
 
 /* ---------- data shape (also the columns of each sheet tab) ---------- */
 var TABS = {
@@ -409,9 +409,9 @@ function startJob(k) {
 }
 function jobPart() {
   var j = job(); if (mode !== "demo" || !j) return "";
-  return '<div class="part">Made for ' + esc(j.pl) + ' · in the pilot</div><p class="pain">' + esc(j.pain) + '</p><div class="rows">' + j.f.map(function (f, i) {
-    return '<button class="row" data-jobf="' + i + '"><span>' + esc(f[0].replace(/\.$/, "")) + '</span><span class="tag">Pilot</span><span class="sub">' + esc(f[1]) + "</span></button>";
-  }).join("") + "</div>";
+  return '<div class="made"><div class="made-h"><span class="part">Made for ' + esc(j.pl) + ' · in the pilot</span><p class="pain">' + esc(j.pain) + '</p></div><div class="fcards">' + j.f.map(function (f, i) {
+    return '<button class="fcard" data-jobf="' + i + '"><span class="n">0' + (i + 1) + '</span><b>' + esc(f[0].replace(/\.$/, "")) + '</b><span class="q">' + esc(f[1]) + '</span><span class="go">See it <span aria-hidden="true">→</span></span></button>';
+  }).join("") + "</div></div>";
 }
 function jobSheet(i) {
   var f = job().f[i];
@@ -445,13 +445,15 @@ function setup() {
 function home() {
   var s = D.settings, L = todo(), up = D.bookings.filter(function (b) { var d = parse(b.end || b.start); return b.status !== "Cancelled" && d && d >= today(); }).sort(function (a, b) { return a.start < b.start ? -1 : 1; });
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
-  return '<div class="top"><span class="q">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + '</span>' + (mode === "demo" ? '<button class="lnk" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
-    "<h2>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h2>" +
-    '<div class="lead"><span class="q">Owed to you</span><b>' + money(owed()) + "</b><span>" + (od ? '<span class="late">' + money(od) + " late</span> · " : "") + conf + " booked · " + holds + " on hold</span></div>" +
-    '<div class="two"><div class="stack">' + jobPart() + starter() + '<div class="part">For you</div><div class="rows">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div></div>" +
-    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(bookingRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div>" +
-    '<div class="sum"><div><span class="q">Booked this month</span><span>' + money(bookedThisMonth()) + '</span></div><div><span class="q">Tax to put aside</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + "</span></div></div>" + '<button class="row-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div></div>";
+  var tile = function (lab, v, sub, cls) { return '<div class="tile' + (cls ? " " + cls : "") + '"><span class="part">' + lab + "</span><b>" + v + "</b><span class=\"q\">" + sub + "</span></div>"; };
+  return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? '<button class="btn sm" data-switchjob>Switch job</button>' : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
+    '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
+    '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
+    jobPart() +
+    '<div class="two"><div class="stack"><div class="part">Needs you' + (L.length ? " · " + L.length : "") + '</div><div class="rows needs">' + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span><i class="' + (x.amb ? "rd" : "od") + '"></i>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div>" + starter() + "</div>" +
+    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(upRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div></div></div>";
 }
+function upRow(b) { var d = parse(b.start); return '<button class="row up" data-booking="' + b.id + '"><span class="dt"><b>' + (d ? d.getDate() : "") + "</b>" + (d ? MON[d.getMonth()] : "") + '</span><span class="up-t">' + esc(b.production || "Booking") + '<span class="q">' + esc(b.client) + (b.end && b.end !== b.start ? ", to " + nice(b.end) : "") + '</span></span><span class="tag' + (b.status === "Confirmed" ? " ok" : "") + '">' + esc(b.status) + "</span></button>"; }
 /* First steps: sample data gets things to try, a real account gets its setup checklist. */
 function flag(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {} return null; }
 function starter() {

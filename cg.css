@@ -299,3 +299,35 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-tile.cg-ink { --tile: #0E0E0D; --mk: rgba(243,243,240,.35); color: #F3F3F0; }
 .eltio.cg .cg-ink .k2, .eltio.cg .cg-ink .k2 .lock { color: #F3F3F0 !important; }
 .eltio.cg .cg-ink .cg-ag-cov, .eltio.cg .cg-ink .cg-sy-cov { color: #F3F3F0; }
+
+/* 19 Oct: animated covers, no hover wireframes. The locked wordmark at the size it has on the last tile; one soft
+   thing moves. Elliot's picks (16:34): Out & Scout the sun rises; Grip the fingertip crimps; Lampwerk flickers on;
+   Aglo a small sun rises on its sky behind the word; Systems is one word that breaks into Sy ste ms. CSS and SVG only. */
+.eltio.cg .cg-logo .k2-wf, .eltio.cg .cg-logo .k2-tag { display: none !important; }
+.eltio.cg .cg-logo .x-frame:hover .k2-rest, .eltio.cg .cg-logo .k2.on .k2-rest { opacity: 1; transform: none; filter: none; }
+.eltio.cg .cg-cvt .cg-in > .cg-cv { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0A; }
+.eltio.cg .cg-cv svg { display: block; height: auto; overflow: visible; }
+/* Out & Scout: the sun comes up slowly and stays, then goes and comes up again */
+.eltio.cg .cg-cv-os .lock { font-size: 4.2cqi !important; color: #0B0B0A; }
+.eltio.cg .cg-cv-os .lock .sd { display: inline-block; animation: cvsun 12s ease-in-out infinite; }
+@keyframes cvsun { 0% { transform: translateY(.9em); opacity: 0; } 6% { opacity: 1; } 45% { transform: none; } 86% { transform: none; opacity: 1; } 95%, 100% { transform: translateY(.9em); opacity: 0; } }
+/* Grip: the fingertip presses on the i and lets go */
+.eltio.cg .cg-cv-gr svg { width: 15.8cqi; }
+.eltio.cg .cg-cv-gr .tip { animation: cvcrimp 6s ease-in-out infinite; }
+@keyframes cvcrimp { 0%, 60% { transform: none; } 72% { transform: translateY(44px); } 80% { transform: translateY(44px); } 92%, 100% { transform: none; } }
+/* Lampwerk: flickers on, holds, goes off, again */
+.eltio.cg .cg-cv-lw svg { width: 30cqi; }
+.eltio.cg .cg-cv-lw .w { fill: currentColor; animation: cvflick 10s ease-in-out infinite; }
+@keyframes cvflick { 0% { opacity: 0; } 2% { opacity: .5; } 3.5% { opacity: .08; } 5.5% { opacity: .85; } 7% { opacity: .3; } 9% { opacity: 1; } 78% { opacity: 1; } 86% { opacity: 0; } 100% { opacity: 0; } }
+/* Aglo: its sky behind the word, a small sun rising */
+.eltio.cg .cg-cv-ag .ag-sky { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(180deg, #9BB7D9, #CCD3DA 70%); animation: cvsky 14s ease-in-out infinite; }
+.eltio.cg .cg-cv-ag .ag-sky .sun { position: absolute; left: 50%; top: 100%; width: 34cqi; height: 34cqi; translate: -50% -50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 186, 130, .95), rgba(255, 210, 170, .5) 38%, rgba(255, 217, 184, 0)); animation: cvrise 14s ease-in-out infinite; }
+.eltio.cg .cg-cv-ag .ag-wm { position: relative; width: 24cqi; color: #121211; }
+@keyframes cvrise { 0% { top: 112%; opacity: 0; } 8% { opacity: 1; } 55% { top: 58%; } 85% { top: 58%; opacity: 1; } 94%, 100% { top: 112%; opacity: 0; } }
+@keyframes cvsky { 0%, 100% { filter: brightness(.96); } 55%, 85% { filter: brightness(1.03); } }
+/* Systems: one word that breaks into its three parts, then closes again */
+.eltio.cg .cg-cv-sy svg { width: 32cqi; }
+.eltio.cg .cg-cv-sy .s { fill: currentColor; animation: cvbreak 12s cubic-bezier(.4, 0, .2, 1) infinite; }
+.eltio.cg .cg-cv-sy .s0 { --dx: 439px; } .eltio.cg .cg-cv-sy .s1 { --dx: 74px; } .eltio.cg .cg-cv-sy .s2 { --dx: -439px; }
+@keyframes cvbreak { 0%, 22% { transform: translateX(var(--dx)); } 48% { transform: none; } 78% { transform: none; } 100% { transform: translateX(var(--dx)); } }
+@media (prefers-reduced-motion: reduce) { .eltio.cg .cg-cv, .eltio.cg .cg-cv * { animation: none !important; } }

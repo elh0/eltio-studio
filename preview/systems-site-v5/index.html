@@ -67,6 +67,16 @@
     </div>
   </section>
 
+  <!-- 1c. ONE SIGN-OFF: timesheet and invoice approved together, in a set order -->
+  <section class="sgn" id="signoff">
+    <div class="sgn-copy">
+      <p class="lab">One sign-off · commercials, film and TV</p>
+      <h2 class="h2" id="sgH">Timesheet and invoice. One tap.</h2>
+      <p id="sgP">Your timesheet goes up the chain in order, HoD then PM then producer. Once it's signed off, your invoice is drafted from it. No timecard in one app and invoices in another.</p>
+    </div>
+    <div class="card sg" id="sg"></div>
+  </section>
+
   <section class="inbox" id="inbox">
     <div class="ib-copy">
       <p class="lab">Your inbox</p>
@@ -294,7 +304,7 @@
   <section class="drive">
     <div class="sheet3d" aria-hidden="true">
       <div class="sheet">
-        <div class="sheet-bar"><span class="lab">Your Drive · Systems.xlsx</span></div>
+        <div class="sheet-bar"><span class="lab" id="dvBar">Your Google Drive · Work dashboard</span></div>
         <div class="sh h"><span>Job</span><span>Amount</span><span>Status</span></div>
         <div class="sh"><span>Sportswear spot</span><span>£42,000</span><span class="st ok">Paid</span></div>
         <div class="sh"><span>Canal promo</span><span>£8,400</span><span class="st amber">Chased</span></div>
@@ -302,12 +312,13 @@
       </div>
     </div>
     <div class="drive-copy">
-      <h2 class="h2">Your books stay in your Drive.</h2>
-      <ul class="ticks-list">
-        <li>One spreadsheet, in your Google Drive. Systems can only open the file it made.</li>
-        <li>Your accountant opens it in Google Sheets.</li>
-        <li>Leave whenever you like. The sheet stays yours.</li>
-      </ul>
+      <p class="lab">Where your work lives</p>
+      <h2 class="h2">Kept for you. Out in a tap.</h2>
+      <div class="dv">
+        <div class="dv-c" id="dvCrew"><span class="lab">Crew · your Google Drive</span><b>Your work dashboard.</b><p>Bookings, holds, invoices and timesheets live in your own Google Drive and feed the app. You never need to open Drive. Systems can only open the files it made.</p></div>
+        <div class="dv-c" id="dvProd"><span class="lab">Producers · hosted for you</span><b>Nothing to manage.</b><p>Your jobs, crew and money run on our servers. No sheets to set up or look after, and everyone on the job sees the same thing.</p></div>
+      </div>
+      <p class="dv-x"><span class="lab">Export from the app</span><span class="fmt"><i>CSV</i><i>Excel</i><i>PDF</i></span><span class="q">For your accountant, Xero or FreeAgent. Leave whenever you like and it all comes with you.</span></p>
     </div>
   </section>
 
@@ -346,14 +357,16 @@
       <details><summary>Does it read all my email?</summary><p>No. It reads work email from the productions, agents and suppliers you pick, and you can switch it off any time. It drafts replies. It never sends one for you.</p></details>
       <details><summary>Do my crew need it?</summary><p>No. Their invoices are read from email and checked either way. The live day works best when the unit is on it, but anyone who isn't just hears the usual way.</p></details>
       <details><summary>What if I don't want to go over?</summary><p>Tap "Talk to the producer". They're told who wants a word, and the ask stays open until you've spoken. The app saves the walk round the set, not the conversation.</p></details>
-      <details><summary>Can it read my bank statements?</summary><p>If you want. Export a CSV from your bank, drop it in your Systems folder in Google Drive, and payments are matched to invoices. There's no bank login, and you can skip it completely.</p></details>
+      <details><summary>Can it read my bank statements?</summary><p>If you want. Export a CSV from your bank, upload it in the app, and payments are matched to invoices. There's no bank login, and you can skip it completely.</p></details>
+      <details><summary>Where is my data kept?</summary><p>Crew: in your own Google Drive, as a work dashboard that feeds the app. You never need to open it, and Systems can only open the files it made. Producers: hosted for you, with nothing to set up. Everyone can export CSV, Excel or PDF from inside the app.</p></details>
       <details><summary>Who sees my hours and overtime?</summary><p>You, and the production you're working for on that job. Nobody else.</p></details>
       <details><summary>Is it free for crew?</summary><p>Overtime and timesheets are free on every job, for good. If a producer runs the job on Systems, you use everything on it free. &pound;4 a month adds your inbox, invoices, chasing and diary across all your jobs.</p></details>
       <details><summary>I have a diary service. Can I keep it?</summary><p>Yes. Systems sits alongside it, and holds you take through them still show in your diary. Plenty of people try both for a while and keep whichever earns its money.</p></details>
       <details><summary>What about my agent?</summary><p>Keep them. Give your agent a link and they manage your holds and offers in Systems, while you see everything as it lands.</p></details>
       <details><summary>Is it a diary service?</summary><p>It does the diary part: availability, holds, offers and clash warnings. It's a flat &pound;4 a month with no commission, ever. Keep your agent if you have one and give them a link to manage your holds.</p></details>
       <details><summary>Who can see my passport?</summary><p>Nobody, until you choose to be found. Producers then see your role, credits and whether you're free. Bank, NI, address and dietary are only shared with a job you've accepted.</p></details>
-      <details><summary>Commercials, TV or both?</summary><p>Both. Each job carries its own terms: APA for commercials, Pact/Bectu for drama, or your own flat rate.</p></details>
+      <details><summary>Commercials, film or TV?</summary><p>All three. Each job carries its own terms: APA for commercials, Pact/Bectu for film and TV drama, or your own flat rate. Long shoots run week by week, with timesheets and invoices signed off each week.</p></details>
+      <details><summary>How do approvals work?</summary><p>The order is set once per job, for example HoD, then PM, then producer. Each person gets one link and taps Approve or Send back with a note. No logins. When the timesheet is signed off, the invoice is drafted from it and approved in the same tap.</p></details>
       <details><summary>What does it cost?</summary><p>Overtime and timesheets are free for crew. Crew Pro is &pound;4 a month, producers &pound;19, companies &pound;59, with packs on top only if you want them. A producer's first real job is free, and trying it with sample data needs no card.</p></details>
     </div>
   </section>

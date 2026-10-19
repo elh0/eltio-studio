@@ -472,7 +472,28 @@ function shootCard() {
     '<div class="sh-bar"><b>29</b><span class="q">of 32 crew booked</span><span class="bar"><i style="width:' + (29 / 32 * 100).toFixed(1) + '%"></i></span></div>' +
     '<div class="rows">' + SHOOT.map(function (r) { return '<div class="row static sh-r"><span>' + esc(r[0]) + (r[1] ? '<span class="q sub">' + esc(r[1]) + "</span>" : '<span class="q sub">Nobody yet</span>') + "</span>" + (r[2] === "open" ? '<button class="btn sm solid" data-findcrew>Find crew</button>' : r[2] === "wait" ? '<button class="btn sm" data-nudge="' + esc(r[1].replace("Offer sent to ", "")) + '">Nudge</button>' : '<span class="tag' + (r[2] === "ok" ? " ok" : " amb") + '">' + (r[2] === "ok" ? "Booked" : "Pencilled") + "</span>") + "</div>"; }).join("") + "</div></div>";
 }
-function dashTop() { if (mode !== "demo" || !job()) return ""; return isProd() ? shootCard() : diaryCard(); }
+/* One sign-off: approvals in a set order, timesheet and invoice approved in one tap, and the day's hot cost. */
+var SIGN = [{ id: "s1", who: "Ana R.", role: "1st AC", days: "2 days, 3 hrs over", amt: 1180, chain: ["Camera HoD", "PM"], st: "" }, { id: "s2", who: "Leon B.", role: "Spark", days: "2 days, 1 hr over", amt: 840, chain: ["Gaffer", "PM"], st: "" }, { id: "s3", who: "Kit M.", role: "Sound recordist", days: "2 days", amt: 1040, chain: ["PM", "Accountant"], st: "" }];
+function chainHtml(names, done) { return '<span class="chain">' + names.map(function (n, i) { return '<span class="' + (i < done ? "ok" : i === done ? "now" : "") + '">' + (i < done ? "✓ " : "") + esc(n) + "</span>"; }).join('<i aria-hidden="true">›</i>') + "</span>"; }
+function hotCost() {
+  var ok = SIGN.filter(function (x) { return x.st === "ok"; }).reduce(function (a, x) { return a + x.amt; }, 0), today = 21480 + ok, todate = 38960 + ok, budget = 52000, pct = Math.min(100, todate / budget * 100);
+  return '<div class="hot"><div class="dia-h"><span class="part">Hot cost · Canal promo · day 2</span><span class="q">from approved and pending timesheets</span></div><div class="hot-n"><div><span class="q">Labour today</span><b>' + money(today) + '</b></div><div><span class="q">To date</span><b>' + money(todate) + '</b></div><div><span class="q">Budget</span><b>' + money(budget) + '</b></div></div><span class="bar"><i style="width:' + pct.toFixed(1) + '%"></i></span><span class="q">' + Math.round(pct) + "% of labour budget used, with one shoot day to go.</span></div>";
+}
+function signCard() {
+  var w = SIGN.filter(function (x) { return !x.st; }).length;
+  return '<div class="diary sign"><div class="dia-h"><span class="part">Sign-offs · timesheet and invoice together</span><span class="tag' + (w ? " amb" : " ok") + '">' + (w ? w + " waiting for you" : "All signed off") + "</span></div>" + SIGN.map(function (x) {
+    return '<div class="sg-r"><span class="sg-t">' + esc(x.who) + ", " + esc(x.role) + '<span class="q">' + esc(x.days) + " · invoice " + money(x.amt) + " drafted from the timesheet</span>" + chainHtml(x.chain.concat(["You"]), x.st === "ok" ? x.chain.length + 1 : x.chain.length) + "</span>" +
+      (x.st === "ok" ? '<span class="tag ok">Approved and invoiced</span>' : x.st === "back" ? '<span class="tag amb">Sent back</span>' : '<span class="sg-a"><button class="btn sm solid" data-signok="' + x.id + '">Approve both</button><button class="btn sm" data-signback="' + x.id + '">Send back</button></span>') + "</div>";
+  }).join("") + '<p class="q">The order is set once per job. Everyone in the chain gets one link and one tap, no login.</p></div>';
+}
+var MYJOBS = [["b6", "Car commercial", "Ironbridge Pictures", 2, ["Gaffer", "PM", "Producer"]], ["b5", "Music video", "Field Records", 1, ["Producer"]], ["b7", "TV drama, second unit", "Harbour Drama", 3, ["HoD", "PM", "Accountant", "Line producer"]]];
+var STEPS = ["Submitted", "Approved", "Invoiced", "Paid"];
+function jobsCard() {
+  return '<div class="diary jobs"><div class="dia-h"><span class="part">Your jobs · one status each</span><span class="q">no separate timecard and invoice</span></div>' + MYJOBS.map(function (j) {
+    return '<div class="jb-r"><span class="sg-t">' + esc(j[1]) + '<span class="q">' + esc(j[2]) + "</span>" + chainHtml(j[4], j[3] >= 1 ? j[4].length : 1) + '</span><span class="steps">' + STEPS.map(function (t, i) { return '<span class="' + (i <= j[3] ? "on" : "") + '">' + t + "</span>"; }).join("") + "</span></div>";
+  }).join("") + '<p class="q">When your timesheet is signed off, the invoice is drafted from it. You never type your hours twice.</p></div>';
+}
+function dashTop() { if (mode !== "demo" || !job()) return ""; return isProd() ? shootCard() + hotCost() + signCard() : diaryCard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -603,8 +624,31 @@ function more() {
     (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-features><span>Everything Systems runs</span><span class="q">26</span><span class="sub">Advance invoices, crew checks, permits, rights, deliverables, the books.</span></button><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
     '<div class="acts"><button class="btn" data-tour>How it works</button><button class="btn" data-editsetup>Edit details</button>' + (mode === "google" && G.sheetId ? '<a class="btn" target="_blank" rel="noopener" href="https://docs.google.com/spreadsheets/d/' + esc(G.sheetId) + '">Open my sheet</a>' : "") + "</div>" +
     '<div class="part">On your phone</div><p class="q">iPhone: open this page in Safari, tap Share, then Add to Home Screen. Android: tap the menu, then Install app. Sign in with the same Google account and it matches your laptop.</p>' +
-    '<div class="part">Your data</div><p class="q">Everything is in one Google Sheet in your Drive, which you own and can edit or delete. Eltio can only see files this app made, and keeps no copy. Nothing is ever sent for you: drafts open in your own email.</p>' +
+    '<div class="part">Where your work lives</div>' + (roleKey() === "Producer"
+      ? '<div class="rows"><div class="row static"><span>Hosted for you</span><span class="tag ok">Nothing to manage</span><span class="sub">Your jobs, crew and money run on Eltio\'s servers. No sheets to set up or look after, and everyone on the job sees the same thing.</span></div></div>'
+      : '<div class="rows"><div class="row static"><span>Your work dashboard</span><span class="tag ok">In your Google Drive</span><span class="sub">Bookings, holds, invoices and timesheets live in your own Google Drive and feed this app. You never need to open Drive. Eltio can only see files this app made, and keeps no copy.</span></div></div>') +
+    '<div class="part">Export</div><div class="exp"><button class="btn" data-export="csv">CSV</button><button class="btn" data-export="xls">Excel</button><button class="btn" data-export="pdf">PDF</button></div><p class="q">For your accountant, Xero or FreeAgent. Excel has a tab each for bookings, invoices, expenses and timesheet days. Nothing is ever sent for you: drafts open in your own email.</p>' +
     '<div class="acts"><button class="btn" data-signout>' + (mode === "demo" ? "Leave sample data" : "Sign out") + "</button>" + (mode === "demo" ? '<button class="lnk" data-resetdemo>Reset sample data</button>' : "") + "</div>" + '<p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>';
+}
+
+/* ---------- export: CSV, Excel and PDF, made in the browser ---------- */
+function rowsOf(t) { return (D[KEY[t]] || []).map(function (r) { return TABS[t].map(function (c) { return r[c] == null ? "" : String(r[c]); }); }); }
+function saveFile(name, type, body) { var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([body], { type: type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+function stamp() { return "eltio-systems-" + iso(today()); }
+function exportCSV() { var q = function (v) { return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }; saveFile(stamp() + "-bookings.csv", "text/csv", [TABS.Bookings].concat(rowsOf("Bookings")).map(function (r) { return r.map(q).join(","); }).join("\n")); }
+/* Excel 2003 XML: opens in Excel, Numbers and Google Sheets, one worksheet per tab. */
+function exportXLS() {
+  var x = function (v) { return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+  var ws = Object.keys(KEY).map(function (t) { return '<Worksheet ss:Name="' + t + '"><Table>' + [TABS[t]].concat(rowsOf(t)).map(function (r) { return "<Row>" + r.map(function (v) { var n = v !== "" && !isNaN(v) && !/^0\d/.test(v); return '<Cell><Data ss:Type="' + (n ? "Number" : "String") + '">' + x(v) + "</Data></Cell>"; }).join("") + "</Row>"; }).join("") + "</Table></Worksheet>"; }).join("");
+  saveFile(stamp() + ".xls", "application/vnd.ms-excel", '<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' + ws + "</Workbook>");
+}
+/* PDF: a clean summary page, saved with the browser's own Save as PDF. */
+function exportPDF() {
+  var up = D.bookings.slice().sort(function (a, b) { return a.start < b.start ? -1 : 1; });
+  var h = '<h1>' + esc(D.settings.name || "Systems") + '</h1><p>Exported ' + nice(iso(today())) + '</p><h2>Bookings</h2><table><tr><th>Date</th><th>Job</th><th>For</th><th>Status</th><th>Rate</th></tr>' + up.map(function (b) { return "<tr><td>" + niceRange(b.start, b.end) + "</td><td>" + esc(b.production) + "</td><td>" + esc(b.client) + "</td><td>" + esc(b.status) + "</td><td>£" + esc(b.rate) + "</td></tr>"; }).join("") + '</table><h2>Invoices</h2><table><tr><th>Number</th><th>For</th><th>Amount</th><th>Due</th><th>Paid</th></tr>' + D.invoices.map(function (v) { return "<tr><td>" + esc(v.number) + "</td><td>" + esc(v.client) + "</td><td>" + money(num(v.amount)) + "</td><td>" + nice(v.due) + "</td><td>" + (v.paid ? nice(v.paid) : "") + "</td></tr>"; }).join("") + "</table>";
+  var w = window.open("", "_blank"); if (!w) { banner("Allow pop-ups to save the PDF."); return; }
+  w.document.write('<!doctype html><meta charset="utf-8"><title>' + stamp() + '</title><style>body{font:13px/1.4 -apple-system,Helvetica,Arial,sans-serif;margin:32px;color:#111}h1{font-size:24px;margin:0}h2{font-size:15px;margin:28px 0 8px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #ddd}th{font-weight:500;color:#666}</style>' + h + "<script>onload=function(){print()}<\/script>");
+  w.document.close();
 }
 
 /* ---------- forms ---------- */
@@ -830,6 +874,9 @@ document.addEventListener("click", function (e) {
   if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
   if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
   if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
+  if (d.export) { if (d.export === "csv") exportCSV(); else if (d.export === "xls") exportXLS(); else exportPDF(); if (d.export !== "pdf") banner(d.export === "csv" ? "Bookings saved as a CSV." : "Saved as an Excel workbook."); return; }
+  if (b.hasAttribute("data-signok")) { var so = SIGN.find(function (x) { return x.id === b.getAttribute("data-signok"); }); so.st = "ok"; render(); banner(so.who + "'s timesheet and invoice approved. Into the next pay run."); return; }
+  if (b.hasAttribute("data-signback")) { var sb = SIGN.find(function (x) { return x.id === b.getAttribute("data-signback"); }); sb.st = "back"; render(); banner("Sent back to " + sb.who + " with a note. Their invoice waits until it's fixed."); return; }
   if (b.hasAttribute("data-offerinfo")) { openSheet(offerSheet(b.getAttribute("data-offerinfo"))); return; }
   if (b.hasAttribute("data-quick")) { var ta = $("of-msg"); if (ta) { ta.value = b.getAttribute("data-quick"); ta.focus(); } return; }
   if (b.hasAttribute("data-sendmsg")) { var m = $("bk-msg"); banner(m && m.value.trim() ? "Drafted. It's in your email drafts, ready to send." : "Write a message first."); return; }

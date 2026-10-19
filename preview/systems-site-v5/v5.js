@@ -327,14 +327,14 @@
   }
   var ROLES = {
     prod: { n: "Producer", h1: "Production admin, made easy.", lede: "Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.",
-      fine: "For UK production companies and producers. No card, no call, no download.",
+      fine: "For UK production companies and producers: commercials, film and TV. No card, no call, no download.",
       cards: [["Award · 09:12", "Drafted", "Advance invoice, 50%", "£42,000"], ["Crew invoices · 32", "30 match", "Into the 7-day run", "£21,480"], ["On set · 14:31", "Approved", "The canal shot, by the agency", "+£5,220"]],
       taps: [["Forward the award email.", "The 50% advance and the balance are drafted, with the dates in your calendar.", scr("Inbox · 09:12", '<p class="scr-mail">Re: Sportswear spot<br><b>We\'d love to go with you.</b></p>' + scard("Advance, 50%", "£42,000.00", "Due 7 days before the shoot"), "Send the invoice")],
         ["Tap wrap.", "Once a day, for the whole unit. Every crew member's overtime is worked out.", scr("Day 2 · call 06:30", '<div class="scr-big">20:30</div><span class="scr-q c">Wrap, logged for 32 crew</span>' + scard("On overtime", "18 crew", "Worked out at each person's band"), "Wrap", 1)],
         ["Approve the pay run.", "Every crew invoice is read and checked first. The odd one out gets a polite query.", PAY]],
       wrap: true, client: true, chips: PROD_CHIPS },
     pm: { n: "Production manager", h1: "Production admin, made easy.", lede: "Permits, start packs, holds and the pay run, without keeping any of it in your head.",
-      fine: "For UK production companies and producers. No card, no call, no download.",
+      fine: "For UK production companies and producers: commercials, film and TV. No card, no call, no download.",
       cards: [["Start packs · 14 crew", "3 to chase", "Bank, UTR, right to work", "11 of 14"], ["Permits", "This week", "Westminster, 3 working days", "8 days"], ["Holds · Tue, Wed", "Booked", "Northbound Films, confirmed", "32 crew"]],
       taps: [["Add the shoot date.", "Every permit and licence deadline is counted back from it, with the urgent ones first.", scr("Shoot in 26 days", rows([["Child licence", "apply now", "amber"], ["City of London", "by 29 Oct"], ["Westminster", "by 12 Nov"]]), "Start the applications")],
         ["Drop in the crew list.", "Start packs go out and get chased: bank details, UTR, right to work.", scr("Start packs · 14 crew", rows([["Back and complete", "11"], ["Sound recordist, UTR", "chase", "amber"], ["Runner, right to work", "chase", "amber"]]), "Send the chasers")],
@@ -558,6 +558,26 @@
     if (b.hasAttribute("data-dbi")) { dbInfo = !dbInfo; dbDraw(); }
     if (b.hasAttribute("data-dbf")) { dbFill = Math.min(3, dbFill + 1); dbDraw(); }
   });
+  /* One sign-off: the chain, timesheet and invoice together, and for producers the day's hot cost. */
+  var sgEl = $("#sg"), sgProd = false, sgDone = 0;
+  function sgDraw() {
+    if (!sgEl) return;
+    var names = sgProd ? ["Camera HoD", "PM", "You"] : ["Camera HoD", "PM", "Producer"], fin = sgDone >= names.length;
+    var chain = '<span class="sg-chain">' + names.map(function (n, i) { return '<span class="' + (i < sgDone ? "ok" : i === sgDone ? "now" : "") + '">' + (i < sgDone ? "&#10003; " : "") + n + "</span>"; }).join('<i aria-hidden="true">&rsaquo;</i>') + "</span>";
+    var who = sgProd ? "Ana R., 1st AC" : "You, 1st AC";
+    var steps = '<div class="sg-steps">' + ["Submitted", "Approved", "Invoiced", "Paid"].map(function (t, i) { return '<span class="' + (i === 0 || (fin && i <= 2) ? "on" : "") + '">' + t + "</span>"; }).join("") + "</div>";
+    var lab = 1180 * (fin ? 1 : 0), today = 21480 + lab, todate = 38960 + lab;
+    sgEl.innerHTML = '<div class="sg-h"><span class="lab">Canal promo · ' + who + '</span><span class="st-p' + (fin ? " av-ok" : " pen") + '">' + (fin ? "Signed off" : "Waiting") + "</span></div>" + chain +
+      '<div class="sg-two"><div><span>Timesheet</span><b>2 days, 3 hrs over</b><span>APA, worked out</span></div><div><span>Invoice</span><b>&pound;1,180</b><span>drafted from it</span></div></div>' + steps +
+      (fin ? '<button class="pill" data-sga>Play it again</button>' : '<button class="pill" data-sgn>' + (sgProd && sgDone === names.length - 1 ? "Approve both" : sgProd ? "Next: " + names[sgDone] + " approves" : names[sgDone] + " approves") + "</button>") +
+      (sgProd ? '<div class="sg-hot"><span class="lab">Hot cost · day 2</span><div class="row"><span>Labour today</span><b>' + gbp0(today) + '</b></div><div class="row"><span>To date, of &pound;52,000</span><b>' + gbp0(todate) + '</b></div><span class="bar"><i style="width:' + (todate / 52000 * 100).toFixed(1) + '%"></i></span></div>' : "");
+  }
+  if (sgEl) sgEl.addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; if (b.hasAttribute("data-sgn")) sgDone++; if (b.hasAttribute("data-sga")) sgDone = 0; sgDraw(); });
+  function sgSet(prod) {
+    sgProd = prod; sgDone = 0; sgDraw();
+    $("#sgH").textContent = prod ? "Approve the day. Pay the right amount." : "Timesheet and invoice. One tap.";
+    $("#sgP").textContent = prod ? "Timesheets come up the chain in the order you set: HoD, then PM, then you. Each person gets one link and one tap. When you approve, the invoice drafted from that timesheet is approved too, and the day's hot cost updates." : "Your timesheet goes up the chain in order, HoD then PM then producer. Once it's signed off, your invoice is drafted from it. No timecard in one app and invoices in another.";
+  }
   function dbSet(prod) {
     dbProd = prod; dbTook = ""; dbInfo = false; dbFill = 0; dbDraw();
     $("#dbH").textContent = prod ? "Open it. Your shoot's already there." : "Open it. Your week's already there.";
@@ -573,7 +593,9 @@
     $("#asName").textContent = R.n;
     bdKey = key; bdDraw();
     prPlan = key === "prod" || key === "pm" ? "producer" : "crew"; prDraw();
-    dbSet(key === "prod" || key === "pm");
+    dbSet(key === "prod" || key === "pm"); sgSet(key === "prod" || key === "pm");
+    var pr = key === "prod" || key === "pm", dc = $("#dvCrew"), dp = $("#dvProd");
+    if (dc && dp) { dc.classList.toggle("on", !pr); dp.classList.toggle("on", pr); dc.parentNode.insertBefore(pr ? dp : dc, dc.parentNode.firstChild); $("#dvBar").textContent = pr ? "Hosted · your jobs" : "Your Google Drive · Work dashboard"; }
     if (R.rate) { $("#kcR").value = R.rate; kcDraw(); }
     dyKey = key === "other" ? guess(R.n) : key; dyReset();
     ibKey = key === "other" ? guess(R.n) : key; if (ibSeen) ibPlay();

@@ -105,8 +105,9 @@
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-frame,html.lv-m.lv6 .eltio.alt-plx.lp .x-frame{border-radius:22px;background:#F1F1EC!important;box-shadow:0 1px 0 rgba(0,0,0,.03),0 30px 60px -40px rgba(0,0,0,.35)}',
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-txt,html.lv-m.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
     'html.lv-m.lv5 .x-frame .k2,html.lv-m.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv-m.lv5 .x-p.lv-on .x-frame>.k2,html.lv-m.lv6 .x-p.lv-on .x-frame>.k2{opacity:0}',
-    'html.lv-m.lv5 .lv-ph,html.lv-m.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    // 19 Oct 20:15: on phones no cover logo at all, just the phone and its opening-screen motion, in view from the start
+    'html.lv-m .x-frame>.k2{display:none!important}',
+    'html.lv-m.lv5 .lv-ph,html.lv-m.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:1;scale:1;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
     'html.lv-m.lv5 .lv-ph.w,html.lv-m.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
     'html.lv-m.lv5 .x-p.lv-on .lv-ph,html.lv-m.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',

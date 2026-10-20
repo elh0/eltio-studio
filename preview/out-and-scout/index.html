@@ -147,6 +147,16 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
 .who { display: flex; gap: 8px; flex-wrap: wrap; }
 .who span { border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; }
 .jbtn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; background: var(--paper); color: var(--ink); text-decoration: none; font-size: 16px; letter-spacing: -.01em; }
+.su { display: grid; gap: 12px; width: 100%; max-width: 560px; position: relative; }
+.su-note { margin: 0; font-size: 15px; line-height: 1.5; }
+.su-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.su input[type=email] { flex: 1 1 220px; min-width: 0; height: 52px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(239,237,230,.04); color: var(--paper); font-size: 16px; font-family: inherit; }
+.su input[type=email]::placeholder { color: var(--q); }
+.su input[type=email]:focus { outline: none; border-color: var(--mark); }
+.su .jbtn { border: 0; cursor: pointer; font-family: inherit; }
+.su .jbtn:disabled { opacity: .6; }
+.su-done { min-height: 1.3em; margin: 0; }
+.su-done a { color: var(--paper); }
 .jbtn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sun); }
 .road { display: flex; gap: 10px 22px; flex-wrap: wrap; }
 .fl { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 0 28px; }
@@ -239,6 +249,29 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
   .sw-where { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 20px; }
   .sw-where li:last-child { border-bottom: 0; }
 }
+
+/* ---------- exposure: tap, then pull the sun ---------- */
+.ex-vf { position: relative; aspect-ratio: 844 / 390; overflow: hidden; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.ex-vf img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; pointer-events: none; transition: filter .08s linear; }
+.ex-vf { container-type: inline-size; }
+.ex-mask { position: absolute; left: 0; right: 0; top: calc((100% - 100cqw / 2.39) / 2); bottom: calc((100% - 100cqw / 2.39) / 2); pointer-events: none; box-shadow: 0 0 0 100vmax rgba(0,0,0,.55); outline: 1px solid rgba(239,237,230,.55); }
+.ex-fs { --sq: max(8.5cqw, 52px); --stop: max(2.85cqw, 16px); position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; transform: translate(calc(var(--sq) / -2), -50%); opacity: 0; pointer-events: none; transition: opacity .25s; }
+.ex-fs.on { opacity: 1; pointer-events: auto; }
+.ex-fs.pop .sq { animation: expop .35s var(--e); }
+@keyframes expop { from { transform: scale(1.35); } to { transform: none; } }
+.ex-fs .sq { position: relative; width: var(--sq); height: var(--sq); border: 1px solid var(--paper); border-radius: 2px; }
+.ex-fs .lk { position: absolute; left: 50%; top: -22px; transform: translateX(-50%); background: var(--paper); color: var(--ink); font: 400 9px/1.6 var(--mono); letter-spacing: .04em; padding: 0 5px; border-radius: 3px; white-space: nowrap; opacity: 0; transition: opacity .25s; }
+.ex-fs .lk.on { opacity: 1; }
+.ex-fs .rail { position: relative; width: 40px; height: calc(var(--stop) * 4 + 16px); }
+.ex-fs .rail::before { content: ""; position: absolute; left: 50%; top: 8px; bottom: 8px; width: 1px; background: rgba(239,237,230,.5); }
+.ex-fs .rail i { position: absolute; left: 50%; top: 50%; width: max(1.9cqw, 14px); height: max(1.9cqw, 14px); border-radius: 50%; background: var(--sun); transform: translate(-50%, -50%); cursor: ns-resize; touch-action: none; }
+.ex-fs .rail i::after { content: ""; position: absolute; inset: -14px; }
+.ex-fin { position: absolute; z-index: 3; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; border: 1.5px solid rgba(239,237,230,.9); background: rgba(239,237,230,.16); opacity: 0; pointer-events: none; transition: left .45s var(--e), top .45s var(--e), opacity .3s, transform .15s; }
+.ex-fin.on { opacity: 1; }
+.ex-fin.down { transform: scale(.78); background: rgba(239,237,230,.3); }
+.ex-fin.hold { transition: transform .8s; transform: scale(.6); }
+.ex-cap { font-size: 11px; min-height: 0; padding-bottom: 18px; }
+@media (max-width: 599px) { .ex-vf { aspect-ratio: 3 / 2; } }
 
 /* ---------- wider screens: the card sits left, the phone sits right ---------- */
 @media (min-width: 900px) {
@@ -365,9 +398,27 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
   <div class="tail" aria-hidden="true"></div>
 </div>
 
+<section class="sweep expo" id="expo" aria-labelledby="ex-h">
+  <div class="hd">
+    <span class="mono q">05 · Exposure</span>
+    <h2 id="ex-h">Exposure, without the clutter.</h2>
+    <p>Tap to focus and a small sun sits beside the square. Pull it down to darken, up to brighten, two stops either way. Hold to lock focus and exposure. No panel over the picture, no numbers, no menus. Just the frame.</p>
+  </div>
+  <div class="sw-stage ex-stage">
+    <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+    <div class="ex-vf" id="ex-vf" role="img" aria-label="The viewfinder: a tap places a focus square with a small sun beside it, and dragging the sun down darkens the picture.">
+      <img id="ex-pic" src="img/hero-glacier-s.jpg" alt="" draggable="false">
+      <div class="ex-mask"></div>
+      <div class="ex-fs" id="ex-fs"><span class="sq"><span class="lk" id="ex-lock">AE/AF Lock</span></span><span class="rail"><i id="ex-sun"></i></span></div>
+      <span class="ex-fin" id="ex-fin"></span>
+    </div>
+    <p class="sw-cap ex-cap mono" id="ex-cap" aria-live="polite">Tap to focus</p>
+  </div>
+</section>
+
 <section class="sweep" id="sweep" aria-labelledby="sw-h">
   <div class="hd">
-    <span class="mono q">05 · Sky Sweep <span class="soon">In testing</span></span>
+    <span class="mono q">06 · Sky Sweep <span class="soon">In testing</span></span>
     <h2 id="sw-h">When does the sun clear the roof?</h2>
     <p>After your first shot at a new spot, if the sun crosses where you're pointing, the app offers a ten-second sweep. Follow the sun's path with the phone, it traces where the sky starts, and you get the time to be there.</p>
   </div>
@@ -444,16 +495,20 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
         <div class="nm mono"><span>Founding</span><span class="q">Launch</span></div>
         <div class="amt"><b><sup>£</sup>14.99</b><s>£29.99</s></div>
         <p>Pro at half price for the people who scout with us first. Join the list and we send your code on launch day.</p>
-        <a class="ghost go" href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20founding%20price">Join the founding list</a>
+        <a class="ghost go" href="#join" data-signup-list="founding" data-signup-button="Join the founding list" data-signup-note="Founding list: we send your half-price code on launch day." data-signup-done="You're on the founding list. Your code comes on launch day.">Join the founding list</a>
       </article>
     </div>
     <div class="small mono q"><span>Testing it now? Pro is yours free at launch.</span><span>Production company? <a href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20team%20price">Ask about a team price</a></span></div>
   </div>
-  <div class="join">
+  <div class="join" id="join">
     <span class="mono q">Testing now on real recces</span>
     <h2>Come out with us.</h2>
     <div class="who mono"><span>DPs</span><span>Directors</span><span>Location scouts</span><span>Photographers</span></div>
-    <a class="jbtn" href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20test%20invite">Ask for a test invite</a>
+    <form class="su" data-signup data-app="outandscout" data-list="beta" data-done="You're on the list. Your test invite comes to that email." novalidate>
+      <p class="su-note q">Leave your email for a test invite. Pro is yours free at launch.</p>
+      <div class="su-row"><label class="sr" for="su-em">Your email</label><input id="su-em" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required><input class="sr" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="jbtn" type="submit">Ask for a test invite</button></div>
+      <p class="su-done mono q" role="status" aria-live="polite"></p>
+    </form>
     <div class="road mono q"><span>Now · TestFlight</span><span>Next · more testers</span><span>Then · App Store</span></div>
   </div>
   <footer class="mono q fl"><span>Out &amp; Scout (2026)</span><span><a href="support/">Support</a> · <a href="privacy/">Privacy</a></span></footer>
@@ -463,5 +518,7 @@ input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 
 <script src="site.js"></script>
 <script src="scene.js" defer></script>
 <script src="sweep.js"></script>
+<script src="expo.js"></script>
+<script src="signup.js" defer></script>
 </body>
 </html>

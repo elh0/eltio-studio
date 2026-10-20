@@ -349,3 +349,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-ph, .eltio.cg .cg-emb, .eltio.cg .x-dev, .eltio.cg .cg-zi > .cg-zc { -webkit-mask-image: -webkit-radial-gradient(white, black); isolation: isolate; }
 .eltio.cg .cg-ph > img, .eltio.cg .cg-ph > video, .eltio.cg .cg-emb > .cg-m, .eltio.cg .cg-zi > .cg-zc > img, .eltio.cg .cg-zi > .cg-zc > video { position: absolute; inset: -1px; width: calc(100% + 2px) !important; height: calc(100% + 2px) !important; object-fit: cover; }
 .eltio.cg .cg-ph { position: relative; }
+
+/* 20 Oct: a project's own page fades in once its layout has settled (no cover flash on desktop) */
+.eltio.cg[data-solo] { opacity: 0; transition: opacity .6s ease; }
+.eltio.cg[data-solo].cg-ready { opacity: 1; }

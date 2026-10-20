@@ -1418,19 +1418,99 @@ function deptClick(b) {
   if (d.madeadd) { var a = val("md-a"); if (!a) { banner("Add what it is."); return true; } var key = jk() + d.madeadd; D.made = D.made || {}; (D.made[key] = D.made[key] || []).push([a, val("md-b") || "Added", ""]); demoSave(); render(); banner("Added."); return true; }
   return false;
 }
-function tools() { return (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()); }
-function tool(k) { return tools().find(function (t) { return t.k === k; }); }
+/* ---------- make it yours: your own pages, and a sidebar you can pin and hide ---------- */
+var PAGE_TPL = {
+  costume: [["Fittings", "Cast, Date, Size, Notes"], ["Continuity", "Scene, Character, Look, Photo"]],
+  art: [["Props list", "Prop, Scene, Source, Status"], ["Set dressing", "Set, Item, Hired from, Return by"]],
+  hmu: [["Looks by cast", "Cast, Scene, Look, Products"], ["Allergies", "Cast, Allergy, Notes"]],
+  camera: [["Camera reports", "Roll, Scene, Take, Lens, Notes"], ["Lens list", "Lens, Serial, Owner"]],
+  dop: [["Shot list", "Scene, Shot, Lens, Notes"], ["Lighting plots", "Scene, Units, Power, Notes"]],
+  dit: [["Media log", "Card, Camera, Size, Backed up"], ["Drive register", "Drive, Size, Job, With"]],
+  gaffer: [["Power plan", "Location, Supply, Load, Notes"], ["Team hours", "Name, Call, Wrap, Notes"]],
+  spark: [["Rig log", "Location, Units, Day, Notes"]], grip: [["Rig log", "Rig, Location, Day, Notes"]],
+  sound: [["Sound reports", "Roll, Scene, Take, Tracks, Notes"], ["Radio mics", "Cast, Pack, Channel"]],
+  editor: [["Review notes", "Round, Timecode, Note, Done"], ["Deliverables", "Version, Format, Due, Sent"]],
+  locations: [["Recce log", "Location, Contact, Fee, Photos"], ["Neighbour letters", "Address, Sent, Reply"]],
+  runner: [["Errands", "What, For, Cost, Done"]],
+  prod: [["Pitch tracker", "Brand, Agency, Treatment due, Status"], ["Supplier list", "Supplier, Contact, Terms"]],
+  pm: [["Crew contacts", "Name, Role, Phone, Dietary"], ["Risk checks", "Location, Risk, Owner, Done"]],
+  dir: [["Treatments", "Brand, Due, Status, Fee"]]
+};
+function pages() { return D.custom || (D.custom = []); }
+function layout() { return D.layout || (D.layout = { hide: [], pin: [] }); }
+function customTools() { return pages().map(function (p) { return { k: "t-c-" + p.id, n: p.name, g: "Your pages", fn: function () { return customView(p.id); }, mine: true }; }); }
+function shaped(list) {
+  var L = layout(), out = list.filter(function (t) { return L.hide.indexOf(t.k) < 0; }), pin = [];
+  L.pin.forEach(function (k) { var t = out.find(function (x) { return x.k === k; }); if (t) pin.push(Object.assign({}, t, { g: "Pinned" })); });
+  return pin.concat(out.filter(function (t) { return L.pin.indexOf(t.k) < 0; }));
+}
+function customView(id) {
+  var p = pages().find(function (x) { return x.id === id; }); if (!p) return "";
+  return '<div class="rows">' + (p.rows.length ? p.rows.map(function (r, ri) { return '<div class="row static cp-r"><span class="mail-t">' + esc(r[0] || "") + '<span class="sub q">' + p.cols.slice(1).map(function (c, i) { return r[i + 1] ? esc(c) + ": " + esc(r[i + 1]) : ""; }).filter(Boolean).join(" · ") + '</span></span><button class="lnk" data-cpdel="' + id + ":" + ri + '" aria-label="Remove">Remove</button></div>'; }).join("") : '<div class="row static"><span class="q">Nothing here yet. Add the first one below.</span></div>') + "</div>" +
+    '<div class="part">Add one</div><div class="grid2">' + p.cols.map(function (c, i) { return field("cp-" + i, esc(c), "", /date|due|when|by$/i.test(c) ? "date" : "text"); }).join("") + '</div><div class="acts"><button class="btn solid" data-cpadd="' + id + '">Add it</button></div>' +
+    '<p class="q">' + p.cols.length + " columns · " + p.rows.length + ' rows. It\'s a tab in your sheet, so you can sort, filter and share it there too. <button class="lnk" data-cpkill="' + id + '">Delete this page</button></p>';
+}
+/* Describe it: plain words in, a page out. The preview reads the words for the usual things; the pilot does it properly. */
+var DESC_COLS = [[/\b(date|day|when|due|by)\b/, "Date"], [/\b(cost|price|£|amount|fee|spend|paid)\b/, "Cost"], [/\b(who|person|name|crew|contact)\b/, "Who"], [/\b(actor|actors|cast|talent|character)\b/, "Cast"], [/\b(size|sizes|measure)/, "Size"], [/\b(scene|scenes|shot)\b/, "Scene"], [/\b(location|address|where|place)\b/, "Location"], [/\b(photo|picture|image)/, "Photo"], [/\b(status|done|tick|approved|sent|returned)\b/, "Status"], [/\b(phone|email|number)\b/, "Contact"], [/\b(supplier|shop|hire|vendor)\b/, "Supplier"], [/\b(time|call|wrap|hours?)\b/, "Time"], [/\b(serial|kit|item|prop|props)\b/, "Item"]];
+function fromWords(t) {
+  var w = t.toLowerCase(), cols = [];
+  DESC_COLS.forEach(function (c) { if (c[0].test(w) && cols.indexOf(c[1]) < 0) cols.push(c[1]); });
+  var m = w.match(/(?:track|log|list|keep|record|note|tick off|manage|plan)\s+(?:a\s+|an\s+|list\s+|log\s+|record\s+|of\s+|all\s+|my\s+|the\s+|our\s+|each\s+|every\s+)*([a-z][a-z \-]{2,24}?)(?=\s+(?:for|with|by|on|and|per|that|so|from|to|in)\b|[.,]|$)/), name = m ? m[1] : (w.split(/\s+/).filter(function (x) { return x.length > 3; })[0] || "My page");
+  name = name.trim(); name = name.charAt(0).toUpperCase() + name.slice(1);
+  if (cols.indexOf("Item") < 0 && cols.indexOf("Who") < 0 && cols.indexOf("Cast") < 0) cols.unshift(name.replace(/s$/, ""));
+  var lead = ["Cast", "Who", "Item"].find(function (c) { return cols.indexOf(c) > 0; }); if (lead) { cols.splice(cols.indexOf(lead), 1); cols.unshift(lead); }
+  if (cols.indexOf("Notes") < 0) cols.push("Notes");
+  return { name: name.slice(0, 28), cols: cols.slice(0, 6) };
+}
+function addPageSheet() {
+  var T = PAGE_TPL[jk()] || [["Checklist", "Item, Who, Done"]];
+  return "<h2>Add your own page.</h2><p class=\"q\">Anything Systems doesn't do yet. Pick a start or make your own.</p>" +
+    '<div class="part">Made for ' + esc((job() || {}).pl || "you") + '</div><div class="pills">' + T.concat([["Checklist", "Item, Who, Done"]]).filter(function (x, i, a) { return a.findIndex(function (y) { return y[0] === x[0]; }) === i; }).map(function (t) { return '<button class="pill" data-cptpl="' + esc(t[0]) + "|" + esc(t[1]) + '">' + esc(t[0]) + "</button>"; }).join("") + "</div>" +
+    '<div class="field"><label for="cp-desc">Or say what you need</label><textarea id="cp-desc" rows="2" placeholder="e.g. Track fittings for each actor with sizes, date and a photo"></textarea></div><div class="acts"><button class="btn" data-cpdesc>Build it from that</button></div>' +
+    field("cp-name", "Page name", "", "text", "e.g. Fittings") + field("cp-cols", "Columns, with commas", "", "text", "e.g. Cast, Date, Size, Notes") +
+    '<div class="acts"><button class="btn solid wide" data-cpmake>Add the page</button></div>';
+}
+function customiseSheet() {
+  var L = layout(), all = (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools());
+  return "<h2>Your sidebar.</h2><p class=\"q\">Pin what you use every day. Hide what you don't. Nothing is deleted.</p><div class=\"rows\">" + all.map(function (t) {
+    var pin = L.pin.indexOf(t.k) >= 0, hid = L.hide.indexOf(t.k) >= 0;
+    return '<div class="row static cz-r"><span class="mail-t">' + esc(t.n) + '<span class="sub q">' + esc(t.g) + '</span></span><span class="cz-a"><button class="btn sm' + (pin ? " solid" : "") + '" data-czpin="' + t.k + '">' + (pin ? "Pinned" : "Pin") + '</button><button class="btn sm' + (hid ? " solid" : "") + '" data-czhide="' + t.k + '">' + (hid ? "Hidden" : "Hide") + "</button></span></div>";
+  }).join("") + '</div><div class="acts"><button class="btn" data-addpage>Add your own page</button><button class="btn solid" data-close>Done</button></div>';
+}
+function customClick(b) {
+  var d = b.dataset;
+  if (b.hasAttribute("data-addpage")) { openSheet(addPageSheet()); return true; }
+  if (b.hasAttribute("data-customise")) { openSheet(customiseSheet()); return true; }
+  if (d.cptpl) { var t = d.cptpl.split("|"); $("cp-name").value = t[0]; $("cp-cols").value = t[1]; return true; }
+  if (b.hasAttribute("data-cpdesc")) { var t0 = val("cp-desc"); if (!t0) { banner("Say what the page is for."); return true; } var g = fromWords(t0); $("cp-name").value = g.name; $("cp-cols").value = g.cols.join(", "); banner("Here's a start. Change anything, then add it."); return true; }
+  if (b.hasAttribute("data-cpmake")) {
+    var n = val("cp-name"), cols = val("cp-cols").split(",").map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 6);
+    if (!n) { banner("Give the page a name."); return true; } if (!cols.length) cols = ["What", "Notes"];
+    var p = { id: uid(), name: n.slice(0, 28), cols: cols, rows: [] }; pages().push(p); demoSave(); closeSheet(); S.tab = "t-c-" + p.id; render(); window.scrollTo(0, 0); banner(p.name + " added to your sidebar."); return true;
+  }
+  if (d.cpadd) { var p2 = pages().find(function (x) { return x.id === d.cpadd; }), r = p2.cols.map(function (c, i) { return val("cp-" + i); }); if (!r.some(Boolean)) { banner("Fill in at least one."); return true; } p2.rows.unshift(r); demoSave(); render(); banner("Added."); return true; }
+  if (d.cpdel) { var a = d.cpdel.split(":"), p3 = pages().find(function (x) { return x.id === a[0]; }); p3.rows.splice(+a[1], 1); demoSave(); render(); return true; }
+  if (d.cpkill) { D.custom = pages().filter(function (x) { return x.id !== d.cpkill; }); demoSave(); S.tab = "home"; render(); banner("Page deleted."); return true; }
+  if (d.czpin || d.czhide) {
+    var L = layout(), k = d.czpin || d.czhide, arr = d.czpin ? L.pin : L.hide, i = arr.indexOf(k);
+    if (i >= 0) arr.splice(i, 1); else { arr.push(k); var other = d.czpin ? L.hide : L.pin, j = other.indexOf(k); if (j >= 0) other.splice(j, 1); }
+    demoSave(); render(); openSheet(customiseSheet()); return true;
+  }
+  return false;
+}
+function tools() { return shaped((isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools())); }
+function tool(k0) { return (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools()).find(function (t) { return t.k === k0; }); }
 function toolView() {
   var t = tool(S.tab); if (!t) { S.tab = "home"; return home(); }
   return '<div class="hd"><div class="hd-l"><span class="part">' + esc(t.g) + "</span><h1>" + esc(t.n) + '.</h1></div><span class="tag">Preview</span></div><div class="tool">' + t.fn() + "</div>";
 }
 function sideTools() {
   var gs = []; tools().forEach(function (t) { if (gs.indexOf(t.g) < 0) gs.push(t.g); });
-  return gs.map(function (g) { return '<div class="side-g">' + esc(g) + "</div>" + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button data-tab="' + t.k + '" class="' + (S.tab === t.k ? "on" : "") + '"><span>' + esc(t.n) + '</span><span class="q"></span></button>'; }).join(""); }).join("");
+  return gs.map(function (g) { return '<div class="side-g">' + esc(g) + "</div>" + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button data-tab="' + t.k + '" class="' + (S.tab === t.k ? "on" : "") + '"><span>' + esc(t.n) + '</span><span class="q"></span></button>'; }).join(""); }).join("") + '<div class="side-g">Make it yours</div><button data-addpage><span>Add your own page</span><span class="q">+</span></button><button data-customise><span>Pin and hide pages</span><span class="q"></span></button>';
 }
 function toolList() {
   var gs = []; tools().forEach(function (t) { if (gs.indexOf(t.g) < 0) gs.push(t.g); });
-  return '<div class="tool-list">' + gs.map(function (g) { return '<div class="part">' + esc(g) + '</div><div class="rows">' + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button class="row" data-tab="' + t.k + '"><span>' + esc(t.n) + '</span><span class="q">→</span></button>'; }).join("") + "</div>"; }).join("") + "</div>";
+  return '<div class="tool-list">' + gs.map(function (g) { return '<div class="part">' + esc(g) + '</div><div class="rows">' + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button class="row" data-tab="' + t.k + '"><span>' + esc(t.n) + '</span><span class="q">→</span></button>'; }).join("") + "</div>"; }).join("") + '<div class="part">Make it yours</div><div class="rows"><button class="row" data-addpage><span>Add your own page</span><span class="q">+</span></button><button class="row" data-customise><span>Pin and hide pages</span><span class="q">→</span></button></div></div>';
 }
 /* A sheet that re-opens the page it was opened from redraws the page instead. */
 var openSheet0 = openSheet;
@@ -1502,7 +1582,7 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
-  if (pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b)) return;
+  if (pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }
@@ -1607,7 +1687,9 @@ if ("serviceWorker" in navigator && location.protocol === "https:") navigator.se
 
 /* Opened from the site as a job (?as=gaffer): straight into sample data for that job. */
 var asJob = (location.search.match(/[?&]as=([a-z]+)/) || [])[1];
-if (!(asJob && startJob(asJob))) render();
+/* Same job already saved on this device: keep its pages and sidebar rather than starting again. */
+var kept = asJob && (function () { var s = demoLoad(); return s && s.settings && s.settings.job === asJob && s.settings.name ? s : null; })();
+if (kept) { mode = "demo"; D = kept; render(); } else if (!(asJob && startJob(asJob))) render();
 /* Returning user on this device: try a silent sign-in. If Google needs a tap, the welcome screen stays. */
 try { if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in")) startGoogle(true).catch(function () {}); } catch (e) {}
 setInterval(function () { document.querySelectorAll(".callin").forEach(function (e) { e.textContent = callIn(); }); }, 30000);

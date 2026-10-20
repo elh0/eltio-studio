@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-sky="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0E0E0D">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Systems">
+<title>Eltio Systems</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500&family=Martian+Mono:wght@300;400&family=Schibsted+Grotesk:wght@400;500&display=swap">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="open.css">
+</head>
+<body>
+<div class="splash" id="splash" aria-hidden="true"><span class="swm"><span>S</span><span style="--g:.08em">y</span><span style="--g:.36em">st</span><span style="--g:.14em">e</span><span style="--g:.42em">ms</span></span></div>
+<div class="shell">
+  <nav class="side" id="side" aria-label="Sections"></nav>
+  <main id="main" aria-live="polite"></main>
+</div>
+<div id="tabs"></div>
+<div class="shade" id="shade"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="banner" id="banner" role="status"></div>
+<script src="config.js"></script>
+<script src="jobs.js"></script>
+<script src="app.js"></script>
+<script>
+(function(){var el=document.getElementById("splash");if(!el)return;
+var seen=false;try{seen=sessionStorage.getItem("sySplash")==="1";sessionStorage.setItem("sySplash","1")}catch(e){}
+var rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function done(){el.classList.add("out");setTimeout(function(){el.remove()},450)}
+if(seen){el.remove();return}
+el.classList.add("go");el.addEventListener("click",done);setTimeout(done,rm?700:2700)})();
+</script>
+</body>
+</html>

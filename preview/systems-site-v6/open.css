@@ -1,0 +1,43 @@
+/* Open-style pass: copy in one size and in white, tiny caps labels, thin outline tags,
+   one floating button. Loaded after v5.css. */
+body{font-size:16px;line-height:1.45}
+
+/* Labels: small caps in the body face, not wide mono */
+.lab,.sh.h span,.cs-r.ch::after{font:400 10px/1.4 var(--body);letter-spacing:.06em}
+.jump a{font:400 13px/1 var(--body)}
+.ticks,.db-key,.db-d span,.db-of .dt,.sg-steps span,.sg-chain,.sp-note,.fmt i{font-family:var(--body)}
+.sp-note{font-size:13px;letter-spacing:0}
+
+/* Tags: thin outlines */
+.tag{font:400 10px/1.2 var(--body);letter-spacing:.04em;border-radius:999px;padding:4px 9px;background:transparent;box-shadow:inset 0 0 0 1px currentColor}
+.st-p{font-family:var(--body);background:transparent;box-shadow:inset 0 0 0 1px rgba(242,242,239,.25)}
+
+/* Copy: short, white, one size */
+.lede{font-size:clamp(16px,1.3vw,18px);line-height:1.45;max-width:36ch;color:var(--paper)}
+.fine{font-size:13px}
+section p:not(.lab):not(.lede):not(.fine){font-size:clamp(15px,1.2vw,17px)}
+
+/* Buttons: smaller pills, regular weight */
+.pill{min-height:46px;padding:0 24px;font:400 15px/1 var(--body);background:#ECEAE4}
+.pill.sm{min-height:36px;padding:0 16px;font-size:14px}
+.pill.ghost{background:transparent}
+.acts{align-items:center;gap:20px;margin-top:28px}
+.tlink{color:var(--q);font-size:15px;text-decoration:none;transition:color .2s}
+.tlink:hover{color:var(--paper)}
+
+/* Run it as: one outlined track, the chosen one ringed */
+.who-pills{gap:2px}
+.who-pills button{min-height:36px;padding:0 14px;font-size:14px;box-shadow:none;color:var(--q)}
+.who-pills button:hover{box-shadow:none;color:var(--paper)}
+.who-pills button[aria-checked="true"]{background:transparent;color:var(--paper);box-shadow:inset 0 0 0 1px var(--paper)}
+
+/* FAQ: hairline rows, smaller questions */
+.qa summary{font:400 clamp(16px,1.4vw,19px)/1.3 var(--body);letter-spacing:0;padding:18px 0}
+.qa summary::after{font:300 20px/1 var(--body)}
+.qa details p{font-size:15px}
+
+/* One floating button, with a soft glow under it */
+.fcta{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:40;min-height:50px;padding:0 28px;box-shadow:0 0 0 1px rgba(14,14,13,.06),0 10px 40px 10px rgba(14,14,13,.55);transform:translate(-50%,24px);opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.fcta.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.fcta:active{transform:translate(-50%,0) scale(.97)}
+@media (prefers-reduced-motion:reduce){.fcta{transition:opacity .2s}.fcta,.fcta.on{transform:translate(-50%,0)}}

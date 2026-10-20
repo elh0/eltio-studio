@@ -327,3 +327,25 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-zx { position: absolute; right: 16px; top: 14px; z-index: 2; height: 30px; padding: 0 14px; line-height: 28px !important; font-size: 11px !important; font-family: inherit; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; opacity: 0; transition: opacity .4s .2s; -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-zoom.in .cg-zx { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .eltio.cg .cg-zi, .eltio.cg .cg-zb, .eltio.cg .cg-zx { transition: none; } }
+
+/* 20 Oct: swipe through a card's pieces in the big view; arrows on desktop, a count underneath when there is more than one */
+.eltio.cg .cg-zp, .eltio.cg .cg-zn { position: absolute; top: 50%; z-index: 2; width: 40px; height: 40px; margin-top: -20px; padding: 0; border: 1px solid var(--ink); border-radius: 50%; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px !important; line-height: 38px !important; text-align: center; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .4s .2s; -webkit-tap-highlight-color: transparent; }
+.eltio.cg .cg-zp { left: 24px; } .eltio.cg .cg-zn { right: 24px; }
+.eltio.cg .cg-zp, .eltio.cg .cg-zn { width: 44px !important; height: 44px !important; margin-top: -22px; display: grid; place-items: center; }
+.eltio.cg .cg-zp svg, .eltio.cg .cg-zn svg { display: block; width: 16px; height: 16px; }
+.eltio.cg .cg-zp:hover, .eltio.cg .cg-zn:hover { background: var(--ink); color: var(--bg); }
+.eltio.cg .cg-zoom.in.many .cg-zp, .eltio.cg .cg-zoom.in.many .cg-zn { opacity: 1; pointer-events: auto; }
+@media (max-width: 760px), (hover: none) { .eltio.cg .cg-zp, .eltio.cg .cg-zn { display: none; } }
+.eltio.cg .cg-zd { position: absolute; left: 0; right: 0; bottom: 18px; z-index: 2; text-align: center; font-size: 11px !important; color: var(--ink); opacity: 0; transition: opacity .4s .2s; pointer-events: none; }
+.eltio.cg .cg-zoom.in.many .cg-zd { opacity: .6; }
+.eltio.cg .cg-zoom { touch-action: none; }
+/* 20 Oct: wordmark motion waits until its card is landed on (cg.js adds .cg-here) */
+/* (no animation at all until then, so each cover rests on its locked wordmark instead of a blank first frame;
+   adding the animation back on landing starts it from the top) */
+.eltio.cg .cg-item:not(.cg-here) .cv * { animation-name: none !important; }
+
+/* 20 Oct: iPhone Safari let videos and images bleed a light hairline past rounded, clipped screens (worst while the big
+   view animates). Each rounded screen gets its own clipping layer, and its media sits a pixel past every edge. */
+.eltio.cg .cg-ph, .eltio.cg .cg-emb, .eltio.cg .x-dev, .eltio.cg .cg-zi > .cg-zc { -webkit-mask-image: -webkit-radial-gradient(white, black); isolation: isolate; }
+.eltio.cg .cg-ph > img, .eltio.cg .cg-ph > video, .eltio.cg .cg-emb > .cg-m, .eltio.cg .cg-zi > .cg-zc > img, .eltio.cg .cg-zi > .cg-zc > video { position: absolute; inset: -1px; width: calc(100% + 2px) !important; height: calc(100% + 2px) !important; object-fit: cover; }
+.eltio.cg .cg-ph { position: relative; }

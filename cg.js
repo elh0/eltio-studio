@@ -127,7 +127,7 @@
       if (!kind) return;
       fr.removeAttribute('src'); fr.removeAttribute('data-src');
       if (kind === 'v') {
-        m = document.createElement('video'); m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true;
+        m = document.createElement('video'); m.muted = true; m.loop = true; m.playsInline = true;
         m.setAttribute('muted', ''); m.setAttribute('playsinline', ''); m.setAttribute('preload', 'metadata'); m.poster = f + '.jpg';
         m.innerHTML = '<source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm">';
       } else { m = document.createElement('img'); m.src = f + '.jpg'; m.loading = 'lazy'; m.decoding = 'async'; }
@@ -136,10 +136,19 @@
     if (!CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
     var f = 'video/m/' + pi + '-' + slug(t);
     tile.classList.add('cg-clip');
-    tile.insertAdjacentHTML('beforeend', '<video class="cg-vid" poster="' + f + '.jpg" muted loop playsinline autoplay preload="metadata" aria-label="' + t + '"><source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm"></video>');
+    tile.insertAdjacentHTML('beforeend', '<video class="cg-vid" poster="' + f + '.jpg" muted loop playsinline preload="metadata" aria-label="' + t + '"><source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm"></video>');
   });
-  var vio = new IntersectionObserver(function (es) { es.forEach(function (e) { var v = e.target; if (e.isIntersecting) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } else v.pause(); }); }, { rootMargin: '200px 0px' });
-  arr(root.querySelectorAll('video')).forEach(function (v) { v.muted = true; vio.observe(v); });
+  // 20 Oct: nothing in a project plays until you land on it. A piece counts as landed once it reaches the middle of the
+  // screen; then its loops start from the beginning and its wordmark motion starts from the top. Leaving pauses it.
+  function vplay(v, fresh) { if (fresh) { try { v.currentTime = 0; } catch (e) {} } var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+  function cvRun(el, fresh) { arr(el.querySelectorAll('.cv *')).forEach(function (n) { if (n.getAnimations) n.getAnimations().forEach(function (a) { if (fresh) a.currentTime = 0; }); }); }
+  var lander = new IntersectionObserver(function (es) { es.forEach(function (e) {
+    var el = e.target, vs = arr(el.querySelectorAll('video'));
+    if (e.isIntersecting) { if (!el.classList.contains('cg-here')) { cvRun(el, true); el.classList.add('cg-here'); vs.forEach(function (v) { vplay(v, true); }); arr(el.querySelectorAll('.x-blk')).forEach(function (b) { b.classList.add('vis'); }); } }
+    else { el.classList.remove('cg-here'); vs.forEach(function (v) { v.pause(); }); }
+  }); }, { rootMargin: '-35% 0px -35% 0px' });
+  arr(root.querySelectorAll('video')).forEach(function (v) { v.muted = true; v.autoplay = false; v.removeAttribute('autoplay'); v.pause(); });
+  its.forEach(function (el) { lander.observe(el); });
   // 15 Oct: phones had three Close buttons. One Home on the left, one Menu on the right (home, every project, start a project, email)
   var mn = document.createElement('div'); mn.className = 'cg-menu';
   mn.innerHTML = '<button type="button" class="cg-mb" aria-expanded="false">Menu</button><div class="cg-mp">' +
@@ -172,8 +181,7 @@
 
 
   // identity drawings draw in once their tile arrives
-  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { arr(e.target.querySelectorAll('.x-blk')).forEach(function (b) { b.classList.add('vis'); }); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px 30% 0px' });
-  its.forEach(function (el) { io.observe(el); });
+  // (identity drawings draw in when their tile lands, see land above)
   arr(root.querySelectorAll('.k2')).forEach(function (k) { k.addEventListener('mouseenter', function () { k.classList.add('on'); }); k.addEventListener('mouseleave', function () { k.classList.remove('on'); }); });
   // embedded panels keep their own drawing size and are scaled down to the tile
   var embs = arr(root.querySelectorAll('.cg-emb'));
@@ -201,43 +209,91 @@
   tick(); dbg(hp ? 'opened at ' + hp[1] : 'no project given');
   // 18:31: tap any phone, loop or window to see it big. The piece itself grows from where it sits to fill the
   // screen (one transform, so it is one smooth move on phones and desktop), and shrinks back on tap or Escape.
+  // 20 Oct: swipe (or the arrows, or the arrow keys) to the next piece in the same card; past the last one it closes
+  // itself, back to the page, so you keep scrolling and open the next card the same way.
+  var ZSEL = '.cg-ph, .cg-in > .cg-emb, .cg-elw .x-win, .cg-vid';
   var zo = document.createElement('div'); zo.className = 'cg-zoom';
-  zo.innerHTML = '<div class="cg-zb"></div><div class="cg-zi"></div><button type="button" class="cg-zx" aria-label="Close">Close</button>';
+  zo.innerHTML = '<div class="cg-zb"></div><button type="button" class="cg-zx" aria-label="Close">Close</button>' +
+    '<button type="button" class="cg-zp" aria-label="Previous"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button><button type="button" class="cg-zn" aria-label="Next"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></button><div class="cg-zd"></div>';
   root.appendChild(zo);
-  var zi = zo.querySelector('.cg-zi'), zopen = null, zt = null;
-  // 20:17: drawn at its full size (not a small copy blown up, so it stays sharp), and anything phone-shaped is shown
-  // in a whole phone, dark body and bezel, never as a bare crop. The move is the reverse: start shrunk onto the tile.
-  var zfrom = null;
-  function zoomIn(el) {
-    if (zopen) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
-    var c = el.cloneNode(true); c.classList.add('cg-zc'); c.removeAttribute('loading');
+  var zd = zo.querySelector('.cg-zd'), zopen = null, zcur = null, zt = null, zgrp = [], zgi = 0, zsw = 0;
+  function zgroup(el) {
+    var it = el.closest('.cg-item') || el.parentNode;
+    var all = arr(it.querySelectorAll(ZSEL)).filter(function (x) { var q = x.getBoundingClientRect(); return q.width > 4 && q.height > 4; });
+    all = all.filter(function (x) { return !all.some(function (y) { return y !== x && y.contains(x); }); });
+    return all.indexOf(el) < 0 ? [el] : all;
+  }
+  // drawn at its full size (so it stays sharp); anything phone-shaped sits in a whole phone, never a bare crop
+  function zmake(el) {
+    var r = el.getBoundingClientRect();
+    var c = el.cloneNode(true); c.classList.add('cg-zc'); c.removeAttribute('loading'); c.style.visibility = '';
     var ov = arr(el.querySelectorAll('video')).concat(el.tagName === 'VIDEO' ? [el] : []), cv = arr(c.querySelectorAll('video')).concat(c.tagName === 'VIDEO' ? [c] : []);
     cv.forEach(function (v, k) { v.muted = true; v.loop = true; v.setAttribute('playsinline', ''); v.autoplay = true; try { v.currentTime = ov[k] ? ov[k].currentTime : 0; } catch (e) {} var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); });
     arr(c.querySelectorAll('img')).forEach(function (i) { i.loading = 'eager'; });
-    var a = r.width / r.height, phone = a < .75, pad = innerWidth < 760 ? 18 : 44, W = innerWidth - 2 * pad, H = innerHeight - 2 * pad, k = phone ? .04 : 0;
+    var a = r.width / r.height, phone = a < .75, mob = innerWidth < 760, px = mob ? 18 : 84, py = mob ? 52 : 56;
+    var W = innerWidth - 2 * px, H = innerHeight - 2 * py, k = phone ? .04 : 0;
     var sw = Math.min(W / (1 + 2 * k), H / (1 / a + 2 * k)), sh = sw / a, b = sw * k, fw = sw + 2 * b, fh = sh + 2 * b;
-    zi.innerHTML = ''; zi.className = 'cg-zi' + (phone ? ' ph' : ''); zi.appendChild(c);
-    zi.style.padding = b + 'px'; zi.style.borderRadius = phone ? (sw * .15 + b) + 'px' : '';
+    var box = document.createElement('div'); box.className = 'cg-zi' + (phone ? ' ph' : ''); box.appendChild(c);
+    box.style.padding = b + 'px'; box.style.borderRadius = phone ? (sw * .15 + b) + 'px' : '';
     c.style.borderRadius = phone ? (sw * .15) + 'px' : '';
     var fx = (innerWidth - fw) / 2, fy = (innerHeight - fh) / 2;
-    zi.style.width = fw + 'px'; zi.style.height = fh + 'px'; zi.style.left = fx + 'px'; zi.style.top = fy + 'px';
-    zfrom = function (rr) { var s = rr.width / sw; return 'translate(' + (rr.left - b * s - fx).toFixed(1) + 'px,' + (rr.top - b * s - fy).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; };
-    zi.style.transition = 'none'; zi.style.transform = zfrom(r);
-    zo.classList.add('on'); zopen = el; el.style.visibility = 'hidden'; hold = null;
-    requestAnimationFrame(function () { requestAnimationFrame(function () { zi.style.transition = ''; zi.style.transform = 'none'; zo.classList.add('in'); }); });
+    box.style.width = fw + 'px'; box.style.height = fh + 'px'; box.style.left = fx + 'px'; box.style.top = fy + 'px';
+    zo.insertBefore(box, zo.querySelector('.cg-zx'));
+    return { el: el, box: box, from: function (q) { var s = q.width / sw; return 'translate(' + (q.left - b * s - fx).toFixed(1) + 'px,' + (q.top - b * s - fy).toFixed(1) + 'px) scale(' + s.toFixed(4) + ')'; } };
+  }
+  function zdots() { var m = zgrp.length; zo.classList.toggle('many', m > 1); zd.textContent = m > 1 ? (zgi + 1) + ' / ' + m : ''; }
+  function zoomIn(el) {
+    if (zopen) return; var r = el.getBoundingClientRect(); if (r.width < 4 || r.height < 4) return;
+    zgrp = zgroup(el); zgi = zgrp.indexOf(el); zcur = zmake(el);
+    zcur.box.style.transition = 'none'; zcur.box.style.transform = zcur.from(r);
+    zo.classList.add('on'); zopen = el; el.style.visibility = 'hidden'; hold = null; zdots();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { zcur.box.style.transition = ''; zcur.box.style.transform = 'none'; zo.classList.add('in'); }); });
+  }
+  function zgo(d) {
+    if (!zopen) return; var j = zgi + d;
+    if (j >= zgrp.length) { zoomOut(); return; }
+    if (j < 0) { zcur.box.style.transition = ''; zcur.box.style.transform = 'none'; return; }
+    var old = zcur, nx = zmake(zgrp[j]), w = innerWidth;
+    nx.box.style.transition = 'none'; nx.box.style.transform = 'translateX(' + (d * w) + 'px)';
+    old.el.style.visibility = ''; zgrp[j].style.visibility = 'hidden'; zcur = nx; zgi = j; zopen = zgrp[j]; zdots();
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      nx.box.style.transition = ''; nx.box.style.transform = 'none';
+      old.box.style.transition = ''; old.box.style.transform = 'translateX(' + (-d * w) + 'px)';
+      setTimeout(function () { if (old.box.parentNode) old.box.parentNode.removeChild(old.box); }, reduce ? 0 : 650);
+    }); });
   }
   function zoomOut() {
-    if (!zopen) return; var el = zopen; zopen = null;
-    zo.classList.remove('in'); zi.style.transform = zfrom(el.getBoundingClientRect());
-    var done = function () { zo.classList.remove('on'); zi.innerHTML = ''; el.style.visibility = ''; zi.removeEventListener('transitionend', done); clearTimeout(zt); };
-    zi.addEventListener('transitionend', done); zt = setTimeout(done, reduce ? 0 : 700);
+    if (!zopen) return; var el = zopen, c = zcur; zopen = null;
+    zo.classList.remove('in'); c.box.style.transition = ''; c.box.style.transform = c.from(el.getBoundingClientRect());
+    var done = function () { zo.classList.remove('on', 'many'); arr(zo.querySelectorAll('.cg-zi')).forEach(function (x) { x.parentNode.removeChild(x); }); el.style.visibility = ''; c.box.removeEventListener('transitionend', done); clearTimeout(zt); };
+    c.box.addEventListener('transitionend', done); zt = setTimeout(done, reduce ? 0 : 700);
   }
+  // follow the finger sideways; a short flick moves on, a small one springs back, a tap closes
+  var zx0 = 0, zy0 = 0, zdx = 0, zdrag = false;
+  zo.addEventListener('touchstart', function (e) { if (!zopen || e.touches.length > 1) return; zx0 = e.touches[0].clientX; zy0 = e.touches[0].clientY; zdx = 0; zdrag = false; }, { passive: true });
+  zo.addEventListener('touchmove', function (e) {
+    if (!zopen) return; var dx = e.touches[0].clientX - zx0, dy = e.touches[0].clientY - zy0;
+    if (!zdrag && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { zdrag = true; zcur.box.style.transition = 'none'; }
+    if (!zdrag) return; e.preventDefault(); zdx = dx;
+    var edge = (dx > 0 && zgi === 0); zcur.box.style.transform = 'translateX(' + (edge ? dx * .35 : dx).toFixed(1) + 'px)';
+  }, { passive: false });
+  zo.addEventListener('touchend', function () {
+    if (!zdrag) return; zdrag = false; zsw = Date.now(); zcur.box.style.transition = '';
+    if (zdx < -50) zgo(1); else if (zdx > 50 && zgi > 0) zgo(-1); else zcur.box.style.transform = 'none';
+  });
   root.addEventListener('click', function (e) {
-    if (zopen) { e.preventDefault(); zoomOut(); return; }
+    if (zopen) {
+      e.preventDefault(); if (Date.now() - zsw < 450) return;
+      if (e.target.closest('.cg-zn')) { zgo(1); return; } if (e.target.closest('.cg-zp')) { zgo(-1); return; }
+      zoomOut(); return;
+    }
     if (e.target.closest('a, button')) return;
-    var el = e.target.closest('.cg-ph, .cg-in > .cg-emb, .cg-elw .x-win, .cg-vid'); if (!el) return;
+    var el = e.target.closest(ZSEL); if (!el) return;
     e.preventDefault(); zoomIn(el);
   });
-  addEventListener('keydown', function (e) { if (e.key === 'Escape' && zopen) zoomOut(); });
+  addEventListener('keydown', function (e) {
+    if (!zopen) return;
+    if (e.key === 'Escape') zoomOut(); else if (e.key === 'ArrowRight') { e.preventDefault(); zgo(1); } else if (e.key === 'ArrowLeft') { e.preventDefault(); zgo(-1); }
+  });
   addEventListener('resize', function () { if (zopen) zoomOut(); });
 })();

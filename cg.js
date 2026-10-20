@@ -16,19 +16,21 @@
   // phones a 'you are here' button (project + tile) opens the list of projects to jump between.
   projs.forEach(function (pr, j) {
     var m = document.createElement('div'); m.className = 'cg-mark';
-    m.innerHTML = '<span>' + ('(' + ('0' + (j + 1)).slice(-2) + ') ') + names[j] + '</span><span>' + pr.querySelectorAll('.cg-item').length + ' pieces</span>';
+    m.innerHTML = '<span>' + (root.hasAttribute('data-solo') ? '' : '(' + ('0' + (j + 1)).slice(-2) + ') ') + names[j] + '</span><span>' + pr.querySelectorAll('.cg-item').length + ' pieces</span>';
     pr.insertBefore(m, pr.firstChild);
   });
   var fr = root.querySelector('.cg-fr'), land = root.querySelector('.cg-land'), lf = land && land.querySelector('iframe');
-  var num = function (j) { return '(' + ('0' + (j + 1)).slice(-2) + ') '; };
+  var num = function (j) { return solo ? '' : '(' + ('0' + (j + 1)).slice(-2) + ') '; };
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   function centre(k) { var r = its[k].getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, scrollY + r.top + r.height / 2 - innerHeight / 2)); }
   var cur = -1, tgt = 0, born = performance.now();
   // 18 Oct: a link of its own for every project (#out-and-scout, #grip ...) to send to people
   var slugs = names.map(function (nm) { return nm.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); });
   var routeP = -1;
+  // 20 Oct: a project's own page (eltio.studio/aglo ...) keeps its clean link, no #route added
+  var solo = root.hasAttribute('data-solo');
   function route(p) {
-    if (p === routeP) return; routeP = p;
+    if (solo || p === routeP) return; routeP = p;
     if (inFrame) window.parent.postMessage({ cgRoute: slugs[p] }, '*');
     else try { history.replaceState(null, '', location.pathname + location.search + '#' + slugs[p]); } catch (e) {}
   }
@@ -72,7 +74,12 @@
   // past the last project the page scrolls out into the landing page: the frame fades as it comes up, and once it
   // fills the screen the landing page (already loaded behind it, at its top) takes over
   var inFrame = /[?&]in=1/.test(location.search) && window.parent !== window;
-  function home(top) { if (inFrame) window.parent.postMessage({ cgClose: 1, top: !!top }, '*'); else location.href = 'landing.html'; }
+  function home(top) {
+    if (inFrame) { window.parent.postMessage({ cgClose: 1, top: !!top }, '*'); return; }
+    // inside the Cargo page for one project, 'Eltio Studio' opens the whole site there
+    if (solo && window.top !== window) { try { window.top.location.href = 'https://eltio.studio/'; return; } catch (e) {} }
+    location.href = 'landing.html';
+  }
   var leaving = false;
   function out() {
     if (!land) return;

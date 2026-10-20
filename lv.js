@@ -55,7 +55,7 @@
     'html.lv .k2-wf,html.lv .k2-tag{display:none!important}',
     'html.lv .x-frame:hover .k2-rest{opacity:1;transform:none;filter:none}',
     'html.lv-d .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv-d .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
+    'html.lv-d .x-p.lv-on .x-frame>.k2{opacity:0}',
     'html.lv-d .lv-ph{left:50%;top:50%;height:90%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
     'html.lv-d .lv-ph.w{height:auto;width:92%}',
     'html.lv-d .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
@@ -73,7 +73,7 @@
     'html.lv-m.lv2 .lv-ph.w{width:82%}',
     'html.lv-m.lv2 .x-p.lv-on .lv-ph{top:30%}',
     'html.lv-m.lv2 .x-p.lv-on .lv-ph.w{top:44%}',
-    'html.lv-m.lv2 .x-p.lv-on .x-frame .k2{transform:translateY(-34%) scale(.72)}',
+    'html.lv-m.lv2 .x-p.lv-on .x-frame .k2{opacity:0}',
 
     // 3 Fan: three screens open out from behind the wordmark as the card crosses the screen
     'html.lv-m.lv3 .lv-ph{left:50%;top:38%;width:36%;transform-origin:50% 120%;will-change:transform}',
@@ -95,6 +95,7 @@
     'html.lv-m.lv4 .lv-big small{display:block;font-size:11px;letter-spacing:0;margin-top:8px;text-transform:uppercase}',
     'html.lv-m.lv4.lv-in .lv-big{opacity:1}',
     'html.cg-open .lv-big,html.cg-open .lv-bg{display:none}',
+    // 19 Oct 19:58 Elliot: no logos zooming in on scroll; the cover wordmark only fades as the phone arrives (opacity, never scale)
     // 5 Stack, refined (19 Oct: less bulky, the logo lands ON the phone, the whole phone in view, floating)
     // 6 Float: the same cards without pinning, drifting at their own pace
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-list,html.lv-m.lv6 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:24vh!important}',
@@ -104,8 +105,9 @@
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-frame,html.lv-m.lv6 .eltio.alt-plx.lp .x-frame{border-radius:22px;background:#F1F1EC!important;box-shadow:0 1px 0 rgba(0,0,0,.03),0 30px 60px -40px rgba(0,0,0,.35)}',
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-txt,html.lv-m.lv6 .eltio.alt-plx.lp .x-txt{padding:14px 4px 0!important}',
     'html.lv-m.lv5 .x-frame .k2,html.lv-m.lv6 .x-frame .k2{transition:opacity .55s ease,transform .8s cubic-bezier(.3,.7,.2,1)}',
-    'html.lv-m.lv5 .x-p.lv-on .x-frame>.k2,html.lv-m.lv6 .x-p.lv-on .x-frame>.k2{opacity:0;transform:scale(.42)}',
-    'html.lv-m.lv5 .lv-ph,html.lv-m.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:0;scale:.9;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
+    // 19 Oct 20:15: on phones no cover logo at all, just the phone and its opening-screen motion, in view from the start
+    'html.lv-m .x-frame>.k2{display:none!important}',
+    'html.lv-m.lv5 .lv-ph,html.lv-m.lv6 .lv-ph{left:50%;top:46%;height:76%;width:auto;translate:-50% -50%;opacity:1;scale:1;transition:opacity .6s ease,scale 1s cubic-bezier(.3,.7,.2,1)}',
     'html.lv-m.lv5 .lv-ph.w,html.lv-m.lv6 .lv-ph.w{height:auto;width:86%;top:44%}',
     'html.lv-m.lv5 .x-p.lv-on .lv-ph,html.lv-m.lv6 .x-p.lv-on .lv-ph{opacity:1;scale:1;animation:lvFloat 5.5s ease-in-out infinite}',
     '@keyframes lvFloat{0%,100%{translate:-50% -50%}50%{translate:-50% calc(-50% - 7px)}}',
@@ -122,8 +124,8 @@
     'html.lv .lv-sp.s3{background:#121211}html.lv .lv-sp.s3 .ag-wm{filter:invert(1)}',
     'html.lv .lv-sp.s4{background:#F3F3F0}',
     // the wordmark motion on the opening screen, sized for a phone (cv.css)
-    'html.lv .lv-sp .cv{--cvs:1.7}html.lv .lv-ph.w .lv-sp .cv{--cvs:.95}',
-    'html.lv .lv-sp.s0 .cv{--cvs:2.3;color:#F3F3F0}html.lv .lv-sp.s2 .cv{color:#EDEDEA}html.lv .lv-sp.s2 .cv svg,html.lv .lv-sp.s3 .cv .ag-wm{filter:none}html.lv .lv-sp.s3{background:#9BB7D9}html.lv .lv-sp.s4 .cv{color:#0B0B0A}'
+    'html.lv .lv-sp .cv{--cvs:2.2}html.lv .lv-sp.s2 .cv{--cvs:2.1}html.lv .lv-ph.w .lv-sp .cv{--cvs:1.2}',
+    'html.lv .lv-sp.s0 .cv{--cvs:2.85;color:#F3F3F0}html.lv .lv-sp.s2 .cv{color:#EDEDEA}html.lv .lv-sp.s2 .cv svg,html.lv .lv-sp.s3 .cv .ag-wm{filter:none}html.lv .lv-sp.s3{background:#9BB7D9}html.lv .lv-sp.s4 .cv{color:#0B0B0A}'
   ].join('\n');
   document.head.appendChild(css);
 

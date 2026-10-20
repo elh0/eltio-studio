@@ -2,7 +2,7 @@
    Markup: <form data-signup data-app="lampwerk" data-list="beta"> with an email input, a hidden
    input name="website" (bot trap), a submit button and a .su-done status line. */
 (function () {
-  var URL = ''; // App signups web app URL from Apps Script (Deploy > Web app). Empty = email us instead.
+  var URL = 'https://script.google.com/macros/s/AKfycbyAiPN1LOlTFbZZqsByr86l-Uc_9zBqYRrgudf9A6UbW7m2mP7H46oYghL8HYOEminiwg/exec'; // App signups web app URL from Apps Script (Deploy > Web app). Empty = email us instead.
   var NAMES = { lampwerk: 'Lampwerk', outandscout: 'Out & Scout', aglo: 'Aglo' };
   var OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

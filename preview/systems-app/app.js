@@ -395,7 +395,7 @@ function invoiceDraft(v) {
 
 /* ---------- UI state ---------- */
 var S = { tab: "home" };
-var TABN = { home: "Home", bookings: "Bookings", money: "Money", more: "You" };
+var TABN = { home: "Home", bookings: "Bookings", money: "Money", more: "More" };
 
 function banner(t) { var b = $("banner"); b.textContent = t; b.classList.add("on"); clearTimeout(banner.t); banner.t = setTimeout(function () { b.classList.remove("on"); }, 2600); }
 function openSheet(h) { $("sheet").innerHTML = '<span class="grab"></span>' + h; $("sheet").classList.add("on"); $("shade").classList.add("on"); var f = $("sheet").querySelector("input,button"); if (f && window.innerWidth >= 900) f.focus(); }
@@ -1017,7 +1017,7 @@ function moneyScr() {
 }
 function more() {
   var s = D.settings;
-  return '<div class="top"><span>You</span><span></span></div><h2>' + esc(s.name || "Your account") + "</h2>" +
+  return '<div class="top"><span>You</span><span></span></div><h2>' + esc(s.name || "Your account") + "</h2>" + toolList() +
     '<div class="sum"><div><span class="q">Signed in</span><span>' + (mode === "demo" ? "Sample data, this browser only" : esc(G.email || "Google")) + '</span></div><div><span class="q">Your data</span><span>' + (mode === "demo" ? "Not saved to Drive" : "In your Google Drive") + '</span></div><div><span class="q">Grade</span><span>' + esc(s.grade || "Not picked yet") + '</span></div><div><span class="q">Day rate</span><span>' + money(num(s.rate)) + '</span></div><div><span class="q">Terms</span><span>' + esc(s.terms || 30) + ' days</span></div><div><span class="q">Email</span><span>' + esc(s.mail || "Gmail") + '</span></div><div><span class="q">Agent</span><span>' + (s.hasAgent === "Yes" ? esc(s.agent || "Yes") : "None") + "</span></div></div>" +
     (roleKey() === "Producer" ? '<div class="part">For producers</div><div class="rows"><button class="row" data-features><span>Everything Systems runs</span><span class="q">26</span><span class="sub">Advance invoices, crew checks, permits, rights, deliverables, the books.</span></button><button class="row" data-check><span>Check a crew day</span><span class="q">APA or Bectu</span><span class="sub">See what a crew member is owed and whether their invoice is over or under.</span></button></div>' : "") +
     '<div class="part">Linked</div><div class="rows"><button class="row" data-links=""><span>Accounts, bank and calendar</span><span class="q">' + (linked().length ? linked().length + " linked" : "None yet") + '</span><span class="sub">Xero, QuickBooks or FreeAgent, a CSV from your bank, Google or Apple Calendar.</span></button><button class="row" data-onbon><span>Set up your dashboard</span><span class="q">Checklist</span><span class="sub">Put the setup steps back on your home screen.</span></button></div>' +
@@ -1262,6 +1262,82 @@ function showTour(i) {
 function endTour() { tourT.forEach(function (x) { clearTimeout(x); cancelAnimationFrame(x); }); tourT = []; var el = $("tour"); if (el) el.remove(); flag("eltio-systems-tour-1", "1"); }
 
 /* ---------- render ---------- */
+/* ---------- tools: every feature on the website gets its own page in the sidebar ---------- */
+/* Inbox: work email sorted into the job, the reply drafted. Sample mail only in the preview. */
+var INBOX_P = [
+  { id: "m1", from: "Brightside Agency", subj: "Re: Canal promo, can we add a pickup shot?", job: "Canal promo", sort: "Change request", tag: "amb", body: "Hi Sam, could we grab a pickup of the bridge at golden hour on Friday? Same cast. Thanks, Jess", draft: { to: "jess@brightside.example", subject: "Re: Canal promo, pickup shot", body: "Hi Jess,\n\nHappy to. A half-day pickup on Friday with the same cast and a reduced crew of 8 comes to £1,850 plus VAT. I've sent you a link to approve it in one tap, and once you do it goes on the balance invoice.\n\nThanks,\nSam" } },
+  { id: "m2", from: "Fieldwear accounts", subj: "PO 7731 for the advance", job: "Canal promo", sort: "Money", tag: "ok", body: "Please find PO 7731 attached for the 50% advance.", draft: { to: "accounts@fieldwear.example", subject: "Re: PO 7731 for the advance", body: "Thanks, that's great. The advance invoice with PO 7731 on it is attached, due in 14 days as agreed.\n\nBest,\nSam" } },
+  { id: "m3", from: "Westminster filming office", subj: "Permit FO-2291: approved", job: "Canal promo", sort: "Permits", tag: "ok", body: "Your filming notice for Little Venice towpath, 21 to 22 Oct, is approved.", draft: null },
+  { id: "m4", from: "Priya K.", subj: "Re: 2nd AC hold, Canal promo", job: "Canal promo", sort: "Crew", tag: "", body: "Yes, I'm in for both days. Rate as the card is fine.", draft: { to: "priya@example.com", subject: "Re: 2nd AC hold", body: "Brilliant, thanks Priya. You're confirmed for 21 and 22 Oct. The call sheet link and start pack are on their way.\n\nSam" } },
+  { id: "m5", from: "Lensworks Hire", subj: "Quote: cross-hire zoom, 2 days", job: "Canal promo", sort: "Spend", tag: "", body: "Angénieux 24-290 for two days, £380 plus VAT.", draft: null }
+];
+var INBOX_C = [
+  { id: "m1", from: "Maya, Halde Films", subj: "Hold for Thu 22 Oct?", job: "Sportswear spot", sort: "Diary", tag: "amb", body: "Hi Sam, could we pencil you for Thursday? Two cameras on a stage.", draft: { to: "maya@haldefilms.example", subject: "Re: Hold for Thu 22 Oct", body: "Hi Maya,\n\nHappy to take a first pencil on Thursday 22 Oct at my APA card rate. Let me know when it confirms.\n\nThanks,\nSam" } },
+  { id: "m2", from: "Ironbridge Pictures", subj: "Remittance advice", job: "Car commercial", sort: "Money", tag: "ok", body: "Payment of £1,180.00 has been sent for invoice INV-0031.", draft: null },
+  { id: "m3", from: "Ruth, Lark Crew", subj: "Northlight drama, second unit", job: "Drama, second unit", sort: "Offer", tag: "amb", body: "They want you for two days on Bectu terms. Shall I say yes?", draft: { to: "ruth@larkcrew.example", subject: "Re: Northlight drama", body: "Hi Ruth,\n\nYes please, on Bectu terms for both days. Send the deal memo over when you have it.\n\nThanks,\nSam" } }
+];
+function inbox() { return isProd() ? INBOX_P : INBOX_C; }
+function inboxView() {
+  var M = inbox(), sorts = M.reduce(function (a, m) { a[m.sort] = (a[m.sort] || 0) + 1; return a; }, {});
+  return '<div class="facts">' + Object.keys(sorts).slice(0, 3).map(function (k) { return "<span><i>" + esc(k) + "</i>" + sorts[k] + "</span>"; }).join("") + '</div><div class="rows">' + M.map(function (m) {
+    return '<button class="row" data-mail="' + m.id + '"><span class="mail-t">' + esc(m.from) + '<span class="sub q">' + esc(m.subj) + '</span></span><span class="tag' + (m.tag ? " " + m.tag : "") + '">' + esc(m.sort) + "</span></button>";
+  }).join("") + '</div><p class="q">Systems reads only the mail you label for work, sorts it into the job, and drafts the reply in your Gmail drafts. You press send.</p>';
+}
+function mailSheet(id) {
+  var m = inbox().find(function (x) { return x.id === id; });
+  return '<div class="top"><span class="q">' + esc(m.job) + " · " + esc(m.sort) + '</span><span class="q">' + esc(m.from) + "</span></div><h2>" + esc(m.subj) + '</h2><div class="dm"><p>' + esc(m.body) + "</p></div>" +
+    (m.draft ? '<div class="part">Reply drafted</div><div class="glass" style="padding:14px 16px;white-space:pre-wrap">' + esc(m.draft.body) + '</div><div class="acts"><button class="btn solid" data-maildraft="' + m.id + '">Open the draft</button><button class="btn" data-close>Later</button></div>' : '<p class="q">Filed to ' + esc(m.job) + ". Nothing to reply to.</p>" + '<div class="acts"><button class="btn solid" data-close>Done</button></div>');
+}
+function bankView() { return bankSheet() + '<div class="part">Linked accounts</div>' + linkSheet().replace(/<h2>[^<]*<\/h2>/, ""); }
+function clientsView() {
+  var P = pj();
+  return '<div class="facts"><span><i>Client</i>' + esc(P.client) + '</span><span><i>Brand</i>' + esc(P.brand) + '</span><span><i>Budget</i>' + money(P.budget) + "</span></div>" + extrasSheet().replace(/<div class="top">.*?<\/div>/, "");
+}
+function strip(h) { return h.replace(/^<div class="top">.*?<\/div>/, ""); }
+var TOOLS_P = [
+  { k: "t-inbox", n: "Inbox", g: "Run the job", fn: inboxView, sub: "Mail sorted into the job" },
+  { k: "t-dir", n: "Crew directory", g: "Run the job", fn: function () { return strip(findCrew()); }, sub: "Who's free, and send a hold" },
+  { k: "t-crew", n: "Crew and start packs", g: "Run the job", fn: function () { return strip(crewSheet()); } },
+  { k: "t-cs", n: "Call sheets", g: "Run the job", fn: function () { return strip(callSheet()); } },
+  { k: "t-permits", n: "Permits", g: "Run the job", fn: function () { return strip(permitSheet()); } },
+  { k: "t-sign", n: "Sign-off", g: "Pay", fn: function () { return strip(signSheet()); } },
+  { k: "t-run", n: "Pay run", g: "Pay", fn: function () { return strip(runSheet()); } },
+  { k: "t-bank", n: "Bank and accounts", g: "Pay", fn: bankView },
+  { k: "t-rates", n: "Rate cards", g: "Pay", fn: function () { return strip(rateSheet()); } },
+  { k: "t-clients", n: "Client and extras", g: "Client", fn: clientsView },
+  { k: "t-rights", n: "Rights and usage", g: "Client", fn: function () { return strip(rightsSheet()); } }
+];
+var TOOLS_C = [
+  { k: "t-inbox", n: "Inbox", g: "Your work", fn: inboxView },
+  { k: "t-pass", n: "Passport", g: "Your work", fn: function () { return strip(passportSheet()); } },
+  { k: "t-dir", n: "Crew directory", g: "Your work", fn: function () { return strip(findCrew()); } },
+  { k: "t-cs", n: "Call sheets", g: "Your work", fn: function () { return strip(callSheet()); } },
+  { k: "t-rates", n: "Rate cards", g: "Money", fn: function () { return strip(rateSheet()); } },
+  { k: "t-bank", n: "Bank and receipts", g: "Money", fn: bankView }
+];
+function tools() { return isProd() ? TOOLS_P : TOOLS_C; }
+function tool(k) { return tools().find(function (t) { return t.k === k; }); }
+function toolView() {
+  var t = tool(S.tab); if (!t) { S.tab = "home"; return home(); }
+  return '<div class="hd"><div class="hd-l"><span class="part">' + esc(t.g) + "</span><h1>" + esc(t.n) + '.</h1></div><span class="tag">Preview</span></div><div class="tool">' + t.fn() + "</div>";
+}
+function sideTools() {
+  var gs = []; tools().forEach(function (t) { if (gs.indexOf(t.g) < 0) gs.push(t.g); });
+  return gs.map(function (g) { return '<div class="side-g">' + esc(g) + "</div>" + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button data-tab="' + t.k + '" class="' + (S.tab === t.k ? "on" : "") + '"><span>' + esc(t.n) + '</span><span class="q"></span></button>'; }).join(""); }).join("");
+}
+function toolList() {
+  var gs = []; tools().forEach(function (t) { if (gs.indexOf(t.g) < 0) gs.push(t.g); });
+  return '<div class="tool-list">' + gs.map(function (g) { return '<div class="part">' + esc(g) + '</div><div class="rows">' + tools().filter(function (t) { return t.g === g; }).map(function (t) { return '<button class="row" data-tab="' + t.k + '"><span>' + esc(t.n) + '</span><span class="q">→</span></button>'; }).join("") + "</div>"; }).join("") + "</div>";
+}
+/* A sheet that re-opens the page it was opened from redraws the page instead. */
+var openSheet0 = openSheet;
+openSheet = function (h) { var t = tool(S.tab); if (t && $("sheet") && !$("sheet").classList.contains("on")) { try { if (h === t.fn() || strip(h) === t.fn() || h === findCrew() && t.k === "t-dir") { render(); return; } } catch (e) {} } openSheet0(h); };
+function toolClick(b) {
+  var d = b.dataset;
+  if (d.mail) { openSheet(mailSheet(d.mail)); return true; }
+  if (d.maildraft) { var m = inbox().find(function (x) { return x.id === d.maildraft; }); DRAFT = m.draft; openSheet(draftSheet(DRAFT, "Reply drafted")); return true; }
+  return false;
+}
 var VIEWS = { home: home, bookings: bookings, money: moneyScr, more: more };
 /* Trying it with sample data: always show the way back to the site and the waitlist. */
 function siteUrl() { return /\/preview\/systems-app\//.test(location.pathname) ? "../systems-site-v5/" : /^https?:/.test(location.protocol) && location.hostname !== "localhost" && !/claude/.test(location.hostname) ? "/" : "https://eltio.systems/"; }
@@ -1269,11 +1345,11 @@ function demoBar() { return '<div class="demobar"><span class="part">Sample data
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
-  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : !ready ? setup() : VIEWS[S.tab]());
+  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : !ready ? setup() : (VIEWS[S.tab] || toolView)());
   if (ready && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
-  $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
-  $("tabs").innerHTML = ready ? '<nav class="tabs" aria-label="Sections">' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><i></i>' + TABN[t] + (t === "home" && n ? '<span class="badge">' + n + "</span>" : "") + "</button>"; }).join("") + '</nav><button class="fab" data-addbooking aria-label="Add a booking">+</button>' : "";
+  $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + sideTools() + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
+  $("tabs").innerHTML = ready ? '<nav class="tabs" aria-label="Sections">' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t || t === "more" && /^t-/.test(S.tab) ? "on" : "") + '"><i></i>' + TABN[t] + (t === "home" && n ? '<span class="badge">' + n + "</span>" : "") + "</button>"; }).join("") + '</nav><button class="fab" data-addbooking aria-label="Add a booking">+</button>' : "";
 }
 
 /* ---------- start-up ---------- */
@@ -1302,7 +1378,7 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
-  if (pjClick(b) || bankClick(b)) return;
+  if (pjClick(b) || bankClick(b) || toolClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }

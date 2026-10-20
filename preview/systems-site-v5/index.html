@@ -14,6 +14,25 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=s1">
 <link rel="stylesheet" href="v5.css">
 <link rel="stylesheet" href="open.css">
+<style>
+/* Home tutorials: one player, four picks beside it, plays in place */
+.hv{padding-block:96px;display:grid;gap:32px}
+.hv-copy p:not(.lab){margin-top:16px;max-width:520px;color:var(--q)}
+.hv-copy .h2{margin-top:12px}
+.hv-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:20px;align-items:start}
+.hv-screen{aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden}
+.hv-screen video{width:100%;height:100%;display:block;background:#000}
+.hv-list{display:grid;gap:12px}
+.hv-c{display:grid;grid-template-columns:128px minmax(0,1fr);gap:14px;align-items:center;background:none;border:0;padding:6px;border-radius:12px;color:var(--paper);text-align:left;cursor:pointer;font:inherit}
+.hv-c:hover{background:rgba(242,242,239,.05)}
+.hv-c[aria-current=true]{background:rgba(226,65,43,.12)}
+.hv-th{position:relative;aspect-ratio:16/9;border-radius:8px;background:#000 center/cover no-repeat;box-shadow:inset 0 0 0 1px var(--hr)}
+.hv-th i{position:absolute;right:6px;bottom:6px;font:400 10px/1 var(--mono);font-style:normal;background:rgba(14,14,13,.85);padding:4px 6px;border-radius:4px}
+.hv-c b{display:block;font:400 15px/1.3 var(--body)}
+.hv-c span.lab{display:block;margin-top:4px}
+.hv-all{justify-self:start}
+@media (max-width:900px){.hv{padding-block:64px}.hv-stage{grid-template-columns:minmax(0,1fr)}.hv-list{grid-template-columns:repeat(2,minmax(0,1fr))}.hv-c{grid-template-columns:minmax(0,1fr);align-items:start}}
+</style>
 </head>
 <body>
 
@@ -22,7 +41,7 @@
   <a class="mark" href="#top" aria-label="Systems, home"><span>S</span><span style="--g:.08em">y</span><span style="--g:.36em">st</span><span style="--g:.14em">e</span><span style="--g:.42em">ms</span></a>
   <span class="nav-r"><a class="as" href="#who" id="asBtn" aria-label="Change who you are"><span class="lab">As</span> <b id="asName">Producer</b></a><a class="pill sm" href="../systems-app/">Try it</a></span>
   <nav class="jump" id="jump" aria-label="On this page"><div class="jump-in">
-  <a href="#signoff">Sign-off</a><a href="#dash">Dashboard</a><a href="#rates">Rates</a><a href="#invoices">Invoices</a><a href="#easy">How easy</a><a href="#day">On set</a><a href="#callsheet">Call sheets</a><a href="#passport">Crew</a><a href="#clients">Clients</a><a href="#prices">Prices</a><a href="tutorials/">Tutorials</a><a href="#faq">Questions</a><a href="#waitlist">Waitlist</a>
+  <a href="#tutorials">Tutorials</a><a href="#signoff">Sign-off</a><a href="#dash">Dashboard</a><a href="#rates">Rates</a><a href="#invoices">Invoices</a><a href="#easy">How easy</a><a href="#day">On set</a><a href="#callsheet">Call sheets</a><a href="#passport">Crew</a><a href="#clients">Clients</a><a href="#prices">Prices</a><a href="#faq">Questions</a><a href="#waitlist">Waitlist</a>
 </div></nav>
 </header>
 
@@ -59,6 +78,20 @@
         <span class="fl-s">The canal shot, by the agency</span><b>+£5,220</b>
       </div>
     </div>
+  </section>
+
+  <!-- 1b. WATCH IT: the 80-second tour plus three short tutorials, played in place -->
+  <section class="hv" id="tutorials">
+    <div class="hv-copy">
+      <p class="lab">Tutorials · recorded in the real app</p>
+      <h2 class="h2">See it working first.</h2>
+      <p>Short videos with sample data. Start with the 80-second tour, or pick your side.</p>
+    </div>
+    <div class="hv-stage">
+      <div class="hv-screen" id="hvScreen"></div>
+      <div class="hv-list" id="hvList" role="list"></div>
+    </div>
+    <a class="tlink hv-all" href="tutorials/">See all 17 tutorials <span aria-hidden="true">→</span></a>
   </section>
 
   <!-- 1c. ONE SIGN-OFF: timesheet and invoice approved together, in a set order -->
@@ -434,6 +467,25 @@
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) seen.add(e.target); else seen.delete(e.target); }); set(); });
   document.querySelectorAll("main a.pill").forEach(function (a) { if (!a.closest(".hero") && /(systems-)?app\//.test(a.getAttribute("href"))) io.observe(a); });
   var h = document.querySelector('.hero .acts .pill'); if (h) new MutationObserver(function () { b.href = h.href; }).observe(h, { attributes: true, attributeFilter: ["href"] });
+})();
+</script>
+<script>
+/* Home tutorials: the tour plus three picks; each plays here, the rest live on tutorials/ */
+(function () {
+  var T = "tutorials/", picks = [
+    ["01-systems-in-80-seconds", "Systems in 80 seconds", "The tour", "1:13"],
+    ["03-systems-as-a-producer", "Systems as a producer", "From award to pay run", "1:29"],
+    ["06-systems-as-a-gaffer", "Systems as a gaffer", "Offers, team timesheet, one invoice", "0:47"],
+    ["10-sign-off", "Sign-off in one tap", "Timesheet and invoice together", "0:29"]];
+  var scr = document.getElementById("hvScreen"), list = document.getElementById("hvList"); if (!scr || !list) return;
+  function show(id, play) {
+    scr.innerHTML = '<video controls playsinline preload="metadata" poster="' + T + "th/" + id + '.jpg" src="' + T + "media/" + id + '.mp4"><track kind="captions" srclang="en" label="English" src="' + T + "cc/" + id + '.vtt"></video>';
+    [].forEach.call(list.children, function (b) { b.setAttribute("aria-current", b.dataset.id === id); });
+    if (play) scr.firstChild.play().catch(function () {});
+  }
+  list.innerHTML = picks.map(function (p) { return '<button type="button" role="listitem" class="hv-c" data-id="' + p[0] + '"><span class="hv-th" style="background-image:url(' + T + "th/" + p[0] + '.jpg)"><i>' + p[3] + '</i></span><span><b>' + p[1] + '</b><span class="lab">' + p[2] + "</span></span></button>"; }).join("");
+  list.addEventListener("click", function (e) { var b = e.target.closest(".hv-c"); if (b) show(b.dataset.id, true); });
+  show(picks[0][0], false);
 })();
 </script>
 </body>

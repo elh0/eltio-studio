@@ -41,3 +41,11 @@ section p:not(.lab):not(.lede):not(.fine){font-size:clamp(15px,1.2vw,17px)}
 .fcta.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .fcta:active{transform:translate(-50%,0) scale(.97)}
 @media (prefers-reduced-motion:reduce){.fcta{transition:opacity .2s}.fcta,.fcta.on{transform:translate(-50%,0)}}
+
+/* Waitlist: left-aligned like the rest of the page */
+.close{place-content:center start;justify-items:start;text-align:left;gap:28px}
+.wl{justify-items:start}
+.wl-p{font-size:16px}
+.wl-who button{font-size:14px;padding:8px 14px}
+.wl-row input[type=email]{font-size:16px}
+.close-try,.close-price{font-size:14px}

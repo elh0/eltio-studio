@@ -280,7 +280,10 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 16 Oct: Aglo's cover, the name on today's sky */
 .eltio.cg .cg-ag-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #121211; }
 .eltio.cg .cg-ag-cov .ag-wm { position: relative; width: 24%; }
-.eltio.cg .cg-sy-cov { position: absolute; inset: 0; margin: auto; width: 32%; height: max-content; display: grid; gap: 1.6cqi; color: #0B0B0A; }
+/* 19 Oct 19:57: centred the Aglo way; margin:auto + height:max-content pinned the word to the top of the tile on iPhone */
+.eltio.cg .cg-sy-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #0B0B0A; }
+.eltio.cg .cg-sy-cov .sy-wm { display: block; width: 32%; height: auto; aspect-ratio: 5318 / 995; }
+.eltio.cg .cg-ag-cov .ag-wm { height: auto; aspect-ratio: 2068 / 935; }
 .eltio.cg .cg-sy-cov .sy-segs { gap: .8cqi; }
 .eltio.cg .cg-sy-cov .sy-segs i { height: .7cqi; }
 .eltio.cg .cg-info .cg-cap a { color: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
@@ -294,7 +297,7 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 
 /* 16:11 sideways phones (Out & Scout), and the wordmark on black that ends each project */
-.eltio.cg .cg-card .cg-in > .cg-side { grid-template-columns: repeat(var(--c), 1fr); width: min(86cqw, calc(var(--c) * (78cqh - (var(--r) - 1) * 2.2cqw) / var(--r) * 2.164 + (var(--c) - 1) * 2.2cqw)); }
+.eltio.cg .cg-card .cg-in > .cg-side { grid-template-columns: repeat(var(--c), 1fr); gap: 1.6cqw; width: min(88cqw, calc(var(--c) * (84cqh - (var(--r) - 1) * 1.6cqw) / var(--r) * 2.164 + (var(--c) - 1) * 1.6cqw)); }
 .eltio.cg .cg-phl { aspect-ratio: 1600 / 739; border-radius: 4.6% / 10%; background: none; box-shadow: 0 24px 48px -24px rgba(0,0,0,.5); }
 .eltio.cg .cg-tile.cg-ink { --tile: #0E0E0D; --mk: rgba(243,243,240,.35); color: #F3F3F0; }
 .eltio.cg .cg-ink .k2, .eltio.cg .cg-ink .k2 .lock { color: #F3F3F0 !important; }
@@ -305,3 +308,22 @@ html { -webkit-tap-highlight-color: transparent; }
 .eltio.cg .cg-logo .k2-wf, .eltio.cg .cg-logo .k2-tag { display: none !important; }
 .eltio.cg .cg-logo .x-frame:hover .k2-rest, .eltio.cg .cg-logo .k2.on .k2-rest { opacity: 1; transform: none; filter: none; }
 .eltio.cg .cg-cvt .cg-in > .cv { position: absolute; inset: 0; color: #0B0B0A; }
+/* the page's 12px-for-every-span rule above would win over cv.css (fewer classes), so the lock's size is said again here */
+.eltio.cg .cg-cvt .cv-os .lock { font-size: calc(3.4cqi * var(--cvs)) !important; }
+
+/* 18:31 zoom: the tapped piece grows from its tile to fill the screen, same move on phones and desktop */
+.eltio.cg .cg-ph, .eltio.cg .cg-in > .cg-emb, .eltio.cg .cg-elw .x-win, .eltio.cg .cg-vid { cursor: zoom-in; }
+.eltio.cg .cg-zoom { position: fixed; inset: 0; z-index: 40; display: none; }
+.eltio.cg .cg-zoom.on { display: block; cursor: zoom-out; }
+.eltio.cg .cg-zb { position: absolute; inset: 0; background: var(--bg); opacity: 0; transition: opacity .5s cubic-bezier(.22,1,.36,1); }
+.eltio.cg .cg-zoom.in .cg-zb { opacity: .96; }
+.eltio.cg .cg-zi { position: absolute; transform-origin: 0 0; transition: transform .6s cubic-bezier(.22,1,.36,1); will-change: transform; }
+.eltio.cg .cg-zi > .cg-zc { width: 100% !important; height: 100% !important; margin: 0 !important; display: block; }
+.eltio.cg .cg-zi > .cg-zc.cg-vid { position: static; object-fit: cover; }
+/* 20:17 phone-shaped pieces zoom inside a whole phone: dark body, bezel, one shadow (the same shell as the landing phones) */
+.eltio.cg .cg-zi.ph { box-sizing: border-box; background: #0E0E0D; box-shadow: inset 0 0 0 1px #2a2a27, 0 40px 80px -40px rgba(0,0,0,.55); }
+.eltio.cg .cg-zi.ph > .cg-zc { position: relative !important; overflow: hidden; box-shadow: none !important; background: #000; }
+.eltio.cg .cg-zi.ph > .cg-zc img, .eltio.cg .cg-zi.ph > .cg-zc video { object-fit: cover; }
+.eltio.cg .cg-zx { position: absolute; right: 16px; top: 14px; z-index: 2; height: 30px; padding: 0 14px; line-height: 28px !important; font-size: 11px !important; font-family: inherit; border: 1px solid var(--ink); border-radius: 999px; background: var(--bg); color: var(--ink); cursor: pointer; opacity: 0; transition: opacity .4s .2s; -webkit-tap-highlight-color: transparent; }
+.eltio.cg .cg-zoom.in .cg-zx { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .eltio.cg .cg-zi, .eltio.cg .cg-zb, .eltio.cg .cg-zx { transition: none; } }

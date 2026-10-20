@@ -119,11 +119,14 @@
   // the three in-page drawings of Out & Scout keep their whole-tile clips
   var CLIPS = { 0: ['Drawing'] }, MEDIA = {"0-library":"i","0-viewfinder":"i","0-portrait":"i","0-kit":"i","0-shot-list":"i","0-export":"i","1-climb":"v","1-roll":"v","1-analysis":"v","1-compare":"v","1-on-the-bar":"v","1-set-up":"i","1-lidar-scan":"v","1-your-body":"v","1-cue-cards":"i","1-coaches":"i","2-plots":"i","2-plan":"i","2-on-a-laptop":"i","2-light-at-subject":"i","2-power":"i","2-library":"v","2-gaffer-sheet":"i","2-ar-tag":"i","3-welcome":"i","3-home":"i","3-a-day":"v","3-search":"i","3-behind-aglo":"i","3-press-ups":"i","3-guarded-apps":"i","3-stack":"i","3-two-smalls":"i","4-welcome":"i","4-who-it-s-for":"i","4-where-it-hurts":"i","4-what-we-set-up":"i","4-your-rules":"i","4-morning-brief":"i","4-for-you":"i","4-services":"i","4-connections":"i","4-jobs":"i","4-on-set":"i","4-files":"i","2-from-the-scan":"i","2-send":"i","2-live-link":"i","2-new-set":"i"};
   var slug = function (t) { return t.toLowerCase().replace(/[^a-z]+/g, '-'); };
-  if (matchMedia('(max-width: 760px), (hover: none)').matches) its.forEach(function (el) {
-    var pj = el.closest('.cg-proj'), pi = pj ? +pj.getAttribute('data-p') : -1, t = el.getAttribute('data-t') || '', tile = el.querySelector('.cg-tile');
+  // 20 Oct Elliot: on desktop the live panels opened on each app's splash, a logo flash every time. Every screen size
+  // now gets the calm recordings phones get; only the website loops and the drawing clips stay phone-only.
+  var phone = matchMedia('(max-width: 760px), (hover: none)').matches;
+  its.forEach(function (el) {
+    var pj = el.closest('.cg-proj'), pi = pj ? +(pj.getAttribute('data-m') || pj.getAttribute('data-p')) : -1, t = el.getAttribute('data-t') || '', tile = el.querySelector('.cg-tile');
     if (!tile) return;
     // website loops: the phone-layout recording, at the phone's shape
-    arr(tile.querySelectorAll('video[data-m]')).forEach(function (v) {
+    if (phone) arr(tile.querySelectorAll('video[data-m]')).forEach(function (v) {
       var f = v.getAttribute('data-m'), w = v.parentNode, mar = w.getAttribute('data-mar');
       v.poster = f + '.jpg'; v.innerHTML = '<source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm">'; v.load();
       if (mar) w.style.setProperty('--ar', mar);
@@ -140,7 +143,7 @@
       } else { m = document.createElement('img'); m.src = f + '.jpg'; m.loading = 'lazy'; m.decoding = 'async'; }
       m.className = 'cg-m'; m.setAttribute('aria-label', t); fr.parentNode.replaceChild(m, fr);
     });
-    if (!CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
+    if (!phone || !CLIPS[pi] || CLIPS[pi].indexOf(t) < 0) return;
     var f = 'video/m/' + pi + '-' + slug(t);
     tile.classList.add('cg-clip');
     tile.insertAdjacentHTML('beforeend', '<video class="cg-vid" poster="' + f + '.jpg" muted loop playsinline preload="metadata" aria-label="' + t + '"><source src="' + f + '.mp4" type="video/mp4"><source src="' + f + '.webm" type="video/webm"></video>');
@@ -214,6 +217,9 @@
   try { sessionStorage.removeItem('cg-p'); } catch (e) {}
   if (hp && first[+hp[1]] >= 0) { history.replaceState(null, '', location.pathname + location.search); holdAt(first[+hp[1]]); } else scrollTo(0, 0);
   tick(); dbg(hp ? 'opened at ' + hp[1] : 'no project given');
+  // 20 Oct Elliot: a project's own page shouldn't flash its cover while the layout settles; it fades in once, like phones
+  if (solo) { var shown = false, show = function () { if (shown) return; shown = true; requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('cg-ready'); }); }); };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { scrollTo(0, centre(0)); tick(); show(); }); setTimeout(show, 1500); }
   // 18:31: tap any phone, loop or window to see it big. The piece itself grows from where it sits to fill the
   // screen (one transform, so it is one smooth move on phones and desktop), and shrinks back on tap or Escape.
   // 20 Oct: swipe (or the arrows, or the arrow keys) to the next piece in the same card; past the last one it closes

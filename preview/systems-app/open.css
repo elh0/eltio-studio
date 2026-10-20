@@ -64,3 +64,5 @@ h2{font-size:26px}
 .tool>h2:first-child{font-size:22px}
 .tool [data-close]{display:none}
 .mail-t{display:grid;gap:2px;min-width:0}
+.fbar{display:block;height:3px;border-radius:2px;background:#2E2E2B;overflow:hidden}.fbar i{display:block;height:100%;background:var(--tally)}
+.lede-s{margin:0;max-width:52ch}

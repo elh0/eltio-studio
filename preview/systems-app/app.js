@@ -603,7 +603,7 @@ function onboard(asSheet) {
   }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
   return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero and your calendar, match your bank</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : diaryCard() + onboard() + jobsCard(); }
+function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -1315,7 +1315,110 @@ var TOOLS_C = [
   { k: "t-rates", n: "Rate cards", g: "Money", fn: function () { return strip(rateSheet()); } },
   { k: "t-bank", n: "Bank and receipts", g: "Money", fn: bankView }
 ];
-function tools() { return isProd() ? TOOLS_P : TOOLS_C; }
+/* ---------- department tools: what each crew job needs, on top of the shared ones ---------- */
+/* Float: the department's petty cash. Snap each receipt, tag it, send production one reconciliation. No company card needed. */
+var FLOATCAT = { art: "Set", costume: "Character", hmu: "Cast", locations: "Location", runner: "Department", pm: "Department" };
+var FLOATSAMPLE = {
+  art: [["Dressing, kitchen set", 42.1, "Set: Kitchen", "Hobbs Antiques", ""], ["Gaffer tape and pins", 18.5, "Set: General", "Screwfix", ""], ["Fruit bowl, hero", 24, "Set: Kitchen", "Borough Market", ""], ["Rug, return by 25 Oct", 120, "Set: Lounge", "Habitat", "return"]],
+  costume: [["Linen shirt, size M", 65, "Character: Jess", "COS", "return"], ["Trainers, two pairs", 180, "Character: Lead runner", "Size?", "return"], ["Dry cleaning", 28, "Character: Mum", "Johnsons", ""], ["Safety pins, tit tape", 9.4, "Character: General", "Boots", ""]],
+  hmu: [["Setting spray", 14, "Cast: Jess", "Boots", ""], ["Hair grips, kirby", 6.5, "Cast: General", "Superdrug", ""], ["Sun cream SPF50", 12, "Cast: All", "Boots", ""]],
+  locations: [["Parking, two vans", 48, "Location: Little Venice", "RingGo", ""], ["Key holder tip", 20, "Location: Flat, NW3", "Cash", ""], ["Cleaning after", 85, "Location: Flat, NW3", "Clean Co", ""]],
+  runner: [["Coffee run, 14", 46.2, "Department: Production", "Pret", ""], ["Taxi, rushes drop", 32, "Department: Post", "Uber", ""], ["Batteries AA", 11, "Department: Camera", "Argos", ""]],
+  pm: [["Float to art", 500, "Department: Art", "Issued", ""], ["Float to costume", 800, "Department: Costume", "Issued", ""]]
+};
+var FLOATAMT = { art: 500, costume: 800, hmu: 200, locations: 300, runner: 150, pm: 1300 };
+function jk() { return (job() || {}).k || ""; }
+function floatData() {
+  var k = jk(); if (!D.float || D.float.k !== k) { D.float = { k: k, issued: FLOATAMT[k] || 300, items: (FLOATSAMPLE[k] || []).map(function (r, i) { return { id: "s" + i, date: iso(addDays(today(), -i)), what: r[0], amt: r[1], cat: r[2], sup: r[3], ret: r[4], photo: true }; }), sent: "" }; }
+  return D.float;
+}
+function floatSpent() { return floatData().items.reduce(function (a, x) { return a + (x.ret === "returned" ? 0 : num(x.amt)); }, 0); }
+function floatView() {
+  var F = floatData(), sp = floatSpent(), left = F.issued - sp, cat = FLOATCAT[jk()] || "Job", rets = F.items.filter(function (x) { return x.ret === "return"; });
+  return '<div class="facts"><span><i>Float</i>' + pounds(F.issued) + '</span><span><i>Spent</i>' + pounds(sp) + '</span><span><i>' + (left < 0 ? "You're owed" : "Left") + "</i>" + pounds(Math.abs(left)) + "</span></div>" +
+    '<span class="bar fbar"><i style="width:' + Math.min(100, sp / F.issued * 100).toFixed(1) + '%"></i></span>' +
+    '<div class="acts"><button class="btn solid" data-fsnap>Snap a receipt</button><button class="btn" data-fsend>Send to production</button><button class="btn" data-ftop>Ask for a top-up</button></div>' +
+    '<div class="part">Receipts · by ' + esc(cat.toLowerCase()) + '</div><div class="rows">' + F.items.map(function (x) {
+      return '<div class="row static"><span class="mail-t">' + esc(x.what) + '<span class="sub q">' + esc(x.cat) + " · " + esc(x.sup) + " · " + nice(x.date) + (x.photo ? " · photo" : "") + '</span></span><span class="tag' + (x.ret === "return" ? " amb" : x.ret === "returned" ? " ok" : "") + '">' + (x.ret === "returned" ? "Refunded " : "") + pounds(num(x.amt)) + "</span>" + (x.ret === "return" ? '<span class="sub"><button class="lnk" data-fret="' + x.id + '">Mark returned and refunded</button></span>' : "") + "</div>";
+    }).join("") + "</div>" +
+    (rets.length ? '<p class="q">' + rets.length + " item" + (rets.length > 1 ? "s" : "") + " to go back. Systems reminds you three days before the shop's return window closes.</p>" : "") +
+    '<p class="q">Every receipt is a photo in your Drive, tagged to the job and the ' + esc(cat.toLowerCase()) + '. Production gets one reconciliation with the photos, not an envelope.' + (F.sent ? " Last sent " + nice(F.sent) + "." : "") + "</p>";
+}
+function snapSheet() {
+  var cat = FLOATCAT[jk()] || "Job";
+  return "<h2>Snap a receipt.</h2><p class=\"q\">Take the photo, say what it was for, and it's on the float.</p>" +
+    '<div class="field"><label for="fs-photo">Receipt photo</label><input id="fs-photo" type="file" accept="image/*" capture="environment"></div>' +
+    '<div class="grid2">' + field("fs-what", "What it was", "", "text", "e.g. Shirt, size M") + field("fs-amt", "Amount (£)", "", "number", "", ' inputmode="decimal"') + "</div>" +
+    '<div class="grid2">' + field("fs-cat", cat, "", "text", cat === "Character" ? "e.g. Jess" : cat === "Set" ? "e.g. Kitchen" : "") + field("fs-sup", "Shop", "", "text", "e.g. COS") + "</div>" +
+    '<div class="field"><label for="fs-ret">Going back?</label><select id="fs-ret"><option value="">No, it\'s kept</option><option value="return">Yes, return it for a refund</option></select></div>' +
+    '<div class="acts"><button class="btn solid wide" data-fsave>Add it to the float</button></div>';
+}
+function floatMail() {
+  var F = floatData(), P = job() || {}, cat = FLOATCAT[jk()] || "Job", by = {};
+  F.items.forEach(function (x) { if (x.ret === "returned") return; by[x.cat] = (by[x.cat] || 0) + num(x.amt); });
+  return { to: "production@example.com", subject: "Float reconciliation, " + (P.n || "my department") + ", " + nice(iso(today())), body: "Hi,\n\nHere's my float reconciliation.\n\nFloat: " + pounds(F.issued) + "\nSpent: " + pounds(floatSpent()) + "\n" + (F.issued - floatSpent() >= 0 ? "Coming back to you: " + pounds(F.issued - floatSpent()) : "Owed to me: " + pounds(floatSpent() - F.issued)) + "\n\nBy " + cat.toLowerCase() + ":\n" + Object.keys(by).map(function (k) { return "  " + k + ": " + pounds(by[k]); }).join("\n") + "\n\nEvery receipt photo is in the shared folder, one line each in the attached sheet.\n\nThanks" };
+}
+function floatCSV() { return "Date,What,Amount," + (FLOATCAT[jk()] || "Job") + ",Shop,Status\n" + floatData().items.map(function (x) { return [x.date, x.what, num(x.amt).toFixed(2), x.cat, x.sup, x.ret || "kept"].map(function (v) { return /[",]/.test(v) ? '"' + String(v).replace(/"/g, '""') + '"' : v; }).join(","); }).join("\n"); }
+
+/* Kit: what you bring, what's hired in, and the day fee that goes on the invoice. */
+var KITSAMPLE = {
+  dop: [["Camera package, Alexa Mini LF", 450, "Yours"], ["Lens set, Ultra Primes", 220, "Yours"], ["Monitor, 17in", 60, "Hired: Lensworks"]],
+  camera: [["Focus kit, Nucleus M", 45, "Yours"], ["AC bag and slate", 15, "Yours"], ["Teradek Bolt", 40, "Hired: Lensworks"]],
+  dit: [["DIT cart", 150, "Yours"], ["Resolve licence", 20, "Yours"], ["Shuttle drives, 4 x 4TB", 60, "Yours"]],
+  gaffer: [["Lighting van, 3.5t", 120, "Yours"], ["Aputure 1200d x2", 90, "Hired: Panalux"], ["Dimmer board", 40, "Yours"]],
+  grip: [["Grip truck", 150, "Yours"], ["Dana dolly", 60, "Yours"], ["Car rig", 180, "Hired: Arri Rental"]],
+  sound: [["Sound cart, 8 channels", 180, "Yours"], ["Radio mics, 6", 90, "Yours"], ["Timecode boxes", 30, "Yours"]],
+  spark: [["Personal tools", 0, "Yours"]]
+};
+function kitData() { var k = jk(); if (!D.kit || D.kit.k !== k) D.kit = { k: k, items: (KITSAMPLE[k] || []).map(function (r, i) { return { id: "k" + i, item: r[0], fee: r[1], src: r[2], on: i < 2 }; }) }; return D.kit; }
+function kitView() {
+  var K = kitData(), day = K.items.filter(function (x) { return x.on; }).reduce(function (a, x) { return a + num(x.fee); }, 0);
+  return '<div class="facts"><span><i>Items</i>' + K.items.length + '</span><span><i>On this job</i>' + K.items.filter(function (x) { return x.on; }).length + '</span><span><i>Kit a day</i>' + money(day) + "</span></div>" +
+    '<div class="rows">' + K.items.map(function (x) { return '<div class="row static"><span class="mail-t">' + esc(x.item) + '<span class="sub q">' + esc(x.src) + " · " + (num(x.fee) ? money(num(x.fee)) + " a day" : "no fee") + '</span></span><button class="btn sm' + (x.on ? " solid" : "") + '" data-kiton="' + x.id + '">' + (x.on ? "On the job" : "Add to job") + "</button></div>"; }).join("") + "</div>" +
+    '<div class="part">Add kit</div><div class="grid2">' + field("kt-item", "Item", "", "text", "e.g. Wireless follow focus") + field("kt-fee", "Day fee (£)", "", "number", "", ' inputmode="decimal"') + '</div><div class="acts"><button class="btn solid" data-kitadd>Add it</button></div>' +
+    '<p class="q">Kit on the job goes on your invoice as its own lines, apart from your labour, and the hired items go on the kit cover sheet with the insurance.</p>';
+}
+
+/* The three things made for each job, as pages you can add to. */
+function madeView(i) {
+  var j = job(), f = j.f[i], k = j.k + i; D.made = D.made || {}; var mine = D.made[k] || [];
+  return '<p class="lede-s">' + esc(f[1]) + '</p><div class="rows">' + f[2].concat(mine).map(function (r) { return '<div class="row static"><span>' + esc(r[0]) + '</span><span class="tag' + (r[2] === "amber" ? " amb" : r[2] === "q" ? "" : " ok") + '">' + esc(r[1]) + "</span></div>"; }).join("") + "</div>" +
+    '<div class="part">Add one</div><div class="grid2">' + field("md-a", "What", "", "text") + field("md-b", "Detail", "", "text") + '</div><div class="acts"><button class="btn solid" data-madeadd="' + i + '">Add it</button></div>';
+}
+function deptTools() {
+  var j = job(), k = jk(), out = []; if (!j) return out;
+  var g = "For " + j.pl;
+  if (FLOATSAMPLE[k] && k !== "pm") out.push({ k: "t-float", n: "Float and receipts", g: g, fn: floatView });
+  if (KITSAMPLE[k]) out.push({ k: "t-kit", n: k === "sound" ? "Sound package" : k === "dit" ? "Cart and drives" : "Kit and day fees", g: g, fn: kitView });
+  j.f.forEach(function (f, i) { out.push({ k: "t-made" + i, n: f[0].replace(/\.$/, ""), g: g, fn: function () { return madeView(i); } }); });
+  return out;
+}
+function deptCard() {
+  var k = jk();
+  if (FLOATSAMPLE[k] && k !== "pm") { var F = floatData(), sp = floatSpent(), r = F.items.filter(function (x) { return x.ret === "return"; }).length;
+    return '<div class="diary"><div class="edge"><span class="part">Your float</span><span class="part">' + F.items.length + ' receipts</span></div><div class="facts"><span><i>Left</i>' + pounds(Math.max(0, F.issued - sp)) + '</span><span><i>Spent</i>' + pounds(sp) + '</span><span><i>To return</i>' + r + '</span></div><div class="acts"><button class="btn solid sm" data-fsnap>Snap a receipt</button><button class="btn sm" data-tab="t-float">See the float</button></div></div>'; }
+  if (KITSAMPLE[k]) { var K = kitData(), on = K.items.filter(function (x) { return x.on; });
+    return '<div class="diary"><div class="edge"><span class="part">Your kit</span><span class="part">' + on.length + ' on this job</span></div><div class="facts"><span><i>Kit a day</i>' + money(on.reduce(function (a, x) { return a + num(x.fee); }, 0)) + '</span><span><i>Items</i>' + K.items.length + '</span><span><i>Hired in</i>' + K.items.filter(function (x) { return /^Hired/.test(x.src); }).length + '</span></div><div class="acts"><button class="btn sm" data-tab="t-kit">See your kit</button></div></div>'; }
+  return "";
+}
+function deptClick(b) {
+  var d = b.dataset;
+  if (b.hasAttribute("data-fsnap")) { openSheet(snapSheet()); return true; }
+  if (b.hasAttribute("data-fsave")) {
+    var amt = num(val("fs-amt")), what = val("fs-what"); if (!amt || !what) { banner("Add what it was and the amount."); return true; }
+    var f = $("fs-photo") && $("fs-photo").files[0], cat = FLOATCAT[jk()] || "Job";
+    floatData().items.unshift({ id: uid(), date: iso(today()), what: what, amt: amt, cat: cat + ": " + (val("fs-cat") || "General"), sup: val("fs-sup") || "Shop", ret: val("fs-ret"), photo: !!f });
+    demoSave(); closeSheet(); render(); banner("On the float. " + pounds(Math.max(0, floatData().issued - floatSpent())) + " left."); return true;
+  }
+  if (d.fret) { var x = floatData().items.find(function (y) { return y.id === d.fret; }); if (x) { x.ret = "returned"; demoSave(); render(); banner("Refund logged. Back on the float."); } return true; }
+  if (b.hasAttribute("data-fsend")) { DRAFT = floatMail(); saveFile(stamp() + "-float.csv", "text/csv", floatCSV()); floatData().sent = iso(today()); demoSave(); openSheet(draftSheet(DRAFT, "Reconciliation drafted")); return true; }
+  if (b.hasAttribute("data-ftop")) { var F = floatData(); DRAFT = { to: "production@example.com", subject: "Float top-up, " + ((job() || {}).n || ""), body: "Hi,\n\nI've spent " + pounds(floatSpent()) + " of my " + pounds(F.issued) + " float, receipts attached. Could you top it up by " + pounds(Math.max(100, Math.ceil(floatSpent() / 50) * 50)) + "?\n\nThanks" }; openSheet(draftSheet(DRAFT, "Top-up drafted")); return true; }
+  if (d.kiton) { var it = kitData().items.find(function (y) { return y.id === d.kiton; }); if (it) { it.on = !it.on; demoSave(); render(); } return true; }
+  if (b.hasAttribute("data-kitadd")) { var n = val("kt-item"); if (!n) { banner("Add the item."); return true; } kitData().items.push({ id: uid(), item: n, fee: num(val("kt-fee")), src: "Yours", on: true }); demoSave(); render(); banner("Added, and on this job."); return true; }
+  if (d.madeadd) { var a = val("md-a"); if (!a) { banner("Add what it is."); return true; } var key = jk() + d.madeadd; D.made = D.made || {}; (D.made[key] = D.made[key] || []).push([a, val("md-b") || "Added", ""]); demoSave(); render(); banner("Added."); return true; }
+  return false;
+}
+function tools() { return (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()); }
 function tool(k) { return tools().find(function (t) { return t.k === k; }); }
 function toolView() {
   var t = tool(S.tab); if (!t) { S.tab = "home"; return home(); }
@@ -1378,7 +1481,7 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
-  if (pjClick(b) || bankClick(b) || toolClick(b)) return;
+  if (pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }
@@ -1388,7 +1491,7 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-starteroff")) { flag("eltio-systems-starter-off", "1"); render(); return; }
   if (b.hasAttribute("data-howphone")) { flag("eltio-systems-phone", "1"); openSheet('<h2>Put it on your home screen</h2><div class="sum"><div><span class="q">iPhone</span><span>Safari, Share, Add to Home Screen</span></div><div><span class="q">Android</span><span>Chrome menu, Install app</span></div></div><p class="q">Then sign in with the same Google account on your laptop. Both read the same sheet, so they always match.</p><div class="acts"><button class="btn solid wide" data-close>Done</button></div>'); render(); return; }
   if (d.job) { startJob(d.job); return; }
-  if (d.jobf) { openSheet(jobSheet(+d.jobf)); return; }
+  if (d.jobf) { S.tab = "t-made" + d.jobf; closeSheet(); render(); window.scrollTo(0, 0); return; }
   if (b.hasAttribute("data-callsheet")) { openSheet(callSheet()); return; }
   if (b.hasAttribute("data-findcrew")) { openSheet(findCrew()); return; }
   if (d.export === "acct") { exportAccountant(); banner("Saved: this tax year's invoices, expenses and mileage, ready for your accountant."); return; }

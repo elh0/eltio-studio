@@ -128,7 +128,9 @@ function frameTop() { return $("#frame").getBoundingClientRect().top + scrollY; 
 function goFrame() {
   var y = frameTop(); scrollTo({ top: y, behavior: RM ? "auto" : "smooth" });
   /* if a smooth scroll gets cut short, finish the move */
-  setTimeout(function () { if (scrollY < frameTop() - innerHeight * .3) scrollTo({ top: frameTop(), behavior: "instant" }); }, 1400);
+  var moved = false, mark = function () { moved = true; };
+  addEventListener("touchstart", mark, { passive: true, once: true }); addEventListener("wheel", mark, { passive: true, once: true });
+  setTimeout(function () { removeEventListener("touchstart", mark); removeEventListener("wheel", mark); if (!moved && scrollY < frameTop() - innerHeight * .3) scrollTo({ top: frameTop(), behavior: "instant" }); }, 1400);
 }
 shutter.addEventListener("click", take);
 addEventListener("keydown", function (e) { if ((e.key === " " || e.key === "Enter") && e.target === document.body) { e.preventDefault(); take(); } });

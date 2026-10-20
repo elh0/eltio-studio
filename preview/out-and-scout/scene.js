@@ -196,7 +196,7 @@ function build() {
   var T = window.THREE;
   var renderer = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, powerPreference: "high-performance" });
   if (!renderer.getContext()) throw new Error("no webgl");
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2)); renderer.outputColorSpace = T.SRGBColorSpace;
+  renderer.setPixelRatio(Math.min(devicePixelRatio, innerWidth < 900 ? 1.5 : 2)); renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   var scene = new T.Scene(), cam = new T.PerspectiveCamera(30, 1, 8, 500); cam.position.set(0, 0, 60);
   var world = new T.Group(); scene.add(world);
@@ -322,8 +322,12 @@ function build() {
 
   /* ---- drag to turn ---- */
   var yaw = 0, pitch = 0, vy = 0, drag = null;
-  cv.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY, yaw: yaw, pitch: pitch }; cv.setPointerCapture(e.pointerId); });
-  cv.addEventListener("pointermove", function (e) { if (!drag) return; var nx = drag.yaw + (e.clientX - drag.x) * .01; vy = (nx - yaw) * .6; yaw = nx; pitch = clamp(drag.pitch + (e.clientY - drag.y) * .005, -.45, .45); });
+  /* a finger only turns the phone on a sideways drag; an upward or downward swipe is left to scroll the page */
+  cv.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY, yaw: yaw, pitch: pitch, touch: e.pointerType !== "mouse", lock: e.pointerType === "mouse" }; if (drag.lock) cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener("pointermove", function (e) {
+    if (!drag) return;
+    if (!drag.lock) { var mx = Math.abs(e.clientX - drag.x), my = Math.abs(e.clientY - drag.y); if (mx + my < 8) return; if (my >= mx) { drag = null; return; } drag.lock = true; }
+    var nx = drag.yaw + (e.clientX - drag.x) * .01; vy = (nx - yaw) * .6; yaw = nx; pitch = drag.touch ? pitch : clamp(drag.pitch + (e.clientY - drag.y) * .005, -.45, .45); });
   function up() { drag = null; }
   cv.addEventListener("pointerup", up); cv.addEventListener("pointercancel", up);
   cv.addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") { vy -= .06; e.preventDefault(); } if (e.key === "ArrowRight") { vy += .06; e.preventDefault(); } });

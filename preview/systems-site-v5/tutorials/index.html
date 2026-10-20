@@ -26,6 +26,8 @@
 .now{margin-top:16px}
 .now h2{font:400 26px/1.15 var(--disp);letter-spacing:-.01em}
 .now p{margin-top:8px;color:var(--q);max-width:640px}
+.next{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.now .fine{margin-top:12px;font-size:14px}
 .bd{background:var(--ink2);border-radius:14px;padding:18px 10px 10px;max-height:min(560px,70vh);overflow:auto}
 .bd h3{font:500 15px/1 var(--body);padding:0 10px}
 .bd .lab{display:block;padding:6px 10px 10px}
@@ -72,7 +74,9 @@
   <section class="stage" aria-label="Now playing">
     <div>
       <div class="screen" id="screen"></div>
-      <div class="now"><h2 id="vTitle"></h2><p id="vDesc"></p></div>
+      <div class="now"><h2 id="vTitle"></h2><p id="vDesc"></p>
+        <div class="next"><a class="pill" id="tryBtn" href="../../systems-app/">Try it free <span aria-hidden="true">→</span></a><a class="pill ghost" href="../#waitlist">Join the waitlist <span aria-hidden="true">↓</span></a></div>
+        <p class="fine">No card, no call, no download. It opens with sample data.</p></div>
     </div>
     <aside class="bd" aria-label="Breakdown">
       <h3>Breakdown</h3>
@@ -97,6 +101,7 @@ var $ = function (id) { return document.getElementById(id); };
 var secs = function (d) { var p = d.split(":").map(Number); return p[0] * 60 + p[1]; };
 var esc = function (s) { return s.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
 var filter = "all", cur = V[0];
+var AS = { "03-systems-as-a-producer": "prod", "04-systems-as-a-production-manager": "pm", "05-systems-as-a-dop": "dop", "06-systems-as-a-gaffer": "gaffer", "07-systems-as-a-1st-ac": "camera", "08-systems-as-a-sound-recordist": "sound", "09-systems-as-a-director": "dir" };
 $("count").textContent = V.length + " videos, about " + Math.round(V.reduce(function (a, v) { return a + secs(v.dur); }, 0) / 60) + " minutes in all";
 
 $("tabs").innerHTML = [["all", "All"]].concat(SHELVES).map(function (s) { return '<button type="button" data-f="' + s[0] + '" aria-pressed="' + (s[0] === "all") + '">' + s[1] + "</button>"; }).join("");
@@ -124,6 +129,7 @@ function drawPlayer(play) {
   $("screen").innerHTML = '<video id="vid" controls playsinline preload="metadata" poster="th/' + v.id + '.jpg" src="media/' + v.id + '.mp4"><track kind="captions" srclang="en" label="English" src="cc/' + v.id + '.vtt"></video>';
   $("vid").addEventListener("timeupdate", mark);
   if (play) $("vid").play().catch(function () {});
+  $("tryBtn").href = "../../systems-app/" + (AS[v.id] ? "?as=" + AS[v.id] : "");
   $("vTitle").textContent = v.title; $("vDesc").textContent = v.desc;
   $("chapters").innerHTML = v.ch.map(function (c) { return '<li><button type="button" data-t="' + secs(c[0]) + '"><span class="t">' + c[0] + "</span><span>" + esc(c[1]) + "</span></button></li>"; }).join("");
 }

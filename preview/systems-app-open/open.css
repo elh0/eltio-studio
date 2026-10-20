@@ -1,0 +1,54 @@
+/* Open-style pass: one body size in white, tiny grey caps for labels, thin outline tags,
+   smaller buttons, flat cards with hairlines. Loaded after app.css. */
+html[data-sky]{--q:rgba(242,242,239,.5);--rim:rgba(242,242,239,.1);--hr:rgba(242,242,239,.1)}
+html[data-sky] body{font:400 15px/1.4 var(--body)}
+main{gap:22px}
+
+/* Labels: small caps in the body face, not wide mono */
+.part,.dt,.key,.chain,.steps span,.fcard .n,.hc-chart .legend,.dy .q,.edge .part{font:400 10px/1.3 var(--body);text-transform:uppercase;letter-spacing:.06em;color:var(--q)}
+.edge{display:flex;justify-content:space-between;gap:12px}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding-top:2px}
+.facts span{display:grid;gap:3px;font-size:15px;line-height:1.25}
+.facts i{font:400 10px/1.3 var(--body);font-style:normal;text-transform:uppercase;letter-spacing:.06em;color:var(--q)}
+
+/* Secondary lines: smaller, still readable */
+.sub,.row .q,.up-t .q,.sg-t .q,.offer-r .up-t .q{font-size:13px}
+
+/* Tags: thin outlines, body face */
+.tag{font:400 11px/1 var(--body);letter-spacing:0;padding:5px 9px;border-radius:999px;background:transparent;box-shadow:inset 0 0 0 1px rgba(242,242,239,.28);color:var(--fg)}
+.tag.ok{background:transparent;box-shadow:inset 0 0 0 1px rgba(140,203,159,.45);color:#9FD3AE}
+.tag.amb{background:transparent;box-shadow:inset 0 0 0 1px rgba(255,122,99,.5);color:#FF8A75}
+
+/* Buttons: smaller pills, regular weight, arrow-led */
+.btn{font-weight:400;padding:11px 20px;font-size:15px;min-height:42px;line-height:20px}
+.btn.sm{padding:8px 15px;font-size:13px;min-height:34px;line-height:18px}
+.btn.solid{background:#ECEAE4;color:#0E0E0D}
+
+/* Pill tabs: one outlined track, the chosen one ringed */
+.pills{gap:2px}
+.pill{box-shadow:none;background:transparent;color:var(--q);padding:8px 14px;font-size:14px}
+.pill[aria-pressed="true"]{background:transparent;color:var(--fg);box-shadow:inset 0 0 0 1px var(--fg)}
+.pills:not(.jobs){padding:3px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--rim);width:max-content;max-width:100%}
+
+/* Cards: flat, hairline edge, no gradient */
+.diary,.hot,.hcard,.onb{background:#141413;border-radius:16px;box-shadow:inset 0 0 0 1px var(--rim);padding:18px}
+.diary .rows{box-shadow:none;border-radius:0;border-top:1px solid var(--hr)}
+.diary .row{padding:14px 0;background:transparent}
+.diary .row:hover{background:transparent}
+.rows{border-radius:14px}
+.sh-bar b{font-size:52px;letter-spacing:-.04em}
+.sh-bar .bar,.hot .bar,.onb .bar{height:3px}
+
+/* Demo bar: a quiet line, not a box */
+.demobar{background:transparent;box-shadow:none;padding:0 0 12px;border-radius:0;border-bottom:1px solid var(--hr);margin-bottom:6px}
+.demobar .lnk{font-size:13px}
+
+/* Bottom tabs and the add button */
+.tabs button{font-size:13px}
+.fab{width:48px;height:48px;font-size:24px;box-shadow:0 8px 28px rgba(226,65,43,.3)}
+
+/* Big numbers stay big; headings a touch quieter */
+h1{font-size:clamp(28px,4vw,40px)}
+h2{font-size:26px}
+.diary .rows{background:transparent}
+.av,.dirr .av{font-family:var(--body)}

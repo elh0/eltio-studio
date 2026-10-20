@@ -493,14 +493,14 @@ body { background: #061469; }
 
 <script>
 /* ---------- per client: swap CLIENT and FLOW for the next one ---------- */
-var CLIENT = { title: 'Your new site', for: 'Leo Marcus, Helical Sound', email: 'hello@eltio.studio', price: '£1,100', usual: '', today: '£550', later: '£550 when it\'s live', what: 'One site', name: 'Leo Marcus' };
+var CLIENT = { title: 'Your new site', for: 'Leo Marcus, Helical Sound', email: 'hello@eltio.studio', price: '£1,000', usual: '', today: '£500', later: '£500 when it\'s live', what: 'One site', name: 'Leo Marcus' };
 var CANT = ['Can\'t answer this yet, sorry', 'No idea yet, ask me on the call', 'Pass for now (I\'ll owe you one)'];
 var CANT_REPLY = ['No stress. A rough guess still helps, so have a think before the call.', 'Fair. We\'ll go through it together on the call.', 'Noted. A half-answer later still helps.'];
 var FLOW = [
   { id: 'roadmap', name: 'Roadmap', tag: 'How your site gets made', mins: 3, s: [
     { k: 'info', kick: 'Hello Leo', t: 'Your site, on the engine.', p: 'The setup behind elliot.onl, with your look on top. A few quick questions so it fits your work.' },
-    { k: 'info', kick: 'What changes', t: 'Fast, and it plays with sound.', rows: [['Speed', 'Pages load quickly and films start in place'], ['Player', 'A light player of your own, not the Vimeo one'], ['Sound', 'Click a project and it plays with sound'], ['Tags', 'Composition, sound design, mix, or a mix of them']] },
-    { k: 'many', key: 'tags', b: 'Tags', kick: 'Your work', t: 'Which tags do you need?', p: 'Pick as many as you like. A job can carry one or several.', o: ['Composition', 'Sound design', 'Sound mix', 'Something else'] },
+    { k: 'info', kick: 'What changes', t: 'Fast, and it plays with sound.', rows: [['Speed', 'Pages load quickly and films start in place'], ['Player', 'A light player of your own, not the Vimeo one'], ['Sound', 'Click a project and it plays with sound'], ['Tags', 'Composition, sound design, mix, or a mix of them'], ['Editing', 'Add & remove work yourself in Cargo, no code']] },
+    { k: 'many', key: 'tags', b: 'Tags', kick: 'Your work', t: 'Which tags do you need?', p: 'Pick as many as you like. A job can carry one or several.', o: ['Composition', 'Sound design', 'Sound mix', 'A new category'] },
     { k: 'one', key: 'filter', b: 'Tag filter', kick: 'Your work', t: 'How should the tags work?', o: [
       ['Filter at the top', 'Tap a tag and the list shows only those jobs.'],
       ['On each job', 'Tags sit beside every project; the list stays whole.'],
@@ -508,28 +508,29 @@ var FLOW = [
     { k: 'one', key: 'lead', b: 'Opens with', kick: 'Your site', t: 'What should your site open with?', o: [
       ['Straight into the work', 'The list of projects, first thing.'],
       ['A showreel', 'One film plays first, the list sits under it.'],
-      ['The latest job', 'Newest project open and ready to play.']], own: 'Something else?' },
+      ['The latest job', 'Newest project open and ready to play.'],
+      ['A fixed list at the bottom', 'The work up top, the full list always sat underneath.']], own: 'Something else? Sketch it in words' },
     { k: 'one', key: 'count', b: 'Projects', kick: 'Your site', t: 'Roughly how many projects?', o: [
       ['Under 15', 'Plenty of room to breathe.'], ['15 to 30', 'Comfortable; the tags do the sorting.'], ['More than 30', 'We\'ll talk about an archive on the call.']], own: 'Not sure?' },
     { k: 'one', key: 'where', b: 'Films from', kick: 'Your site', t: 'Where do the films live now?', o: [
       ['Vimeo', 'We plug your Vimeo into the new player. Nothing to re-upload.'], ['YouTube', 'We\'ll move the ones you want across with you.'],
       ['A hard drive', 'We\'ll send you a link at the end to drop the finals in.']], own: 'Somewhere else?' },
     { k: 'text', key: 'new', b: 'New work', kick: 'Your site', t: 'Anything new to add?', p: 'Work that isn\'t online yet. New work makes the best opening.', ph: 'A few words is plenty', pills: ['A score', 'A sound design job', 'A mix', 'A release'] },
-    { k: 'info', kick: 'The plan', t: 'About two weeks.', acc: true, note: 'Tap a step to open it.', rows: [['Days 1–3', 'The engine on your Cargo', 'We set up the player and the tags in your Cargo and load your projects in.'], ['Week 1', 'Round one: the columns', 'A few column layouts and tag filters, on your phone. Pick one or tell us what to mash together, and we build it in.'], ['Week 2', 'Your fonts and colours', 'You style it in Cargo with its font library. Then round two: we tidy anything that fights the layout.'], ['Then', 'Live, and yours', 'Everything sits in your name. Small fixes are free for the first 30 days.']] },
+    { k: 'info', kick: 'The plan', t: 'About two weeks.', acc: true, note: 'Tap a step to open it.', rows: [['Days 1–3', 'The engine on your Cargo', 'We set up the player and the tags in your Cargo and load your projects in.'], ['Week 1', 'Round one: the columns', 'A few column layouts and tag filters, on your phone. Pick one or tell us what to mash together, and we build it in.'], ['Week 2', 'Your fonts and colours', 'You style it in Cargo with its font library. Then round two: we tidy anything that fights the layout.'], ['Then', 'Live, and yours', 'Everything sits in your name, with a short how-to for adding work & tags. Small fixes are free for the first 30 days.']] },
     { k: 'cool', key: 'cool', b: 'Cool level', kick: 'Be honest', t: 'How cool do you want your site to be?', p: 'On a scale of 1 to 10.' },
     { k: 'info', kick: 'Your part', t: 'Your part is small.', rows: [['1 call', 'Your site and a few ideas'], ['Your list', 'Projects, with the tags for each'], ['Your look', 'Fonts and colours, in Cargo'], ['2 rounds', 'Notes; a voice note is fine']] },
     { k: 'done', t: 'Roadmap, done.' }
   ] },
   { id: 'proposal', name: 'Proposal', tag: 'Dates and the price', mins: 2, s: [
     { k: 'info', kick: 'Proposal', t: 'This is the proposal.', p: 'The site, the dates and the price, a card at a time. Nothing is final until you sign.' },
-    { k: 'info', kick: 'The site', t: 'One site, on the engine.', rows: [['Pages', 'Work, Info, Contact'], ['Tags', 'Composition, sound design, mix'], ['Changes', '2 rounds on the layout'], ['Look', 'Yours: fonts and colours in Cargo']] },
+    { k: 'info', kick: 'The site', t: 'One site, on the engine.', rows: [['Pages', 'Work, Info, Contact'], ['Tags', 'Composition, sound design, mix, plus new ones any time'], ['Editing', 'Add & remove work in Cargo, no code'], ['Changes', '2 rounds on the layout'], ['Look', 'Yours: fonts and colours in Cargo']] },
     { k: 'one', key: 'start', b: 'Start date', kick: 'Dates', t: 'When should we start?', o: [['Week of 26 October', 'Your site live by 6 Nov.'], ['Week of 2 November', 'Your site live by 13 Nov.'], ['Week of 9 November', 'Your site live by 20 Nov.']], own: 'Another date?' },
     { k: 'many', key: 'days', b: 'Days', kick: 'Dates', t: 'Which days suit you for calls?', p: 'Pick as many as you like.', o: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] },
     { k: 'one', key: 'time', b: 'Time', kick: 'Dates', t: 'And what time of day?', o: [['Mornings', 'Coffee and ideas.'], ['Afternoons', 'Afternoons it is.'], ['Evenings', 'After a session. Works for us.']] },
     { k: 'info', kick: 'You own it all', t: 'Everything is in your name.', p: 'Domain, site, code and films. You pay for them direct, with no subscription to us.' },
     { k: 'info', kick: 'You own it all', t: 'Mostly, you have them already.', rows: [['Domain', 'yours already'], ['Cargo', 'yours already, the pages you edit'], ['Vimeo', 'yours already, it holds the films'], ['GitHub', 'free, it hosts the player <a class="ext" href="https://github.com/signup" target="_blank" rel="noopener" data-hot>github.com &#8599;</a>']], note: 'Links open in a new tab.' },
     { k: 'pay', kick: 'Your new site', t: 'Ready when you are.' },
-    { k: 'sign', doc: 'proposal', kick: 'Proposal No. 002', t: 'Book your start.', p: 'One site for £1,100. The £550 invoice follows the same day.' },
+    { k: 'sign', doc: 'proposal', kick: 'Proposal No. 002', t: 'Book your start.', p: 'One site for £1,000. The £500 invoice follows the same day.' },
     { k: 'done', t: 'Proposal, signed.' }
   ] },
   { id: 'terms', name: 'Terms', tag: 'The rules, in plain words', mins: 1, s: [
@@ -660,7 +661,7 @@ function screenHTML(c, sc) {
   if (sc.k === 'scale') { var f0 = S.feel || 3; o += '<div class="cool"><div class="num"><span><span id="fvn">' + f0 + '</span>/5</span><span id="fvl">' + FEEL[f0 - 1][0] + '</span></div><input class="range" id="fr" type="range" min="1" max="5" step="1" value="' + f0 + '" style="--p:' + ((f0 - 1) / 4 * 100) + '%" aria-label="How simple or full on, 1 to 5" data-hot><div class="ends"><span>1 simple</span><span>5 full on</span></div>' + feelHTML(f0) + '<p class="q" id="fvd" style="margin:0;min-height:3em">' + FEEL[f0 - 1][1] + '</p><p class="q" style="margin:0">Usually £3,000 for simple, up to £5,000 for full on. Yours is ' + CLIENT.price + ' whichever you pick.</p></div>'; }
   if (sc.k === 'cool') { var c0 = S.cool || 5; o += '<div class="cool"><div class="num"><span>' + '<span id="cv">' + c0 + '</span>/10</span><span class="q" id="cl">' + COOL[c0] + '</span></div><input class="range" id="cr" type="range" min="1" max="10" step="1" value="' + c0 + '" style="--p:' + ((c0 - 1) / 9 * 100) + '%" aria-label="How cool, 1 to 10" data-hot><div class="ends"><span>1 fine</span><span>10 unreasonably cool</span></div>' + coolNote(c0) + '</div>'; }
   if (sc.k === 'review') { var L = basket(); o += L.length ? '<div class="rows">' + L.map(function (l) { return '<div><span class="k">' + h(l.k) + '</span><span>' + h(l.v) + ' <button class="lnk q" style="text-decoration:underline" data-act="jump" data-c="' + l.c + '" data-j="' + l.j + '" data-hot>change</button></span></div>'; }).join('') + '</div>' : '<p class="q">Nothing picked yet, and that\'s fine. We\'ll cover it on the first call.</p>'; }
-  if (sc.k === 'pay') o += '<div class="ticks">' + ['The elliot.onl engine on your Cargo', 'Your own light player, sound on click', 'Tags for composition, sound design and mix', 'Column layouts on your phone first', 'Tested on phones and slow 4G', 'Fixes free for 30 days'].map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>' +
+  if (sc.k === 'pay') o += '<div class="ticks">' + ['The elliot.onl engine on your Cargo', 'Your own light player, sound on click', 'Tags for composition, sound design and mix', 'Add & remove work yourself, no code', 'Column layouts on your phone first', 'Tested on phones and slow 4G', 'Fixes free for 30 days'].map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>' +
     '<div class="rows">' + (CLIENT.usual ? '<div><span class="k">Usually</span><span class="strike">' + CLIENT.usual + '</span></div>' : '') + '<div><span class="k">For you</span><span>' + CLIENT.price + ' for the site</span></div><div><span class="k">Today</span><span>' + CLIENT.today + ' books your start</span></div></div>' +
     '<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><button class="btn solid" data-act="sheet" data-hot>' + (S.done.proposal ? 'Booked' : 'Book my start') + '</button><button class="lnk q" data-act="later" data-hot>Not yet, keep reading</button></div>';
   if (sc.k === 'sign') o += signHTML(sc.doc);

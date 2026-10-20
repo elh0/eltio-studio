@@ -214,6 +214,9 @@
   try { sessionStorage.removeItem('cg-p'); } catch (e) {}
   if (hp && first[+hp[1]] >= 0) { history.replaceState(null, '', location.pathname + location.search); holdAt(first[+hp[1]]); } else scrollTo(0, 0);
   tick(); dbg(hp ? 'opened at ' + hp[1] : 'no project given');
+  // 20 Oct Elliot: a project's own page shouldn't flash its cover while the layout settles; it fades in once, like phones
+  if (solo) { var shown = false, show = function () { if (shown) return; shown = true; requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('cg-ready'); }); }); };
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { scrollTo(0, centre(0)); tick(); show(); }); setTimeout(show, 1500); }
   // 18:31: tap any phone, loop or window to see it big. The piece itself grows from where it sits to fill the
   // screen (one transform, so it is one smooth move on phones and desktop), and shrinks back on tap or Escape.
   // 20 Oct: swipe (or the arrows, or the arrow keys) to the next piece in the same card; past the last one it closes

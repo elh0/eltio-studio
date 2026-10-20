@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B0A09">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Out &amp; Scout · A viewfinder for the recce</title>
+<meta name="description" content="A viewfinder for the recce. Frame the shot at your real lens, read the light, send the shot list.">
+<meta property="og:title" content="Out &amp; Scout">
+<meta property="og:description" content="A viewfinder for the recce. Frame the shot, read the light, send the shot list.">
+<meta property="og:image" content="img/blue-hour.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* The whole site is the viewfinder: frame marks round the screen, a HUD, a lens ring to move through it and a shutter that works. */
+:root {
+  --ink: #0B0A09; --paper: #EFEDE6; --q: #8C887D; --line: rgba(239,237,230,.14); --mark: rgba(239,237,230,.7); --glass: rgba(14,13,11,.62); --sun: #FF5A1F;
+  --sans: "Geist", "Helvetica Neue", Arial, sans-serif; --mono: "Geist Mono", ui-monospace, Menlo, monospace;
+  --e: cubic-bezier(.2,.7,0,1);
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
+  --inset: 12px; --dock: 64px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 16px/1.5 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+.mono { font: 400 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.q { color: var(--q); }
+.sd { display: inline-block; width: .2em; height: .2em; border-radius: 50%; background: var(--sun); margin: 0 .22em; transform: translateY(-.55em); }
+h1, h2 { font-weight: 400; letter-spacing: -.045em; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(44px, 8vw, 128px); line-height: .94; }
+h2 { font-size: clamp(30px, 4.2vw, 60px); line-height: 1; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 1px solid var(--paper); outline-offset: 3px; }
+
+/* ---------- the viewfinder over everything ---------- */
+.hud { position: fixed; inset: 0; z-index: 40; pointer-events: none; }
+.hud .cm { position: absolute; width: 22px; height: 22px; border: 0 solid var(--mark); }
+.hud .cm.tl { top: calc(var(--sat) + var(--inset)); left: var(--inset); border-top-width: 1.5px; border-left-width: 1.5px; }
+.hud .cm.tr { top: calc(var(--sat) + var(--inset)); right: var(--inset); border-top-width: 1.5px; border-right-width: 1.5px; }
+.hud .cm.bl { bottom: calc(var(--sab) + var(--inset)); left: var(--inset); border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.hud .cm.br { bottom: calc(var(--sab) + var(--inset)); right: var(--inset); border-bottom-width: 1.5px; border-right-width: 1.5px; }
+.hud .top { position: absolute; top: calc(var(--sat) + var(--inset) + 6px); left: calc(var(--inset) + 16px); right: calc(var(--inset) + 16px); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.hud .wm { pointer-events: auto; font-size: 19px; letter-spacing: -.02em; text-decoration: none; white-space: nowrap; }
+.hud .rd { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.hud .rd i { width: 7px; height: 7px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 10px rgba(255,90,31,.7); flex: none; }
+.hud .rd .rec { display: inline-flex; align-items: center; gap: 6px; }
+.hud .cnt { pointer-events: auto; text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.flash { position: fixed; inset: 0; z-index: 60; background: #fff; opacity: 0; pointer-events: none; }
+.flash.go { animation: flash .45s ease-out; }
+@keyframes flash { 0% { opacity: .85; } 100% { opacity: 0; } }
+.iris { position: fixed; inset: 0; z-index: 59; pointer-events: none; border: 0 solid #000; opacity: 0; }
+.iris.go { animation: iris .32s cubic-bezier(.6,0,.4,1); }
+@keyframes iris { 0% { opacity: 1; border-width: 0; } 45% { opacity: 1; border-width: 50vmax; } 100% { opacity: 1; border-width: 0; } }
+
+/* the dock: the lens ring for chapters, and the shutter */
+.dock { position: fixed; z-index: 45; left: 50%; bottom: calc(var(--sab) + var(--inset) + 8px); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); max-width: calc(100vw - 2 * var(--inset) - 16px); transition: transform .5s var(--e), opacity .4s; }
+.dock nav { display: flex; gap: 2px; }
+.dock nav a { display: inline-flex; align-items: center; height: 40px; padding: 0 12px; border-radius: 999px; text-decoration: none; color: var(--q); transition: background .3s, color .3s; white-space: nowrap; }
+.dock nav a[aria-current="true"] { background: var(--paper); color: var(--ink); }
+.shut { all: unset; flex: none; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--paper); display: grid; place-items: center; cursor: pointer; position: relative; }
+.shut::before { content: ""; width: 38px; height: 38px; border-radius: 50%; background: var(--paper); transition: transform .15s, background .2s; }
+.shut:active::before, .shut.press::before { transform: scale(.82); background: #c9c7c0; }
+.shut:focus-visible { outline: 1px solid var(--paper); outline-offset: 4px; }
+.shut .n { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--sun); color: #fff; font: 500 10px/18px var(--mono); text-align: center; transform: scale(0); transition: transform .3s var(--e); }
+.shut .n.on { transform: scale(1); }
+.shut .n.bump { animation: bump .4s var(--e); }
+@keyframes bump { 50% { transform: scale(1.35); } }
+
+/* ---------- open: the photograph, inside the frame ---------- */
+.open { position: relative; height: 100svh; min-height: 560px; overflow: hidden; }
+.open img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 52% 40%; animation: rack 2.6s var(--e) both; }
+@keyframes rack { from { filter: blur(14px) brightness(.7); transform: scale(1.06); } to { filter: none; transform: none; } }
+.open::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,10,9,.55), rgba(11,10,9,0) 22%, rgba(11,10,9,0) 45%, rgba(11,10,9,.82) 82%, var(--ink)); }
+.open .say { position: absolute; z-index: 2; left: 28px; right: 28px; bottom: calc(var(--sab) + var(--dock) + 52px); display: grid; gap: 16px; max-width: 980px; }
+.open .say p { margin: 0; max-width: 30em; font-size: clamp(16px, 1.5vw, 20px); color: rgba(239,237,230,.82); }
+.open .tip { display: inline-flex; align-items: center; gap: 10px; }
+.open .tip::after { content: ""; width: 34px; height: 1px; background: currentColor; opacity: .6; }
+
+/* ---------- the story: one phone, four chapters ---------- */
+.story { position: relative; }
+.stick { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.stick canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: grab; }
+.stick canvas:active { cursor: grabbing; }
+.stick .fb { display: none; }
+.stick.no3d canvas { display: none; }
+.stick.no3d .fb { display: flex; position: absolute; inset: 0; align-items: center; justify-content: center; padding: 0 40px; text-align: center; color: var(--q); }
+.stick .chap { position: absolute; top: calc(var(--sat) + var(--inset) + 52px); left: 28px; display: flex; gap: 10px; align-items: center; }
+.stick .chap b { font-weight: 400; color: var(--paper); }
+.steps { position: relative; z-index: 2; margin-top: -100svh; pointer-events: none; }
+.step { min-height: 135svh; display: flex; align-items: flex-end; padding: 0 16px calc(var(--sab) + var(--dock) + 34px); }
+.step:first-child { min-height: 115svh; }
+.card { pointer-events: auto; position: sticky; bottom: calc(var(--sab) + var(--dock) + 34px); width: 100%; max-width: 440px; margin-inline: auto; padding: 20px 20px 18px; border-radius: 18px; background: var(--glass); border: 1px solid var(--line); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2); display: grid; gap: 12px; }
+.step .card { transition: opacity .45s var(--e), transform .45s var(--e); }
+.step:not(.on) .card { opacity: 0; pointer-events: none; transform: translateY(18px); }
+.card h2 { font-size: clamp(26px, 7.4vw, 44px); }
+.card p { margin: 0; color: var(--q); font-size: 15px; line-height: 1.5; }
+.card .k { display: flex; justify-content: space-between; gap: 10px; }
+.card .k b { font-weight: 400; color: var(--paper); }
+
+/* controls inside the cards, drawn like the app's own chips */
+.tail { height: 45svh; }
+.card .k > span { flex: 1; min-width: 0; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { all: unset; box-sizing: border-box; cursor: pointer; white-space: nowrap; flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; min-width: 46px; padding: 0 12px; border-radius: 999px; border: 1px solid rgba(239,237,230,.32); font: 400 12px var(--mono); letter-spacing: .04em; text-transform: uppercase; transition: background .25s, color .25s, border-color .25s, transform .12s; }
+.chip:active { transform: scale(.95); }
+.chip[aria-pressed="true"] { background: var(--paper); color: var(--ink); border-color: var(--paper); }
+.chip.sun { border-color: rgba(255,90,31,.6); }
+.chip:focus-visible { outline: 1px solid var(--paper); outline-offset: 2px; }
+.tl { display: grid; gap: 8px; }
+.tl .read { font-size: 22px; letter-spacing: -.02em; line-height: 1.15; min-height: 1.15em; }
+.tl .read em { font-style: normal; color: var(--sun); }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; margin: 0; cursor: pointer; touch-action: pan-y; }
+input[type=range]::-webkit-slider-runnable-track { height: 2px; background: linear-gradient(90deg, rgba(239,237,230,.25) var(--g0, 30%), var(--sun) var(--g0, 30%), var(--sun) var(--g1, 40%), rgba(239,237,230,.25) var(--g1, 40%)); }
+input[type=range]::-moz-range-track { height: 2px; background: rgba(239,237,230,.25); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; margin-top: -12px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); box-shadow: 0 0 0 1px var(--sun), 0 0 18px rgba(255,90,31,.6); }
+input[type=range]::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--sun); border: 3px solid var(--ink); }
+.pages { text-align: right; }
+.pages.sent { color: var(--paper); }
+.pages.sent::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); margin-right: 8px; vertical-align: 1px; }
+.toast { min-height: 1.4em; margin: 0; color: var(--paper); opacity: 0; transform: translateY(4px); transition: opacity .4s, transform .4s var(--e); }
+.toast.show { opacity: 1; transform: none; }
+.toast i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); margin-right: 8px; vertical-align: 1px; }
+
+/* ---------- get it ---------- */
+.get { position: relative; z-index: 3; background: var(--ink); padding: 18vh 0 calc(var(--sab) + var(--dock) + 60px); display: grid; gap: 56px; }
+.places { border-block: 1px solid var(--line); overflow: hidden; }
+.places .cap2 { display: flex; justify-content: space-between; gap: 16px; padding: 10px 28px; border-bottom: 1px solid var(--line); }
+.pl-track { display: flex; width: max-content; animation: run 90s linear infinite; }
+.places:hover .pl-track { animation-play-state: paused; }
+@keyframes run { to { transform: translateX(-50%); } }
+.pl-track span { display: inline-flex; align-items: center; gap: 10px; padding: 14px 22px; font: 400 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--q); border-right: 1px solid var(--line); white-space: nowrap; }
+.pl-track b { font-weight: 400; color: var(--paper); }
+.pl-track i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(239,237,230,.25); }
+.pl-track i.lit { background: var(--sun); border-color: var(--sun); box-shadow: 0 0 10px rgba(255,90,31,.6); }
+.join { margin: 0 16px; padding: clamp(24px, 5vw, 56px); border: 1px solid var(--line); border-radius: 18px; display: grid; gap: 22px; justify-items: start; position: relative; overflow: hidden; }
+.join::before { content: ""; position: absolute; width: 520px; height: 520px; right: -200px; top: -260px; border-radius: 50%; background: radial-gradient(closest-side, rgba(255,90,31,.32), rgba(255,90,31,0)); pointer-events: none; }
+.join h2 { font-size: clamp(38px, 7vw, 92px); }
+.who { display: flex; gap: 8px; flex-wrap: wrap; }
+.who span { border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; }
+.jbtn { display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: 999px; background: var(--paper); color: var(--ink); text-decoration: none; font-size: 16px; letter-spacing: -.01em; }
+.su { display: grid; gap: 12px; width: 100%; max-width: 560px; position: relative; }
+.su-note { margin: 0; font-size: 15px; line-height: 1.5; }
+.su-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.su input[type=email] { flex: 1 1 220px; min-width: 0; height: 52px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--line); background: rgba(239,237,230,.04); color: var(--paper); font-size: 16px; font-family: inherit; }
+.su input[type=email]::placeholder { color: var(--q); }
+.su input[type=email]:focus { outline: none; border-color: var(--mark); }
+.su .jbtn { border: 0; cursor: pointer; font-family: inherit; }
+.su .jbtn:disabled { opacity: .6; }
+.su-done { min-height: 1.3em; margin: 0; }
+.su-done a { color: var(--paper); }
+.jbtn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sun); }
+.road { display: flex; gap: 10px 22px; flex-wrap: wrap; }
+.fl { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 0 28px; }
+
+/* ---------- price ---------- */
+.price { margin: 0 16px; display: grid; gap: 28px; }
+.price .hd { display: grid; gap: 14px; max-width: 760px; }
+.price .hd h2 { font-size: clamp(38px, 7vw, 92px); }
+.price .hd p { margin: 0; color: var(--q); font-size: 16px; line-height: 1.5; max-width: 34em; }
+.pv { display: grid; gap: 14px; justify-items: center; padding: 26px 0 8px; }
+.pv .chips { justify-content: center; }
+.sheet { position: relative; width: min(250px, 66vw); aspect-ratio: 1 / 1.414; background: var(--paper); color: var(--ink); border-radius: 4px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 30px 60px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(239,237,230,.2); transform: perspective(900px) rotateX(10deg) rotateY(-14deg) rotateZ(2deg); transition: transform .8s var(--e); overflow: hidden; }
+.pv:hover .sheet, .sheet.pro { transform: perspective(900px) rotateX(4deg) rotateY(-6deg) rotateZ(1deg); }
+.sheet .t { font: 400 8px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; display: flex; justify-content: space-between; color: rgba(11,10,9,.55); }
+.sheet .h { font-size: 17px; letter-spacing: -.03em; line-height: 1.05; }
+.sheet .img { flex: 1; min-height: 0; border-radius: 2px; background: #1a1916 url(img/hero-glacier-s.jpg) center / cover; position: relative; }
+.sheet .img::before, .sheet .img::after { content: ""; position: absolute; width: 10px; height: 10px; border: 0 solid rgba(239,237,230,.85); }
+.sheet .img::before { top: 6px; left: 6px; border-top-width: 1px; border-left-width: 1px; }
+.sheet .img::after { bottom: 6px; right: 6px; border-bottom-width: 1px; border-right-width: 1px; }
+.sheet .rw { display: grid; grid-template-columns: 8px 1fr auto; gap: 6px; align-items: center; font: 400 7.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; border-top: 1px solid rgba(11,10,9,.12); padding-top: 5px; }
+.sheet .rw i { width: 6px; height: 6px; border-radius: 50%; border: 1px solid rgba(11,10,9,.4); }
+.sheet .rw i.lit { background: var(--sun); border-color: var(--sun); }
+.sheet .wmk { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; transition: clip-path .9s var(--e), opacity .9s; clip-path: inset(0 0 0 0); }
+.sheet .wmk span { transform: rotate(-28deg); font: 400 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: rgba(11,10,9,.5); background: rgba(239,237,230,.82); border: 1px solid rgba(11,10,9,.35); padding: 8px 12px; white-space: nowrap; }
+.sheet.pro .wmk { clip-path: inset(0 0 0 100%); opacity: 0; }
+.pv .cap3 { min-height: 1.4em; text-align: center; }
+.tiers { display: grid; gap: 12px; }
+.tier { position: relative; padding: 26px 22px 22px; border: 1px solid var(--line); border-radius: 18px; display: grid; gap: 18px; align-content: start; background: rgba(239,237,230,.02); transition: border-color .4s, background .4s, transform .4s var(--e); }
+.tier .cm { position: absolute; width: 14px; height: 14px; border: 0 solid var(--mark); opacity: 0; transition: opacity .4s, inset .5s var(--e); }
+.tier .cm.a { top: 14px; left: 14px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.tier .cm.b { top: 14px; right: 14px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.tier .cm.c { bottom: 14px; left: 14px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.tier .cm.d { bottom: 14px; right: 14px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+.tier.sel { border-color: rgba(239,237,230,.42); background: rgba(239,237,230,.045); }
+.tier.sel .cm { opacity: 1; }
+.tier .nm { display: flex; justify-content: space-between; gap: 12px; }
+.tier .amt { display: flex; align-items: baseline; gap: 10px; }
+.tier .amt b { font-weight: 400; font-size: clamp(56px, 14vw, 84px); letter-spacing: -.06em; line-height: .9; font-variant-numeric: tabular-nums; }
+.tier .amt b sup { font-size: .42em; letter-spacing: -.02em; vertical-align: .9em; margin-right: .04em; }
+.tier .amt s { color: var(--q); font-size: 18px; text-decoration-thickness: 1px; }
+.tier p { margin: 0; color: var(--q); font-size: 15px; line-height: 1.5; }
+.tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.tier li { display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: baseline; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; line-height: 1.35; }
+.tier li::before { content: ""; width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(239,237,230,.45); transform: translateY(-1px); }
+.tier li.on::before { background: var(--paper); border-color: var(--paper); }
+.tier li em { font-style: normal; color: var(--q); }
+.tier.pro { border-color: rgba(255,90,31,.45); background: radial-gradient(120% 70% at 100% 0%, rgba(255,90,31,.16), rgba(255,90,31,0) 60%), rgba(239,237,230,.03); }
+.tier.pro.sel { border-color: var(--sun); }
+.tier.pro .cm { border-color: var(--sun); }
+.tier.pro li.on::before { background: var(--sun); border-color: var(--sun); }
+.tier .tag { color: var(--sun); }
+.tier .go { justify-self: start; }
+.tier .ghost { display: inline-flex; align-items: center; gap: 10px; height: 46px; padding: 0 18px; border-radius: 999px; border: 1px solid rgba(239,237,230,.32); color: var(--paper); text-decoration: none; font-size: 15px; }
+.tier .ghost::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sun); }
+.small { display: flex; flex-wrap: wrap; gap: 10px 26px; }
+.small a { color: var(--paper); }
+
+/* ---------- sky sweep (coming) ---------- */
+.sweep { position: relative; z-index: 3; background: var(--ink); padding: 16vh 16px 0; display: grid; gap: 22px; }
+.sweep .hd { display: grid; gap: 14px; max-width: 760px; }
+.sweep .hd h2 { font-size: clamp(34px, 6.4vw, 80px); }
+.sweep .hd p { margin: 0; color: var(--q); font-size: 16px; line-height: 1.5; max-width: 34em; }
+.soon { display: inline-block; margin-left: 8px; padding: 3px 8px; border: 1px solid rgba(255,90,31,.6); border-radius: 999px; color: var(--paper); }
+.sw-stage { position: relative; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: #11141a; }
+.sw-stage .cm { position: absolute; z-index: 2; width: 14px; height: 14px; border: 0 solid var(--mark); }
+.sw-stage .cm.a { top: 12px; left: 12px; border-top-width: 1.5px; border-left-width: 1.5px; }
+.sw-stage .cm.b { top: 12px; right: 12px; border-top-width: 1.5px; border-right-width: 1.5px; }
+.sw-stage .cm.c { bottom: 12px; left: 12px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+.sw-stage .cm.d { bottom: 12px; right: 12px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+.sw-top { position: absolute; z-index: 2; top: 16px; left: 34px; right: 34px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+#sw-v { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; touch-action: pan-y; }
+@media (max-width: 599px) { #sw-v { aspect-ratio: 40 / 34; } .sw-top span + span { display: none; } }
+.sw-t { fill: var(--paper); font: 400 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.sw-n { fill: var(--paper); font: 400 18px var(--mono); letter-spacing: .04em; }
+.sw-h { cursor: ns-resize; }
+.sw-cap { margin: 0; padding: 14px 20px 0; font-size: clamp(18px, 2.2vw, 26px); letter-spacing: -.02em; line-height: 1.2; min-height: 2.6em; }
+.sw-plan { display: flex; flex-wrap: wrap; gap: 0; padding: 10px 20px 22px; min-height: 64px; }
+.sw-plan span { display: grid; gap: 4px; padding: 6px 16px 6px 0; margin-right: 16px; border-right: 1px solid var(--line); }
+.sw-plan span:last-child { border-right: 0; }
+.sw-plan b { font: 400 16px var(--mono); letter-spacing: .02em; }
+.sw-plan b.o { color: var(--sun); }
+.sw-ctl { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sw-where { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.sw-where li { display: grid; gap: 6px; padding: 14px 0; border-top: 1px solid var(--line); color: var(--q); font-size: 15px; line-height: 1.45; }
+.sw-where li:last-child { border-bottom: 1px solid var(--line); }
+@media (min-width: 900px) {
+  .sweep { padding: 22vh max(40px, 6vw) 0; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 28px 56px; align-items: start; }
+  .sweep .hd { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: 20vh; }
+  .sw-stage, .sw-ctl, .sw-where { grid-column: 2; }
+  .sw-where { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 20px; }
+  .sw-where li:last-child { border-bottom: 0; }
+}
+
+/* ---------- wider screens: the card sits left, the phone sits right ---------- */
+@media (min-width: 900px) {
+  :root { --inset: 18px; }
+  .hud .top { left: calc(var(--inset) + 22px); right: calc(var(--inset) + 22px); }
+  .open .say { left: 7%; right: 7%; bottom: calc(var(--dock) + 64px); }
+  .step { align-items: center; padding: 0 0 0 max(40px, 6vw); min-height: 120svh; }
+  .step:first-child { min-height: 110svh; }
+  .card { position: sticky; top: 50%; bottom: auto; transform: translateY(-50%); margin: 0; max-width: 400px; }
+  .step:not(.on) .card { transform: translateY(calc(-50% + 18px)); }
+  .stick .chap { left: max(40px, 6vw); }
+  .get { padding-top: 22vh; }
+  .join, .price { margin: 0 max(40px, 6vw); }
+  .price { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 40px 56px; }
+  .price .hd { grid-column: 1; }
+  .pv { grid-column: 2; grid-row: 1; padding: 0; }
+  .sheet { width: 280px; }
+  .tiers { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tier:hover { transform: translateY(-4px); }
+  .small { grid-column: 1 / -1; }
+  .fl { padding: 0 max(40px, 6vw); }
+  .places .cap2 { padding-inline: max(40px, 6vw); }
+}
+@media (max-width: 899px) and (max-height: 740px) {
+  .card > p { display: none; }
+  .card { gap: 10px; padding: 16px 16px 14px; }
+  .card h2 { font-size: 26px; }
+  .tl .read { font-size: 18px; }
+}
+@media (max-width: 380px) {
+  .dock nav a { padding: 0 9px; }
+  .hud .rd .long { display: none; }
+}
+@media (max-width: 899px) { .hud .rd .long { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .open img, .pl-track, .flash.go, .iris.go { animation: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="hud" aria-hidden="false">
+  <span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span>
+  <div class="top">
+    <a class="wm" href="#open">Out &amp; Sc<i class="sd"></i>out</a>
+    <span class="rd mono"><span class="rec"><i></i><span id="hud-now">Knole Park</span></span><span class="long q" id="hud-gold"></span><a class="cnt" href="#get">Get it</a></span>
+  </div>
+</div>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<div class="iris" id="iris" aria-hidden="true"></div>
+
+<div class="dock" id="dock">
+  <nav class="mono" aria-label="Chapters">
+    <a href="#frame" data-c="0">Frame</a><a href="#light" data-c="1">Light</a><a href="#list" data-c="2">List</a><a href="#send" data-c="3">Send</a>
+  </nav>
+  <button type="button" class="shut" id="shutter" aria-label="Take a shot"><span class="n" id="shots" aria-live="polite"></span></button>
+</div>
+
+<main>
+<section class="open" id="open">
+  <img srcset="img/blue-hour-s.jpg 1024w, img/blue-hour.jpg 2048w" sizes="100vw" src="img/blue-hour.jpg" alt="Three people in head torches on a hillside before sunrise, one framing the mountains on a phone.">
+  <div class="say">
+    <span class="mono" style="color:rgba(239,237,230,.75)">A viewfinder for the recce</span>
+    <h1>Out before first light.</h1>
+    <p>Frame the shot at your real lens, read the light, and come home with the shot list already written.</p>
+    <span class="tip mono q">Press the shutter, or scroll</span>
+  </div>
+</section>
+
+<div class="story" id="story">
+  <div class="stick" id="stick">
+    <canvas id="cv" tabindex="0" role="img" aria-label="A 3D iPhone running Out & Scout. Drag or use the arrow keys to turn it."></canvas>
+    <div class="fb mono">Your browser can't show the 3D phone, but everything below still works.</div>
+    <div class="chap mono q" aria-hidden="true"><b id="chap-n">01</b><span>/ 04</span><span id="chap-w">Frame</span></div>
+  </div>
+  <div class="steps">
+    <section class="step" id="frame" data-c="0">
+      <div class="card">
+        <span class="mono q">01 · Viewfinder</span>
+        <h2>Frame it at your real lens.</h2>
+        <p>Pick the lenses in your kit and the iPhone shows what each one sees, with frame lines for 2.39, 1.85, 16:9 and 9:16. Try it, then press the shutter.</p>
+        <div class="chips" role="group" aria-label="Lens" id="lenses"><button type="button" class="chip" data-mm="18" aria-pressed="false">18</button><button type="button" class="chip" data-mm="24" aria-pressed="false">24</button><button type="button" class="chip" data-mm="35" aria-pressed="true">35</button><button type="button" class="chip" data-mm="50" aria-pressed="false">50</button><button type="button" class="chip" data-mm="85" aria-pressed="false">85</button></div>
+        <div class="chips" role="group" aria-label="Frame lines" id="ratios"><button type="button" class="chip" data-r="2.39" aria-pressed="true">2.39</button><button type="button" class="chip" data-r="1.85" aria-pressed="false">1.85</button><button type="button" class="chip" data-r="1.78" aria-pressed="false">16:9</button></div>
+      </div>
+    </section>
+    <section class="step" id="light" data-c="1">
+      <div class="card">
+        <span class="mono q">02 · Sun path and light read</span>
+        <h2>Know when it'll be backlit.</h2>
+        <p>The real sun for Knole Park today. Drag it through the day and the light on the phone, the picture and the read all change together.</p>
+        <div class="tl">
+          <span class="read" id="lt-read" aria-live="polite"></span>
+          <input type="range" id="lt-time" min="300" max="1260" step="1" value="420" aria-label="Time of day">
+          <div class="k mono q"><span id="lt-log"></span><button type="button" class="chip sun" id="lt-play" aria-pressed="false">Play the day</button></div>
+        </div>
+      </div>
+    </section>
+    <section class="step" id="list" data-c="2">
+      <div class="card">
+        <span class="mono q">03 · Shot List</span>
+        <h2>Every shot, numbered.</h2>
+        <p>Each shot lands in the list with its still, caption, lens, time and light. Shots you take with the shutter here land in it too.</p>
+        <div class="k mono q"><span id="sl-count">3 shots</span><button type="button" class="chip" id="sl-sort" aria-pressed="false">Sort by light</button></div>
+      </div>
+    </section>
+    <section class="step" id="send" data-c="3">
+      <div class="card">
+        <span class="mono q">04 · Export</span>
+        <h2>Send the day as a PDF.</h2>
+        <p>A plan for the day in the order the light comes round, a page per scene with its map and the sun, then a card per shot.</p>
+        <div class="chips" role="group" aria-label="Version" id="tiers"><button type="button" class="chip" data-t="detailed" aria-pressed="true">Detailed</button><button type="button" class="chip" data-t="summary" aria-pressed="false">Summary</button><button type="button" class="chip" data-t="photos" aria-pressed="false">Photos</button></div>
+        <div class="k"><button type="button" class="chip sun" id="send-it" aria-pressed="false">Send it</button><span class="mono q pages" id="pages" aria-live="polite">5 pages</span></div>
+      </div>
+    </section>
+  </div>
+  <div class="tail" aria-hidden="true"></div>
+</div>
+
+<section class="sweep" id="sweep" aria-labelledby="sw-h">
+  <div class="hd">
+    <span class="mono q">05 · Sky Sweep <span class="soon">In testing</span></span>
+    <h2 id="sw-h">When does the sun clear the roof?</h2>
+    <p>After your first shot at a new spot, if the sun crosses where you're pointing, the app offers a ten-second sweep. Follow the sun's path with the phone, it traces where the sky starts, and you get the time to be there.</p>
+  </div>
+  <div class="sw-stage">
+    <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+    <div class="sw-top mono q"><span>Example · city yard, facing south-west</span><span>14:00 to sunset</span></div>
+    <svg id="sw-v" viewBox="0 0 600 400" role="img" aria-label="An afternoon sun path over a city skyline. Orange where the sun reaches you, dashed where a roof blocks it."></svg>
+    <p class="sw-cap" id="sw-cap" aria-live="polite"></p>
+    <div class="sw-plan" id="sw-plan"></div>
+  </div>
+  <div class="sw-ctl">
+    <div class="chips"><button type="button" class="chip sun" id="sw-go" aria-pressed="false">Sweep · 10 s</button><button type="button" class="chip" id="sw-fix" aria-pressed="false">Fix the line</button><button type="button" class="chip" id="sw-reset">Reset</button></div>
+    <span class="mono q">Fix the line: drag the roofline and the times move</span>
+  </div>
+  <ul class="sw-where">
+    <li><span class="mono q">On the shot</span>The time goes under the still, on the day plan and on the PDF the crew gets.</li>
+    <li><span class="mono q">Light today</span>A small widget: golden hour, sunset and the next be-here time when a shoot is planned.</li>
+    <li><span class="mono q">Later · Wake me</span>An alarm from the same time, with the drive added, and a warning if it'll be grey.</li>
+  </ul>
+</section>
+
+<section class="get" id="get">
+  <div class="places" id="places" aria-label="Today's sun at ten places">
+    <div class="cap2 mono q"><span>Today's sun · ten places we go</span><span>Orange · sun up now</span></div>
+    <div class="pl-track"></div>
+  </div>
+  <div class="price" id="price">
+    <div class="hd">
+      <span class="mono q">Price · no subscription</span>
+      <h2>Free to scout. Pay once to go clean.</h2>
+      <p>Everything works for free on your first project. Your PDFs carry a small Out &amp; Scout mark. Pro opens up every project, takes the mark off and adds the extra exports, once, and it's yours for good.</p>
+    </div>
+    <div class="pv">
+      <div class="chips" role="group" aria-label="Preview the PDF" id="pv-t"><button type="button" class="chip" data-p="free" aria-pressed="true">Free</button><button type="button" class="chip sun" data-p="pro" aria-pressed="false">Pro</button></div>
+      <div class="sheet" id="sheet" aria-hidden="true">
+        <div class="t"><span>Day plan · Knole Park</span><span>1 / 5</span></div>
+        <div class="h">Scene 1 · The ridge</div>
+        <div class="img"></div>
+        <div class="rw"><i class="lit"></i><span>Wide · 24mm</span><span>07:12 Backlit</span></div>
+        <div class="rw"><i class="lit"></i><span>Walk in · 35mm</span><span>07:40 Side lit</span></div>
+        <div class="rw"><i></i><span>Close · 85mm</span><span>12:30 Top light</span></div>
+        <div class="wmk"><span>Scouted with Out &amp; Scout</span></div>
+      </div>
+      <span class="mono q cap3" id="pv-cap" aria-live="polite">Free · sent with the mark</span>
+    </div>
+    <div class="tiers">
+      <article class="tier sel" data-p="free">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Free</span><span class="q">Forever</span></div>
+        <div class="amt"><b><sup>£</sup>0</b></div>
+        <p>The whole app, on one project.</p>
+        <ul>
+          <li class="on">Every lens and ratio in the finder</li>
+          <li class="on">Live sun and the light read</li>
+          <li class="on">One project, every scene and shot in it</li>
+          <li class="on">PDFs with a small watermark</li>
+        </ul>
+      </article>
+      <article class="tier pro" data-p="pro">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Pro</span><span class="tag">Pay once</span></div>
+        <div class="amt"><b><sup>£</sup>29.99</b></div>
+        <p>For the PDFs you send to a client or a crew.</p>
+        <ul>
+          <li class="on">Unlimited projects</li>
+          <li class="on">Clean PDFs, no watermark</li>
+          <li class="on">Shot list as CSV</li>
+          <li class="on">Every scene in one send</li>
+          <li class="on"><span>Live link for the crew <em>(coming)</em></span></li>
+        </ul>
+      </article>
+      <article class="tier" data-p="founding">
+        <span class="cm a"></span><span class="cm b"></span><span class="cm c"></span><span class="cm d"></span>
+        <div class="nm mono"><span>Founding</span><span class="q">Launch</span></div>
+        <div class="amt"><b><sup>£</sup>14.99</b><s>£29.99</s></div>
+        <p>Pro at half price for the people who scout with us first. Join the list and we send your code on launch day.</p>
+        <a class="ghost go" href="#join" data-signup-list="founding" data-signup-button="Join the founding list" data-signup-note="Founding list: we send your half-price code on launch day." data-signup-done="You're on the founding list. Your code comes on launch day.">Join the founding list</a>
+      </article>
+    </div>
+    <div class="small mono q"><span>Testing it now? Pro is yours free at launch.</span><span>Production company? <a href="mailto:hello@eltio.studio?subject=Out%20%26%20Scout%20team%20price">Ask about a team price</a></span></div>
+  </div>
+  <div class="join" id="join">
+    <span class="mono q">Testing now on real recces</span>
+    <h2>Come out with us.</h2>
+    <div class="who mono"><span>DPs</span><span>Directors</span><span>Location scouts</span><span>Photographers</span></div>
+    <form class="su" data-signup data-app="outandscout" data-list="beta" data-done="You're on the list. Your test invite comes to that email." novalidate>
+      <p class="su-note q">Leave your email for a test invite. Pro is yours free at launch.</p>
+      <div class="su-row"><label class="sr" for="su-em">Your email</label><input id="su-em" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required><input class="sr" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="jbtn" type="submit">Ask for a test invite</button></div>
+      <p class="su-done mono q" role="status" aria-live="polite"></p>
+    </form>
+    <div class="road mono q"><span>Now · TestFlight</span><span>Next · more testers</span><span>Then · App Store</span></div>
+  </div>
+  <footer class="mono q fl"><span>Out &amp; Scout (2026)</span><span><a href="support/">Support</a> · <a href="privacy/">Privacy</a></span></footer>
+</section>
+</main>
+
+<script src="site.js"></script>
+<script src="scene.js" defer></script>
+<script src="sweep.js"></script>
+<script src="signup.js" defer></script>
+</body>
+</html>

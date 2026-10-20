@@ -14,6 +14,8 @@ Same pattern as lampwerk-site.
    sed -i 's#a\[href\*="systems-app/"\]#a[href^="app/"]#' /tmp/sys/v5.js
    mkdir -p /tmp/sys/app && cp -r /tmp/es/preview/systems-app/. /tmp/sys/app/
    sed -i '/name="robots"/d' /tmp/sys/app/privacy.html /tmp/sys/app/terms.html
+   cp -r /tmp/es/preview/systems-site-v5/tutorials /tmp/sys/
+   sed -i -e '/name="robots"/d' -e 's#\.\./\.\./systems-app/#../app/#g' /tmp/sys/tutorials/index.html
    echo eltio.systems > /tmp/sys/CNAME
    ```
 

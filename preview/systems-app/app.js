@@ -537,7 +537,8 @@ function diaryCard() {
 var SHOOT = [["Sound recordist", "", "open"], ["2nd AC", "Offer sent to Priya K.", "wait"], ["Spark", "Pencilled: Leon B.", "pen"], ["Gaffer", "Booked: Sam C.", "ok"], ["1st AC", "Booked: Ana R.", "ok"]];
 function shootCard() {
   var open = SHOOT.filter(function (r) { return r[2] !== "ok"; }).length;
-  return '<div class="diary shoot"><div class="dia-h"><span class="part">Your shoot · Canal promo · tomorrow</span><span class="tag amb">' + open + " to fill</span></div>" +
+  return '<div class="diary shoot"><div class="edge"><span class="part">Your shoot</span><span class="part">Canal promo · tomorrow</span></div>' +
+    '<div class="facts"><span><i>Call</i>' + esc(pj().unit.call) + '</span><span><i>Wrap</i>' + esc(pj().unit.wrap) + '</span><span><i>To fill</i>' + open + ' roles</span></div>' +
     '<div class="sh-bar"><b>29</b><span class="q">of 32 crew booked</span><span class="bar"><i style="width:' + (29 / 32 * 100).toFixed(1) + '%"></i></span></div>' +
     '<div class="rows">' + SHOOT.map(function (r) { return '<div class="row static sh-r"><span>' + esc(r[0]) + (r[1] ? '<span class="q sub">' + esc(r[1]) + "</span>" : '<span class="q sub">Nobody yet</span>') + "</span>" + (r[2] === "open" ? '<button class="btn sm solid" data-findcrew>Find crew</button>' : r[2] === "wait" ? '<button class="btn sm" data-nudge="' + esc(r[1].replace("Offer sent to ", "")) + '">Nudge</button>' : '<span class="tag' + (r[2] === "ok" ? " ok" : " amb") + '">' + (r[2] === "ok" ? "Booked" : "Pencilled") + "</span>") + "</div>"; }).join("") + "</div></div>";
 }
@@ -1264,7 +1265,7 @@ function endTour() { tourT.forEach(function (x) { clearTimeout(x); cancelAnimati
 var VIEWS = { home: home, bookings: bookings, money: moneyScr, more: more };
 /* Trying it with sample data: always show the way back to the site and the waitlist. */
 function siteUrl() { return /\/preview\/systems-app\//.test(location.pathname) ? "../systems-site-v5/" : /^https?:/.test(location.protocol) && location.hostname !== "localhost" && !/claude/.test(location.hostname) ? "/" : "https://eltio.systems/"; }
-function demoBar() { return '<div class="demobar"><span class="q">Sample data · nothing is saved</span><span class="db-l"><button class="lnk" data-switchjob>Switch job</button><a class="lnk" href="' + siteUrl() + '">Back to the site</a><a class="btn sm solid" href="' + siteUrl() + '#waitlist">Join the waitlist</a></span></div>'; }
+function demoBar() { return '<div class="demobar"><span class="part">Sample data · nothing is saved</span><span class="db-l"><button class="lnk" data-switchjob>Switch job</button><a class="lnk" href="' + siteUrl() + '">Back to the site</a><a class="btn sm solid" href="' + siteUrl() + '#waitlist">Join the waitlist</a></span></div>'; }
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);

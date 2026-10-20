@@ -457,7 +457,7 @@ function slowPayers() {
 }
 
 /* ---------- try it as any job: sample data set up for that job, no form ---------- */
-function job() { var k = D && D.settings && D.settings.job; return JOBS.find(function (j) { return j.k === k; }); }
+function job() { var k = D && D.settings && D.settings.job, j = JOBS.find(function (x) { return x.k === k; }), n = D && D.settings && D.settings.jobName; return j && n ? Object.assign({}, j, { n: n, pl: n.toLowerCase().replace(/s$/, "") + "s" }) : j; }
 function startJob(k) {
   var j = JOBS.find(function (x) { return x.k === k; }); if (!j) return false;
   mode = "demo"; D = sample();
@@ -484,7 +484,7 @@ function jobSheet(i) {
 /* ---------- the dashboard you open on: your diary and offers (crew), your shoot (producers) ---------- */
 /* Each sample job's grade on the card, so its rate comes from the card. */
 var JOBGRADE = { camera: "1st AC, focus puller", gaffer: "Gaffer", spark: "Spark", grip: "Grip", sound: "Sound recordist", dit: "DIT", art: "Art director", costume: "Costume designer", hmu: "HMU artist", locations: "Location manager", runner: "Runner", editor: "Editor" };
-var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory", "Maya, producer", "Hi Sam, found you in the directory. One day on a sportswear spot, two cameras on a stage in E2. Could you hold it until Thursday? Happy to send the treatment.", "Canal St Studios, E2", "07:00", "Jonah A.", "Mara Q."], ["o2", 4, "2", "Northlight Films", "Drama, second unit", "Via your agent", "Your agent, for Northlight", "Northlight want you for two days of second unit on their drama in Kent, on Bectu terms. Day two is a night shoot on the seafront. They asked if you can do a recce the Friday before.", "Margate seafront, Kent", "05:30", "Ade O.", "Lena K."]];
+var OFFERS = [["o1", 2, "1", "Halde Films", "Sportswear spot", "Found you in the directory", "Maya, producer", "Hi Sam, found you in the directory. One day on a sportswear spot, on a stage in E2. Could you hold it until Thursday? Happy to send the treatment.", "Canal St Studios, E2", "07:00", "Jonah A.", "Mara Q."], ["o2", 4, "2", "Northlight Films", "Drama, second unit", "Via your agent", "Your agent, for Northlight", "Northlight want you for two days of second unit on their drama in Kent, on Bectu terms. Day two is a night shoot on the seafront. They asked if you can do a recce the Friday before.", "Margate seafront, Kent", "05:30", "Ade O.", "Lena K."]];
 /* The person behind each offer, so it reads like someone asking, not a form. */
 var PEOPLE = {
   o1: { n: "Maya Lindqvist", s: "Maya", ini: "ML", h: 18, role: "Producer, Halde Films", bio: "Produces sportswear and music films, mostly on stage in east London. Small crews, proper lunches, wraps on time.", made: "Fieldwear spring spot, Canal promo, Low Tide 'Haze'", know: "Ana R. and Leon B. have worked with her", pays: "In 9 days, on average" },
@@ -1444,7 +1444,28 @@ function toolClick(b) {
 var VIEWS = { home: home, bookings: bookings, money: moneyScr, more: more };
 /* Trying it with sample data: always show the way back to the site and the waitlist. */
 function siteUrl() { return /\/preview\/systems-app\//.test(location.pathname) ? "../systems-site-v5/" : /^https?:/.test(location.protocol) && location.hostname !== "localhost" && !/claude/.test(location.hostname) ? "/" : "https://eltio.systems/"; }
-function demoBar() { return '<div class="demobar"><span class="part">Sample data · nothing is saved</span><span class="db-l"><button class="lnk" data-switchjob>Switch job</button><a class="lnk" href="' + siteUrl() + '">Back to the site</a><a class="btn sm solid" href="' + siteUrl() + '#waitlist">Join the waitlist</a></span></div>'; }
+/* Switch job: a menu under the button, every job grouped by department, and any other job typed in. */
+var JGROUPS = [["Production", ["prod", "pm", "dir"]], ["Camera", ["dop", "camera", "dit"]], ["Lighting and grip", ["gaffer", "spark", "grip"]], ["Sound and post", ["sound", "editor"]], ["Art, costume, hair and make-up", ["art", "costume", "hmu"]], ["Locations and runners", ["locations", "runner"]]];
+var JGUESS = [[/line producer|producer|exec/, "prod"], [/production (manager|coord)|coordinator|\bpm\b|\bad\b|assistant director|1st ad|first ad|script sup/, "pm"], [/dop|\bdp\b|cinematographer|director of photography|camera op|steadicam|operator/, "dop"], [/director/, "dir"], [/gaffer|best boy/, "gaffer"], [/spark|electric|rigger|lighting/, "spark"], [/grip|dolly|crane/, "grip"], [/focus|\bac\b|camera ass|clapper|loader|camera/, "camera"], [/\bdit\b|data|media/, "dit"], [/sound|boom|mixer|audio/, "sound"], [/art|design|set dress|props|buyer|construct|scenic|graphic/, "art"], [/costume|wardrobe|stylist|dresser/, "costume"], [/make|hair|hmu|mua|prosthetic/, "hmu"], [/location|unit manager|marshal/, "locations"], [/edit|colou?r|vfx|grade|post|online|motion|anim/, "editor"], [/runner|\bpa\b|assistant|driver/, "runner"]];
+function jguess(t) { t = t.toLowerCase(); for (var i = 0; i < JGUESS.length; i++) if (JGUESS[i][0].test(t)) return JGUESS[i][1]; return "runner"; }
+function jobMenu() {
+  var cur = D && D.settings ? D.settings.job : "", nm = D && D.settings ? D.settings.jobName : "";
+  return '<div class="jmenu" id="jmenu" role="menu"><div class="jm-in">' + JGROUPS.map(function (g) {
+    return '<div class="jm-g"><span class="part">' + esc(g[0]) + "</span>" + g[1].map(function (k) { var j = JOBS.find(function (x) { return x.k === k; }); return j ? '<button role="menuitem" data-job="' + k + '" class="' + (k === cur && !nm ? "on" : "") + '">' + esc(j.n) + "</button>" : ""; }).join("") + "</div>";
+  }).join("") + '</div><form class="jm-other" id="jmOther"><label class="part" for="jmIn">Not here? Type your job</label><div class="jm-row"><input id="jmIn" list="jmList" placeholder="e.g. Props buyer, colourist" autocomplete="off" maxlength="32" value="' + esc(nm || "") + '"><button class="btn solid sm" type="submit">Build it</button></div><datalist id="jmList">' + ["Focus puller", "Steadicam operator", "Best boy", "Rigger", "Props buyer", "Set dresser", "Production designer", "Wardrobe supervisor", "Prosthetics artist", "Boom operator", "Colourist", "VFX artist", "Script supervisor", "1st AD", "Unit manager", "Driver"].map(function (x) { return '<option value="' + x + '">'; }).join("") + "</datalist></form></div>";
+}
+function toggleJobMenu(btn) {
+  var m = $("jmenu"); if (m) { m.remove(); return; }
+  var bar = btn.closest(".demobar"); if (!bar) return; bar.insertAdjacentHTML("beforeend", jobMenu());
+  var f = $("jmOther"); f.addEventListener("submit", function (e) { e.preventDefault(); var t = val("jmIn"); if (!t) return; customJob(t); });
+}
+function customJob(t) {
+  var k = jguess(t), nm = t.trim().replace(/\s+/g, " ").slice(0, 32); nm = nm.charAt(0).toUpperCase() + nm.slice(1);
+  if (!startJob(k)) return; D.settings.jobName = nm; demoSave(); render(); banner("Built for a " + nm.toLowerCase() + ", from the " + JOBS.find(function (x) { return x.k === k; }).n.toLowerCase() + " tools.");
+}
+document.addEventListener("click", function (e) { var m = $("jmenu"); if (m && !m.contains(e.target) && !e.target.closest("[data-switchjob]")) m.remove(); });
+document.addEventListener("keydown", function (e) { if (e.key === "Escape" && $("jmenu")) $("jmenu").remove(); });
+function demoBar() { return '<div class="demobar"><span class="part">Sample data · nothing is saved</span><span class="db-l"><button class="lnk jm-btn" data-switchjob aria-haspopup="menu">' + (job() ? "As " + esc(job().n.toLowerCase()) : "Switch job") + ' <span aria-hidden="true">▾</span></button><a class="lnk" href="' + siteUrl() + '">Back to the site</a><a class="btn sm solid" href="' + siteUrl() + '#waitlist">Join the waitlist</a></span></div>'; }
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
@@ -1533,7 +1554,7 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-postv")) { closeSheet(); banner("V4 posted. Everyone gets a ping with what changed."); return; }
   if (b.hasAttribute("data-editlink")) { closeSheet(); banner("Edit link ready for your PM. Rates and budget stay hidden."); return; }
   if (b.hasAttribute("data-confirmed")) { banner("Production confirmed these hours. The mark goes on your invoice."); return; }
-  if (b.hasAttribute("data-switchjob")) { closeSheet(); mode = null; S.tab = "home"; render(); return; }
+  if (b.hasAttribute("data-switchjob")) { closeSheet(); toggleJobMenu(b); return; }
   if (b.hasAttribute("data-demo")) { mode = "demo"; D = demoLoad(); if (!D.settings.name) { D.settings.name = ""; } render(); return; }
   if (b.hasAttribute("data-signin")) { b.disabled = true; startGoogle(false).catch(function (er) { b.disabled = false; banner("Sign-in didn't finish: " + (er.message || er)); }); return; }
   if (b.hasAttribute("data-signout")) { if (mode === "google" && G.token && window.google) { try { google.accounts.oauth2.revoke(G.token, function () {}); } catch (x) {} } try { localStorage.removeItem("eltio-systems-signed-in"); } catch (x) {} mode = null; G = { token: null, exp: 0, client: null, sheetId: null, email: "" }; S.tab = "home"; render(); return; }

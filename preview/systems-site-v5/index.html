@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500&family=Martian+Mono:wght@300;400&family=Schibsted+Grotesk:wght@400;500&display=swap">
 <link rel="stylesheet" href="v5.css">
+<link rel="stylesheet" href="open.css">
 </head>
 <body>
 
@@ -31,7 +32,7 @@
       <p class="lede" id="lede">Advances, crew invoices, permits and clients, run from your phone. If you can send a text, you can run Systems.</p>
       <div class="acts">
         <a class="pill" href="../systems-app/">Try it free <span aria-hidden="true">→</span></a>
-        <a class="pill ghost" href="#waitlist">Join the waitlist <span aria-hidden="true">↓</span></a>
+        <a class="tlink" href="#waitlist">Or join the waitlist <span aria-hidden="true">↓</span></a>
       </div>
       <p class="fine" id="fine">For UK production companies and producers. No card, no call, no download.</p>
       <div class="who" id="who">
@@ -417,6 +418,21 @@
   <span class="flinks"><a href="../systems-app/privacy.html">Privacy</a><a href="../systems-app/terms.html">Terms</a></span>
 </footer>
 
+<a class="pill fcta" id="fcta" href="../systems-app/" aria-hidden="true" tabindex="-1">Try it free <span aria-hidden="true">→</span></a>
 <script src="v5.js"></script>
+<script>
+/* One floating button: shows once the hero's button has scrolled away, hides at the waitlist */
+(function () {
+  var b = document.getElementById("fcta"), hero = document.querySelector(".hero .acts"), wl = document.getElementById("waitlist"), heroOut = false, wlIn = false, seen = new Set();
+  if (!b || !hero || !("IntersectionObserver" in window)) return;
+  function set() { var on = heroOut && !wlIn && !seen.size; b.classList.toggle("on", on); b.setAttribute("aria-hidden", on ? "false" : "true"); b.tabIndex = on ? 0 : -1; }
+  new IntersectionObserver(function (e) { heroOut = !e[0].isIntersecting && e[0].boundingClientRect.top < 0; set(); }).observe(hero);
+  if (wl) new IntersectionObserver(function (e) { wlIn = e[0].isIntersecting; set(); }).observe(wl);
+  /* Step aside while a section's own Try it free button is on screen */
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) seen.add(e.target); else seen.delete(e.target); }); set(); });
+  document.querySelectorAll("main a.pill").forEach(function (a) { if (!a.closest(".hero") && /(systems-)?app\//.test(a.getAttribute("href"))) io.observe(a); });
+  var h = document.querySelector('.hero .acts .pill'); if (h) new MutationObserver(function () { b.href = h.href; }).observe(h, { attributes: true, attributeFilter: ["href"] });
+})();
+</script>
 </body>
 </html>

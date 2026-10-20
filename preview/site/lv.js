@@ -95,7 +95,7 @@
     'html.lv-m.lv4 .lv-big small{display:block;font-size:11px;letter-spacing:0;margin-top:8px;text-transform:uppercase}',
     'html.lv-m.lv4.lv-in .lv-big{opacity:1}',
     'html.cg-open .lv-big,html.cg-open .lv-bg{display:none}',
-    // 19 Oct 19:58 Elliot: no logos zooming in on scroll; the cover wordmark only fades as the phone arrives (opacity, never scale)
+    // 19 Oct 19:58: no logos zooming in on scroll; the cover wordmark only fades as the phone arrives (opacity, never scale)
     // 5 Stack, refined (19 Oct: less bulky, the logo lands ON the phone, the whole phone in view, floating)
     // 6 Float: the same cards without pinning, drifting at their own pace
     'html.lv-m.lv5 .eltio.alt-plx.lp .x-list,html.lv-m.lv6 .eltio.alt-plx.lp .x-list{gap:0!important;padding-bottom:24vh!important}',

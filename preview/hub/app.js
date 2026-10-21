@@ -10,7 +10,7 @@ var TABS = {
   since: ["date", "area", "text"],
   timeline: ["area", "title", "start", "end", "kind", "edited"],
   tree: ["area", "title", "state", "go"],
-  apps: ["id", "name", "colour", "stage", "site", "testflight", "users", "downloads", "paid", "revenue", "step1", "step2", "step3", "step4", "value1", "value2", "value3", "value4", "blocker", "next", "target", "now", "tests", "flag", "note", "prompt1", "prompt2", "sources"],
+  apps: ["id", "name", "colour", "stage", "site", "testflight", "users", "downloads", "paid", "revenue", "step1", "step2", "step3", "step4", "value1", "value2", "value3", "value4", "blocker", "next", "target", "now", "tests", "flag", "note", "prompt1", "prompt2", "sources", "store"],
   channels: ["app", "channel", "visits", "downloads", "paid", "spend"],
   campaigns: ["app", "channel", "title", "status", "when", "result", "spend", "posts", "views", "visits", "downloads", "link", "logged"],
   sources: ["key", "name", "what", "status", "note", "updated"],
@@ -215,9 +215,15 @@ function studio() {
 /* personal money: kpis rows keyed p_*; p_next* rows are upcoming bills (label = when, value = amount, sub = what). Never balances. */
 function myMoney() {
   var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }); if (!P.length) return "";
-  var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; });
+  var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0 && k.key.indexOf("p_cat") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; }), C = P.filter(function (k) { return k.key.indexOf("p_cat") === 0; });
   return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") +
-    (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span></div>"; }).join("") + "</div>" : "");
+    (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span></div>"; }).join("") + "</div>" : "") + catCard(C);
+}
+/* p_cat rows: label = category, value = spent this month, sub = "of £400" (its budget) */
+function catCard(C) {
+  if (!C.length) return "";
+  return '<div class="card cardpad cats" style="margin-top:8px"><div class="cap">Spend by category this month</div>' + C.map(function (k) { var v = num(k.value) || 0, b = num(String(k.sub).replace(/^[^£\d]*/, "")), over = b && v > b;
+    return '<div class="cat' + (over ? " over" : "") + '"><span class="t">' + esc(k.label) + '</span><span class="bar2"><i style="width:' + (b ? Math.min(100, v / b * 100) : 0) + '%"></i></span><span class="w">' + esc(k.value) + (b ? '<small> of ' + money(b) + "</small>" : "") + (over ? '<small class="ov">over ' + money(v - b) + "</small>" : "") + "</span></div>"; }).join("") + "</div>";
 }
 function top3() {
   var L = rows("top3").slice().sort(function (a, b) { return (+a.rank || 9) - (+b.rank || 9); }).map(function (t) { return [item(t.item_id), t.reason]; }).filter(function (t) { return t[0] && open(t[0]); }).slice(0, 3);
@@ -242,6 +248,16 @@ function vToday(mac) {
 /* ---------- Apps ---------- */
 function icon(a, big) { return '<span class="ico" style="background:' + esc(a.colour || "#737373") + (big ? ";width:40px;height:40px;border-radius:11px;font-size:17px" : "") + '">' + esc((a.name || "?")[0]) + "</span>"; }
 function appTabs() { return '<div class="utabs" role="tablist" aria-label="Apps"><button type="button" data-app="all" class="' + (S.app === "all" ? "on" : "") + '">All</button>' + rows("apps").map(function (a) { return '<button type="button" data-app="' + esc(a.id) + '" class="' + (S.app === a.id ? "on" : "") + '"><span class="dot" style="background:' + esc(a.colour) + '"></span>' + esc(a.name) + "</button>"; }).join("") + "</div>"; }
+function url(x) { x = String(x || "").trim(); return /^https:\/\//.test(x) ? x : "https://" + x.replace(/^\/+/, ""); }
+/* site, App Store page (store column, once it's live) and App Store Connect */
+function appLinks(a) {
+  var L = [];
+  if (a.site) L.push([a.site, url(a.site)]);
+  if (a.store) L.push(["App Store page", url(a.store)]);
+  if (a.id !== "systems") L.push(["App Store Connect", "https://appstoreconnect.apple.com/apps"]);
+  if (!L.length) return "";
+  return '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 4px">' + L.map(function (l) { return '<a class="btn sm" href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + " " + ic("chev") + "</a>"; }).join("") + "</div>";
+}
 function appCard(a) {
   var tf = a.testflight === "1" || a.testflight === "yes";
   return '<button type="button" class="appc" data-app="' + esc(a.id) + '"><div class="ah">' + icon(a) + "<b>" + esc(a.name) + '</b><span class="badge">' + esc(a.stage) + '</span></div><div class="am"><div><span>' + (tf ? "Testers" : "Users") + "</span><b>" + n(a.users) + "</b></div><div><span>Downloads</span><b>" + n(a.downloads) + "</b></div><div><span>Paid</span><b>" + n(a.paid) + "</b></div><div><span>£ a month</span><b>" + money(a.revenue) + "</b></div></div>" +
@@ -275,7 +291,7 @@ function vApps() {
     return h + '<div class="kpis" style="padding-top:14px">' + kpi("Downloads", T.dl.toLocaleString("en-GB"), "all apps") + kpi("Paid", T.paid.toLocaleString("en-GB"), "") + kpi("£ a month", money(T.rev), "apps only") + "</div>" + sec("Your apps", "tap one for the detail") + '<div class="appgrid">' + A.map(appCard).join("") + "</div>" + sec("Where the numbers come from", "") + srcCard(srcList()) + '<div style="height:24px"></div>';
   }
   var a = appById(S.app), tf = a.testflight === "1" || a.testflight === "yes";
-  return h + '<div class="sec" style="padding-top:16px"><span style="display:flex;gap:12px;align-items:center">' + icon(a, 1) + '<span style="display:grid"><h3 style="font-size:18px">' + esc(a.name) + '</h3><span class="muted" style="font-size:12px">' + esc(a.site) + '</span></span></span><span class="badge">' + esc(a.stage) + "</span></div>" +
+  return h + '<div class="sec" style="padding-top:16px"><span style="display:flex;gap:12px;align-items:center">' + icon(a, 1) + '<span style="display:grid"><h3 style="font-size:18px">' + esc(a.name) + '</h3><span class="muted" style="font-size:12px">' + (a.site ? '<a href="' + esc(url(a.site)) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(a.site) + "</a>" : "") + '</span></span></span><span class="badge">' + esc(a.stage) + "</span></div>" + appLinks(a) +
     '<div class="kpis">' + kpi(tf ? "Testers" : "Users", n(a.users)) + kpi("Paid", n(a.paid)) + kpi("£ a month", money(a.revenue)) + "</div>" + scoreCard(a) + sec("Funnel", tf ? "testing" : "store to paid") + funnel(a) + (tf ? "" : chTable(a)) +
     sec("Blocker and next", "") + '<div class="card cardpad" style="overflow:hidden"><div class="rows"><div class="r">' + ic("alert") + "<span>" + esc(a.blocker || "–") + '</span></div><div class="r">' + ic("chev") + "<span>" + esc(a.next || "–") + "</span></div></div>" + plist("app:" + a.id, [a.prompt1, a.prompt2].filter(Boolean)) + "</div>" +
     sec("Feeds for " + esc(a.name), "") + srcCard(srcList(a.sources)) + '<div style="height:24px"></div>';

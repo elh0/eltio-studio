@@ -302,3 +302,16 @@ html.mac .sheet.long{width:440px;max-height:80vh}
 .src .ic,.src svg:last-child{flex:none;align-self:center;color:var(--faint)}
 a.btn{text-decoration:none;display:inline-flex;align-items:center}
 a.btn:not(.primary){color:inherit}
+
+/* spend by category */
+.cats{padding:4px 18px 10px}
+.cats .cap{padding:10px 0 4px;font-size:12px;color:var(--faint)}
+.cats .cat{display:grid;grid-template-columns:110px 1fr 128px;gap:12px;align-items:center;padding:7px 0;font-size:13px}
+.cats .w{display:grid;justify-items:end;line-height:1.2}
+.cats .w small{margin-left:0}
+.cats .bar2{height:6px;border-radius:99px;background:var(--raised);overflow:hidden}
+.cats .bar2 i{display:block;height:100%;background:var(--money);border-radius:99px}
+.cats .cat.over .bar2 i{background:var(--health)}
+.cats .w{font-variant-numeric:tabular-nums;text-align:right}
+.cats .w small{color:var(--faint);margin-left:4px}
+.cats .w .ov{color:var(--health)}

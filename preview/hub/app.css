@@ -315,3 +315,5 @@ a.btn:not(.primary){color:inherit}
 .cats .w{font-variant-numeric:tabular-nums;text-align:right}
 .cats .w small{color:var(--faint);margin-left:4px}
 .cats .w .ov{color:var(--health)}
+.cats .cat.tap{cursor:pointer;border-radius:8px}
+.cats .cat.tap:hover{background:var(--raised)}

@@ -223,13 +223,39 @@ function myMoney() {
   var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }); if (!P.length) return "";
   var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0 && k.key.indexOf("p_cat") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; }), C = P.filter(function (k) { return k.key.indexOf("p_cat") === 0; });
   return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") +
-    (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span></div>"; }).join("") + "</div>" : "") + catCard(C);
+    (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r tap" data-act="kx" data-k="' + esc(k.key) + '" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span>" + ic("chev") + "</div>"; }).join("") + "</div>" : "") + catCard(C);
 }
 /* p_cat rows: label = category, value = spent this month, sub = "of £400" (its budget) */
 function catCard(C) {
   if (!C.length) return "";
   return '<div class="card cardpad cats" style="margin-top:8px"><div class="cap">Spend by category this month</div>' + C.map(function (k) { var v = num(k.value) || 0, b = num(String(k.sub).replace(/^[^£\d]*/, "")), over = b && v > b;
-    return '<div class="cat' + (over ? " over" : "") + '"><span class="t">' + esc(k.label) + '</span><span class="bar2"><i style="width:' + (b ? Math.min(100, v / b * 100) : 0) + '%"></i></span><span class="w">' + esc(k.value) + (b ? '<small> of ' + money(b) + "</small>" : "") + (over ? '<small class="ov">over ' + money(v - b) + "</small>" : "") + "</span></div>"; }).join("") + "</div>";
+    return '<div class="cat tap' + (over ? " over" : "") + '" data-act="kx" data-k="' + esc(k.key) + '"><span class="t">' + esc(k.label) + '</span><span class="bar2"><i style="width:' + (b ? Math.min(100, v / b * 100) : 0) + '%"></i></span><span class="w">' + esc(k.value) + (b ? '<small> of ' + money(b) + "</small>" : "") + (over ? '<small class="ov">over ' + money(v - b) + "</small>" : "") + "</span></div>"; }).join("") + "</div>";
+}
+/* a category's pace: how much is left and whether spending is ahead of the month */
+function catPace(k) {
+  var v = num(k.value) || 0, b = num(String(k.sub).replace(/^[^£\d]*/, "")), now = new Date(), dim = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate(), togo = dim - now.getDate() + 1;
+  if (!b) return "Spent so far this month. No budget is set for this one.";
+  if (v > b) return "Over budget by " + money(v - b) + " with " + togo + " days of the month left. Anything more here comes out of another category.";
+  var ahead = v / b - now.getDate() / dim;
+  return money(b - v) + " left of " + money(b) + " with " + togo + " days to go, about " + money(Math.floor((b - v) / togo)) + " a day. " + (ahead > 0.1 ? "That's ahead of the month, so go easy." : ahead < -0.1 ? "Well under pace." : "Right on pace.");
+}
+/* after 4pm: what got done, moved, logged and slipped today, from the sheet */
+function dueDay(w) { w = String(w || ""); if (/^\d{4}-\d\d-\d\d/.test(w)) return di(w); var m = w.match(/\b(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i); if (!m) return null;
+  var d = new Date(NOW.getFullYear(), MON.map(function (x) { return x.toLowerCase(); }).indexOf(m[2].toLowerCase()), +m[1]); return Math.round((d - START) / 864e5); }
+function wasToday(t) { var d = new Date(t || 0); return !isNaN(d) && iso(d) === iso(new Date()); }
+function recap() {
+  if (new Date().getHours() < 16) return "";
+  var I = rows("items"), dn = I.filter(function (x) { return x.status === "done" && wasToday(x.updated); }), mv = I.filter(function (x) { return x.status === "later" && wasToday(x.updated); }),
+    sl = I.filter(function (x) { var d = dueDay(x.when); return open(x) && d !== null && d <= TODAY; }),
+    lg = rows("campaigns").filter(function (c) { return wasToday(c.logged); }).map(function (c) { return "Logged " + c.channel + ": " + c.title; })
+      .concat(rows("ideas").filter(function (z) { return wasToday(z.created); }).map(function (z) { return "Idea: " + z.text; }))
+      .concat(rows("timeline").filter(function (e) { return wasToday(e.edited); }).map(function (e) { return "Calendar: " + e.title; })),
+    w = rows("tree").filter(function (z) { return z.state === "working"; });
+  function r(a, t, st, id) { return '<div class="r' + (id ? ' tap" data-act="go" data-go="item:' + esc(id) + '"' : '"') + " " + av(a) + '><span class="dot"></span><span class="t">' + esc(t) + '</span><span class="w">' + st + "</span>" + (id ? ic("chev") : "") + "</div>"; }
+  var h = dn.map(function (x) { return r(x.area, x.title, "done"); }).join("") + mv.map(function (x) { return r(x.area, x.title, "moved to " + (di(x.later) !== null ? fmt(di(x.later)) : esc(x.later))); }).join("") +
+    lg.map(function (t) { return r("sw", t, "logged"); }).join("") + sl.map(function (x) { return r(x.area, x.title, "slipped", x.id); }).join("") +
+    (w.length ? r("sw", "Claude is on " + w.length + (w.length > 1 ? " things" : " thing") + ": " + w.slice(0, 3).map(function (z) { return z.title; }).join(", "), "Claude") : "");
+  return sec("Today so far", dn.length + " done · " + mv.length + " moved · " + sl.length + " slipped") + '<div class="card rows cardpad">' + (h || '<p class="empty-note">Nothing moved yet today.</p>') + "</div>";
 }
 function top3() {
   var L = rows("top3").slice().sort(function (a, b) { return (+a.rank || 9) - (+b.rank || 9); }).map(function (t) { return [item(t.item_id), t.reason]; }).filter(function (t) { return t[0] && open(t[0]); }).slice(0, 3);
@@ -246,7 +272,7 @@ function fresh() { var src = rows("sources"), live = src.filter(function (s) { r
 function vToday(mac) {
   var K = rows("kpis").filter(function (k) { return k.key.indexOf("p_") !== 0; }).slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Selling mode</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + recap() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }
@@ -376,7 +402,7 @@ function campSheet() {
 }
 /* "How this page works" for every tab: [heading, what it is and what tapping does] */
 var HELP = {
-  today: { tip: "", L: [["The date and the switch", "The switch is Selling mode. Friday is your marketing and sales day, so it turns on by itself on Fridays and puts the selling checklist at the top. Flip it any day you want a selling session. It never posts or sends anything."], ["The three numbers", "Money in since 6 Apr against the £150k goal, money owed to you, and app revenue a month. Tap Owed or App revenue to jump to the detail."], ["Top 3 today", "The three open jobs that earn the most per hour of your time. Tap one to open it."], ["Since yesterday", "What changed overnight, from the 06:52 scan."], ["Waiting on you", "Everything that needs you, one card at a time. Tap Done, or Later to pick a day it comes back. Your taps win over the morning scan. Copy a prompt to hand a job to the right project."], ["Your money", "Private to you. Traffic light, runway, spend, this month's bookings, bills coming out next and spend by category. Never balances or account numbers."], ["Next 7 days", "Tap any event to change its date or time, or remove it. Add an event at the bottom. Your edits win over the calendar scan."], ["Studio", "Each area and what's being worked on. Tap a line to go to it."]] },
+  today: { tip: "", L: [["The date and the switch", "The switch is Selling mode. Friday is your marketing and sales day, so it turns on by itself on Fridays and puts the selling checklist at the top. Flip it any day you want a selling session. It never posts or sends anything."], ["The three numbers", "Money in since 6 Apr against the £150k goal, money owed to you, and app revenue a month. Tap Owed or App revenue to jump to the detail."], ["Today so far", "Shows from 4pm. What you ticked off, moved to later or logged today, what's slipped past its date (tap to open it) and what Claude is still on."], ["Top 3 today", "The three open jobs that earn the most per hour of your time. Tap one to open it."], ["Since yesterday", "What changed overnight, checked every morning at 6:52."], ["Waiting on you", "Everything that needs you, one card at a time. Tap Done, or Later to pick a day it comes back. Your taps win over the morning scan. Copy a prompt to hand a job to the right project."], ["Your money", "Private to you. Traffic light, runway, spend, this month's bookings, bills coming out next and spend by category. Tap any tile, bill or category to see what it means and how much is left. Never balances or account numbers."], ["Next 7 days", "Tap any event to change its date or time, or remove it. Add an event at the bottom. Your edits win over the calendar scan."], ["Studio", "Each area and what's being worked on. Tap a line to go to it."]] },
   apps: { tip: "Tap an app for its numbers, links, blocker and next step.", L: [["Your apps", "One card per app: users, downloads, paid and its blocker. Tap a card for the detail."], ["App page", "Buttons for the website, App Store Connect and the store page once it's live. Then the scoreboard, funnel, by-channel numbers and the blocker."], ["Scoreboard", "Each app gets a target. Two one-change tests that miss it turn the app amber: one more try, or park it for fun app time."], ["Feeds", "Where the numbers come from. Tap one to see how to fix it."]] },
   mkt: { tip: "The quickest way to get numbers: make the campaign links for the planned posts, then add the App Store Connect key.", L: [["The three numbers", "Spend, store visits and cost a download, added up from every campaign row."], ["Channels", "Views per channel this month. They fill in as you log posts and add Friday numbers."], ["Campaigns", "One row per post or ad. Tap a row to change its status, add numbers or paste its campaign link. No link means downloads can't be traced to it, so each row says so until it has one."], ["Log a post or ad", "Tap it right after you post. App, channel, what it was, spend if it's an ad."], ["Feeds", "Where the numbers come from. Green is live, yellow needs a key, orange is logged by hand. Tap one to see how to fix it."], ["Friday", "Selling day. Send screenshots of TikTok, Instagram and Reddit stats and Claude fills the numbers in."]] },
   time: { tip: "", L: [["The chart", "Six weeks of shoots, holds, launches and money dates, colour by area. A dashed outline means a hold or an estimate. Tap a bar to change or remove it."], ["Coming up", "The next 14 days as a list. Tap to change, or add an event."], ["Fridays", "Shaded columns are selling days."]] },
@@ -395,8 +421,11 @@ var KX = {
 };
 function kxSheet() {
   var k = rows("kpis").filter(function (z) { return z.key === S.kx; })[0]; if (!k) return "";
-  var x = KX[S.kx] || ["", "", []];
-  return '<div class="scrim" data-act="closekx"></div><div class="sheet long" role="dialog" aria-label="' + esc(k.label) + '">' + shead(esc(k.label), "closekx") +
+  var x = KX[S.kx] || ["", "", []], title = k.label;
+  if (S.kx.indexOf("p_next") === 0) { var kn = KNOWN.filter(function (r) { return r[0].test(k.sub); })[0]; title = k.sub; k = { value: k.value, sub: "due " + k.label };
+    x = ["Scheduled to go out on that day. If it looks wrong or you want it moved, sort it in Monzo or with the payee.", "From the morning money brief (your Monzo scheduled payments and direct debits).", (kn ? [[kn[1], kn[2]]] : []).concat([["Money to-dos", "go:area:money"]])]; }
+  if (S.kx.indexOf("p_cat") === 0) x = [catPace(k), "From the morning money brief (your Monzo spending, by category). Budgets come from money.md.", [["Money to-dos", "go:area:money"]]];
+  return '<div class="scrim" data-act="closekx"></div><div class="sheet long" role="dialog" aria-label="' + esc(title) + '">' + shead(esc(title), "closekx") +
     '<div style="display:grid;gap:2px"><b style="font-size:28px;font-weight:600;letter-spacing:-.02em">' + esc(k.value) + '</b><span class="muted" style="font-size:13px">' + esc(k.sub) + "</span></div>" +
     (x[0] ? '<p style="font-size:13px;line-height:1.5">' + x[0] + "</p>" : "") + (x[1] ? '<p class="note">' + x[1] + "</p>" : "") + (S.kx === "year" ? chartCard() : "") +
     (x[2].length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + x[2].map(function (l, i) { return l[1].indexOf("go:") === 0 ? '<button type="button" class="btn sm' + (i ? "" : " primary") + '" data-act="kxgo" data-go="' + esc(l[1].slice(3)) + '">' + esc(l[0]) + "</button>" : '<a class="btn sm' + (i ? "" : " primary") + '" href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>"; }).join("") + "</div>" : "") + "</div>";
@@ -585,7 +614,7 @@ document.addEventListener("click", function (e) {
   if (a === "done") { var it = item(d.id); setCell("items", it, "updated", new Date().toISOString()); setCell("items", it, "status", "done"); toast("Done. It won't come back"); return render(); }
   if (a === "later") { S.sheet = d.id; S.pick = null; return render(); }
   if (a === "close") { S.sheet = null; return render(); }
-  if (a === "setlater") { if (!S.pick) return; var t = item(S.sheet), dt = new Date(NOW.getFullYear(), NOW.getMonth(), S.pick); setCell("items", t, "later", iso(dt)); setCell("items", t, "status", "later"); S.sheet = null; render(); return toast("Back on " + S.pick + " " + MON[NOW.getMonth()]); }
+  if (a === "setlater") { if (!S.pick) return; var t = item(S.sheet), dt = new Date(NOW.getFullYear(), NOW.getMonth(), S.pick); setCell("items", t, "updated", new Date().toISOString()); setCell("items", t, "later", iso(dt)); setCell("items", t, "status", "later"); S.sheet = null; render(); return toast("Back on " + S.pick + " " + MON[NOW.getMonth()]); }
   if (a === "fri") { S.fri = !S.fri; return render(); }
   if (a === "log") { S.log = true; return render(); }
   if (a === "src") { S.src = d.k; return render(); }

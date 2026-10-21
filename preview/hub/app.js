@@ -8,8 +8,8 @@ var TABS = {
   items: ["id", "area", "title", "why", "when", "cash", "prompt1", "prompt2", "status", "later", "updated"],
   top3: ["rank", "item_id", "reason"],
   since: ["date", "area", "text"],
-  timeline: ["area", "title", "start", "end", "kind"],
-  tree: ["area", "title", "state"],
+  timeline: ["area", "title", "start", "end", "kind", "edited"],
+  tree: ["area", "title", "state", "go"],
   apps: ["id", "name", "colour", "stage", "site", "testflight", "users", "downloads", "paid", "revenue", "step1", "step2", "step3", "step4", "value1", "value2", "value3", "value4", "blocker", "next", "target", "now", "tests", "flag", "note", "prompt1", "prompt2", "sources"],
   channels: ["app", "channel", "visits", "downloads", "paid", "spend"],
   campaigns: ["app", "channel", "title", "status", "when", "result", "spend", "posts", "views", "visits", "downloads", "link", "logged"],
@@ -115,13 +115,17 @@ function load() {
     D = {}; D._head = {};
     (r.valueRanges || []).forEach(function (vr, k) {
       var t = names[k], v = vr.values || [], h = v[0] || TABS[t]; D._head[t] = h;
+      /* a sheet made before a column was added gets the new header cells */
+      if (v.length && h.length < TABS[t].length && TABS[t].slice(0, h.length).join() === h.join()) { var add = TABS[t].slice(h.length); api(SHEETS + G.sheetId + "/values/" + encodeURIComponent(t + "!" + col(h.length) + "1") + "?valueInputOption=RAW", { method: "PUT", body: { values: [add] } }).catch(function () {}); h = D._head[t] = h.concat(add); }
       D[t] = v.slice(1).map(function (row, j) { var o = { _r: j + 2 }; h.forEach(function (f, c) { o[f] = row[c] == null ? "" : row[c]; }); return o; }).filter(function (o) { return h.some(function (f) { return o[f] !== ""; }); });
     });
   });
 }
 function setCell(t, o, f, v) {
-  o[f] = v; var c = (D._head[t] || TABS[t]).indexOf(f); if (c < 0) return Promise.resolve();
-  return api(SHEETS + G.sheetId + "/values/" + encodeURIComponent(t + "!" + col(c) + o._r) + "?valueInputOption=RAW", { method: "PUT", body: { values: [[v]] } }).catch(function (e) { toast("Didn't save: " + e.message); });
+  o[f] = v; var h = D._head[t] || TABS[t], c = h.indexOf(f), pre = Promise.resolve();
+  /* sheets made before a column was added get its header the first time it's written */
+  if (c < 0) { if (TABS[t].indexOf(f) < 0) return pre; c = h.length; h.push(f); D._head[t] = h; pre = api(SHEETS + G.sheetId + "/values/" + encodeURIComponent(t + "!" + col(c) + "1") + "?valueInputOption=RAW", { method: "PUT", body: { values: [[f]] } }); }
+  return pre.then(function () { return api(SHEETS + G.sheetId + "/values/" + encodeURIComponent(t + "!" + col(c) + o._r) + "?valueInputOption=RAW", { method: "PUT", body: { values: [[v]] } }); }).catch(function (e) { toast("Didn't save: " + e.message); });
 }
 function append(t, o) {
   var h = D._head[t] || TABS[t]; D[t] = D[t] || []; D[t].unshift(o);
@@ -131,6 +135,9 @@ function append(t, o) {
 }
 
 /* ---------- derived data ---------- */
+/* timeline rows Elliot removed in the app stay in the sheet as kind "gone" so the morning fill doesn't bring them back */
+function evs() { return rows("timeline").filter(function (e) { return e.kind !== "gone"; }); }
+function evAt(r) { return rows("timeline").filter(function (e) { return e._r === r; })[0]; }
 function open(x) { if (x.status === "done") return false; if (x.status === "later") { var d = di(x.later); return d !== null && d <= TODAY; } return true; }
 function items() { return rows("items").filter(open); }
 function list() { return items().filter(function (x) { return S.f === "all" || x.area === S.f; }); }
@@ -176,14 +183,14 @@ function waitBlock() {
 }
 function agenda(from, to) {
   var R = [];
-  rows("timeline").forEach(function (e) { var s = di(e.start), en = di(e.end);
-    if (s !== null && s >= from && s <= to && !(en !== null && s <= TODAY)) R.push([s, e.area, e.title + (en !== null ? " starts" : ""), e.kind]);
-    if (en !== null && en >= from && en <= to) R.push([en, e.area, e.title + " ends", e.kind]); });
+  evs().forEach(function (e) { var s = di(e.start), en = di(e.end);
+    if (s !== null && s >= from && s <= to && !(en !== null && s <= TODAY)) R.push([s, e.area, e.title + (en !== null ? " starts" : ""), e.kind, e._r]);
+    if (en !== null && en >= from && en <= to) R.push([en, e.area, e.title + " ends", e.kind, e._r]); });
   for (var i = from; i <= to; i++) if (dayAt(i).getDay() === 5) R.push([i, "sw", "Selling day: marketing and sales", "fri"]);
   R.sort(function (p, q) { return p[0] - q[0]; }); var last = -1;
   return '<div class="card rows cardpad">' + R.map(function (r) { var c = r[0] !== last ? '<div class="cap">' + (r[0] === TODAY ? "Today · " : "") + fmt(r[0]) + "</div>" : ""; last = r[0]; var soft = r[3] === "hold" || r[3] === "est";
-    return c + '<div class="r" ' + av(r[1]) + '><span class="dot"' + (soft ? ' style="background:none;border:1.5px solid var(--a)"' : "") + '></span><span class="t">' + esc(r[2]) + "</span>" + (r[3] === "hold" ? '<span class="w">hold</span>' : r[3] === "est" ? '<span class="w">estimate</span>' : "") + "</div>"; }).join("") +
-    '<div class="cap" style="font-size:11px">Gym Mon + Thu and climbing Sat are protected. Nothing gets booked over them.</div></div>';
+    return c + '<div class="r' + (r[4] ? ' tap" data-act="ev" data-r="' + r[4] + '"' : '"') + " " + av(r[1]) + '><span class="dot"' + (soft ? ' style="background:none;border:1.5px solid var(--a)"' : "") + '></span><span class="t">' + esc(r[2]) + "</span>" + (r[3] === "hold" ? '<span class="w">hold</span>' : r[3] === "est" ? '<span class="w">estimate</span>' : "") + (r[4] ? ic("chev") : "") + "</div>"; }).join("") +
+    '<button type="button" class="cap addev" data-act="addev">' + ic("plus") + 'Add an event</button><div class="cap" style="font-size:11px">Tap an event to change or remove it. Gym Mon + Thu and climbing Sat are protected. Nothing gets booked over them.</div></div>';
 }
 function chartCard() {
   var ys = new Date((meta("year_start") || "2026-09-01") + "T00:00:00"), target = num(meta("target")) || 150000, pace = num(meta("pace")) || target / 12;
@@ -200,7 +207,7 @@ function studio() {
   return '<div class="tree" style="padding:0 18px">' + ORDER.map(function (a) {
     var lv = rows("tree").filter(function (z) { return z.area === a; }), w = lv.filter(function (z) { return z.state === "working"; }).length, op = S.open === a;
     var q = rows("items").filter(function (x) { return x.area === a && open(x); }).map(function (x) { return '<button type="button" class="leaf" data-goto="' + esc(x.id) + '" ' + av(a) + '><span class="ring"></span>' + esc(x.title) + '<span class="st">waiting on you</span></button>'; }).join("");
-    var l = lv.map(function (z) { var k = z.state; return '<div class="leaf' + (k === "done" ? " done" : "") + '" ' + av(a) + ">" + (k === "working" ? '<span class="pulse"></span>' : '<span class="dot" style="opacity:' + (k === "done" ? ".4" : ".6") + '"></span>') + esc(z.title) + '<span class="st">' + (k === "working" ? "agent working" : k === "hold" ? "in progress" : esc(k)) + "</span></div>"; }).join("");
+    var l = lv.map(function (z) { var k = z.state; return '<div class="leaf' + (k === "done" ? " done" : "") + (z.go ? ' tap" data-act="go" data-go="' + esc(z.go) + '"' : '"') + " " + av(a) + ">" + (k === "working" ? '<span class="pulse"></span>' : '<span class="dot" style="opacity:' + (k === "done" ? ".4" : ".6") + '"></span>') + esc(z.title) + '<span class="st">' + (k === "working" ? "agent working" : k === "hold" ? "in progress" : esc(k)) + "</span>" + (z.go ? ic("chev") : "") + "</div>"; }).join("");
     return '<div class="card branch" ' + av(a) + '><button type="button" class="bh" data-br="' + a + '" aria-expanded="' + op + '"><b><span class="dot"></span>' + AREAS[a] + '</b><span style="display:flex;gap:6px;align-items:center">' + (w ? '<span class="badge"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--chart)"></span>' + w + " working</span>" : "") + (left(a) ? '<span class="badge area">' + left(a) + " on you</span>" : '<span class="badge">quiet</span>') + ic(op ? "down" : "chev") + "</span></button>" + (op ? '<div class="leaves">' + (q + l || '<p class="empty-note">Nothing here yet.</p>') + "</div>" : "") + "</div>";
   }).join("") + "</div>";
 }
@@ -219,7 +226,7 @@ function fresh() { var src = rows("sources"), live = src.filter(function (s) { r
 function vToday(mac) {
   var K = rows("kpis").slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Friday</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { var g = k.key === "apps" ? "tab:apps" : k.key === "owed" ? "area:money" : ""; return g ? kpi(k.label, k.value, k.sub).replace('class="card kpi"', 'class="card kpi tap" data-act="go" data-go="' + g + '"') : kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }
@@ -281,6 +288,14 @@ function vMkt() {
   h += sec("Campaigns", C.length + " planned or running", '<button type="button" class="btn sm" data-act="log">' + ic("plus") + "Log a post or ad</button>") + (C.length ? '<div class="card cardpad">' + C.map(campRow).join("") + "</div>" : none("Nothing logged yet. Tap Log a post or ad after you post."));
   return h + sec("Feeds", "") + srcCard(srcList("asc social yt plaus")) + '<div style="height:24px"></div>';
 }
+function evSheet() {
+  var e = S.ev === "new" ? { area: "dp", title: "", start: iso(NOW), end: "", kind: "" } : evAt(S.ev); if (!e) return "";
+  return '<div class="scrim" data-act="closeev"></div><div class="sheet" role="dialog" aria-label="Edit event"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-weight:600">' + (S.ev === "new" ? "Add an event" : "Change this event") + '</b><button type="button" class="btn ghost sm" data-act="closeev">Close</button></div>' +
+    '<label style="display:grid;gap:4px;font-size:12px;color:var(--muted)">What (add a time if it has one)<input class="in2" id="ev-t" value="' + esc(e.title) + '" placeholder="e.g. Leo Marcus call, 17:00"></label>' +
+    '<div class="frm"><label>Date<input class="in2" type="date" id="ev-s" value="' + esc(e.start) + '"></label><label>Ends (optional)<input class="in2" type="date" id="ev-e" value="' + esc(e.end) + '"></label>' +
+    '<label>Area<select class="sel2" id="ev-a">' + ORDER.map(function (a) { return '<option value="' + a + '"' + (a === e.area ? " selected" : "") + ">" + AREAS[a] + "</option>"; }).join("") + '</select></label><label>Status<select class="sel2" id="ev-k"><option value=""' + (e.kind === "hold" || e.kind === "est" ? "" : " selected") + '>Confirmed</option><option value="hold"' + (e.kind === "hold" ? " selected" : "") + '>Hold or to confirm</option><option value="est"' + (e.kind === "est" ? " selected" : "") + ">Estimate</option></select></label></div>" +
+    '<p class="note">Your change wins over the morning scan.</p><div style="display:flex;gap:8px"><button type="button" class="btn primary" data-act="saveev" style="flex:1">Save</button>' + (S.ev === "new" ? "" : '<button type="button" class="btn" data-act="delev">Remove</button>') + "</div></div>";
+}
 function logSheet() {
   var A = rows("apps");
   return '<div class="scrim" data-act="closelog"></div><div class="sheet" role="dialog" aria-label="Log a post or ad"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-weight:600">Log a post or ad</b><button type="button" class="btn ghost sm" data-act="closelog">Close</button></div>' +
@@ -292,14 +307,14 @@ function logSheet() {
 
 /* ---------- Timeline ---------- */
 function vTime(mac) {
-  var DW = mac ? 20 : 15, LW = mac ? 210 : 128, W = LW + 42 * DW, out = "", T = rows("timeline");
+  var DW = mac ? 20 : 15, LW = mac ? 210 : 128, W = LW + 42 * DW, out = "", T = evs();
   var wk = '<div class="wk" style="width:' + W + 'px"><span style="width:' + LW + 'px;border-left:0"></span>' + [0, 7, 14, 21, 28, 35].map(function (i) { var d = dayAt(i); return '<span style="width:' + (7 * DW) + 'px">' + d.getDate() + " " + MON[d.getMonth()] + "</span>"; }).join("") + "</div>";
   var fr = ""; for (var i = 0; i < 42; i++) if (dayAt(i).getDay() === 5) fr += '<span class="fri" style="left:' + (LW + i * DW) + "px;width:" + DW + 'px"></span>';
   ORDER.forEach(function (a) { T.filter(function (e) { return e.area === a; }).forEach(function (e) {
     var s = di(e.start), en = di(e.end); if (s === null || (en !== null ? en : s) < 0 || s > 41) return; s = Math.max(0, s); var x = LW + s * DW, soft = e.kind === "hold" || e.kind === "est";
     var bar = en !== null ? '<span class="gb" title="' + esc(e.title) + '" style="--a:var(--' + a + ");left:" + x + "px;width:" + ((Math.min(en, 41) - s + 1) * DW) + "px;" + (soft ? "border-style:dashed;background:transparent" : "") + '">' + ((Math.min(en, 41) - s + 1) * DW > 70 ? esc(e.title) : "") + "</span>"
       : '<span class="gb" title="' + esc(fmt(s) + ": " + e.title) + '" style="--a:var(--' + a + ");left:" + (x + DW / 2 - 6) + "px;width:12px;min-width:12px;height:12px;top:11px;padding:0;border-radius:3px;transform:rotate(45deg);" + (e.kind === "hold" ? "background:transparent" : "background:var(--a)") + '"></span>';
-    out += '<div class="lane" style="width:' + W + 'px"><span class="lab2" style="--a:var(--' + a + ");width:" + LW + 'px"><span class="dot"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(e.title) + "</span></span>" + bar + "</div>"; }); });
+    out += '<div class="lane tap" data-act="ev" data-r="' + e._r + '" style="width:' + W + 'px"><span class="lab2" style="--a:var(--' + a + ");width:" + LW + 'px"><span class="dot"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(e.title) + "</span></span>" + bar + "</div>"; }); });
   var g = out ? '<div class="card cardpad" style="overflow:hidden"><div class="gantt"><div class="gi" style="width:' + W + 'px">' + wk + '<div style="position:relative">' + fr + '<span class="now" style="left:' + (LW + TODAY * DW + DW / 2) + 'px"></span>' + out + "</div></div></div>" +
     '<div class="legend"><span><span class="sw2" style="background:var(--chart);opacity:.3"></span>Friday selling day</span><span><span class="sw2" style="background:var(--fg);width:2px;height:12px"></span>Today</span><span><span class="sw2" style="border:1px dashed var(--muted)"></span>Estimate or hold</span></div></div>' : none("Shoots, launches and money dates land here with the first scan.");
   return topbar() + head("Timeline", "Next 6 weeks. Shoots, launches, money dates.") + g + sec("Coming up", "next 14 days") + agenda(TODAY, TODAY + 13) + '<div style="height:24px"></div>';
@@ -371,7 +386,7 @@ function render() {
   if (mac) h = macView();
   else if (S.tab === "ask") h = '<div class="view">' + vAsk() + tabbar() + "</div>";
   else h = '<div class="view"><div class="main">' + body(false) + "</div>" + tabbar() + "</div>";
-  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.fb) h += fbSheet();
+  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet();
   $("scr").innerHTML = h; bindSwipe();
   var m2 = document.querySelector(".main,.center"); if (m2 && S.keep) m2.scrollTop = y; S.keep = false;
   var c = document.querySelector(".chat"); if (c && S.chat.length) { var m = c.closest(".main"); if (m) m.scrollTop = m.scrollHeight; }
@@ -392,6 +407,15 @@ function boot(silent) {
   return getToken(silent).then(function () { $("scr").innerHTML = '<div class="gate"><p class="muted">Loading your hub…</p></div>'; return findSheet(); })
     .then(function (id) { G.sheetId = id; return load(); }).then(function () { render(); })
     .catch(function (e) { if (e && e.message === "signed out") return; flag("hub-sheet-id", null); gate(e && e.message ? (/^Sign-in/.test(e.message) ? e.message : "Couldn't open your hub: " + e.message) : ""); });
+}
+/* tree "go": app:<id>, tab:<name>, item:<id>, area:<code> or an https link */
+function goTo(g) {
+  g = String(g || ""); var k = g.indexOf(":"), t = g.slice(0, k), v = g.slice(k + 1);
+  if (/^https:\/\//.test(g)) { window.open(g, "_blank", "noopener"); return; }
+  if (t === "app") { S.app = v; return go("apps"); }
+  if (t === "tab") { if (v === "apps") S.app = null; return go(v); }
+  if (t === "item") { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(v)); return go("today"); }
+  if (t === "area") { S.f = v; S.i = 0; return go("today"); }
 }
 function reload() { return load().then(function () { S.keep = true; render(); toast("Up to date"); }).catch(function (e) { toast(e.message); }); }
 
@@ -420,6 +444,16 @@ document.addEventListener("click", function (e) {
   if (a === "log") { S.log = true; return render(); }
   if (a === "closelog") { S.log = false; return render(); }
   if (a === "savelog") { var sp = $("lg-sp").value.replace(/[£\s]/g, ""); append("campaigns", { app: $("lg-app").value, channel: $("lg-ch").value, title: ($("lg-t").value.trim() || $("lg-k").value), status: $("lg-k").value === "Ad" ? "Ad live" : "Posted", when: iso(new Date()), spend: sp, link: $("lg-url").value.trim(), logged: new Date().toISOString() }); S.log = false; render(); return toast("Logged. Numbers get added Friday"); }
+  if (a === "ev") { S.ev = +d.r; return render(); }
+  if (a === "addev") { S.ev = "new"; return render(); }
+  if (a === "closeev") { S.ev = null; return render(); }
+  if (a === "saveev") { var et = $("ev-t").value.trim(), es = $("ev-s").value, ee = $("ev-e").value; if (!et || !es) return toast("Add what it is and a date");
+    if (ee && ee < es) return toast("The end date is before the start");
+    var nv = { area: $("ev-a").value, title: et, start: es, end: ee, kind: $("ev-k").value, edited: new Date().toISOString() };
+    if (S.ev === "new") append("timeline", nv); else { var ev = evAt(S.ev); Object.keys(nv).forEach(function (f) { if (ev[f] !== nv[f]) setCell("timeline", ev, f, nv[f]); }); }
+    S.ev = null; render(); return toast("Saved"); }
+  if (a === "delev") { var ev2 = evAt(S.ev); setCell("timeline", ev2, "edited", new Date().toISOString()); setCell("timeline", ev2, "kind", "gone"); S.ev = null; render(); return toast("Removed"); }
+  if (a === "go") return goTo(d.go);
   if (a === "fb") { S.fb = true; return render(); }
   if (a === "closefb") { S.fb = false; return render(); }
   if (a === "savefb") { var tx = $("fb-in").value.trim(); if (!tx) return toast("Type something first"); append("feedback", { time: new Date().toISOString(), text: tx }); S.fb = false; render(); return toast("Thanks. It's in the feedback list"); }
@@ -432,7 +466,7 @@ document.addEventListener("click", function (e) {
 });
 document.addEventListener("keydown", function (e) {
   if (/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)) { if (e.key === "Enter" && !e.shiftKey && e.target.id === "ask-in") { e.preventDefault(); ask(e.target.value); } return; }
-  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
+  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
 });
 var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { S.keep = true; render(); }, 150); });
 document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && D && G.token && Date.now() < G.exp) load().then(function () { S.keep = true; render(); }).catch(function () {}); });

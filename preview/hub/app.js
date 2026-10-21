@@ -70,14 +70,7 @@ function fmt(i) { var d = dayAt(i); return DOW[d.getDay()] + " " + d.getDate() +
 function iso(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
 
 /* ---------- Google sign-in (token model; the token lives in memory only) ---------- */
-var REDIRECT_AUTH = /iPhone|iPad|iPod/.test(navigator.userAgent) && (navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
-function loadGis() {
-  return new Promise(function (ok, bad) {
-    if (window.google && google.accounts && google.accounts.oauth2) return ok();
-    var s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true; s.onload = function () { ok(); }; s.onerror = function () { bad(new Error("Couldn't reach Google sign-in.")); };
-    document.head.appendChild(s);
-  });
-}
+/* Full-page redirect on every device: no pop-up for Chrome or Safari to block, and it works inside the home-screen app. */
 function tokenFromHash() {
   var h = location.hash || ""; if (h.indexOf("access_token=") < 0 && h.indexOf("error=") < 0) return false;
   var q = {}; h.slice(1).split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
@@ -88,22 +81,9 @@ function tokenFromHash() {
 }
 function getToken(silent) {
   if (G.token && Date.now() < G.exp) return Promise.resolve();
-  if (REDIRECT_AUTH) {
-    location.assign("https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=mission-control&client_id=" + encodeURIComponent(CFG.googleClientId) +
+  location.assign("https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=mission-control&client_id=" + encodeURIComponent(CFG.googleClientId) +
       "&redirect_uri=" + encodeURIComponent(location.origin + location.pathname) + "&scope=" + encodeURIComponent(SCOPE) + "&prompt=" + (silent ? "none" : "select_account"));
-    return new Promise(function () {});
-  }
-  /* Safari and Chrome only allow the pop-up straight from the tap, so Google's script is loaded early (see gate) and the request below runs synchronously. */
-  var ask = function () {
-    return new Promise(function (ok, bad) {
-      if (!G.client) G.client = google.accounts.oauth2.initTokenClient({ client_id: CFG.googleClientId, scope: SCOPE, callback: function () {} });
-      G.client.callback = function (r) { if (r.error) return bad(new Error(r.error)); G.token = r.access_token; G.exp = Date.now() + (r.expires_in - 60) * 1000; flag("hub-signed-in", "1"); ok(); };
-      G.client.error_callback = function (e) { var t = e && e.type; bad(new Error(t === "popup_failed_to_open" ? "Your browser blocked Google's sign-in window. Allow pop-ups for this page, then tap Continue again." : t === "popup_closed" ? "Sign-in window closed. Tap Continue to try again." : t || "Sign-in cancelled")); };
-      G.client.requestAccessToken({ prompt: silent ? "" : "select_account" });
-    });
-  };
-  if (window.google && google.accounts && google.accounts.oauth2) return ask();
-  return loadGis().then(function () { throw new Error("Google sign-in is ready now. Tap Continue again."); });
+  return new Promise(function () {});
 }
 function api(url, opt) {
   opt = opt || {};
@@ -406,13 +386,12 @@ function go(tab) { S.tab = tab; render(); var m = document.querySelector(".main,
 function ask(g) { g = (g || "").trim(); if (!g) return toast("Type a rough goal first"); S.chat.push({ me: 1, t: g }); S.chat.push({ g: g, area: guessArea(g) }); render(); }
 
 function gate(msg) {
-  if (!REDIRECT_AUTH) loadGis().catch(function () {});
   $("scr").innerHTML = '<div class="gate"><div class="box"><span class="logo">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { return "<i" + (i === 0 || i === 4 || i === 8 ? ' class="on"' : "") + "></i>"; }).join("") + "</span><h1>Mission control</h1><p class=\"muted\">" + esc(msg || "Sign in with the Google account that holds your hub sheet.") + '</p><button type="button" class="btn primary" data-act="signin">Continue with Google</button><p class="note">Your data stays in one sheet in your own Drive.</p></div></div>';
 }
 function boot(silent) {
   return getToken(silent).then(function () { $("scr").innerHTML = '<div class="gate"><p class="muted">Loading your hub…</p></div>'; return findSheet(); })
     .then(function (id) { G.sheetId = id; return load(); }).then(function () { render(); })
-    .catch(function (e) { if (e && e.message === "signed out") return; flag("hub-sheet-id", null); gate(e && e.message ? (/^(Google sign-in is ready|Your browser|Sign-in window)/.test(e.message) ? e.message : "Couldn't open your hub: " + e.message) : ""); });
+    .catch(function (e) { if (e && e.message === "signed out") return; flag("hub-sheet-id", null); gate(e && e.message ? (/^Sign-in/.test(e.message) ? e.message : "Couldn't open your hub: " + e.message) : ""); });
 }
 function reload() { return load().then(function () { S.keep = true; render(); toast("Up to date"); }).catch(function (e) { toast(e.message); }); }
 
@@ -460,5 +439,5 @@ document.addEventListener("visibilitychange", function () { if (document.visibil
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
 
 if (tokenFromHash()) boot(true);
-else if (REDIRECT_AUTH && flag("hub-signed-in") && !G.authErr) boot(true);
+else if (flag("hub-signed-in") && !G.authErr) boot(true);
 else gate(flag("hub-signed-in") ? "Tap to open your hub." : "");

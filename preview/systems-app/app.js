@@ -79,7 +79,24 @@ function sample() {
 }
 
 function demoLoad() { try { var s = JSON.parse(localStorage.getItem(DEMO_KEY) || "null"); if (s && s.settings) { s.days = s.days || []; return s; } } catch (e) {} return sample(); }
-function demoSave() { try { localStorage.setItem(DEMO_KEY, JSON.stringify(D)); } catch (e) {} }
+function demoSave() {
+  if (mode === "google") { extrasSave(); return; }
+  try { localStorage.setItem(DEMO_KEY, JSON.stringify(D)); } catch (e) {}
+}
+/* Signed in: the bits that aren't sheet rows (your own pages, pinned and hidden tools, rows added to job pages) ride along in Settings as one JSON value. */
+var extrasTimer = null;
+function extrasSave() {
+  clearTimeout(extrasTimer);
+  extrasTimer = setTimeout(function () {
+    if (mode !== "google" || !G.sheetId) return;
+    var x = JSON.stringify({ custom: D.custom || [], layout: D.layout || { hide: [], pin: [] }, made: D.made || {} });
+    if (D.settings.extras === x) return;
+    change("Settings", function (st) { st.extras = x; }).catch(function () {});
+  }, 800);
+}
+function extrasLoad() {
+  try { var x = JSON.parse(D.settings.extras || "null"); if (x) { D.custom = x.custom || []; D.layout = x.layout || { hide: [], pin: [] }; D.made = x.made || {}; } } catch (e) {}
+}
 
 /* Google sign-in (Google Identity Services, token model). The token lives in memory only. */
 function loadGis() {
@@ -89,7 +106,28 @@ function loadGis() {
     document.head.appendChild(s);
   });
 }
+/* On an iPhone home-screen app Google's pop-up opens in Safari and never comes back, so we send the whole page to Google and read the token off the address when it returns. */
+var REDIRECT_AUTH = /iPhone|iPad|iPod/.test(navigator.userAgent) && (navigator.standalone === true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
+function redirectUri() { return location.origin + location.pathname; }
+function tokenFromHash() {
+  var h = location.hash || "";
+  if (h.indexOf("access_token=") < 0 && h.indexOf("error=") < 0) return false;
+  var q = {}; h.slice(1).split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
+  try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+  if (q.state !== "eltio-systems") return false;
+  if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
+  try { localStorage.removeItem("eltio-systems-signed-in"); } catch (e) {}
+  return false;
+}
+function redirectToGoogle(silent) {
+  var u = "https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=eltio-systems" +
+    "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(SCOPE) + "&prompt=" + (silent ? "none" : "select_account");
+  location.assign(u);
+  return new Promise(function () {}); /* the page is leaving */
+}
 function getToken(silent) {
+  if (G.token && Date.now() < G.exp) return Promise.resolve();
+  if (REDIRECT_AUTH && CFG.googleClientId) return redirectToGoogle(silent);
   return loadGis().then(function () {
     return new Promise(function (ok, bad) {
       if (!G.client) G.client = google.accounts.oauth2.initTokenClient({ client_id: CFG.googleClientId, scope: SCOPE, callback: function () {} });
@@ -1562,7 +1600,7 @@ function startGoogle(silent) {
     return api("https://www.googleapis.com/oauth2/v3/userinfo").then(function (u) { G.email = u.email || ""; }).catch(function () {});
   }).then(findSheet).then(function (id) {
     mode = "google";
-    if (id) { G.sheetId = id; return ensureTabs().then(readAll).then(function (d) { D = d; }); }
+    if (id) { G.sheetId = id; return ensureTabs().then(readAll).then(function (d) { D = d; extrasLoad(); }); }
     D = { bookings: [], invoices: [], expenses: [], days: [], settings: { name: "", rate: "", terms: "30", tax: "25", mileage: "45", mail: "Gmail", hasAgent: "No", invoicePrefix: "INV" } };
   }).then(render);
 }
@@ -1690,7 +1728,11 @@ var asJob = (location.search.match(/[?&]as=([a-z]+)/) || [])[1];
 /* Same job already saved on this device: keep its pages and sidebar rather than starting again. */
 var kept = asJob && (function () { var s = demoLoad(); return s && s.settings && s.settings.job === asJob && s.settings.name ? s : null; })();
 if (kept) { mode = "demo"; D = kept; render(); } else if (!(asJob && startJob(asJob))) render();
-/* Returning user on this device: try a silent sign-in. If Google needs a tap, the welcome screen stays. */
-try { if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in")) startGoogle(true).catch(function () {}); } catch (e) {}
+/* Back from Google's sign-in page (home-screen iPhones): the token is on the address. Otherwise a returning user on this device gets a silent sign-in; if Google needs a tap, the welcome screen stays. */
+try {
+  var backFromGoogle = CFG.googleClientId && tokenFromHash();
+  if (backFromGoogle) startGoogle(true).catch(function (er) { banner("Sign-in didn't finish: " + (er.message || er)); });
+  else if (CFG.googleClientId && localStorage.getItem("eltio-systems-signed-in") && !asJob) startGoogle(true).catch(function () {});
+} catch (e) {}
 setInterval(function () { document.querySelectorAll(".callin").forEach(function (e) { e.textContent = callIn(); }); }, 30000);
 })();

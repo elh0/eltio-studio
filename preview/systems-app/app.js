@@ -43,7 +43,7 @@ var CFG = window.ELTIO_CONFIG || {};
 var SCOPE = "https://www.googleapis.com/auth/drive.file openid email profile";
 /* Read-only Gmail, asked for only when someone taps Scan. */
 var GMAIL = "https://www.googleapis.com/auth/gmail.readonly";
-function scopeNow() { return SCOPE + (G.wantGmail ? " " + GMAIL : ""); }
+function scopeNow() { return SCOPE + (G.wantGmail ? " " + GMAIL : "") + (G.wantCal ? " " + CAL : ""); }
 var NO_GMAIL = "Google didn't let Systems read your email. Tap Scan again and tick the Gmail box on Google's screen.";
 var G = { token: null, exp: 0, client: null, sheetId: null, email: "" };
 var mode = null; /* "google" | "demo" */
@@ -93,13 +93,13 @@ function extrasSave() {
   clearTimeout(extrasTimer);
   extrasTimer = setTimeout(function () {
     if (mode !== "google" || !G.sheetId) return;
-    var x = JSON.stringify({ custom: D.custom || [], layout: D.layout || { hide: [], pin: [] }, made: D.made || {} });
+    var x = JSON.stringify({ custom: D.custom || [], layout: D.layout || { hide: [], pin: [] }, made: D.made || {}, pj: D.pj && D.pj.real ? D.pj : null, pjPast: D.pjPast || [] });
     if (D.settings.extras === x) return;
     change("Settings", function (st) { st.extras = x; }).catch(function () {});
   }, 800);
 }
 function extrasLoad() {
-  try { var x = JSON.parse(D.settings.extras || "null"); if (x) { D.custom = x.custom || []; D.layout = x.layout || { hide: [], pin: [] }; D.made = x.made || {}; } } catch (e) {}
+  try { var x = JSON.parse(D.settings.extras || "null"); if (x) { D.custom = x.custom || []; D.layout = x.layout || { hide: [], pin: [] }; D.made = x.made || {}; D.pj = x.pj || null; D.pjPast = x.pjPast || []; } } catch (e) {}
 }
 
 /* Google sign-in (Google Identity Services, token model). The token lives in memory only. */
@@ -121,14 +121,14 @@ function tokenFromHash() {
   if (q.state !== "eltio-systems") return false;
   if (q.access_token && (q.scope || "").indexOf("drive.file") < 0) { banner("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box."); G.needDrive = true; return false; }
   if (q.access_token && flag("sy-scan-pending") && (q.scope || "").indexOf("gmail") < 0) { try { localStorage.removeItem("sy-scan-pending"); } catch (e) {} SCAN.err = NO_GMAIL; }
-  if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; G.gmail = (q.scope || "").indexOf("gmail") >= 0; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
+  if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; G.gmail = (q.scope || "").indexOf("gmail") >= 0; G.cal = (q.scope || "").indexOf("calendar") >= 0; if (flag("sy-cal-pending") && !G.cal) OB.err = NO_CAL; try { localStorage.removeItem("sy-cal-pending"); } catch (e) {} try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
   try { localStorage.removeItem("eltio-systems-signed-in"); } catch (e) {}
   return false;
 }
 function redirectToGoogle(silent) {
   var u = "https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=eltio-systems" +
     "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(scopeNow()) + "&prompt=" + (silent ? "none" : (G.needDrive ? "consent" : "select_account")) + (G.email ? "&login_hint=" + encodeURIComponent(G.email) : "");
-  if (G.wantGmail) flag("sy-scan-pending", "1");
+  if (G.wantGmail) flag("sy-scan-pending", "1"); if (G.wantCal) flag("sy-cal-pending", "1");
   location.assign(u);
   return new Promise(function () {}); /* the page is leaving */
 }
@@ -142,8 +142,10 @@ function getToken(silent) {
         if (r.error) return bad(new Error(r.error));
         /* Google lets people untick the Drive box on its consent screen. Without it there's nowhere to keep the sheet. */
         if (google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, "https://www.googleapis.com/auth/drive.file")) { G.needDrive = true; return bad(new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen.")); }
-        if (G.wantGmail && google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, GMAIL)) return bad(new Error(NO_GMAIL));
-        if (G.wantGmail) G.gmail = true;
+        var has = function (x) { return google.accounts.oauth2.hasGrantedAllScopes ? google.accounts.oauth2.hasGrantedAllScopes(r, x) : (r.scope || "").indexOf(x) >= 0; };
+        if (G.wantGmail && !has(GMAIL)) return bad(new Error(NO_GMAIL));
+        if (G.wantCal && !has(CAL)) return bad(new Error(NO_CAL));
+        G.gmail = has(GMAIL); G.cal = has(CAL);
         G.needDrive = false; G.token = r.access_token; G.exp = Date.now() + (r.expires_in - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} ok(); };
       G.client.error_callback = function (e) { bad(new Error(e && e.type || "sign-in cancelled")); };
       G.client.requestAccessToken({ scope: scopeNow(), prompt: silent ? "" : (G.needDrive ? "consent" : G.wantGmail ? "" : "select_account"), hint: G.email || undefined });
@@ -656,7 +658,7 @@ function onboard(asSheet) {
   }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
   return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero and your calendar, match your bank</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode === "google") return scanHero() + helpLine(); if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
+function dashTop() { if (mode === "google") return obNudge() + rescanLine() + (isProd() ? (D.pj ? pjCard() + (D.pj.wrap ? signCard() : "") : pjNewCard()) : ""); if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -706,7 +708,7 @@ function pjSample() {
     rights: [{ id: "r1", what: "Talent usage, online, UK", ends: iso(addDays(t, 27)) }, { id: "r2", what: "Music licence, social cutdowns", ends: iso(addDays(t, 85)) }, { id: "r3", what: "Drone footage, all media", ends: "" }]
   };
 }
-function pj() { if (!D.pj) D.pj = pjSample(); return D.pj; }
+function pj() { if (!D.pj) D.pj = mode === "demo" ? pjSample() : pjFrom({}); return D.pj; }
 function pjSave() { demoSave(); }
 function crewRate(c) { return cardRate(cardOf(pj().terms === "Bectu" ? "TV drama" : "APA"), c.grade) || 0; }
 function pjTerms() { return pj().terms === "Bectu" ? "TV drama" : "APA"; }
@@ -716,6 +718,7 @@ function ics(name, ev) {
   var f = function (d) { return iso(d).replace(/-/g, ""); };
   saveFile(name + ".ics", "text/calendar", "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Eltio Systems//EN\r\n" + ev.map(function (e) { return "BEGIN:VEVENT\r\nUID:" + uid() + "@eltio.systems\r\nDTSTAMP:" + f(today()) + "T000000Z\r\nDTSTART;VALUE=DATE:" + f(e[0]) + "\r\nDTEND;VALUE=DATE:" + f(addDays(e[0], 1)) + "\r\nSUMMARY:" + e[1].replace(/[,;]/g, " ") + "\r\nEND:VEVENT\r\n"; }).join("") + "END:VCALENDAR\r\n");
 }
+function slug(t) { return String(t || "job").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "job"; }
 function copyText(t) { try { navigator.clipboard.writeText(t); } catch (e) {} }
 
 /* The job, step by step, on the producer's home. */
@@ -726,7 +729,7 @@ function pjCard() {
     ["award", "Award", P.award ? "Advance " + money(P.award.adv) + " drafted" : "Forward the award email", P.award ? "ok" : "amb", "The advance and balance invoices drafted, with the dates in your calendar."],
     ["crew", "Crew and start packs", P.crew.length + " booked · " + (missing ? missing + " packs missing" : "all packs in"), missing ? "amb" : "ok", "Grades and rates from the " + P.terms + " card. Missing bank, UTR or right to work chased in one email."],
     ["permits", "Permits", due ? due + " to apply for this week" : "On track", due ? "amb" : "ok", "Each council's lead time, counted back from the shoot."],
-    ["cs", "Call sheet", "V" + P.cs.length + " · one link", "", "Every version kept, what changed lit up, sent by WhatsApp or email."],
+    ["cs", "Call sheet", "V" + P.cs.length + (P.real ? "" : " · one link"), "", "Every version kept, what changed lit up, sent by WhatsApp or email."],
     ["wrap", "On the day", P.wrap ? "Wrapped " + P.wrap.at : P.ask ? "Ask sent, run to " + P.ask.to : "Tap wrap once for everyone", P.wrap ? "ok" : "", "Every crew member's overtime at their own grade, from one wrap time."],
     ["sign", "Sign-off", P.wrap ? (w ? w + " waiting" : "All signed off") : "After wrap", P.wrap && w ? "amb" : P.wrap ? "ok" : "", "Timesheet and invoice approved together, in your order."],
     ["run", "Pay run", P.run ? "Paid " + nice(P.run.paid) : P.wrap ? "Ready to check" : "After sign-off", P.run ? "ok" : P.wrap ? "amb" : "", "Every crew invoice checked against the timesheet. The odd one out gets a polite query."],
@@ -747,7 +750,7 @@ function awardSheet() {
     '<div class="row static"><span>Balance <span class="q">· due ' + nice(P.award.balDue) + (extrasOk() ? ", with " + money(extrasOk()) + " of approved extras" : "") + '</span></span><span class="tag">' + money(P.award.bal + extrasOk()) + "</span></div></div>" +
     '<div class="acts"><button class="btn solid" data-pjinv="adv">See the advance</button><button class="btn" data-pjinv="bal">See the balance</button><button class="btn" data-pjmail="award">Draft the email to accounts</button><button class="btn" data-pjics="award">Add dates to calendar</button></div>' +
     '<p class="q">Drafts only. You send the email, and the invoices go into your accounts app as drafts once it\'s linked.</p><button class="lnk" data-pjreset="award">Start the award again</button>';
-  return '<div class="top"><span class="q">Award</span><span class="q">Forward it, or paste it here</span></div><h2>The award email.</h2><div class="field"><label for="aw-mail">The email from the agency</label><textarea id="aw-mail" rows="8">' + esc(AWARD_MAIL) + '</textarea></div><div class="acts"><button class="btn solid wide" data-pjread>Read the award</button></div><p class="q">In the pilot you forward it to your job\'s own address. Here, paste any award email and it picks out the budget, the split and the terms.</p>';
+  return '<div class="top"><span class="q">Award</span><span class="q">Forward it, or paste it here</span></div><h2>The award email.</h2><div class="field"><label for="aw-mail">The email from the agency</label><textarea id="aw-mail" rows="8">' + esc(P.real ? "" : AWARD_MAIL) + '</textarea></div><div class="acts"><button class="btn solid wide" data-pjread>Read the award</button></div><p class="q">In the pilot you forward it to your job\'s own address. Here, paste any award email and it picks out the budget, the split and the terms.</p>';
 }
 function readAward() {
   var P = pj(), t = val("aw-mail"), m = /£\s?([\d,]+(?:\.\d+)?)(k)?/i.exec(t), sp = /(\d{2})\s?%/.exec(t), pd = /balance\s+(\d{1,3})\s+days/i.exec(t) || /(\d{1,3})\s+days/i.exec(t), ac = /[\w.+-]+@[\w-]+\.[\w.]+/.exec(t), po = /PO[\s:#-]*([A-Z0-9-]{3,})/i.exec(t);
@@ -801,7 +804,7 @@ function callSheet(vi) {
   return '<div class="top"><span class="q">' + esc(P.name) + " · " + esc(dayLabel(P.shoot)) + '</span><span class="tag' + (ch ? " amb" : "") + '">V' + V.v + (ch ? " · " + ch + " changed" : "") + "</span></div><h2>Tomorrow's call sheet.</h2>" +
     '<div class="pills">' + P.cs.map(function (x, k) { return '<button type="button" class="pill" data-csv="' + k + '" aria-pressed="' + (k === i) + '">V' + x.v + "</button>"; }).join("") + "</div>" +
     '<div class="sum ot">' + CSF.map(function (k) { var was = prev && prev.f[k] !== V.f[k] ? prev.f[k] : ""; return '<div><span class="q">' + k + "</span><span>" + (was ? '<s class="q">' + esc(was) + "</s> " : "") + '<span' + (was ? ' class="late"' : "") + ">" + esc(V.f[k]) + "</span></span></div>"; }).join("") + "</div>" +
-    '<p class="q">V' + V.v + " posted by the " + esc(V.by.toLowerCase()) + ". " + (P.cs.length > 1 ? "Every version is kept. " : "") + "Opened by 29 of 32 crew.</p>" +
+    '<p class="q">V' + V.v + " posted by the " + esc(V.by.toLowerCase()) + ". " + (P.cs.length > 1 ? "Every version is kept. " : "") + (P.real ? "" : "Opened by 29 of 32 crew.") + "</p>" +
     (p ? '<div class="acts"><button class="btn solid" data-pjv4>Make V' + (P.cs.length + 1) + '</button><button class="btn" data-pjsend="wa">Send by WhatsApp</button><button class="btn" data-pjsend="mail">Send by email</button><button class="btn" data-editlink>Share an edit link</button></div>' : '<div class="acts"><button class="btn solid wide" data-close>Got it</button></div>');
 }
 function csForm() {
@@ -820,7 +823,7 @@ function wrapSheet() {
   return '<div class="top"><span class="q">' + esc(P.name) + " · day 1 · " + esc(P.terms) + ' terms</span><span class="q">' + P.crew.length + ' crew</span></div><h2>The unit, on one clock.</h2>' +
     '<div class="grid2">' + field("u-call", "Unit call", u.call, "time") + field("u-wrap", "Scheduled wrap", u.wrap, "time") + "</div>" +
     '<div class="part">Ask to run on</div><div class="grid2">' + field("u-to", "Run to", P.ask ? P.ask.to : hm(tm(u.wrap) + 60), "time") + '<div class="field"><span class="lab">What it costs</span><b id="u-cost" class="big">' + pounds(askCost(P.ask ? P.ask.to : hm(tm(u.wrap) + 60))) + "</b></div></div>" +
-    (P.ask ? '<div class="rows"><div class="row static"><span>' + (P.crew.length - 2) + " in, 2 want a word</span><span class=\"tag amb\">" + esc(P.ask.to) + '</span><span class="sub">Kit Morgan and Ade Cole asked to talk to the producer.</span></div></div><div class="acts"><button class="btn" data-pjtalk>Message the two</button></div>' : '<div class="acts"><button class="btn" data-pjask>Send the ask to all ' + P.crew.length + "</button></div>") +
+    (P.ask && !P.real ? '<div class="rows"><div class="row static"><span>' + (P.crew.length - 2) + " in, 2 want a word</span><span class=\"tag amb\">" + esc(P.ask.to) + '</span><span class="sub">Kit Morgan and Ade Cole asked to talk to the producer.</span></div></div><div class="acts"><button class="btn" data-pjtalk>Message the two</button></div>' : '<div class="acts"><button class="btn" data-pjask>Send the ask to all ' + P.crew.length + "</button></div>") +
     '<div class="part">Wrap</div>' + field("u-at", "Unit wrap", P.ask ? P.ask.to : u.wrap, "time") + '<div class="acts"><button class="btn solid wide" data-pjwrap>Tap wrap for everyone</button></div><p class="q">Each person\'s overtime is worked out at their own grade on the ' + esc(P.terms) + " card. Anyone released early or called early can be changed after.</p>";
 }
 function askCost(to) { var P = pj(); return P.crew.reduce(function (a, c) { return a + crewDay(c, to).total - crewDay(c).total; }, 0); }
@@ -829,7 +832,7 @@ function askCost(to) { var P = pj(); return P.crew.reduce(function (a, c) { retu
 function chainOf(c) { var g = c.grade, d = /AC|DIT|Camera/.test(g) ? "Camera HoD" : /Spark|Gaffer|Best boy/.test(g) ? "Gaffer" : /grip/i.test(g) ? "Key grip" : "PM"; return d === "PM" ? ["PM"] : [d, "PM"]; }
 function signRows() {
   var P = D.pj;
-  if (!P || !P.wrap) return SIGN;
+  if (!P || !P.wrap) return P && P.real ? [] : SIGN;
   return P.crew.map(function (c) { var s = P.sign[c.id] || (P.sign[c.id] = { st: "", step: 0, note: "" }), r = crewDay(c, P.wrap.at); return { id: c.id, who: c.n, role: c.grade, days: "Day 1, wrap " + P.wrap.at, amt: Math.round(r.total * 100) / 100, h: c.h, pay: c.pay, chain: chainOf(c), st: s.st, step: s.step, note: s.note, email: c.email }; });
 }
 function signCard() {
@@ -848,7 +851,7 @@ function backSheet(id) { var x = signRows().find(function (r) { return r.id === 
 /* Pay run: every crew invoice read and checked against its signed timesheet. */
 function runRows() {
   var P = pj();
-  return P.crew.map(function (c, i) { var r = crewDay(c, P.wrap.at), t = Math.round(r.total * 100) / 100, claim = i === 3 ? t + 26.25 : t; return { c: c, t: t, claim: claim, paye: c.pay === "PAYE", ok: Math.abs(claim - t) < 0.5 }; });
+  return P.crew.map(function (c, i) { var r = crewDay(c, P.wrap.at), t = Math.round(r.total * 100) / 100, claim = i === 3 && !P.real ? t + 26.25 : t; return { c: c, t: t, claim: claim, paye: c.pay === "PAYE", ok: Math.abs(claim - t) < 0.5 }; });
 }
 function runSheet() {
   var P = pj();
@@ -865,8 +868,8 @@ function payFile() { var rows = [["Name", "Sort code", "Account", "Amount", "Ref
 function extrasSheet() {
   var P = pj();
   return '<div class="top"><span class="q">Extras · ' + esc(P.client) + '</span><span class="q">' + money(extrasOk()) + ' approved</span></div><h2>The client says yes in one tap.</h2><div class="rows">' + P.extras.map(function (x) {
-    return '<div class="row static"><span>' + esc(x.what) + '</span><span class="tag' + (x.st === "ok" ? " ok" : x.st === "no" ? "" : x.st === "sent" ? " amb" : " ink") + '">' + pounds(x.amt) + " · " + (x.st === "ok" ? "approved" : x.st === "no" ? "declined" : x.st === "sent" ? "waiting" : "draft") + '</span><span class="sub">' + (x.st === "sent" ? '<button class="lnk" data-pjagency="' + x.id + '">See what ' + esc(P.client) + ' sees</button> · <button class="lnk" data-pjcopy="' + x.id + '">Copy their link</button>' : x.st === "" ? '<button class="lnk" data-pjsendx="' + x.id + '">Send to ' + esc(P.client) + "</button>" : x.st === "ok" ? "On the balance invoice" : "Not on the invoice") + "</span></div>";
-  }).join("") + '</div><div class="part">Cost a new one</div><div class="grid2">' + field("ex-what", "What it is", "", "text", "e.g. A second location, half day") + field("ex-amt", "Cost (£)", "", "number", "", ' inputmode="decimal"') + '</div><div class="acts"><button class="btn solid" data-pjaddx>Add it</button></div><p class="q">The agency opens one link, no login, and taps Approve. It\'s logged against the budget and added to the balance invoice.</p>';
+    return '<div class="row static"><span>' + esc(x.what) + '</span><span class="tag' + (x.st === "ok" ? " ok" : x.st === "no" ? "" : x.st === "sent" ? " amb" : " ink") + '">' + pounds(x.amt) + " · " + (x.st === "ok" ? "approved" : x.st === "no" ? "declined" : x.st === "sent" ? "waiting" : "draft") + '</span><span class="sub">' + (x.st === "sent" ? (P.real ? '<button class="lnk" data-pjapprove="' + x.id + '">They said yes</button> · <button class="lnk" data-pjdecline="' + x.id + '">They said no</button>' : '<button class="lnk" data-pjagency="' + x.id + '">See what ' + esc(P.client) + ' sees</button> · <button class="lnk" data-pjcopy="' + x.id + '">Copy their link</button>') : x.st === "" ? '<button class="lnk" data-pjsendx="' + x.id + '">Send to ' + esc(P.client) + "</button>" : x.st === "ok" ? "On the balance invoice" : "Not on the invoice") + "</span></div>";
+  }).join("") + '</div><div class="part">Cost a new one</div><div class="grid2">' + field("ex-what", "What it is", "", "text", "e.g. A second location, half day") + field("ex-amt", "Cost (£)", "", "number", "", ' inputmode="decimal"') + '</div><div class="acts"><button class="btn solid" data-pjaddx>Add it</button></div><p class="q">' + (P.real ? "The ask is drafted to their accounts email. When they say yes, mark it and it goes on the balance invoice." : "The agency opens one link, no login, and taps Approve. It\'s logged against the budget and added to the balance invoice.") + '</p>';
 }
 function agencySheet(id) {
   var P = pj(), x = P.extras.find(function (e) { return e.id === id; });
@@ -886,13 +889,13 @@ var PJ_SHEETS = { award: awardSheet, crew: crewSheet, permits: permitSheet, cs: 
 
 /* Producer clicks. Returns true when it handled the tap. */
 function pjClick(b) {
-  var d = b.dataset, P = mode === "demo" && isProd() ? pj() : null; if (!P) return false;
+  var d = b.dataset, P = isProd() && (mode === "demo" || D.pj) ? pj() : null; if (!P) return false;
   if (d.pj) { openSheet(PJ_SHEETS[d.pj]()); return true; }
   if (b.hasAttribute("data-pjread")) { readAward(); return true; }
   if (d.pjinv) { pjInvoice(d.pjinv); return true; }
   if (d.pjmail === "award") { compose(P.accounts, P.name + ": advance invoice", "Hi,\n\nThanks for the award. Attached is our invoice for the " + P.split + "% advance on " + P.name + ", " + money(P.award.adv) + " plus VAT" + (P.po ? ", PO " + P.po : "") + ", due " + nice(P.award.advDue) + ".\n\nThe balance follows on delivery." + sign()); return true; }
-  if (d.pjics === "award") { ics("canal-promo-dates", [[parse(P.award.advDue), P.name + ": advance due"], [parse(P.shoot), P.name + ": shoot day 1"], [parse(P.award.balDue), P.name + ": balance due"]]); banner("Calendar file saved. Open it to add the three dates."); return true; }
-  if (d.pjics === "permits") { ics("canal-promo-permits", permitList().map(function (p) { return [p.by, "Apply: " + p.n]; })); banner("Calendar file saved with " + permitList().length + " deadlines."); return true; }
+  if (d.pjics === "award") { ics(slug(P.name) + "-dates", [[parse(P.award.advDue), P.name + ": advance due"], [parse(P.shoot), P.name + ": shoot day 1"], [parse(P.award.balDue), P.name + ": balance due"]]); banner("Calendar file saved. Open it to add the three dates."); return true; }
+  if (d.pjics === "permits") { ics(slug(P.name) + "-permits", permitList().map(function (p) { return [p.by, "Apply: " + p.n]; })); banner("Calendar file saved with " + permitList().length + " deadlines."); return true; }
   if (d.pjreset) { P[d.pjreset] = null; if (d.pjreset === "wrap") { P.sign = {}; P.run = null; P.ask = null; } pjSave(); openSheet(PJ_SHEETS[d.pjreset]()); render(); return true; }
   if (d.pjpermit) { var i = P.permits.indexOf(d.pjpermit); if (i >= 0) P.permits.splice(i, 1); else P.permits.push(d.pjpermit); var nd = val("pm-date"); if (nd) P.pshoot = nd; pjSave(); openSheet(permitSheet()); render(); return true; }
   if (b.hasAttribute("data-pjchase")) { chaseStartPacks(); banner("Drafted to everyone with something missing. Nothing sends until you tap send."); return true; }
@@ -902,7 +905,7 @@ function pjClick(b) {
   if (b.hasAttribute("data-pjpost")) { var L = P.cs[P.cs.length - 1].f, f = {}; CSF.forEach(function (k, i) { f[k] = val("cs-" + i) || L[k]; }); P.cs.push({ v: P.cs.length + 1, by: "Producer", f: f }); pjSave(); openSheet(callSheet()); render(); banner("V" + P.cs.length + " posted. Everyone's link now shows it, with what changed lit up."); return true; }
   if (d.pjsend === "wa") { window.open("https://wa.me/?text=" + encodeURIComponent(csText()), "_blank", "noopener"); return true; }
   if (d.pjsend === "mail") { compose(P.crew.map(function (c) { return c.email; }).join(","), P.name + ": call sheet V" + P.cs.length, csText() + sign()); return true; }
-  if (b.hasAttribute("data-pjask")) { P.unit.call = val("u-call") || P.unit.call; P.unit.wrap = val("u-wrap") || P.unit.wrap; P.ask = { to: val("u-to") || hm(tm(P.unit.wrap) + 60) }; pjSave(); openSheet(wrapSheet()); render(); banner("Sent to all " + P.crew.length + " at once. " + (P.crew.length - 2) + " said yes."); return true; }
+  if (b.hasAttribute("data-pjask")) { P.unit.call = val("u-call") || P.unit.call; P.unit.wrap = val("u-wrap") || P.unit.wrap; P.ask = { to: val("u-to") || hm(tm(P.unit.wrap) + 60) }; pjSave(); openSheet(wrapSheet()); render(); if (P.real) { window.open("https://wa.me/?text=" + encodeURIComponent(P.name + ": can we run to " + P.ask.to + "? Overtime is paid at your grade on " + P.terms + " terms. Reply yes or come and find me."), "_blank", "noopener"); banner("The ask is drafted in WhatsApp for the crew group."); } else banner("Sent to all " + P.crew.length + " at once. " + (P.crew.length - 2) + " said yes."); return true; }
   if (b.hasAttribute("data-pjtalk")) { compose("kit@crew.example,ade@crew.example", P.name + ": running on", "Hi both,\n\nYou asked for a word about running to " + P.ask.to + ". Can you grab me by the monitor in five?" + sign()); return true; }
   if (b.hasAttribute("data-pjwrap")) { P.unit.call = val("u-call") || P.unit.call; P.unit.wrap = val("u-wrap") || P.unit.wrap; var at = val("u-at") || P.unit.wrap; P.wrap = { at: at }; P.sign = {}; P.run = null; pjSave(); openSheet(wrapSheet()); render(); banner("Wrapped at " + at + ". " + P.crew.length + " timesheets drafted, each at their own grade."); return true; }
   if (d.signstep) { var s1 = signItem(d.signstep); s1.step = (s1.step || 0) + 1; pjSave(); render(); if ($("sheet").classList.contains("on")) openSheet(signSheet()); return true; }
@@ -914,7 +917,7 @@ function pjClick(b) {
   if (b.hasAttribute("data-pjrun")) { P.run = { paid: iso(nextFri()) }; pjSave(); payFile(); openSheet(runSheet()); render(); banner("Run approved. The payment file is saved for your bank's bulk payments."); return true; }
   if (b.hasAttribute("data-pjpayfile")) { payFile(); return true; }
   if (b.hasAttribute("data-pjaddx")) { var w2 = val("ex-what"), a2 = num(val("ex-amt")); if (!w2 || !a2) { banner("Add what it is and what it costs."); return true; } P.extras.push({ id: "x" + uid().slice(-4), what: w2, amt: a2, st: "" }); pjSave(); openSheet(extrasSheet()); render(); return true; }
-  if (d.pjsendx) { P.extras.find(function (x) { return x.id === d.pjsendx; }).st = "sent"; pjSave(); openSheet(extrasSheet()); render(); banner("Sent to " + P.client + ". They get one link, no login."); return true; }
+  if (d.pjsendx) { var xx = P.extras.find(function (x) { return x.id === d.pjsendx; }); xx.st = "sent"; pjSave(); openSheet(extrasSheet()); render(); if (P.real) { compose(P.accounts, P.name + ": an extra to approve", "Hi,\n\nOne extra on " + P.name + " to approve: " + xx.what + ", " + pounds(xx.amt) + " plus VAT. If you're happy, reply yes and it goes on the balance invoice." + sign()); banner("Drafted to " + (P.accounts || P.client) + ". Mark it approved when they say yes."); } else banner("Sent to " + P.client + ". They get one link, no login."); return true; }
   if (d.pjcopy) { copyText("https://eltio.systems/a/" + d.pjcopy); banner("Their link is copied."); return true; }
   if (d.pjagency) { openSheet(agencySheet(d.pjagency)); return true; }
   if (d.pjapprove || d.pjdecline) { var ex = P.extras.find(function (x) { return x.id === (d.pjapprove || d.pjdecline); }); ex.st = d.pjapprove ? "ok" : "no"; pjSave(); openSheet(extrasSheet()); render(); banner(d.pjapprove ? P.client + " approved it. " + money(ex.amt) + " is on the balance invoice." : P.client + " said not this time. Nothing is invoiced."); return true; }
@@ -1014,12 +1017,12 @@ function home() {
   var od = overdue().reduce(function (a, v) { return a + num(v.amount); }, 0), holds = up.filter(isHold).length, conf = up.filter(function (b) { return b.status === "Confirmed"; }).length;
   var tile = function (lab, v, sub, cls) { return '<div class="tile' + (cls ? " " + cls : "") + '"><span class="part">' + lab + "</span><b>" + v + "</b><span class=\"q\">" + sub + "</span></div>"; };
   return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? "" : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
-    dashTop() +
+    quickAdd() + dashTop() +
     '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
     '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
     shareCards() + jobPart() +
     '<div class="two"><div class="stack"><div class="part">Needs you' + (L.length ? " · " + L.length : "") + '</div><div class="rows needs">' + (mode === "demo" && job() && !isProd() ? '<button class="row" data-confirmed><span><i class="gd" style="margin-right:10px"></i>Car commercial hours, confirmed by production</span><span class="tag ok">Confirmed</span></button>' : "") + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span><i class="' + (x.amb ? "rd" : "od") + '"></i>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div>" + starter() + "</div>" +
-    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(upRow).join("") : '<p class="empty">Nothing booked yet.</p>') + "</div></div></div>";
+    '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(upRow).join("") : emptyNext("Nothing booked yet.", "Add your next job", "data-addbooking")) + "</div></div></div>";
 }
 function upRow(b) { var d = parse(b.start); return '<button class="row up" data-booking="' + b.id + '"><span class="dt"><b>' + (d ? d.getDate() : "") + "</b>" + (d ? MON[d.getMonth()] : "") + '</span><span class="up-t">' + esc(b.production || "Booking") + '<span class="q">' + esc(b.client) + (b.end && b.end !== b.start ? ", to " + nice(b.end) : "") + '</span></span><span class="tag' + (b.status === "Confirmed" ? " ok" : "") + '">' + esc(b.status) + "</span></button>"; }
 /* First steps: sample data gets things to try, a real account gets its setup checklist. */
@@ -1032,7 +1035,7 @@ function starter() {
     { t: "Open a timesheet with overtime", sub: "A two-day car commercial on APA terms, worked out line by line.", a: 'data-timesheet="b6"' },
     { t: "Ask a hold to confirm", sub: "One tap drafts the nudge to the production.", a: 'data-todo="hold" data-id="b2"' }
   ];
-  if (roleKey() === "Producer") steps.unshift({ t: "See all 26 things Systems runs", sub: "Advance invoices, permits, rights, deliverables and the books.", a: "data-features" });
+  if (mode === "demo" && roleKey() === "Producer") steps.unshift({ t: "See all 26 things Systems runs", sub: "Advance invoices, permits, rights, deliverables and the books.", a: "data-features" });
   if (mode === "demo" && roleKey() === "Producer") steps.unshift({ t: "Check a crew member's day", sub: "Their call, wrap and rate in, what APA says they're owed out.", a: "data-check" });
   if (mode !== "demo") {
     var cb = D.bookings.find(function (b) { return b.status === "Confirmed"; });
@@ -1040,6 +1043,13 @@ function starter() {
       { t: "Add your next job or hold", sub: "Holds get a nudge before the date.", a: "data-addbooking", done: D.bookings.length > 0 },
       { t: "Log a day's hours", sub: "Call and wrap in, overtime out, on APA or Bectu terms.", a: cb ? 'data-timesheet="' + cb.id + '"' : "data-addbooking", done: D.days.length > 0 },
       { t: "Add an invoice you're waiting on", sub: "We'll tell you when it's late and draft the chase.", a: "data-addinvoice", done: D.invoices.length > 0 },
+      { t: "Put it on your home screen", sub: "So it opens like an app on your phone.", a: "data-howphone", done: !!flag("eltio-systems-phone") || matchMedia("(display-mode: standalone)").matches }
+    ];
+    if (isProd()) steps = [
+      { t: "Add the job you're on", sub: "The award, shoot days and who pays.", a: "data-pjnew", done: !!D.pj },
+      { t: "Add your crew", sub: "Paste the list in. Grades and rates come from the APA or Bectu card.", a: D.pj ? 'data-pj="crew"' : "data-pjnew", done: !!(D.pj && D.pj.crew.length) },
+      { t: "Draft the advance invoice", sub: "Paste the award email and the advance and balance are worked out.", a: D.pj ? 'data-pj="award"' : "data-pjnew", done: !!(D.pj && D.pj.award) },
+      { t: "Connect your calendar and bank", sub: "So payments and shoot days match up.", a: 'data-obstart="1"', done: D.settings.onb === "2" && (D.settings.cal === "1" || !!D.settings.scanned) },
       { t: "Put it on your home screen", sub: "So it opens like an app on your phone.", a: "data-howphone", done: !!flag("eltio-systems-phone") || matchMedia("(display-mode: standalone)").matches }
     ];
     if (steps.every(function (x) { return x.done; })) return "";
@@ -1054,7 +1064,7 @@ function bookings() {
   var t = today(), A = D.bookings.slice().sort(function (a, b) { return a.start < b.start ? -1 : 1; });
   var up = A.filter(function (b) { var d = parse(b.end || b.start); return b.status !== "Cancelled" && d && d >= t; });
   var past = A.filter(function (b) { var d = parse(b.end || b.start); return !(b.status !== "Cancelled" && d && d >= t); }).reverse();
-  var grp = function (name, L) { return '<div class="stack"><div class="part">' + name + '</div><div class="rows">' + (L.length ? L.map(bookingRow).join("") : '<p class="empty">None.</p>') + "</div></div>"; };
+  var grp = function (name, L) { return '<div class="stack"><div class="part">' + name + '</div><div class="rows">' + (L.length ? L.map(bookingRow).join("") : name === "Past" ? '<p class="empty">None.</p>' : emptyNext("None yet.", name === "Confirmed" ? "Add a job" : "Add a hold", "data-addbooking")) + "</div></div>"; };
   return '<div class="top"><span>Bookings</span><button class="lnk" data-addbooking>Add</button></div><h2>Your diary.</h2>' +
     '<div class="two"><div class="stack">' + grp("Confirmed", up.filter(function (b) { return b.status === "Confirmed"; })) + grp("Holds and pencils", up.filter(isHold)) + "</div>" + grp("Past", past.slice(0, 12)) + "</div>";
 }
@@ -1065,7 +1075,7 @@ function moneyScr() {
   return '<div class="top"><span>Money</span><span class="db-l"><button class="lnk" data-addreceipt>Add a receipt</button><button class="lnk" data-addinvoice>New invoice</button><button class="lnk" data-link="csv">Match bank</button></span></div><h2>What you\'re owed.</h2>' +
     '<div class="part">Last 12 months</div>' + barChart(false) +
     '<div class="kpis"><div class="kpi"><b>' + money(owed()) + '</b><span class="q">Owed, ' + open.length + " invoice" + (open.length === 1 ? "" : "s") + '</span></div><div class="kpi' + (od ? " amb" : "") + '"><b>' + money(od) + '</b><span class="q">Overdue</span></div></div>' +
-    '<div class="two"><div class="stack"><div class="part">Unpaid</div><div class="rows">' + (open.length ? open.map(invoiceRow).join("") : '<p class="empty">Nothing outstanding.</p>') + '</div><div class="part">Paid</div><div class="rows">' + (paid.length ? paid.slice(0, 10).map(invoiceRow).join("") : '<p class="empty">None yet.</p>') + "</div></div>" +
+    '<div class="two"><div class="stack"><div class="part">Unpaid</div><div class="rows">' + (open.length ? open.map(invoiceRow).join("") : D.invoices.length ? '<p class="empty">Nothing outstanding.</p>' : emptyNext("No invoices yet.", "Add one you're waiting on", "data-addinvoice") + emptyNext("Paid before?", "Match payments from a bank CSV", 'data-link="csv"')) + '</div><div class="part">Paid</div><div class="rows">' + (paid.length ? paid.slice(0, 10).map(invoiceRow).join("") : '<p class="empty">None yet.</p>') + "</div></div>" +
     '<div class="stack"><div class="part">How fast they pay</div>' + slowPayers() + '<div class="part">Tax and VAT</div><div class="sum"><div><span class="q">Paid since 6 April</span><span>' + money(paidThisYear()) + '</span></div><div><span class="q">Put aside (' + esc(s.tax || 25) + '%)</span><span>' + money(paidThisYear() * num(s.tax || 25) / 100) + '</span></div><div><span class="q">Invoiced, last 12 months</span><span>' + money(r12) + ' of £90,000</span></div></div><div class="bar"><i style="width:' + Math.min(100, r12 / 900) + '%"></i></div><p class="q">£90,000 in 12 months is the VAT line. This is a guide, not tax advice.</p></div></div>';
 }
 function more() {
@@ -1552,10 +1562,10 @@ function customClick(b) {
   return false;
 }
 function tools() { return shaped((mode === "google" ? TOOLS_REAL : (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools())).concat(customTools()).concat(TOOLS_HELP)); }
-function tool(k0) { return (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools()).find(function (t) { return t.k === k0; }); }
+function tool(k0) { return (mode === "google" ? TOOLS_REAL : (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools())).concat(customTools()).concat(TOOLS_HELP).find(function (t) { return t.k === k0; }); }
 function toolView() {
   var t = tool(S.tab); if (!t) { S.tab = "home"; return home(); }
-  return '<div class="hd"><div class="hd-l"><span class="part">' + esc(t.g) + "</span><h1>" + esc(t.n) + '.</h1></div><span class="tag">Preview</span></div><div class="tool">' + t.fn() + "</div>";
+  return '<div class="hd"><div class="hd-l"><span class="part">' + esc(t.g) + "</span><h1>" + esc(t.n) + '.</h1></div>' + (mode === "google" ? "" : '<span class="tag">Preview</span>') + '</div><div class="tool">' + t.fn() + "</div>";
 }
 function sideTools() {
   var gs = []; tools().forEach(function (t) { if (gs.indexOf(t.g) < 0) gs.push(t.g); });
@@ -1602,7 +1612,7 @@ function demoBar() { return '<div class="demobar"><span class="part">Sample data
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
-  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : SCAN.stage ? scanScreen() : !ready ? (mode === "google" && !G.sheetId && !flag("sy-scan-seen") ? scanScreen() : setup()) : (VIEWS[S.tab] || toolView)());
+  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : SCAN.stage ? scanScreen() : OB.active && mode === "google" ? obScreen() : !ready ? setup() : tipFor(S.tab) + (VIEWS[S.tab] || toolView)());
   if (ready && mode === "demo" && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
   $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + sideTools() + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
@@ -1655,7 +1665,7 @@ function amountIn(t) { var m = String(t).match(/£\s?([\d,]+(?:\.\d{2})?)/); ret
 function invNo(t) { var m = String(t).match(/\b(INV[-\s#]?[\w-]*\d[\w-]*|#\s?\d{2,})/i); return m ? m[1].replace(/\s/g, "") : ""; }
 function jobName(subj, who) {
   var s = String(subj).replace(/^\s*((re|fwd?|fw|aw)\s*:\s*)+/i, "");
-  s = s.replace(/\b(call ?sheets?|callsheet|invoice|inv[-#]?\s?\d+|remittance( advice)?|payment (advice|sent|confirmation)|has been paid|timesheets?|time sheets?|timecard|start (pack|form)|crew form|purchase order|po (number|#)\s*\w*|hold|pencil(led)?|avails?|availability|are you free|booking|booked|confirmed|confirmation|v\d+|version \d+|attached|please|thanks)\b/gi, " ");
+  s = s.replace(/\b(call ?sheets?|callsheet|invoice|inv[-#]?\s?\d+|remittance( advice)?|payment (advice|sent|confirmation)|has been paid|timesheets?|time sheets?|timecard|start (pack|form)|crew form|purchase order|po (number|#)\s*\w*|hold|pencil(led)?|avails?|availability|are you free|booking|booked|confirmed|confirmation|v\d+|version \d+|attached|please|thanks|shoot|shooting|shoot day|recce|prep|pre-?light|wrap|tech scout|ppm)\b/gi, " ");
   s = s.replace(new RegExp("\\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\\b|\\b\\d{1,2}(st|nd|rd|th)?\\b|\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\b|\\d{1,2}[\\/.]\\d{1,2}([\\/.]\\d{2,4})?", "gi"), " ");
   s = s.replace(/[|:\-–—_()\[\]#,!.?]+/g, " ").replace(/\s+/g, " ").trim();
   s = s.replace(/^((for|on|re|the|of|about|your|our|a|an|and|to|send|please)\s+)+/i, "").replace(/(\s+(day|days|for|on|the|and|to|of|at|by|from|in))+$/i, "").trim();
@@ -1667,23 +1677,33 @@ function pool(items, n, fn) {
   var i = 0, out = []; var next = function () { if (i >= items.length) return Promise.resolve(); var k = i++; return fn(items[k]).then(function (r) { out[k] = r; }, function () {}).then(next); };
   var runners = []; for (var j = 0; j < Math.min(n, items.length); j++) runners.push(next()); return Promise.all(runners).then(function () { return out; });
 }
-function runScan() {
-  SCAN.stage = "run"; SCAN.err = ""; SCAN.steps = SCAN_Q.map(function (q) { return { n: q.n, c: 0, st: "" }; }); S.tab = "home"; render();
-  var seen = {}, mails = [];
-  var go = SCAN_Q.reduce(function (p, q, i) {
-    return p.then(function () {
-      SCAN.steps[i].st = "on"; render();
-      return gm("messages?maxResults=40&q=" + encodeURIComponent(q.q + " newer_than:" + q.days + "d -in:chats -category:promotions -category:social")).then(function (r) {
+function runScan(o) {
+  o = o || {};
+  var useMail = o.mail !== false, useCal = !!o.cal, bank = o.bank || [];
+  SCAN.stage = "run"; SCAN.err = ""; SCAN.steps = [];
+  if (useCal) SCAN.steps.push({ n: "Your calendar", c: 0, st: "", u: ["event", "events"], cal: 1 });
+  if (useMail) SCAN_Q.forEach(function (q) { SCAN.steps.push({ n: q.n, c: 0, st: "", u: ["email", "emails"], q: q }); });
+  if (bank.length) SCAN.steps.push({ n: "Bank statements", c: 0, st: "", u: ["payment", "payments"], bank: 1 });
+  SCAN.steps.push({ n: "Matching it all up", c: 0, st: "", u: ["", ""], fin: 1 });
+  S.tab = "home"; render(); window.scrollTo(0, 0);
+  var seen = {}, mails = [], cal = [], go = Promise.resolve();
+  SCAN.steps.forEach(function (x) {
+    go = go.then(function () {
+      x.st = "on"; render();
+      if (x.cal) return wantScope("cal").then(calRead).then(function (items) { cal = items; x.c = items.length; x.st = "ok"; });
+      if (x.q) return wantScope("gmail").then(function () { return gm("messages?maxResults=40&q=" + encodeURIComponent(x.q.q + " newer_than:" + x.q.days + "d -in:chats -category:promotions -category:social")); }).then(function (r) {
         var ids = (r.messages || []).filter(function (m) { if (seen[m.id]) return false; seen[m.id] = 1; return true; });
         return pool(ids, 6, function (m) { return gm("messages/" + m.id + "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Date&fields=id,threadId,labelIds,snippet,internalDate,payload/headers"); })
-          .then(function (full) { full.filter(Boolean).forEach(function (m) { m.k = q.k; mails.push(m); }); SCAN.steps[i].c = full.filter(Boolean).length; SCAN.steps[i].st = "ok"; render(); });
+          .then(function (full) { full.filter(Boolean).forEach(function (m) { m.k = x.q.k; mails.push(m); }); x.c = full.filter(Boolean).length; x.st = "ok"; });
       });
+      if (x.bank) { x.c = bank.length; x.st = "ok"; return null; }
+      if (x.fin) { SCAN.found = sortAll(mails, cal, bank); x.st = "ok"; }
     });
-  }, gmailReady());
-  return go.then(function () { SCAN.found = sortMail(mails); SCAN.stage = "review"; flag("sy-scan-seen", "1"); render(); })
-    .catch(function (e) { SCAN.stage = "intro"; SCAN.err = e && e.message || String(e); render(); });
+  });
+  return go.then(function () { SCAN.stage = "review"; flag("sy-scan-seen", "1"); render(); window.scrollTo(0, 0); })
+    .catch(function (e) { var msg = e && e.message || String(e); if (OB.active) { SCAN.stage = ""; OB.err = msg; OB.step = 1; obSave(); } else { SCAN.stage = "intro"; SCAN.err = msg; } render(); });
 }
-function gmailReady() { if (G.gmail) return Promise.resolve(); G.wantGmail = true; G.token = null; return getToken(false).then(function () { G.wantGmail = false; }, function (e) { G.wantGmail = false; throw e; }); }
+function gmailReady() { return wantScope("gmail"); }
 /* Turn the emails into bookings, invoices and things to do. Rough on purpose: every row is shown to the person before anything is added. */
 function sortMail(mails) {
   var t = today(), B = {}, I = {}, P = [], T = [], mail = [];
@@ -1716,7 +1736,7 @@ function sortMail(mails) {
   Object.keys(I).forEach(function (k) { var v = I[k], p = P.find(function (x) { return (x.no && v.number && x.no.toLowerCase() === v.number.toLowerCase()) || (x.who === v.client && x.at >= v.issued && (!x.amt || !v.amount || x.amt === v.amount)); }); if (p) v.paid = p.at; });
   var bk = Object.keys(B).map(function (k) { return B[k]; }).sort(function (a, b) { return (a.start || "9") < (b.start || "9") ? -1 : 1; });
   var have = function (r) { return D.bookings.some(function (x) { return x.production.toLowerCase() === r.production.toLowerCase() && x.start === r.start; }); };
-  return { bookings: bk.filter(function (r) { return !have(r); }), invoices: Object.keys(I).map(function (k) { return I[k]; }).filter(function (v) { return !D.invoices.some(function (x) { return v.number && x.number === v.number; }); }), todos: T, mail: mail.sort(function (a, b) { return a.at < b.at ? 1 : -1; }).slice(0, 120), mails: mails.length };
+  return { bookings: bk.filter(function (r) { return !have(r); }), invoices: Object.keys(I).map(function (k) { return I[k]; }).filter(function (v) { return !D.invoices.some(function (x) { return v.number && x.number === v.number; }); }), todos: T, rem: P, mail: mail.sort(function (a, b) { return a.at < b.at ? 1 : -1; }).slice(0, 120), mails: mails.length };
 }
 function scanTodos() {
   return (SCAN.todos || []).filter(function (x) { return !x.done; }).map(function (x) { return { k: "mail", id: x.th, t: x.t, tag: x.who }; });
@@ -1726,26 +1746,35 @@ function scanScreen() {
   var who = first(G.name || D.settings.name || "");
   if (SCAN.stage === "run") {
     var done = SCAN.steps.filter(function (x) { return x.st === "ok"; }).length, pct = Math.max(6, done / SCAN.steps.length * 100);
-    return '<div class="hero scan"><p class="q">Scanning your email</p><h1>Finding your work.</h1>' +
+    return '<div class="hero scan"><p class="q">Reading on this device</p><h1>Finding your work.</h1>' +
       '<span class="bar scan-bar"><i style="width:' + pct.toFixed(0) + '%"></i></span>' +
-      '<div class="rows">' + SCAN.steps.map(function (x) { return '<div class="row static scan-s ' + x.st + '"><span><i class="ck' + (x.st === "ok" ? " on" : "") + '"></i>' + esc(x.n) + '</span><span class="q">' + (x.st === "ok" ? x.c + (x.c === 1 ? " email" : " emails") : x.st === "on" ? "Looking…" : "") + "</span></div>"; }).join("") + "</div>" +
-      '<p class="q">Subjects, senders and dates only, read on this device. Nothing is sent and none of your email is kept.</p></div>';
+      '<div class="rows">' + SCAN.steps.map(function (x) { return '<div class="row static scan-s ' + x.st + '"><span><i class="ck' + (x.st === "ok" ? " on" : "") + '"></i>' + esc(x.n) + '</span><span class="q">' + (x.st === "ok" ? (x.fin ? "Done" : x.c + " " + (x.u ? x.u[x.c === 1 ? 0 : 1] : "emails")) : x.st === "on" ? "Looking…" : "") + "</span></div>"; }).join("") + "</div>" +
+      '<p class="q">Subjects, senders, dates and amounts only, read on this device. Nothing is sent and nothing is kept by us.</p></div>';
   }
   if (SCAN.stage === "review" && SCAN.found) {
     var F = SCAN.found, up = F.bookings.filter(function (b) { return !b.start || b.start >= iso(today()); }), past = F.bookings.filter(function (b) { return b.start && b.start < iso(today()); });
-    var n = F.bookings.length + F.invoices.length + F.todos.length;
-    var bRow = function (b) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + b.id + '"' + (b.pick ? " checked" : "") + '><span class="up-t">' + esc(b.production) + '<span class="q">' + esc(b.client) + (b.cs ? " · call sheet" : "") + '</span></span><span class="scan-a"><input type="date" data-scandate="' + b.id + '" value="' + esc(b.start) + '" aria-label="Date"><span class="tag' + (b.status === "Confirmed" ? " ok" : " amb") + '">' + esc(b.status) + "</span></span></label>"; };
-    var iRow = function (v) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + v.id + '"' + (v.pick ? " checked" : "") + '><span class="up-t">' + esc(v.client) + '<span class="q">' + esc(v.number || "Invoice") + " · sent " + nice(v.issued) + (v.paid ? " · paid " + nice(v.paid) : "") + '</span></span><span class="scan-a"><input type="text" inputmode="decimal" placeholder="£" data-scanamt="' + v.id + '" value="' + esc(v.amount) + '" aria-label="Amount"><span class="tag' + (v.paid ? " ok" : "") + '">' + (v.paid ? "Paid" : "Owed") + "</span></span></label>"; };
-    var tRow = function (x) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + x.id + '"' + (x.pick ? " checked" : "") + '><span class="up-t">' + esc(x.t) + '<span class="q">' + esc(x.who) + " · " + nice(x.at) + "</span></span></label>"; };
+    var n = F.bookings.length + F.invoices.length + F.todos.length + (F.paid || []).length + (F.income || []).length + (F.costs || []).length;
+    var ck = function (x) { return '<input type="checkbox" data-scanpick="' + x.id + '"' + (x.pick ? " checked" : "") + ">"; };
+    var bRow = function (b) { return '<label class="row static scan-r">' + ck(b) + '<span class="up-t">' + esc(b.production) + '<span class="q">' + esc(b.client || "") + (b.cs ? " · call sheet" : b.src ? " · " + esc(b.src) : "") + (b.end ? " · to " + nice(b.end) : "") + '</span></span><span class="scan-a"><input type="date" data-scandate="' + b.id + '" value="' + esc(b.start) + '" aria-label="Date"><span class="tag' + (b.status === "Confirmed" ? " ok" : " amb") + '">' + esc(b.status) + "</span></span></label>"; };
+    var iRow = function (v) { var bp = (F.paid || []).find(function (p) { return p.inv === v; }); return '<label class="row static scan-r">' + ck(v) + '<span class="up-t">' + esc(v.client) + '<span class="q">' + esc(v.number || "Invoice") + " · sent " + nice(v.issued) + (v.paid ? " · paid " + nice(v.paid) : bp ? " · paid " + nice(bp.date) + ", from your bank" : "") + '</span></span><span class="scan-a"><input type="text" inputmode="decimal" placeholder="£" data-scanamt="' + v.id + '" value="' + esc(v.amount) + '" aria-label="Amount"><span class="tag' + (v.paid || bp ? " ok" : "") + '">' + (v.paid || bp ? "Paid" : "Owed") + "</span></span></label>"; };
+    var pRow = function (x) { return '<label class="row static scan-r">' + ck(x) + '<span class="up-t">' + esc((x.inv.number ? x.inv.number + ", " : "") + x.inv.client) + '<span class="q">' + pounds(x.amt) + " in on " + nice(x.date) + " · " + esc(x.desc.slice(0, 50)) + '</span></span><span class="tag ok">Mark paid</span></label>'; };
+    var mRow = function (x) { return '<label class="row static scan-r">' + ck(x) + '<span class="up-t">' + esc(x.client) + '<span class="q">' + nice(x.date) + " · " + esc(x.desc.slice(0, 50)) + '</span></span><span class="tag">' + pounds(num(x.amount)) + "</span></label>"; };
+    var cRow = function (x) { return '<label class="row static scan-r">' + ck(x) + '<span class="up-t">' + esc(x.item) + '<span class="q">' + nice(x.date) + '</span></span><span class="tag">' + pounds(num(x.amount)) + "</span></label>"; };
+    var tRow = function (x) { return '<label class="row static scan-r">' + ck(x) + '<span class="up-t">' + esc(x.t) + '<span class="q">' + esc(x.who) + " · " + nice(x.at) + "</span></span></label>"; };
+    var paidOld = (F.paid || []).filter(function (p) { return p.old; });
     var grp = function (h, sub, L, f) { return L.length ? '<div class="part">' + h + " · " + L.length + '</div><p class="q">' + sub + '</p><div class="rows">' + L.map(f).join("") + "</div>" : ""; };
-    return '<div class="hero scan wide"><p class="q">Read ' + F.mails + " emails</p><h1>" + (n ? "Here's your work." : "Nothing obvious yet.") + "</h1>" +
-      (n ? '<p class="q">Untick anything that isn\'t right and fix any dates. Only what\'s ticked goes on your dashboard.</p>' : '<p class="q">We couldn\'t spot call sheets, holds or invoices in the last few months. Add your next job by hand and Systems takes it from there.</p>') +
-      grp("Coming up", "Call sheets mean booked. Holds and pencils go in as holds.", up, bRow) +
+    var read = [F.mails ? F.mails + (F.pasted ? " email" : " emails") : "", F.events ? F.events + " calendar events" : "", F.bankN ? F.bankN + " bank lines" : ""].filter(Boolean).join(", ") || "Nothing connected";
+    return '<div class="hero scan wide"><p class="q">Read ' + read + "</p><h1>" + (n ? "Here's your work." : "Nothing obvious yet.") + "</h1>" +
+      (n ? '<p class="q">Untick anything that isn\'t right and fix any dates or amounts. Only what\'s ticked goes on your dashboard.</p>' : '<p class="q">' + (OB.active ? "Your dashboard starts empty. Type your next job in the box on Home and Systems takes it from there." : "We couldn\'t spot call sheets, holds or invoices. Add your next job by hand and Systems takes it from there.") + "</p>") +
+      grp("Coming up", "Call sheets and calendar shoot days go in as booked. Holds and pencils go in as holds.", up, bRow) +
       grp("Recently worked", "Add these to log your hours and invoice them.", past, bRow) +
       grp("Invoices you sent", "We'll tell you when they're late and draft the chase.", F.invoices, iRow) +
+      grp("Paid, from your bank", "Payments that match invoices already in Systems.", paidOld, pRow) +
+      grp("Money in with no invoice", "Payments over £100 we couldn't match. Tick the ones that were work, so your totals and tax are right.", F.income || [], mRow) +
+      grp("Work costs", "Travel, parking, kit and hire from your bank. Ticked ones go in your expenses, on the job they fall on.", F.costs || [], cRow) +
       grp("To do", "Asked for in your email. They go in Needs you.", F.todos, tRow) +
-      '<div class="acts">' + (n ? '<button class="btn solid wide" data-scanadd>Add to my dashboard</button>' : "") + '<button class="btn wide" data-scandone>' + (n ? "Skip, start empty" : "Add a job by hand") + "</button></div>" +
-      '<p class="q">Nothing was sent, changed or kept from your email. Scan again any time from Help.</p></div>';
+      '<div class="acts">' + (n ? '<button class="btn solid wide" data-scanadd>Add to my dashboard</button>' : OB.active ? '<button class="btn solid wide" data-scanadd>Open my dashboard</button>' : "") + (OB.active ? (n ? '<button class="btn wide" data-scanadd data-none>Skip, start empty</button>' : '<button class="btn wide" data-obback2>Back to connect</button>') : '<button class="btn wide" data-scandone>' + (n ? "Skip, start empty" : "Add a job by hand") + "</button>") + "</div>" +
+      '<p class="q">Nothing was sent, changed or kept. Scan again any time from Help.</p></div>';
   }
   return '<div class="hero scan"><p class="q">' + (who ? "Hi " + esc(who) : "Welcome") + '</p><h1>Let\'s find your work.</h1>' +
     '<p class="q">Tap Scan and Systems looks back through the last few months of your email for call sheets, holds, invoices and payments, then lays out what\'s coming up, what you\'re owed and what needs doing.</p>' +
@@ -1755,25 +1784,34 @@ function scanScreen() {
     '<p class="q">Google will ask you to let Systems read your email. It only reads subjects, senders and dates, on this device. It can\'t send, delete or change anything, and nothing is kept.</p>' +
     '<div class="acts"><button class="lnk" data-scanskip>Skip, I\'ll add things myself</button><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Watch how it works · 1 min</a></div></div>';
 }
-function scanAdd() {
-  var F = SCAN.found, on = {}; document.querySelectorAll("[data-scanpick]").forEach(function (c) { on[c.dataset.scanpick] = c.checked; });
+function scanAdd(none) {
+  var F = SCAN.found || emptyFound(), on = {}; document.querySelectorAll("[data-scanpick]").forEach(function (c) { on[c.dataset.scanpick] = !none && c.checked; });
   document.querySelectorAll("[data-scandate]").forEach(function (i) { var b = F.bookings.find(function (x) { return x.id === i.dataset.scandate; }); if (b) b.start = i.value; });
   document.querySelectorAll("[data-scanamt]").forEach(function (i) { var v = F.invoices.find(function (x) { return x.id === i.dataset.scanamt; }); if (v) v.amount = i.value.replace(/[£,\s]/g, ""); });
-  var clean = function (r) { var o = Object.assign({}, r); delete o.th; delete o.pick; delete o.cs; o.id = uid(); return o; };
+  (F.paid || []).forEach(function (p) { if (!p.old && on[p.inv.id]) p.inv.paid = p.date; });
+  var clean = function (r) { var o = Object.assign({}, r); delete o.th; delete o.pick; delete o.cs; delete o.src; o.id = uid(); return o; };
   var nb = F.bookings.filter(function (b) { return on[b.id] && b.start; }).map(clean), ni = F.invoices.filter(function (v) { return on[v.id]; }).map(clean);
-  var nt = F.todos.filter(function (x) { return on[x.id]; });
-  var p = G.sheetId ? Promise.resolve() : (busy++, createSheet("Eltio Systems").then(function () { busy--; }));
+  var oldPaid = (F.paid || []).filter(function (p) { return p.old && on[p.id]; });
+  var inc = (F.income || []).filter(function (x) { return on[x.id]; }).map(function (x) { return { id: uid(), booking: "", number: "", client: x.client, contact: "", amount: x.amount, issued: x.date, due: x.date, paid: x.date, notes: "From your bank statement: " + x.desc.slice(0, 60) }; });
+  var allB = D.bookings.concat(nb);
+  var ne = (F.costs || []).filter(function (x) { return on[x.id]; }).map(function (x) { var b = allB.find(function (y) { return y.start && y.start <= x.date && x.date <= (y.end || y.start); }); return { id: uid(), date: x.date, booking: b ? b.id : "", item: x.item, amount: x.amount, notes: "From your bank statement" }; });
+  var nt = F.todos.filter(function (x) { return on[x.id]; }), ob = OB.active, usedMail = !!F.mails && !F.pasted;
+  if (ob && obProd() && OB.f.job && OB.f.shoot) nb.push(jobBooking(OB.f));
+  var p = G.sheetId ? Promise.resolve() : (busy++, createSheet("Eltio Systems" + (ob && OB.f.trading ? ": " + OB.f.trading : "")).then(function () { busy--; }));
   SCAN.stage = ""; busy++; render();
   p.then(function () { return nb.length ? change("Bookings", function (rows) { return rows.concat(nb); }) : null; })
-    .then(function () { return ni.length ? change("Invoices", function (rows) { return rows.concat(ni); }) : null; })
-    .then(function () { return change("Settings", function (st) { if (!st.name) st.name = G.name || ""; st.scanned = iso(today()); }); })
+    .then(function () { return ni.length || inc.length || oldPaid.length ? change("Invoices", function (rows) { return rows.map(function (r) { var h = oldPaid.find(function (x) { return x.inv.id === r.id; }); return h ? Object.assign({}, r, { paid: h.date }) : r; }).concat(ni, inc); }) : null; })
+    .then(function () { return ne.length ? change("Expenses", function (rows) { return rows.concat(ne); }) : null; })
+    .then(function () { return change("Settings", function (st) { if (!st.name) st.name = G.name || ""; if (usedMail) st.scanned = iso(today()); if (ob) obApply(st); }); })
     .then(function () {
+      if (ob && obProd() && OB.f.job) { D.pj = pjFrom(OB.f); extrasSave(); }
       busy = Math.max(0, busy - 1); SCAN.todos = (SCAN.todos || []).filter(function (x) { return !x.done; }).concat(nt.filter(function (x) { return !(SCAN.todos || []).some(function (y) { return y.id === x.id; }); }));
-      SCAN.mail = F.mail; SCAN.at = iso(today()); scanSaveLocal(); SCAN.found = null; S.tab = "home"; render();
-      banner(nb.length + ni.length + nt.length ? "Added " + (nb.length ? nb.length + " job" + (nb.length > 1 ? "s" : "") : "") + (nb.length && ni.length ? ", " : "") + (ni.length ? ni.length + " invoice" + (ni.length > 1 ? "s" : "") : "") + (nt.length ? (nb.length || ni.length ? " and " : "") + nt.length + " to do" : "") + "." : "Nothing added.");
-      if (!D.settings.role) setTimeout(function () { var k = D.settings.name; D.settings.name = ""; render(); D.settings.name = k; var n = $("s-name"); if (n) n.value = k; }, 900);
+      if (F.mail && F.mail.length) SCAN.mail = F.mail.concat((SCAN.mail || []).filter(function (m) { return !F.mail.some(function (x) { return x.id === m.id; }); })).slice(0, 200);
+      SCAN.at = iso(today()); scanSaveLocal(); SCAN.found = null; if (ob) obEnd(); S.tab = "home"; render(); window.scrollTo(0, 0);
+      var bits = [[nb.length, "job"], [ni.length + inc.length, "invoice"], [oldPaid.length, "payment matched", "payments matched"], [ne.length, "cost"], [nt.length, "to do", "to do"]].filter(function (x) { return x[0]; }).map(function (x) { return x[0] + " " + (x[0] === 1 ? x[1] : x[2] || x[1] + "s"); });
+      banner(bits.length ? "Added " + (bits.length > 1 ? bits.slice(0, -1).join(", ") + " and " + bits[bits.length - 1] : bits[0]) + "." : ob ? "You're set up." : "Nothing added.");
     })
-    .catch(function (e) { busy = Math.max(0, busy - 1); SCAN.stage = "review"; render(); banner("Couldn't add: " + (e.message || e)); });
+    .catch(function (e) { try { console.error("scanAdd", e && e.stack || e); } catch (x) {} busy = Math.max(0, busy - 1); SCAN.stage = "review"; render(); banner("Couldn't add: " + (e.message || e)); });
 }
 function scanDone() {
   SCAN.stage = ""; SCAN.found = null; flag("sy-scan-seen", "1");
@@ -1781,17 +1819,14 @@ function scanDone() {
   S.tab = "home"; render(); openSheet(bookingForm(null));
 }
 /* Home for a real account: Scan first while it's empty, then a quiet line back to it. */
-function scanHero() {
-  if (D.bookings.length || D.invoices.length) return "";
-  return '<button class="onb scanh" data-scan><span class="onb-t"><span class="part">Start here</span><span>Scan your email for call sheets, holds and invoices</span></span><span class="go" aria-hidden="true">→</span></button>';
-}
+function scanHero() { return ""; }
 function helpLine() {
   if (flag("sy-help-off")) return "";
   return '<div class="helpl"><span class="q">New here?</span><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Getting started, 1 min</a><button class="lnk" data-tab="t-help">All the how-tos</button><button class="lnk" data-helpoff aria-label="Hide">Hide</button></div>';
 }
 function scanInboxView() {
   var M = SCAN.mail || [];
-  if (!M.length) return '<div class="top"><span>Inbox</span><span></span></div><h2>Work email, sorted by job.</h2><p class="q">Scan your email and Systems sorts call sheets, holds, invoices and payments under each job, with a link straight to the email.</p><div class="acts"><button class="btn solid" data-scan>Scan my email</button></div>';
+  if (!M.length) return '<div class="top"><span>Inbox</span><span></span></div><h2>Work email, sorted by job.</h2><p class="q">Scan your email and Systems sorts call sheets, holds, invoices and payments under each job, with a link straight to the email.</p><div class="acts"><button class="btn solid" data-scan>Scan my email</button></div>' + pasteBox();
   var by = {}; M.forEach(function (m) { (by[m.job] = by[m.job] || []).push(m); });
   var lab = { cs: "Call sheet", bk: "Booking", inv: "Invoice", paid: "Payment", "do": "To do" };
   return '<div class="top"><span>Inbox</span><button class="lnk" data-scan>Scan again</button></div><h2>Work email, sorted by job.</h2><p class="q">From your last scan, ' + nice(SCAN.at) + ". Tap one to open it in Gmail.</p>" +
@@ -1802,15 +1837,15 @@ var TUTS = [["01-systems-in-80-seconds", "Systems in 80 seconds", "1:13"], ["02-
 function tutUrl(id) { return siteUrl() + "tutorials/#" + id; }
 function helpView() {
   var first3 = mode === "google" ? [
-    ["Scan your email", "Call sheets, holds and invoices from the last few months, laid out for you.", "data-scan", D.settings.scanned ? "Done " + nice(D.settings.scanned) : "Start"],
+    ["Connect calendar, email and bank", "Go back through setup and match everything up again.", 'data-obstart="1"', D.settings.onb === "2" ? "Done" : "Start"],
+    ["Scan your email again", "New call sheets, holds, invoices and payments since last time.", "data-scan", D.settings.scanned ? "Last " + nice(D.settings.scanned) : "Start"],
     ["Add your next job", "A booking or a hold. Holds get a nudge before the date.", "data-addbooking", D.bookings.length ? "Done" : "Start"],
     ["Log a day's hours", "Call and wrap in, overtime out, on APA or Bectu terms.", D.bookings.length ? 'data-tab="bookings"' : "data-addbooking", D.days.length ? "Done" : "Start"],
     ["Chase what's late", "Late invoices show in Needs you, with the chase drafted.", 'data-tab="money"', ""]
   ] : [["Try the sample job", "Everything here is sample data, so tap anything.", 'data-tab="home"', ""], ["Switch job", "See it as a producer, gaffer, costume designer and more.", "data-switchjob", ""]];
-  return '<div class="top"><span>Help</span><span></span></div><h2>How it works.</h2>' +
-    '<div class="part">What to do first</div><div class="rows">' + first3.map(function (x) { return '<button class="row" ' + x[2] + '><span class="up-t">' + esc(x[0]) + '<span class="q">' + esc(x[1]) + '</span></span><span class="q">' + esc(x[3] || "→") + "</span></button>"; }).join("") + "</div>" +
+  return '<div class="part">What to do first</div><div class="rows">' + first3.map(function (x) { return '<button class="row" ' + x[2] + '><span class="up-t">' + esc(x[0]) + '<span class="q">' + esc(x[1]) + '</span></span><span class="q">' + esc(x[3] || "→") + "</span></button>"; }).join("") + "</div>" +
     '<div class="part">Short videos</div><div class="rows">' + TUTS.map(function (t) { return '<a class="row" target="_blank" rel="noopener" href="' + tutUrl(t[0]) + '"><span>' + esc(t[1]) + '</span><span class="q">' + t[2] + "</span></a>"; }).join("") + "</div>" +
-    '<div class="part">Still stuck</div><p class="q">Email <a href="mailto:hello@eltio.studio?subject=Systems%20help">hello@eltio.studio</a> and say what you were trying to do. A person reads every one.</p>';
+    (mode === "google" ? pasteBox() : "") + '<div class="part">Still stuck</div><p class="q">Email <a href="mailto:hello@eltio.studio?subject=Systems%20help">hello@eltio.studio</a> and say what you were trying to do. A person reads every one.</p>';
 }
 var TOOLS_REAL = [
   { k: "t-inbox", n: "Inbox", g: "Your work", fn: scanInboxView },
@@ -1820,14 +1855,357 @@ var TOOLS_REAL = [
 var TOOLS_HELP = [{ k: "t-help", n: "How it works", g: "Help", fn: helpView }];
 function scanClick(b) {
   var d = b.dataset;
-  if (b.hasAttribute("data-scan")) { if (mode !== "google") { banner("Scanning works once you sign in with Google. Here it's sample data."); return true; } closeSheet(); runScan(); return true; }
+  if (b.hasAttribute("data-scan")) { if (mode !== "google") { banner("Scanning works once you sign in with Google. Here it's sample data."); return true; } closeSheet(); runScan({ mail: true, cal: D.settings.cal === "1" }); return true; }
   if (b.hasAttribute("data-scanskip")) { SCAN.stage = ""; scanDone(); return true; }
-  if (b.hasAttribute("data-scanadd")) { scanAdd(); return true; }
+  if (b.hasAttribute("data-scanadd")) { scanAdd(b.hasAttribute("data-none")); return true; }
+  if (b.hasAttribute("data-obback2")) { SCAN.stage = ""; SCAN.found = null; OB.step = 1; obSave(); render(); return true; }
   if (b.hasAttribute("data-scandone")) { scanDone(); return true; }
   if (b.hasAttribute("data-helpoff")) { flag("sy-help-off", "1"); render(); return true; }
   if (d.todo === "mail") { var x = (SCAN.todos || []).find(function (y) { return y.th === d.id; }); if (x) { window.open(gmailLink(x.th), "_blank", "noopener"); x.done = true; scanSaveLocal(); render(); banner("Opened in Gmail. Ticked off here."); } return true; }
   return false;
 }
+/* ---------- onboarding: who you are, connect calendar, email and bank, your rate or your company and job, then build the dashboard ---------- */
+var CAL = "https://www.googleapis.com/auth/calendar.events.readonly";
+var NO_CAL = "Google didn't let Systems see your calendar. Tap Connect again and tick the Calendar box on Google's screen.";
+function obBlank() { return { active: false, step: 0, role: "", work: "Both", f: {}, cal: false, mail: false, bank: [], files: [], err: "", email: "" }; }
+var OB = (function () { try { return Object.assign(obBlank(), JSON.parse(localStorage.getItem("sy-ob") || "null") || {}); } catch (e) { return obBlank(); } })();
+function obSave() { try { localStorage.setItem("sy-ob", JSON.stringify(OB)); } catch (e) {} }
+function obStart(step) {
+  var s = D.settings || {};
+  OB = obBlank(); OB.active = true; OB.step = step || 0; OB.email = G.email || "";
+  OB.role = s.role ? roleKey() : ""; OB.work = s.work || "Both"; OB.cal = !!G.cal; OB.mail = !!G.gmail;
+  OB.f = { name: s.name || G.name || "", trading: s.trading || "", grade: s.grade || "", rate: s.rate || "", terms: s.terms || "30", tax: s.tax || "25", addr: s.addr || "", bank: s.bank || "", vat: s.vat || "", hasAgent: s.hasAgent || "No", agent: s.agent || "", agentEmail: s.agentEmail || "", companyNo: s.companyNo || "", payroll: s.payroll || "", accountant: s.accountant || "", crewTerms: s.crewTerms || "30" };
+  if (D.pj && D.pj.real) { var P = D.pj; Object.assign(OB.f, { job: P.name, client: P.client, brand: P.brand, accounts: P.accounts, po: P.po || "", budget: P.budget ? String(P.budget) : "", split: String(P.split), payDays: String(P.payDays), shoot: P.shoot, days: String(P.days), jterms: P.terms, pshoot: P.pshoot, permits: P.permits.slice(), crew: P.crew.map(function (c) { return [c.n, c.grade, c.email].filter(Boolean).join(", "); }).join("\n") }); }
+  obSave(); SCAN.stage = ""; S.tab = "home"; closeSheet(); render(); window.scrollTo(0, 0);
+}
+function obEnd() { OB = obBlank(); try { localStorage.removeItem("sy-ob"); } catch (e) {} flag("sy-ob-done", "1"); }
+function obProd() { return OB.role === "Producer"; }
+function obSteps() { return obProd() ? ["You", "Connect", "Your company", "The job", "Crew and permits", "Build"] : ["You", "Connect", "Your rate", "Build"]; }
+/* Every field on a step has an id starting ob-, so one read keeps them all. */
+function obRead() {
+  document.querySelectorAll('#main input[id^="ob-"], #main select[id^="ob-"], #main textarea[id^="ob-"]').forEach(function (e) { if (e.type === "file") return; OB.f[e.id.slice(3)] = e.value.trim(); });
+  var r = picked("obrole"); if (r) OB.role = r; var w = picked("obwork"); if (w) OB.work = w;
+  var t = picked("objterms"); if (t) OB.f.jterms = t; var a = picked("obagent"); if (a) OB.f.hasAgent = a;
+  obSave();
+}
+function obScreen() {
+  var L = obSteps(), i = Math.min(OB.step, L.length - 1), k = L[i], f = OB.f, P = obProd(), body = "";
+  var steps = '<div class="ob-steps">' + L.map(function (n, j) { return '<span class="' + (j === i ? "on" : j < i ? "done" : "") + '">' + esc(n) + "</span>"; }).join("") + "</div>";
+  if (k === "You") body = "<h1>Let's set you up.</h1><p class=\"q\">A few quick steps. Connect your calendar, email and bank, and Systems lays your work out for you and matches it up.</p>" +
+    field("ob-name", "Your name", f.name, "text", "First and last name") +
+    '<div class="field"><span class="lab">What do you do?</span>' + pills("obrole", ROLES, OB.role) + '<span class="q">Production company? Pick Producer.</span></div>' +
+    '<div class="field"><span class="lab">Mostly on</span>' + pills("obwork", ["Commercials", "TV and film", "Both"], OB.work) + "</div>";
+  if (k === "Connect") {
+    var con = function (key, t, sub, on) { return '<div class="row static ob-c"><span class="up-t">' + t + '<span class="q">' + sub + "</span></span>" + (on ? '<span class="tag ok">Connected</span>' : '<button class="btn sm solid" data-obcon="' + key + '">Connect</button>') + "</div>"; };
+    var nIn = OB.bank.filter(function (r) { return r.amt > 0; }).length, nOut = OB.bank.length - nIn;
+    body = "<h1>Connect your stuff.</h1><p class=\"q\">The more you connect, the more Systems fills in for you. Everything is read on this device. Nothing is sent, changed or kept by us.</p>" +
+      '<div class="rows">' +
+      con("cal", "Google Calendar", P ? "Shoot days, recces, PPMs and holds." : "Your shoot days, holds and recces.", OB.cal) +
+      con("gmail", "Gmail", P ? "Awards, call sheets, invoices you've sent and remittances." : "Call sheets, holds, invoices you've sent and remittances.", OB.mail) +
+      '<div class="row static ob-c ob-bank"><span class="up-t">Bank statements<span class="q">A CSV from each account you get paid into' + (P ? ", business account first" : "") + '. Payments are matched to invoices, and work costs are picked out.</span></span><label class="btn sm' + (OB.files.length ? "" : " solid") + '" for="ob-bankfile">' + (OB.files.length ? "Add another" : "Add a CSV") + '</label><input id="ob-bankfile" class="vh" type="file" accept=".csv,text/csv" multiple></div>' +
+      (OB.files.length ? OB.files.map(function (x, j) { return '<div class="row static ob-f"><span class="q">' + esc(x.name) + " · " + x.n + ' lines</span><button class="lnk" data-obbankx="' + j + '">Remove</button></div>'; }).join("") : "") +
+      "</div>" +
+      (OB.files.length ? '<p class="q">' + nIn + " payments in and " + nOut + " out, ready to match.</p>" : "") +
+      '<details class="ob-how"><summary class="q">How to get a CSV from your bank</summary><p class="q">On your bank\'s website or app, open your statements or transactions and look for Export, Download or CSV. Pick the last 12 months. Most UK banks and Monzo, Starling and Revolut offer it. Add one file per account.</p></details>' +
+      '<p class="q">Not on Gmail? Skip it, and paste emails in from Help later.</p>' +
+      '<p class="q">While Systems is being checked by Google, its screen says it "hasn\'t verified this app". Tap Advanced, then Go to Systems.</p>';
+  }
+  if (k === "Your rate") body = "<h1>Your rate.</h1><p class=\"q\">So timesheets, overtime and invoices come out right first time.</p>" +
+    gradeField("ob-grade", "Your grade", cardOf(OB.work === "TV and film" ? "TV drama" : "APA"), f.grade || "", "ob-rate", f.rate) +
+    '<div class="grid2">' + field("ob-rate", "Day rate (£)", f.rate, "number", "650", ' inputmode="numeric"') + field("ob-terms", "You get paid within (days)", f.terms || "30", "number", "30", ' inputmode="numeric"') + "</div>" +
+    field("ob-tax", "Put aside for tax (%)", f.tax || "25", "number", "25", ' inputmode="numeric"') +
+    '<div class="part">On your invoices</div>' + field("ob-trading", "Trading name", f.trading, "text", "Your Ltd or trading name (optional)") + field("ob-addr", "Your address", f.addr, "text", "Street, town, postcode") +
+    '<div class="grid2">' + field("ob-bank", "Bank details", f.bank, "text", "Sort code and account number") + field("ob-vat", "VAT number", f.vat, "text", "Only if you're registered") + "</div>" +
+    '<div class="field"><span class="lab">Do you have an agent?</span>' + pills("obagent", ["Yes", "No"], f.hasAgent || "No") + "</div>" +
+    '<div class="grid2">' + field("ob-agent", "Agent", f.agent, "text", "Agency and agent's name (if you have one)") + field("ob-agentEmail", "Their email", f.agentEmail, "email", "bookings@agency.com") + "</div>";
+  if (k === "Your company") body = "<h1>Your company.</h1><p class=\"q\">It goes on advance and balance invoices, POs and crew start packs.</p>" +
+    field("ob-trading", "Company name", f.trading, "text", "e.g. Northlight Films Ltd") +
+    '<div class="grid2">' + field("ob-companyNo", "Company number", f.companyNo, "text", "8 digits") + field("ob-vat", "VAT number", f.vat, "text", "If you're registered") + "</div>" +
+    field("ob-addr", "Registered address", f.addr, "text", "Street, town, postcode") +
+    '<div class="grid2">' + field("ob-bank", "Bank details for clients", f.bank, "text", "Sort code and account number") + field("ob-crewTerms", "You pay crew within (days)", f.crewTerms || "30", "number", "30", ' inputmode="numeric"') + "</div>" +
+    '<div class="part">Who gets the paperwork</div><div class="grid2">' + field("ob-payroll", "Payroll bureau email", f.payroll, "email", "For PAYE crew (optional)") + field("ob-accountant", "Accountant email", f.accountant, "email", "For the month-end pack (optional)") + "</div>";
+  if (k === "The job") body = "<h1>The job you're on.</h1><p class=\"q\">The award, the shoot and who pays. Not on one right now? Leave it blank and add it from Home later.</p>" +
+    '<div class="grid2">' + field("ob-job", "Job name", f.job, "text", "e.g. Canal promo") + field("ob-client", "Agency or client", f.client, "text", "Who you invoice") + "</div>" +
+    '<div class="grid2">' + field("ob-brand", "Brand", f.brand, "text", "e.g. Fieldwear") + field("ob-accounts", "Their accounts email", f.accounts, "email", "accounts@agency.com") + "</div>" +
+    '<div class="grid2">' + field("ob-budget", "Budget (£)", f.budget, "number", "84000", ' inputmode="numeric"') + field("ob-po", "PO number", f.po, "text", "If they've sent one") + "</div>" +
+    '<div class="grid2">' + field("ob-split", "Paid on award (%)", f.split || "50", "number", "50", ' inputmode="numeric"') + field("ob-payDays", "Balance due (days after delivery)", f.payDays || "30", "number", "30", ' inputmode="numeric"') + "</div>" +
+    '<div class="grid2">' + field("ob-shoot", "First shoot day", f.shoot, "date") + field("ob-days", "Shoot days", f.days || "1", "number", "1", ' inputmode="numeric"') + "</div>" +
+    '<div class="field"><span class="lab">Crew terms</span>' + pills("objterms", ["APA", "Bectu"], f.jterms || (OB.work === "TV and film" ? "Bectu" : "APA")) + "</div>";
+  if (k === "Crew and permits") body = "<h1>Crew and permits.</h1><p class=\"q\">Paste your crew list, one person a line: name, role, email. Copy it from a call sheet, a spreadsheet or your notes.</p>" +
+    '<div class="field"><label for="ob-crew">Crew</label><textarea id="ob-crew" rows="7" placeholder="Ana Reyes, 1st AC, ana@email.com&#10;Sam Carter, Gaffer, sam@email.com">' + esc(f.crew || "") + "</textarea></div>" +
+    '<div class="acts"><label class="btn sm" for="ob-crewfile">Or pick a CSV</label><input id="ob-crewfile" class="vh" type="file" accept=".csv,text/csv"></div>' +
+    '<div class="part">Permits to count back from the shoot</div>' + field("ob-pshoot", "Location shoot day", f.pshoot || f.shoot || "", "date") +
+    '<div class="rows">' + PERMITS.map(function (p) { var on = (f.permits || []).indexOf(p[0]) >= 0; return '<button class="row" data-obpermit="' + p[0] + '"><span><i class="ck' + (on ? " on" : "") + '"></i>' + esc(p[1]) + '</span><span class="q">' + p[2] + (p[3] ? " working days" : " days") + "</span></button>"; }).join("") + "</div>";
+  if (k === "Build") {
+    var crewN = crewParse(f.crew).length, row = function (t, v, ok) { return '<div class="row static"><span>' + t + '</span><span class="tag' + (ok ? " ok" : "") + '">' + esc(v) + "</span></div>"; };
+    body = "<h1>Ready when you are.</h1><p class=\"q\">Systems reads and matches everything on this device, then shows you the list. Nothing is saved until you say so.</p><div class=\"rows\">" +
+      row("Calendar", OB.cal ? "Connected" : "Not connected", OB.cal) + row("Email", OB.mail ? "Connected" : "Not connected", OB.mail) + row("Bank statements", OB.files.length ? OB.files.length + " file" + (OB.files.length > 1 ? "s" : "") : "None yet", OB.files.length) +
+      (P ? row("The job", f.job || "Add it later", !!f.job) + row("Crew", crewN ? crewN + " people" : "None yet", crewN) : row("Your rate", f.rate ? "£" + f.rate + " a day" : "Add it later", !!f.rate)) + "</div>" +
+      (OB.cal || OB.mail || OB.files.length ? "" : '<p class="q">Nothing connected yet, so your dashboard starts empty. You can connect things later from Help.</p>');
+  }
+  var nav = '<div class="acts">' + (i ? '<button class="btn" data-obback>Back</button>' : "") + (k === "Build" ? '<button class="btn solid" data-obgo>Build my dashboard</button>' : '<button class="btn solid" data-obnext>' + (k === "Connect" && !OB.cal && !OB.mail && !OB.files.length ? "Skip for now" : "Next") + "</button>") + "</div>";
+  return '<div class="hero scan wide ob">' + steps + (OB.err ? '<p class="note">' + esc(OB.err) + "</p>" : "") + body + nav + '<p class="q"><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Watch how it works · 1 min</a></p></div>';
+}
+function wantScope(k) {
+  if (k === "gmail" ? G.gmail : G.cal) return Promise.resolve();
+  if (k === "gmail") G.wantGmail = true; else G.wantCal = true;
+  G.token = null;
+  var off = function () { G.wantGmail = false; G.wantCal = false; };
+  return getToken(false).then(off, function (e) { off(); throw e; });
+}
+function obConnect(k) {
+  obRead(); OB.err = "";
+  wantScope(k).then(function () { if (k === "gmail") OB.mail = true; else OB.cal = true; obSave(); render(); }, function (e) { OB.err = e && e.message || String(e); render(); });
+}
+function readFiles(files, fn) { Array.prototype.forEach.call(files || [], function (f) { var r = new FileReader(); r.onload = function () { fn(f, String(r.result || "")); }; r.readAsText(f); }); }
+function obBankFiles(files) {
+  readFiles(files, function (f, t) { var rows = readBank(t); OB.bank = OB.bank.concat(rows.map(function (x) { x.file = f.name; return x; })).slice(-4000); OB.files.push({ name: f.name, n: rows.length }); obSave(); render(); if (!rows.length) banner("Couldn't find any payments in " + f.name + ". Is it a CSV statement?"); });
+}
+
+/* Bank CSVs: date, description and money in or out, whichever bank it's from. */
+function ukDate(s) {
+  s = String(s || "").trim(); var m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+  if (m) { var y = +m[3]; if (y < 100) y += 2000; return iso(new Date(y, +m[2] - 1, +m[1])); }
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/); if (m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = s.match(/^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\s+(\d{4})/); if (m && MONS.indexOf(m[2].toLowerCase()) >= 0) return iso(new Date(+m[3], MONS.indexOf(m[2].toLowerCase()), +m[1]));
+  return "";
+}
+function readBank(t) {
+  var R = csvRows(t); if (!R.length) return [];
+  var hi = R.findIndex(function (r) { return r.some(function (h) { return /date/i.test(h); }) && r.some(function (h) { return /amount|paid in|paid out|credit|debit|money in|money out|value/i.test(h); }); });
+  var head = hi >= 0 ? R[hi].map(function (h) { return h.toLowerCase().trim(); }) : [], rows = hi >= 0 ? R.slice(hi + 1) : R;
+  var col = function (re) { return head.findIndex(function (h) { return re.test(h); }); };
+  var di = col(/^(transaction |completed |posting |value )?date$/); if (di < 0) di = col(/date/);
+  var inI = col(/paid in|credit|money in|^in$/), outI = col(/paid out|debit|money out|^out$/), amI = col(/^amount|^amt|^value|amount \(/);
+  var descI = head.map(function (h, j) { return /description|^name$|payee|merchant|details|narrative|reference|memo|counter ?party|^type$|transaction type/.test(h) && !/date|amount|balance|category|sort code|account/.test(h) ? j : -1; }).filter(function (j) { return j >= 0; });
+  return rows.map(function (r) {
+    var date = di >= 0 ? ukDate(r[di]) : ukDate(r.find(function (x) { return ukDate(x); }) || "");
+    var amt = inI >= 0 || outI >= 0 ? Math.abs(num(r[inI])) - Math.abs(num(r[outI])) : amI >= 0 ? num(r[amI]) : (r.map(num).filter(function (n) { return n; })[0] || 0);
+    var desc = descI.length ? descI.map(function (j) { return r[j] || ""; }).filter(Boolean).join(" ") : (r.filter(function (x) { return /[a-z]{3}/i.test(x) && !ukDate(x); }).sort(function (a, b) { return b.length - a.length; })[0] || "");
+    return { date: date, desc: desc.replace(/\s+/g, " ").trim(), amt: Math.round(amt * 100) / 100 };
+  }).filter(function (x) { return x.date && x.amt; });
+}
+var NOTINCOME = /interest|refund|cashback|transfer from|from savings|savings|\bpot\b|own account|hmrc|tax refund|salary|reversal|returned|currency|round ?up/i;
+var COSTW = /\b(tfl|trainline|lner|avanti|gwr|national rail|thameslink|southern|scotrail|eurostar|uber|bolt|addison lee|free now|freenow|shell|bp |esso|texaco|jet |fuel|petrol|parking|ringgo|paybyphone|justpark|ncp|congestion|ulez|hire|rental|cvp|procam|panavision|arri|pixipixel|batteries|screwfix|toolstation|b&q|maplin|amazon|apple\.com|adobe|frame\.io|dropbox|insurance|bectu|equity|freeagent|xero|quickbooks|kit|lighting|grip|camera)\b/i;
+var STRONGCOST = /\b(tfl|trainline|lner|avanti|gwr|national rail|thameslink|eurostar|parking|ringgo|paybyphone|justpark|ncp|congestion|ulez|hire|rental|cvp|procam|panavision|arri|pixipixel|batteries|bectu|equity|kit)\b/i;
+function payer(desc) {
+  var s = String(desc).replace(/\b(faster payments?|fpi|fps|bacs|bgc|bank giro credit|credit|cr|ref(erence)?|payment|from|received|transfer|tfr|inward|bill payment|bp)\b/gi, " ").replace(/[0-9#\/*\-:]{3,}/g, " ").replace(/\s+/g, " ").trim();
+  return s.split(" ").slice(0, 4).join(" ").toLowerCase().replace(/\b\w/g, function (c) { return c.toUpperCase(); }) || "Payment";
+}
+function bankSort(bank, newInv) {
+  var open = D.invoices.filter(function (v) { return !v.paid; }).map(function (v) { return { v: v, old: true }; }).concat(newInv.filter(function (v) { return !v.paid; }).map(function (v) { return { v: v }; }));
+  var used = {}, paid = [], income = [], costs = [], yr = iso(addDays(today(), -365));
+  bank.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (r, i) {
+    if (!r.date || r.date < yr) return;
+    if (r.amt > 0) {
+      var up = r.desc.toUpperCase();
+      var hit = open.find(function (x) { return !used[x.v.id] && x.v.number && x.v.number.length > 2 && up.indexOf(x.v.number.toUpperCase()) >= 0; }) ||
+        open.find(function (x) { return !used[x.v.id] && Math.abs(num(x.v.amount) - r.amt) < 0.01 && (!x.v.issued || r.date >= iso(addDays(parse(x.v.issued), -3))); });
+      if (hit) { used[hit.v.id] = 1; paid.push({ id: "bp" + i, inv: hit.v, old: !!hit.old, date: r.date, amt: r.amt, desc: r.desc, pick: true }); return; }
+      var known = D.invoices.concat(newInv).some(function (v) { return v.paid && ((v.number && v.number.length > 2 && up.indexOf(v.number.toUpperCase()) >= 0) || (Math.abs(num(v.amount) - r.amt) < 0.01 && Math.abs(daysBetween(parse(v.paid), parse(r.date))) <= 10)); });
+      if (known) return;
+      if (r.amt >= 100 && !NOTINCOME.test(r.desc)) income.push({ id: "bi" + i, client: payer(r.desc), amount: r.amt.toFixed(2), date: r.date, desc: r.desc, pick: false });
+    } else if (COSTW.test(r.desc)) costs.push({ id: "bc" + i, item: r.desc.slice(0, 60), amount: (-r.amt).toFixed(2), date: r.date, pick: STRONGCOST.test(r.desc) });
+  });
+  return { paid: paid, income: income.slice(-30).reverse(), costs: costs.slice(-60).reverse() };
+}
+
+/* Calendar: work-looking events in the last two months and the next six. */
+var CALW = /\b(shoot|shooting|hold|pencil|pencilled|recce|recces|prep|pre-?light|tech scout|call ?sheet|wrap|booked|booking|commercial|promo|music video|mv|campaign|job|build|strike|rig|de-?rig|day \d|sd ?\d|travel day|fitting|ppm|pre-?pro|grade|edit|offline|online|pick-?ups?|tvc|ad shoot)\b/i;
+function calRead() {
+  var t0 = iso(addDays(today(), -60)) + "T00:00:00Z", t1 = iso(addDays(today(), 183)) + "T00:00:00Z";
+  return api("https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=250&timeMin=" + encodeURIComponent(t0) + "&timeMax=" + encodeURIComponent(t1) + "&fields=" + encodeURIComponent("items(id,summary,start,end,organizer(email,self),status)")).then(function (r) { return r.items || []; });
+}
+function calSort(items) {
+  var out = [];
+  items.forEach(function (e) {
+    if (e.status === "cancelled") return;
+    var s = e.summary || "", org = e.organizer && !e.organizer.self && e.organizer.email && !/calendar\.google\.com$/.test(e.organizer.email) ? e.organizer.email : "", who = org ? party(org) : null;
+    var dom = org ? (org.split("@")[1] || "").split(".")[0] : "", ext = !!org && !FREEMAIL.test(dom), work = CALW.test(s);
+    if (!work && !ext) return;
+    var st = (e.start && (e.start.date || (e.start.dateTime || "").slice(0, 10))) || "", en = e.end && e.end.date ? iso(addDays(parse(e.end.date), -1)) : e.end && e.end.dateTime ? e.end.dateTime.slice(0, 10) : st;
+    if (!st) return;
+    var low = s.toLowerCase(), status = /second hold|2nd hold/.test(low) ? "Second hold" : /\bhold\b|1st hold|first hold/.test(low) ? "First hold" : /pencil|\btbc\b|\?/.test(low) ? "Pencil" : work ? "Confirmed" : "Pencil";
+    out.push({ id: "cb" + e.id, start: st, end: en > st ? en : "", client: who ? who.co : "", production: jobName(s, who ? who.co : "Calendar"), contact: who ? who.mail : "", status: status, rate: D.settings.rate || OB.f.rate || "", days: "1", agent: "", notes: "From your calendar: " + s.slice(0, 80), terms: "", pick: work, src: "calendar" });
+  });
+  /* The same job over several days is one booking. */
+  var M = []; out.forEach(function (b) { var p = M[M.length - 1]; if (p && p.production.toLowerCase() === b.production.toLowerCase() && b.start <= iso(addDays(parse(p.end || p.start), 1))) { var e2 = b.end || b.start; if (e2 > (p.end || p.start)) p.end = e2; } else M.push(b); });
+  M.forEach(function (b) { b.days = String(b.end ? daysBetween(parse(b.start), parse(b.end)) + 1 : 1); });
+  return M;
+}
+function overlaps(a, b) { return a.start && b.start && a.start <= (b.end || b.start) && b.start <= (a.end || a.start); }
+function sortAll(mails, cal, bank) {
+  var F = sortMail(mails);
+  calSort(cal).forEach(function (c) {
+    var m = F.bookings.find(function (b) { return overlaps(b, c); });
+    if (m) { if (!m.end && c.end) { m.end = c.end; m.days = c.days; } m.src = "email and calendar"; if (!m.client && c.client) m.client = c.client; return; }
+    if (D.bookings.some(function (x) { return overlaps(x, c); })) return;
+    F.bookings.push(c);
+  });
+  F.bookings.sort(function (a, b) { return (a.start || "9") < (b.start || "9") ? -1 : 1; });
+  var B = bankSort(bank || [], F.invoices);
+  /* A remittance email for an invoice already in the sheet marks it paid too. */
+  (F.rem || []).forEach(function (p, i) { var v = D.invoices.find(function (x) { return !x.paid && ((p.no && x.number && p.no.toLowerCase() === x.number.toLowerCase()) || (p.amt && Math.abs(num(x.amount) - num(p.amt)) < 0.01 && x.client.toLowerCase() === String(p.who).toLowerCase())); }); if (v && !B.paid.some(function (y) { return y.inv.id === v.id; })) B.paid.push({ id: "rm" + i, inv: v, old: true, date: p.at, amt: num(p.amt || v.amount), desc: "Remittance from " + p.who, pick: true }); });
+  F.paid = B.paid; F.income = B.income; F.costs = B.costs; F.events = (cal || []).length; F.bankN = (bank || []).length;
+  return F;
+}
+function emptyFound() { return { bookings: [], invoices: [], todos: [], mail: [], mails: 0, paid: [], income: [], costs: [], events: 0, bankN: 0 }; }
+function obGo() {
+  obRead(); OB.err = "";
+  if (!OB.cal && !OB.mail && !OB.bank.length) { SCAN.found = emptyFound(); scanAdd(); return; }
+  runScan({ mail: OB.mail, cal: OB.cal, bank: OB.bank });
+}
+/* What onboarding collected goes into Settings, and a producer's job becomes their first job. */
+function obApply(st) {
+  var f = OB.f, P = obProd();
+  st.name = f.name || st.name || G.name || ""; st.role = OB.role || st.role || ""; st.work = OB.work || st.work || "Both";
+  ["trading", "addr", "bank", "vat"].forEach(function (k) { if (f[k] != null) st[k] = f[k]; });
+  if (P) { st.job = "prod"; ["companyNo", "payroll", "accountant", "crewTerms"].forEach(function (k) { if (f[k] != null) st[k] = f[k]; }); }
+  else { ["grade", "rate", "tax", "hasAgent", "agent", "agentEmail"].forEach(function (k) { if (f[k] != null) st[k] = f[k]; }); st.terms = f.terms || st.terms || "30"; if (st.job === "prod") st.job = ""; }
+  st.terms = st.terms || "30"; st.tax = st.tax || "25"; st.mileage = st.mileage || "45"; st.invoicePrefix = st.invoicePrefix || "INV"; st.mail = OB.mail ? "Gmail" : st.mail || "Gmail";
+  if (OB.cal) st.cal = "1"; if (OB.mail) st.scanned = iso(today()); st.onb = "2";
+}
+
+/* A producer's job, from onboarding or the New job sheet. */
+function crewParse(t) {
+  return String(t || "").split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
+    var em = (l.match(/[\w.+-]+@[\w-]+\.[\w.]+/) || [""])[0], ph = (l.match(/(\+44\s?7\d{3}|07\d{3})\s?\d{3}\s?\d{3}/) || [""])[0];
+    var rest = l.replace(em, "").replace(ph, "").split(/[,\t;|]|\s-\s/).map(function (s) { return s.trim(); }).filter(Boolean);
+    return { n: rest[0] || em.split("@")[0], grade: rest[1] || "", email: em, phone: ph };
+  }).filter(function (c) { return c.n && !/^(name|full name|crew)$/i.test(c.n); });
+}
+function pjFrom(f) {
+  var sh = f.shoot || iso(addDays(today(), 14));
+  return { real: true, name: f.job || "New job", client: f.client || "", brand: f.brand || "", accounts: f.accounts || "", po: f.po || "", budget: num(f.budget), shoot: sh, days: num(f.days) || 1, terms: f.jterms || "APA", split: num(f.split) || 50, payDays: num(f.payDays) || 30, pshoot: f.pshoot || sh,
+    award: null, crew: crewParse(f.crew).map(function (c, i) { return { id: "c" + uid().slice(-6) + i, n: c.n, grade: gradeMatch(f.jterms === "Bectu" ? "Bectu" : "APA", c.grade), pay: "Self-employed", h: (c.n.length * 47) % 360, email: c.email, phone: c.phone, sp: [0, 0, 0], call: "", wrap: "" }; }),
+    unit: { call: "07:00", lunch: "1 hour", wrap: "19:00" }, ask: null, wrap: null, sign: {}, run: null, extras: [], permits: (f.permits || []).slice(), cs: [{ v: 1, by: "Producer", f: { Call: "", Location: "", "Unit base": "", Lunch: "", Weather: "" } }], rights: [] };
+}
+/* "1st AC" or "spark" typed in a crew list, matched to the grade on the card so the rate fills in. */
+function gradeMatch(card, g) {
+  var t = String(g || "").toLowerCase().trim(); if (!t) return "";
+  var rows = (RATES[card] || RATES.APA).rows, alias = { dp: "director of photography", dop: "director of photography", "focus puller": "1st ac", "clapper loader": "2nd ac", sparks: "spark", electrician: "spark", "best boy": "best boy", sound: "sound recordist", mua: "make-up", hmu: "hair", runner: "runner" };
+  var q = alias[t] || t, hit = rows.find(function (r) { return r[1].toLowerCase() === q; }) || rows.find(function (r) { return r[1].toLowerCase().indexOf(q) === 0; }) || rows.find(function (r) { return r[1].toLowerCase().indexOf(q) >= 0; });
+  return hit ? hit[1] : String(g).trim();
+}
+/* The producer's own shoot days go in the diary too. */
+function jobBooking(f) { var d = num(f.days) || 1, en = d > 1 ? iso(addDays(parse(f.shoot), d - 1)) : ""; return { id: uid(), start: f.shoot, end: en, client: f.client || "", production: f.job, contact: f.accounts || "", status: "Confirmed", rate: "", days: String(d), agent: "", notes: "Your job", terms: f.jterms || "APA", kit: "", extra: "", po: f.po || "", message: "", fields: "", grade: "" }; }
+function pjNewCard() {
+  return '<button class="onb scanh" data-pjnew><span class="onb-t"><span class="part">Run the job</span><span>Add the job you\'re on: the award, shoot days, crew and permits</span></span><span class="go" aria-hidden="true">→</span></button>';
+}
+function pjNewSheet() {
+  return "<h2>A new job.</h2><p class=\"q\">The award, the shoot and who pays. Paste the crew in as you book them.</p>" +
+    '<div class="grid2">' + field("nj-job", "Job name", "", "text", "e.g. Canal promo") + field("nj-client", "Agency or client", "", "text", "Who you invoice") + "</div>" +
+    '<div class="grid2">' + field("nj-brand", "Brand", "", "text") + field("nj-accounts", "Their accounts email", "", "email") + "</div>" +
+    '<div class="grid2">' + field("nj-budget", "Budget (£)", "", "number", "", ' inputmode="numeric"') + field("nj-po", "PO number", "", "text") + "</div>" +
+    '<div class="grid2">' + field("nj-shoot", "First shoot day", "", "date") + field("nj-days", "Shoot days", "1", "number", "1", ' inputmode="numeric"') + "</div>" +
+    '<div class="field"><span class="lab">Crew terms</span>' + pills("njterms", ["APA", "Bectu"], D.settings.work === "TV and film" ? "Bectu" : "APA") + "</div>" +
+    '<div class="field"><label for="nj-crew">Crew, one a line: name, role, email</label><textarea id="nj-crew" rows="5"></textarea></div>' +
+    '<div class="acts"><button class="btn solid wide" data-pjnewsave>Start the job</button></div>' + (D.pj && D.pj.real ? '<p class="q">' + esc(D.pj.name) + " moves to your past jobs.</p>" : "");
+}
+function pjNewSave() {
+  var f = { job: val("nj-job"), client: val("nj-client"), brand: val("nj-brand"), accounts: val("nj-accounts"), budget: val("nj-budget"), po: val("nj-po"), shoot: val("nj-shoot"), days: val("nj-days"), jterms: picked("njterms") || "APA", crew: val("nj-crew"), split: "50", payDays: String(num(D.settings.terms) || 30) };
+  if (!f.job) { banner("Give the job a name."); return; }
+  if (D.pj && D.pj.real) { D.pjPast = (D.pjPast || []).concat([D.pj]).slice(-20); }
+  D.pj = pjFrom(f); closeSheet(); extrasSave(); if (f.shoot) upsert("Bookings", jobBooking(f)).then(render); render(); banner(f.job + " is set up. Start with the award or the crew.");
+}
+
+/* Idea 1: type a job in one line. */
+function quickAdd() {
+  return '<form class="qa" id="qa" autocomplete="off"><input id="qa-in" placeholder="Add a job: Nike, 6–7 Nov, £650" aria-label="Add a job in one line" enterkeyhint="done"><button class="btn solid sm" type="submit">Add</button></form>' +
+    (D.bookings.length ? "" : '<p class="q qa-h">Say hold or pencil to add it as a hold. Start with "Invoice" to add an invoice, like "Invoice Heinz £1,250".</p>');
+}
+function quickParse(t) {
+  var s = String(t).trim(), low = s.toLowerCase(), am = s.match(/£\s?([\d,]+(?:\.\d+)?)\s*(k\b)?/i), amt = am ? num(am[1]) * (am[2] ? 1000 : 1) : 0;
+  if (/^(inv|invoice)\b/i.test(s)) return { k: "inv", client: s.replace(/^inv(oice)?\s*(to|for)?\s*/i, "").replace(/£\s?[\d,.]+\s*k?/i, "").replace(/,/g, " ").replace(/\s+/g, " ").trim(), amount: amt };
+  var d = findDate(s, today()), parts = s.split(/,|;|\s-\s|\s–\s/).map(function (x) { return x.trim(); }).filter(Boolean);
+  var st = /second hold|2nd hold/.test(low) ? "Second hold" : /\bhold\b|1st hold|first hold/.test(low) ? "First hold" : /pencil|\btbc\b/.test(low) ? "Pencil" : "Confirmed";
+  var words = parts.filter(function (p) { return !/£/.test(p) && !findDate(p, today()) && !/^\d/.test(p); }).map(function (p) { return p.replace(/\b(second hold|2nd hold|first hold|1st hold|hold|pencil(led)?|confirmed|booked|tbc)\b/ig, "").trim(); }).filter(Boolean);
+  return { k: "bk", production: words[0] || "", client: words[1] || "", start: d ? iso(d.start) : "", end: d && d.end ? iso(d.end) : "", status: st, rate: amt ? String(amt) : "" };
+}
+function quickSave(t) {
+  var q = quickParse(t), save = function (tab, o) { if (mode === "demo") { D[KEY[tab]].push(o); demoSave(); render(); return Promise.resolve(); } return upsert(tab, o).then(render); };
+  if (q.k === "inv") {
+    if (!q.client || !q.amount) { banner('Say who and how much, like "Invoice Heinz £1,250".'); return; }
+    var iss = today();
+    save("Invoices", { id: uid(), booking: "", number: nextInvoiceNumber(), client: q.client, contact: "", amount: String(q.amount), issued: iso(iss), due: iso(addDays(iss, num(D.settings.terms) || 30)), paid: "", notes: "" }).then(function () { banner("Invoice to " + q.client + " added. It shows as owed until it's paid."); });
+    return true;
+  }
+  if (!q.production) { banner('Start with the job or client, like "Nike, 6 Nov".'); return; }
+  if (!q.start) { banner('Add a date, like "6 Nov" or "6–7 Nov".'); return; }
+  var o = { id: uid(), start: q.start, end: q.end, client: q.client || q.production, production: q.production, contact: "", status: q.status, rate: q.rate || D.settings.rate || "", days: String(q.end ? daysBetween(parse(q.start), parse(q.end)) + 1 : 1), agent: "", notes: "", terms: "", kit: "", extra: "", po: "", message: "", fields: "", grade: D.settings.grade || "" };
+  save("Bookings", o).then(function () { banner(o.production + ", " + nice(o.start) + (o.end ? " to " + nice(o.end) : "") + ", " + o.status.toLowerCase() + ". Tap it to change anything."); });
+  return true;
+}
+
+/* Idea 2: every empty list says what to do next. */
+function emptyNext(t, b, a) { return '<div class="empty nx"><span>' + esc(t) + '</span><button class="lnk" ' + a + ">" + esc(b) + ' <span aria-hidden="true">→</span></button></div>'; }
+
+/* Idea 3: a nudge to scan again once a week. */
+function rescanLine() {
+  var last = D.settings.scanned; if (!last) return "";
+  var n = daysBetween(parse(last), today()); if (n < 7) return "";
+  return '<button class="onb scanh" data-rescan><span class="onb-t"><span class="part">' + n + ' days since your last scan</span><span>Check for new call sheets, holds' + (D.settings.cal === "1" ? ", calendar changes" : "") + ' and payments</span></span><span class="go" aria-hidden="true">→</span></button>';
+}
+/* Real accounts that haven't connected anything yet get one way back into setup. */
+function obNudge() {
+  if (D.settings.onb === "2" || flag("sy-obnudge-off")) return "";
+  return '<div class="onb scanh obn"><button class="onb-t" data-obstart="1"><span class="part">Finish setting up</span><span>Connect your calendar and bank statements so Systems can match everything up</span></button><button class="lnk" data-obnudgeoff>Not now</button></div>';
+}
+
+/* Idea 4: a short line the first time each page opens. */
+var TIPS = {
+  home: ["Home is what needs you, what's coming up and what you're owed. Type a job in the box to add it.", "02-getting-started"],
+  bookings: ["Your diary. Tap a job to log hours, change the status or make the invoice.", "14-your-diary"],
+  money: ["What you're owed and what's late. Late ones get the chase drafted for you.", "16-systems-with-xero"],
+  more: ["Your details, exports for your accountant, and the rest of the tools.", "17-your-data-and-exports"],
+  "t-bank": ["Drop in a bank CSV any time to mark invoices paid.", ""],
+  "t-inbox": ["Work email from your last scan, grouped by job.", ""],
+  "t-rates": ["APA and Bectu rates by grade, kept up to date.", "13-rates"]
+};
+function tipFor(t) {
+  if (mode !== "google" || flag("sy-tip-" + t)) return "";
+  var x = TIPS[t]; if (t === "home" && isProd()) x = ["Run the job takes you from the award to the pay run, step by step. Type a job in the box to add a booking.", "03-systems-as-a-producer"];
+  if (!x) return "";
+  return '<div class="tipl"><span>' + esc(x[0]) + "</span>" + (x[1] ? '<a class="lnk" target="_blank" rel="noopener" href="' + tutUrl(x[1]) + '">Watch, under a minute</a>' : "") + (t === "home" ? '<button class="lnk" data-tab="t-help">All the how-tos</button>' : "") + '<button class="lnk" data-tipoff="' + esc(t) + '">Got it</button></div>';
+}
+
+/* Idea 5: paste an email from any mail app. */
+function pasteBox() {
+  return '<div class="part">Not on Gmail?</div><p class="q">Copy a call sheet, hold, award or remittance email and paste it here. Systems reads it the same way as a scan.</p><div class="field"><textarea id="pm-text" rows="5" placeholder="Paste the whole email, with the subject line"></textarea></div><div class="acts"><button class="btn" data-pasteread>Read it</button></div>';
+}
+function pasteRead() {
+  var t = val("pm-text"); if (!t) { banner("Paste an email first."); return; }
+  var subj = (t.match(/^\s*subject:\s*(.+)$/im) || [])[1] || t.split(/\r?\n/).find(function (l) { return l.trim(); }) || "", from = (t.match(/^\s*from:\s*(.+)$/im) || [])[1] || (t.match(/[\w.+-]+@[\w-]+\.[\w.]+/) || [""])[0];
+  var dt = (t.match(/^\s*(date|sent):\s*(.+)$/im) || [])[2], when = dt && !isNaN(new Date(dt)) ? new Date(dt) : new Date(), low = t.toLowerCase();
+  var k = /call ?sheet/.test(low) ? "cs" : /remittance|payment (advice|sent|confirmation)|has been paid/.test(low) ? "paid" : /timesheet|time sheet|start pack|start form|purchase order/.test(low) ? "do" : "bk", id = "p" + uid();
+  var m = { id: id, threadId: id, labelIds: [], snippet: t.replace(/\s+/g, " ").slice(0, 500), internalDate: String(+when), payload: { headers: [{ name: "Subject", value: subj.trim() }, { name: "From", value: from.trim() }] }, k: k };
+  SCAN.found = sortAll([m], [], []); SCAN.found.mails = 1; SCAN.found.pasted = true; SCAN.stage = "review"; closeSheet(); render(); window.scrollTo(0, 0);
+}
+
+function obClick(b) {
+  var d = b.dataset;
+  if (d.obstart) { obStart(+d.obstart || 0); return true; }
+  if (b.hasAttribute("data-obnudgeoff")) { flag("sy-obnudge-off", "1"); render(); return true; }
+  if (b.hasAttribute("data-obnext")) { obRead(); if (OB.step === 0 && (!OB.f.name || !OB.role)) { banner(!OB.f.name ? "Add your name first." : "Pick what you do."); return true; } OB.err = ""; OB.step = Math.min(OB.step + 1, obSteps().length - 1); obSave(); render(); window.scrollTo(0, 0); return true; }
+  if (b.hasAttribute("data-obback")) { obRead(); OB.err = ""; OB.step = Math.max(0, OB.step - 1); obSave(); render(); window.scrollTo(0, 0); return true; }
+  if (d.obcon) { obConnect(d.obcon); return true; }
+  if (d.obbankx) { var x = OB.files.splice(+d.obbankx, 1)[0]; if (x) OB.bank = OB.bank.filter(function (r) { return r.file !== x.name; }); obSave(); render(); return true; }
+  if (d.obpermit) { obRead(); var P = OB.f.permits = OB.f.permits || [], i = P.indexOf(d.obpermit); if (i >= 0) P.splice(i, 1); else P.push(d.obpermit); obSave(); render(); return true; }
+  if (b.hasAttribute("data-obgo")) { obGo(); return true; }
+  if (b.hasAttribute("data-pjnew")) { openSheet(pjNewSheet()); return true; }
+  if (b.hasAttribute("data-pjnewsave")) { pjNewSave(); return true; }
+  if (b.hasAttribute("data-rescan")) { runScan({ mail: true, cal: D.settings.cal === "1" }); return true; }
+  if (d.tipoff) { flag("sy-tip-" + d.tipoff, "1"); render(); return true; }
+  if (b.hasAttribute("data-pasteread")) { pasteRead(); return true; }
+  return false;
+}
+document.addEventListener("change", function (e) {
+  var t = e.target;
+  if (t.id === "ob-bankfile") { obRead(); obBankFiles(t.files); }
+  if (t.id === "ob-crewfile") readFiles(t.files, function (f, txt) { var R = csvRows(txt), h = (R[0] || []).map(function (x) { return x.toLowerCase(); }), ni = h.findIndex(function (x) { return /name/.test(x); }), ri = h.findIndex(function (x) { return /role|position|job|grade|dept/.test(x); }), ei = h.findIndex(function (x) { return /mail/.test(x); }), body = ni >= 0 ? R.slice(1) : R;
+    var lines = body.map(function (r) { return ni >= 0 ? [r[ni], ri >= 0 ? r[ri] : "", ei >= 0 ? r[ei] : ""].filter(Boolean).join(", ") : r.filter(Boolean).join(", "); }).filter(Boolean), ta = $("ob-crew"); if (ta) ta.value = (ta.value ? ta.value.trim() + "\n" : "") + lines.join("\n"); banner(lines.length + " people added from " + f.name + "."); });
+});
+document.addEventListener("submit", function (e) { if (e.target.id === "qa") { e.preventDefault(); var v = val("qa-in"); if (v && quickSave(v)) { var i = $("qa-in"); if (i) i.value = ""; } } });
 /* ---------- start-up ---------- */
 function startGoogle(silent) {
   return getToken(silent).then(function () {
@@ -1836,7 +2214,14 @@ function startGoogle(silent) {
     mode = "google";
     if (id) { G.sheetId = id; return ensureTabs().then(readAll).then(function (d) { D = d; extrasLoad(); }); }
     D = { bookings: [], invoices: [], expenses: [], days: [], settings: { name: "", rate: "", terms: "30", tax: "25", mileage: "45", mail: "Gmail", hasAgent: "No", invoicePrefix: "INV" } };
-  }).then(function () { scanLoad(); render(); if (flag("sy-scan-pending")) { try { localStorage.removeItem("sy-scan-pending"); } catch (e) {} if (G.gmail) runScan(); } });
+  }).then(function () {
+    scanLoad();
+    var pend = flag("sy-scan-pending"); try { localStorage.removeItem("sy-scan-pending"); } catch (e) {}
+    if (OB.active && OB.email && OB.email !== G.email) OB = obBlank();
+    if (OB.active) { if (G.cal) OB.cal = true; if (G.gmail) OB.mail = true; obSave(); render(); return; }
+    if (!G.sheetId || !D.settings.name) { obStart(0); return; }
+    render(); if (pend && G.gmail) runScan({ mail: true, cal: D.settings.cal === "1" });
+  });
 }
 function saveSetup() {
   var s = D.settings;
@@ -1854,7 +2239,7 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
-  if (scanClick(b) || pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
+  if (obClick(b) || scanClick(b) || pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }

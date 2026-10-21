@@ -115,13 +115,14 @@ function tokenFromHash() {
   var q = {}; h.slice(1).split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) q[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); });
   try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
   if (q.state !== "eltio-systems") return false;
+  if (q.access_token && (q.scope || "").indexOf("drive.file") < 0) { banner("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box."); G.needDrive = true; return false; }
   if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
   try { localStorage.removeItem("eltio-systems-signed-in"); } catch (e) {}
   return false;
 }
 function redirectToGoogle(silent) {
   var u = "https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=eltio-systems" +
-    "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(SCOPE) + "&prompt=" + (silent ? "none" : "select_account");
+    "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(SCOPE) + "&prompt=" + (silent ? "none" : (G.needDrive ? "consent" : "select_account"));
   location.assign(u);
   return new Promise(function () {}); /* the page is leaving */
 }
@@ -131,9 +132,13 @@ function getToken(silent) {
   return loadGis().then(function () {
     return new Promise(function (ok, bad) {
       if (!G.client) G.client = google.accounts.oauth2.initTokenClient({ client_id: CFG.googleClientId, scope: SCOPE, callback: function () {} });
-      G.client.callback = function (r) { if (r.error) return bad(new Error(r.error)); G.token = r.access_token; G.exp = Date.now() + (r.expires_in - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} ok(); };
+      G.client.callback = function (r) {
+        if (r.error) return bad(new Error(r.error));
+        /* Google lets people untick the Drive box on its consent screen. Without it there's nowhere to keep the sheet. */
+        if (google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, "https://www.googleapis.com/auth/drive.file")) { G.needDrive = true; return bad(new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen.")); }
+        G.needDrive = false; G.token = r.access_token; G.exp = Date.now() + (r.expires_in - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} ok(); };
       G.client.error_callback = function (e) { bad(new Error(e && e.type || "sign-in cancelled")); };
-      G.client.requestAccessToken({ prompt: silent ? "" : "select_account" });
+      G.client.requestAccessToken({ prompt: silent ? "" : (G.needDrive ? "consent" : "select_account") });
     });
   });
 }
@@ -141,7 +146,7 @@ function api(url, opt) {
   opt = opt || {};
   var go = function () {
     return fetch(url, { method: opt.method || "GET", headers: Object.assign({ Authorization: "Bearer " + G.token }, opt.body ? { "Content-Type": "application/json" } : {}), body: opt.body ? JSON.stringify(opt.body) : undefined })
-      .then(function (r) { if (r.status === 401) { G.token = null; throw { retry: true }; } if (!r.ok) return r.text().then(function (t) { throw new Error("Google said " + r.status + ": " + t.slice(0, 160)); }); return r.status === 204 ? {} : r.json(); });
+      .then(function (r) { if (r.status === 401) { G.token = null; throw { retry: true }; } if (!r.ok) return r.text().then(function (t) { if (r.status === 403 && /insufficient/i.test(t)) { G.needDrive = true; G.token = null; throw new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen."); } throw new Error("Google said " + r.status + ": " + t.slice(0, 160)); }); return r.status === 204 ? {} : r.json(); });
   };
   var ensure = G.token && Date.now() < G.exp ? Promise.resolve() : getToken(true);
   return ensure.then(go).catch(function (e) { if (e && e.retry) return getToken(true).then(go); throw e; });

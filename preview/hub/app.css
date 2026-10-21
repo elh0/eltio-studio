@@ -280,3 +280,12 @@ html.mac .wide .two .cardpad{margin:0}
 .logo i.on{background:#FAFAFA}
 .empty-note{padding:12px 14px;font-size:13px;color:var(--muted)}
 .banner2{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:60;background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:8px 14px;font-size:13px;max-width:92vw}
+/* tappable rows: timeline events, tree lines, KPI tiles */
+.tap{cursor:pointer}
+.rows .r.tap:hover,.leaf.tap:hover,.gantt .lane.tap:hover{background:var(--raised)}
+.kpi.tap:hover{border-color:var(--border2)}
+.rows .r.tap svg{margin-left:auto;color:var(--faint);flex:none;width:14px;height:14px}
+.rows .addev{display:flex;gap:6px;align-items:center;width:100%;border:0;border-top:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;text-align:left;font:inherit;font-size:12px;padding:11px 14px}
+.rows .addev svg{width:14px;height:14px}
+input.in2[type=date]{color-scheme:dark}
+.rows .r.tap .w+svg{margin-left:6px}

@@ -23,6 +23,7 @@ var TABS = {
 };
 
 var IC = {
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
   chev: '<path d="m9 18 6-6-6-6"/>', left: '<path d="m15 18-6-6 6-6"/>', copy: '<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/>',
   check: '<path d="M20 6 9 17l-5-5"/>', cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>', out: '<path d="M7 17 17 7M8 7h9v9"/>',
   home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
@@ -429,10 +430,10 @@ function askBub(m, k) {
   }
   if (!m.area || m.pick) return '<div class="bub it rise"><span>' + (m.area ? "Which project should it go to?" : "Which project is this for? I couldn't tell from the words.") + "</span>" + areaChips(k) + "</div>";
   var L = makePrompt(m);
-  return '<div class="bub it rise"><span>Here\'s your prompt for the <b style="font-weight:500">' + PROJECT[m.area] + '</b> project.</span><div class="code">' + L.map(function (l, i) { return '<span class="ln">' + (i + 1) + '</span><span class="tx">' + esc(l) + "</span>"; }).join("") + '</div></div><div class="reacts rise"><button type="button" data-act="copyask" data-k="' + k + '">' + ic("copy") + 'Copy</button><button type="button" data-act="shorter" data-k="' + k + '">' + (m.short ? "Longer" : "Shorter") + '</button><button type="button" data-act="proj" data-k="' + k + '">Change project</button></div>';
+  return '<div class="bub it rise"><span>Here\'s your prompt for the <b style="font-weight:500">' + PROJECT[m.area] + '</b> project.</span><div class="code">' + L.map(function (l, i) { return '<span class="ln">' + (i + 1) + '</span><span class="tx">' + esc(l) + "</span>"; }).join("") + '</div></div><div class="reacts rise"><button type="button" data-act="copyask" data-k="' + k + '">' + ic("copy") + 'Copy</button><button type="button" data-act="shorter" data-k="' + k + '">' + (m.short ? "Longer" : "Shorter") + '</button><button type="button" data-act="proj" data-k="' + k + '">Change project</button><button type="button" data-act="delask" data-k="' + k + '" aria-label="Delete this prompt">' + ic("x") + "Delete</button></div>";
 }
 function vAsk() {
-  var h = topbar() + '<div class="main" style="display:flex;flex-direction:column"><div class="chat">';
+  var h = (S.chat.length ? topbar().replace('<span style="display:flex;gap:6px">', '<span style="display:flex;gap:6px"><button type="button" class="btn sm" data-act="clearchat">Clear all</button>') : topbar()) + '<div class="main" style="display:flex;flex-direction:column"><div class="chat">';
   if (!S.chat.length) h += '<div class="empty" style="padding-top:30px"><div class="tile">' + ic("spark") + '</div><h3>Make the prompt</h3><p class="muted">Type or dictate a rough goal. You get a full prompt for the right project, using what\'s open in that area.</p></div>';
   S.chat.forEach(function (m, k) { h += m.me ? '<div class="bub me rise">' + esc(m.t) + "</div>" : askBub(m, k); });
   return h + '</div></div><div class="compose"><textarea id="ask-in" rows="1" placeholder="Rough goal… tap the keyboard mic to talk" aria-label="Rough goal"></textarea><button type="button" class="btn icon" data-act="ask" aria-label="Make the prompt">' + ic("send") + "</button></div>";
@@ -570,6 +571,9 @@ document.addEventListener("click", function (e) {
   if (a === "copyask") return copy(makePrompt(m).join("\n"), null);
   if (a === "shorter") { m.short = !m.short; return render(); }
   if (a === "proj") { m.pick = true; return render(); }
+  /* a prompt goes with the message that asked for it; the chat also clears itself on every restart */
+  if (a === "delask") { var dk = +d.k, from = dk > 0 && S.chat[dk - 1].me ? dk - 1 : dk; S.chat.splice(from, dk - from + 1); return render(); }
+  if (a === "clearchat") { S.chat = []; return render(); }
   if (a === "setarea") { m.area = d.a; m.pick = false; return render(); }
   if (a === "askitem") { var it = item(d.id); if (it) { S.chat.push({ me: 1, t: it.title }); S.chat.push({ g: it.title, area: it.area }); render(); } return; }
 });

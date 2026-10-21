@@ -121,3 +121,5 @@ a.row{text-decoration:none;color:inherit}
 .fwd-ad{display:block;font-family:var(--mono);font-size:13px;color:var(--fg);word-break:break-all;margin-top:4px}
 .fwd-s{margin:4px 0 8px;padding-left:20px;font-size:14px;color:var(--q)}.fwd-s li{margin:4px 0}
 .ob .pills a.btn,.ob .acts a.btn{text-decoration:none}
+.bh .pills{margin:10px 0 6px;flex-wrap:wrap;width:auto;border-radius:22px}.bh .pill{padding:6px 11px;font-size:13px}
+.bh-w{margin:8px 0 2px;font-family:var(--mono);font-size:12px;color:var(--q)}

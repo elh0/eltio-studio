@@ -929,7 +929,8 @@ function pjClick(b) {
 /* Bank statement: a CSV export from any UK bank, matched to unpaid invoices by amount or invoice number. No bank login. */
 var BANKROWS = [];
 function csvRows(t) {
-  return String(t).split(/\r?\n/).filter(function (l) { return l.trim(); }).map(function (l) { var out = [], cur = "", q = false; for (var i = 0; i < l.length; i++) { var ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if (ch === "," && !q) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map(function (x) { return x.trim(); }); });
+  var dl = String(t).split("\t").length > String(t).split(",").length ? "\t" : ",";
+  return String(t).split(/\r?\n/).filter(function (l) { return l.trim(); }).map(function (l) { var out = [], cur = "", q = false; for (var i = 0; i < l.length; i++) { var ch = l[i]; if (ch === '"') { if (q && l[i + 1] === '"') { cur += '"'; i++; } else q = !q; } else if (ch === dl && !q) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map(function (x) { return x.trim(); }); });
 }
 /* Money in only: the first column that reads as a positive amount, the longest text as the description, any date as the date. */
 function readStatement(t) {
@@ -946,7 +947,7 @@ function sampleStatement() { var o = outstanding().slice(0, 2); return "Date,Des
 function bankSheet() {
   var M = BANKROWS.map(function (r) { return { r: r, v: matchInv(r) }; }), hit = M.filter(function (x) { return x.v; });
   return '<div class="top"><span class="q">Bank statement · CSV</span><span class="q">No bank login</span></div><h2>Who\'s paid you.</h2><p class="q">Download a CSV statement from your bank\'s app or website and drop it here. Payments in are matched to your unpaid invoices. Nothing leaves this device.</p>' +
-    '<div class="field"><label for="bk-file">Your statement (.csv)</label><input id="bk-file" type="file" accept=".csv,text/csv"></div>' +
+    '<div class="field"><label for="bk-file">Your statement (.csv)</label><input id="bk-file" type="file" accept=".csv,.xls,.txt,text/csv"></div>' + bankHow() +
     (BANKROWS.length ? '<div class="part">' + BANKROWS.length + " payments in · " + hit.length + ' match</div><div class="rows">' + M.map(function (x, i) {
       return '<div class="row static"><span>' + esc(x.r.desc) + ' <span class="q">· ' + esc(x.r.date) + '</span></span><span class="tag' + (x.v ? " ok" : "") + '">' + pounds(x.r.amt) + '</span><span class="sub">' + (x.v ? "Matches " + esc(x.v.number) + ", " + esc(x.v.client) + ' <button class="lnk" data-bankpaid="' + i + '">Mark paid</button>' : "No unpaid invoice for this amount") + "</span></div>";
     }).join("") + "</div>" + (hit.length ? '<div class="acts"><button class="btn solid" data-bankall>Mark ' + hit.length + " paid</button></div>" : "") : '<div class="acts"><button class="btn" data-banksample>Try a sample statement</button></div>');
@@ -1907,11 +1908,11 @@ function obScreen() {
       '<div class="field"><span class="lab">Which email do you use for work?</span>' + pills("obmail", MAILK, mailKind()) + "</div>" +
       (mailKind() === "Gmail" ? '<div class="rows">' + con("gmail", "Gmail", P ? "Awards, call sheets, invoices you've sent and remittances." : "Call sheets, holds, invoices you've sent and remittances.", OB.mail) + "</div>" : fwdPanel()) +
       '<div class="rows">' +
-      '<div class="row static ob-c ob-bank"><span class="up-t">Bank statements<span class="q">A CSV from each account you get paid into' + (P ? ", business account first" : "") + '. Payments are matched to invoices, and work costs are picked out.</span></span><label class="btn sm' + (OB.files.length ? "" : " solid") + '" for="ob-bankfile">' + (OB.files.length ? "Add another" : "Add a CSV") + '</label><input id="ob-bankfile" class="vh" type="file" accept=".csv,text/csv" multiple></div>' +
+      '<div class="row static ob-c ob-bank"><span class="up-t">Bank statements<span class="q">A CSV from each account you get paid into' + (P ? ", business account first" : "") + '. Payments are matched to invoices, and work costs are picked out.</span></span><label class="btn sm' + (OB.files.length ? "" : " solid") + '" for="ob-bankfile">' + (OB.files.length ? "Add another" : "Add a CSV") + '</label><input id="ob-bankfile" class="vh" type="file" accept=".csv,.xls,.txt,text/csv" multiple></div>' +
       (OB.files.length ? OB.files.map(function (x, j) { return '<div class="row static ob-f"><span class="q">' + esc(x.name) + " · " + x.n + ' lines</span><button class="lnk" data-obbankx="' + j + '">Remove</button></div>'; }).join("") : "") +
       "</div>" +
       (OB.files.length ? '<p class="q">' + nIn + " payments in and " + nOut + " out, ready to match.</p>" : "") +
-      '<details class="ob-how"><summary class="q">How to get a CSV from your bank</summary><p class="q">On your bank\'s website or app, open your statements or transactions and look for Export, Download or CSV. Pick the last 12 months. Most UK banks and Monzo, Starling and Revolut offer it. Add one file per account.</p></details>' +
+      bankHow() +
       (mailKind() === "Gmail" ? '<p class="q">While Systems is being checked by Google, its screen says it "hasn\'t verified this app". Tap Advanced, then Go to Systems.</p>' : "");
   }
   if (k === "Your rate") body = "<h1>Your rate.</h1><p class=\"q\">So timesheets, overtime and invoices come out right first time.</p>" +
@@ -1964,6 +1965,39 @@ function obConnect(k) {
 function readFiles(files, fn) { Array.prototype.forEach.call(files || [], function (f) { var r = new FileReader(); r.onload = function () { fn(f, String(r.result || "")); }; r.readAsText(f); }); }
 function obBankFiles(files) {
   readFiles(files, function (f, t) { var rows = readBank(t); OB.bank = OB.bank.concat(rows.map(function (x) { x.file = f.name; return x; })).slice(-4000); OB.files.push({ name: f.name, n: rows.length }); obSave(); render(); if (!rows.length) banner("Couldn't find any payments in " + f.name + ". Is it a CSV statement?"); });
+}
+
+/* ---------- how to get a CSV from your bank: pick your bank, see its own steps ---------- */
+/* Where the export lives differs by bank: the app for Monzo, Starling, Tide and Wise, online banking on a computer for most high-street banks. */
+var BANKHOW = [
+  { n: "Monzo", w: "In the app", s: ["Open the Home tab and tap the three dots on your card.", "Tap Bank statements.", "Choose the dates. The last 12 months is ideal.", "Pick CSV, then save it or share it to this device."], note: "Monzo Business: log in at business.monzo.com and use Export statement.", url: "https://monzo.com/help/budgeting-overdrafts-savings/exporting-my-transactions" },
+  { n: "Starling", w: "In the app", s: ["Tap the account icon at the top right.", "Tap Statements, then Statement history.", "Choose a start and end date.", "Pick CSV and download it."], url: "https://www.starlingbank.com/features/statements/" },
+  { n: "Revolut", w: "In the app", s: ["On Home, tap Accounts under your balance.", "Pick the pounds account.", "Tap More (…), then Statement.", "Choose the dates, pick Excel, then Generate."], note: "If the file ends in .xlsx, open it and save it as CSV first.", url: "https://help.revolut.com/en-GB/help/profile-and-plan/managing-my-account/account-statement-per-chosen-currency/" },
+  { n: "Tide", w: "In the app or online", s: ["Tap Pay, then View more under your transactions.", "Filter to the dates you want.", "Tap the Share icon at the top right.", "Pick a CSV type, then Export."], url: "https://www.tide.co/help-centre/download-tide-account-statements-and-transactions" },
+  { n: "Wise", w: "In the app or online", s: ["Open your pounds balance.", "Tap the three dots, then Statements and reports.", "Choose the dates, up to a year.", "Pick CSV and confirm."], url: "https://wise.com/help/articles/2736049/how-do-i-download-a-statement" },
+  { n: "Barclays", w: "Online banking, on a computer", s: ["Log in to Online Banking and open the account.", "Click View all transactions.", "Set the dates and search.", "Click Export All at the bottom and pick CSV."], note: "The app only gives PDFs. Each export may only go back a few months, so do it in chunks.", url: "https://barclays.co.uk/help/online-banking/using-online-banking/export-data" },
+  { n: "HSBC", w: "Online banking, on a computer", s: ["Log on to online banking and pick the account.", "Choose Search and filter and set the dates.", "Scroll to the bottom of the list and click Download.", "Pick CSV and Continue."], note: "The app only gives PDFs. It may only allow a month or so per download." },
+  { n: "Lloyds or Halifax", w: "Internet banking, on a computer", s: ["Log on and open the account.", "Above your transactions, look for Export or Statement options.", "Choose Export transactions and pick CSV.", "Set the dates and Export."], note: "Same for Bank of Scotland. The app doesn't do CSV." },
+  { n: "NatWest or RBS", w: "Online banking, on a computer", s: ["Log in to Online Banking.", "Go to Statements and transactions, then View transactions.", "Pick the account and the dates.", "Click Export to Excel. The file it saves is a CSV."], note: "Same for Ulster Bank. Each export may only cover about 3 months." },
+  { n: "Santander", w: "Online banking, on a computer", s: ["Log on and open the account.", "Select Download transactions.", "Choose the dates.", "Pick Microsoft Excel and Download."], note: "Up to 600 transactions per download." },
+  { n: "Nationwide", w: "Internet bank, on a computer", s: ["Log in and open the account.", "View your transactions and set the dates.", "Open the Download transactions menu.", "Pick CSV."], note: "The app only gives PDFs." },
+  { n: "First Direct", w: "Online banking, on a computer", s: ["Log on and open the account.", "Go to your transactions.", "Click Download and set the dates.", "Pick CSV."] },
+  { n: "Metro", w: "Online banking, on a computer", s: ["Log in and open the account.", "Go to Transaction summary.", "Click Search and set the dates.", "Click Export for a CSV."], note: "Download gives a PDF, so use Export." },
+  { n: "Co-op", w: "Online banking, on a computer", s: ["Log in to Online Banking.", "Click Search transactions.", "Pick the account and the dates, then search.", "Change the format from PDF to CSV and Download."] },
+  { n: "Other", w: "App or website", s: ["Open your statements or transactions.", "Look for Export, Download or CSV.", "Pick the last 12 months.", "Save it, then add it here. One file per account."], note: "If your app only gives PDFs, try your bank's website on a computer." }
+];
+function bankPicked() { try { return localStorage.getItem("sy-bankhow") || ""; } catch (e) { return ""; } }
+function bankSteps(n) {
+  var b = BANKHOW.find(function (x) { return x.n === n; });
+  if (!b) return '<p class="q">Pick your bank to see where its CSV is.</p>';
+  return '<p class="bh-w">' + esc(b.w) + '</p><ol class="fwd-s">' + b.s.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>" +
+    (b.note ? '<p class="q">' + esc(b.note) + "</p>" : "") +
+    (b.url ? '<p class="q"><a class="lnk" target="_blank" rel="noopener" href="' + b.url + '">' + esc(b.n) + " help page</a></p>" : "");
+}
+function bankHow(open) {
+  var cur = bankPicked();
+  return '<details class="ob-how bh"' + (open || cur ? " open" : "") + '><summary class="q">How to get a CSV from your bank</summary>' +
+    pills("bankhow", BANKHOW.map(function (x) { return x.n; }), cur) + '<div class="bh-s">' + bankSteps(cur) + "</div></details>";
 }
 
 /* Bank CSVs: date, description and money in or out, whichever bank it's from. */
@@ -2347,7 +2381,7 @@ function saveSetup() {
 document.addEventListener("click", function (e) {
   var b = e.target.closest("button,a"); if (!b) { if (e.target.id === "shade") closeSheet(); return; }
   var d = b.dataset;
-  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "obmail") { obRead(); OB.kind = d.v; obSave(); render(); if (d.v !== "Gmail") fwdNew(); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
+  if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "bankhow") { try { localStorage.setItem("sy-bankhow", d.v); } catch (e) {} var bx = b.closest(".bh"); if (bx) bx.querySelector(".bh-s").innerHTML = bankSteps(d.v); return; } if (d.pick === "obmail") { obRead(); OB.kind = d.v; obSave(); render(); if (d.v !== "Gmail") fwdNew(); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
   if (obClick(b) || scanClick(b) || pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }

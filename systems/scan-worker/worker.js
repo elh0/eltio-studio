@@ -6,6 +6,8 @@
 
 const DOMAIN = "scan.eltio.systems";
 const KEEP = 60 * 60 * 24 * 30;
+/* Anything that isn't about work is dropped straight away, unread and unkept. */
+const WORK = /call ?sheet|callsheet|\bhold\b|pencil|avail|are you free|booking|booked|confirm|start date|invoice|\binv\b|remittance|payment|\bpaid\b|timesheet|time ?sheet|timecard|start (pack|form)|crew (form|list)|purchase order|\bpo\b|shoot|recce|\bprep\b|\bwrap\b|day rate|\brate\b|\bppm\b|award/i;
 const ORIGINS = ["https://eltio.systems", "https://elh0.github.io", "http://localhost:8765"];
 
 export default {
@@ -13,10 +15,14 @@ export default {
     const id = String(message.to || "").split("@")[0].toLowerCase();
     const user = id && (await env.SCAN.get("u:" + id));
     if (!user) return message.setReject("Unknown address");
-    const raw = await readRaw(message.raw, 400000);
-    const m = parseMail(raw);
-    const key = "m:" + id + ":" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-    await env.SCAN.put(key, JSON.stringify(m), { expirationTtl: KEEP });
+    const raw = await readRaw(message.raw, 2000000);
+    /* Several emails forwarded as attachments arrive as one; each is read on its own. */
+    const inner = attached(split(raw), 0, []).slice(0, 40).map(parseMail);
+    const list = (inner.length ? inner : [parseMail(raw)]).filter((m) => m.confirm || WORK.test(m.subject + " " + m.snippet + " " + m.files.join(" ")));
+    for (const m of list) {
+      const key = "m:" + id + ":" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      await env.SCAN.put(key, JSON.stringify(m), { expirationTtl: KEEP });
+    }
   },
 
   async fetch(req, env) {
@@ -124,6 +130,23 @@ function findText(p, depth) {
   if (ct.startsWith("text/html")) return { plain: "", html: partText(p) };
   return { plain: "", html: "" };
 }
+function attached(p, depth, out) {
+  const ct = (p.h["content-type"] || "").toLowerCase();
+  if (ct.startsWith("message/rfc822")) {
+    const te = (p.h["content-transfer-encoding"] || "").toLowerCase();
+    out.push(te === "base64" ? unB64(p.body) : te === "quoted-printable" ? unQP(p.body) : p.body);
+    return out;
+  }
+  if (ct.startsWith("multipart/") && depth < 5) {
+    const b = /boundary="?([^";]+)"?/i.exec(p.h["content-type"]);
+    if (b) p.body.split("--" + b[1]).slice(1).filter((x) => !x.startsWith("--")).forEach((x) => attached(split(x.replace(/^\r?\n/, "")), depth + 1, out));
+  }
+  if (/\.eml"?\s*$/i.test(p.h["content-disposition"] || "") && !ct.startsWith("multipart/") && !ct.startsWith("message/")) {
+    const te = (p.h["content-transfer-encoding"] || "").toLowerCase();
+    out.push(te === "base64" ? unB64(p.body) : p.body);
+  }
+  return out;
+}
 function stripHtml(s) {
   return s.replace(/<(style|script)[\s\S]*?<\/\1>/gi, " ").replace(/<br\s*\/?>|<\/(p|div|tr|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, " ")
     .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;|&rsquo;/g, "'").replace(/&pound;/g, "£");
@@ -142,6 +165,12 @@ function parseMail(raw) {
     text = text.slice(block.index + block[0].length);
   }
   subject = subject.replace(/^\s*((fwd?|fw|tr|wg)\s*:\s*)+/i, "");
+  /* The "confirm forwarding" email a mail app sends first: keep its link so the app can show it. */
+  let confirm = "";
+  if (/forwarding|verify|verification|confirm (your|this|the) (address|email)/i.test(subject) && /noreply|no-reply|forwarding|account|security/i.test(from)) {
+    const u = /https:\/\/[^\s"'<>)\]]+/.exec(t.plain || t.html || "");
+    confirm = u ? u[0] : "open";
+  }
   const when = Date.parse(date.replace(/ at /, " ")) || Date.now();
-  return { subject: subject.slice(0, 200), from: from.slice(0, 200), to: to.slice(0, 200), at: when, snippet: text.slice(0, 600), files, fwd };
+  return { subject: subject.slice(0, 200), from: from.slice(0, 200), to: to.slice(0, 200), at: when, snippet: text.slice(0, 600), files, fwd, confirm };
 }

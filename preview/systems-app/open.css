@@ -117,3 +117,7 @@ label.btn{cursor:pointer;display:inline-flex;align-items:center;justify-content:
 .obn{display:flex;align-items:center;gap:12px}.obn .onb-t{flex:1;text-align:left;background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:0}
 .ob{min-width:0;max-width:680px}.ob .pills:not(.jobs){flex-wrap:wrap;width:auto;border-radius:22px}
 a.row{text-decoration:none;color:inherit}
+/* any inbox: forwarding to a Systems address */
+.fwd-ad{display:block;font-family:var(--mono);font-size:13px;color:var(--fg);word-break:break-all;margin-top:4px}
+.fwd-s{margin:4px 0 8px;padding-left:20px;font-size:14px;color:var(--q)}.fwd-s li{margin:4px 0}
+.ob .pills a.btn,.ob .acts a.btn{text-decoration:none}

@@ -291,3 +291,14 @@ input.in2[type=date]{color-scheme:dark}
 .rows .r.tap .w+svg{margin-left:6px}
 .kpis.mine{grid-template-columns:repeat(2,minmax(0,1fr))}
 .mac .kpis.mine{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+/* how-to sheets */
+.sheet.long{max-height:86vh;overflow:auto}
+html.mac .sheet.long{width:440px;max-height:80vh}
+.steps{margin:0;padding-left:20px;display:grid;gap:7px;font-size:13px;line-height:1.5;color:var(--muted)}
+.lab2{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.src.tap,.camp.tap{cursor:pointer}
+.src.tap:hover,.camp.tap:hover{background:color-mix(in srgb,var(--raised) 60%,transparent)}
+.src .ic,.src svg:last-child{flex:none;align-self:center;color:var(--faint)}
+a.btn{text-decoration:none;display:inline-flex;align-items:center}
+a.btn:not(.primary){color:inherit}

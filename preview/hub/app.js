@@ -249,7 +249,7 @@ function appCard(a) {
 function srcCard(L) {
   if (!L.length) return none("No feeds listed yet.");
   return '<div class="card cardpad">' + L.map(function (s) { var st = STL[s.status] ? s.status : "plan", fr = s.updated ? "updated " + since(s.updated) : st === "man" ? "last logged: never" : "no data yet";
-    return '<div class="src st-' + st + '"><span class="dot" style="margin-top:6px"></span><span class="t2"><span>' + esc(s.name) + "</span><small>" + esc(s.what) + (s.note ? ". " + esc(s.note) : "") + '</small><small style="color:' + (st === "ok" && s.updated ? "var(--dp)" : "var(--faint)") + '">' + fr + '</small></span><span class="badge area">' + STL[st] + "</span></div>"; }).join("") + "</div>";
+    return '<div class="src tap st-' + st + '" data-act="src" data-k="' + esc(s.key) + '"><span class="dot" style="margin-top:6px"></span><span class="t2"><span>' + esc(s.name) + "</span><small>" + esc(s.what) + (s.note ? ". " + esc(s.note) : "") + '</small><small style="color:' + (st === "ok" && s.updated ? "var(--dp)" : "var(--faint)") + '">' + fr + '</small></span><span class="badge area">' + STL[st] + "</span>" + ic("chev") + "</div>"; }).join("") + "</div>";
 }
 function funnel(a) {
   var L = [1, 2, 3, 4].map(function (i) { return [a["step" + i], num(a["value" + i])]; }).filter(function (s) { return s[0]; }); if (!L.length) return none("No funnel steps yet.");
@@ -283,17 +283,79 @@ function vApps() {
 /* ---------- Marketing ---------- */
 function campRow(c) {
   var a = appById(c.app), has = num(c.views) !== null || num(c.visits) !== null || num(c.downloads) !== null;
-  return '<div class="camp"><div class="ch1">' + (a ? icon(a) : "") + "<b>" + esc(a ? a.name : c.app) + " · " + esc(c.channel) + '</b><span class="badge" style="margin-left:auto">' + esc(c.status) + "</span></div><span>" + esc(c.title) + "</span>" +
+  return '<div class="camp tap" data-act="camp" data-r="' + c._r + '"><div class="ch1">' + (a ? icon(a) : "") + "<b>" + esc(a ? a.name : c.app) + " · " + esc(c.channel) + '</b><span class="badge" style="margin-left:auto">' + esc(c.status) + "</span></div><span>" + esc(c.title) + "</span>" +
     '<div class="nums">' + (has ? (c.spend ? "<span>Spend <b>" + money(c.spend) + "</b></span>" : "") + (c.posts ? "<span>Posts <b>" + n(c.posts) + "</b></span>" : "") + "<span>Views <b>" + n(c.views) + "</b></span><span>Visits <b>" + n(c.visits) + "</b></span><span>Downloads <b>" + n(c.downloads) + "</b></span>" :
       (c.when ? '<span style="display:inline-flex;gap:5px;align-items:center">' + ic("cal") + esc(c.when) + "</span>" : "") + (c.result ? "<span><b>" + esc(c.result) + "</b></span>" : "<span>No numbers yet</span>") + (c.link ? "" : "<span>needs a campaign link</span>")) + "</div></div>";
 }
 function vMkt() {
-  var C = rows("campaigns"), sum = function (f) { return C.reduce(function (t, c) { return t + (num(c[f]) || 0); }, 0); }, sp = sum("spend"), vi = sum("visits"), dl = sum("downloads");
-  var h = topbar() + head("Marketing", "Every post and ad, per app and channel.") + '<div class="kpis" style="padding-top:14px">' + kpi("Spend", money(sp), sp ? "logged so far" : "nothing running") + kpi("Store visits", vi.toLocaleString("en-GB"), vi ? "from campaign links" : "no campaign links yet") + kpi("Cost a download", sp && dl ? "£" + (sp / dl).toFixed(2) : "–", sp && dl ? "" : "needs spend + links") + "</div>";
+  var C = camps(), sum = function (f) { return C.reduce(function (t, c) { return t + (num(c[f]) || 0); }, 0); }, sp = sum("spend"), vi = sum("visits"), dl = sum("downloads");
+  var h = topbar() + head("Marketing", "Every post and ad, per app and channel. Tap any row to change it or see how to fix it.", '<button type="button" class="btn sm" data-act="guide">How this page works</button>') + '<div class="kpis" style="padding-top:14px">' + kpi("Spend", money(sp), sp ? "logged so far" : "nothing running") + kpi("Store visits", vi.toLocaleString("en-GB"), vi ? "from campaign links" : "no campaign links yet") + kpi("Cost a download", sp && dl ? "£" + (sp / dl).toFixed(2) : "–", sp && dl ? "" : "needs spend + links") + "</div>";
   h += sec("Channels", "") + '<div class="chn">' + ["TikTok", "Instagram", "Reddit", "YouTube"].map(function (ch) { var R = C.filter(function (c) { return c.channel === ch; }), v = R.reduce(function (t, c) { return t + (num(c.views) || 0); }, 0), p = R.reduce(function (t, c) { return t + (num(c.posts) || 0); }, 0);
     return '<div class="card kpi"><span class="k">' + ch + "</span><b>" + v.toLocaleString("en-GB") + '</b><span class="s">' + (p ? p + " posts · views" : "views · nothing posted") + "</span></div>"; }).join("") + "</div>";
   h += sec("Campaigns", C.length + " planned or running", '<button type="button" class="btn sm" data-act="log">' + ic("plus") + "Log a post or ad</button>") + (C.length ? '<div class="card cardpad">' + C.map(campRow).join("") + "</div>" : none("Nothing logged yet. Tap Log a post or ad after you post."));
   return h + sec("Feeds", "") + srcCard(srcList("asc social yt plaus")) + '<div style="height:24px"></div>';
+}
+/* ---------- how-to sheets: feeds, campaigns, the Marketing page ---------- */
+function camps() { return rows("campaigns").filter(function (c) { return c.status !== "gone"; }); }
+var SECRETS = "https://github.com/elh0/eltio-studio/settings/secrets/actions";
+var FIX = {
+  asc: { why: "Downloads, store page views and trials per app, filled in every morning without you doing anything.",
+    steps: ["Open App Store Connect, Users and Access, Integrations, App Store Connect API (button below).", "Under Team Keys press + and name it Mission control. Access: Admin (Apple needs it for the store-view reports; the key only ever lives in GitHub secrets). Generate.", "Download the .p8 file (Apple only lets you do this once) and note the Key ID and the Issuer ID at the top.", "Payments and Financial Reports shows your Vendor number at the top left. Note it too.", "Open GitHub secrets (button below) and add four: ASC_KEY_ID, ASC_ISSUER_ID, ASC_VENDOR and ASC_PRIVATE_KEY (paste the whole .p8 text).", "Tell Claude it's done. Never paste the key in chat."],
+    links: [["Open App Store Connect keys", "https://appstoreconnect.apple.com/access/integrations/api"], ["Open GitHub secrets", SECRETS]],
+    prompt: "I've added the App Store Connect key as GitHub secrets (ASC_KEY_ID, ASC_ISSUER_ID, ASC_VENDOR, ASC_PRIVATE_KEY). Wire it into the morning fill so the hub shows downloads, store views and trials per app. Check one real day of numbers before saying it works." },
+  rc: { why: "Paid users and £ a month per app, straight from the subscriptions.",
+    steps: ["Open RevenueCat (button below) and go to Project settings, API keys.", "Press + New secret API key, name it Mission control, set every permission to Read only.", "Copy the key (starts sk_).", "Open GitHub secrets and add it as REVENUECAT_KEY.", "Tell Claude it's done. Never paste the key in chat."],
+    links: [["Open RevenueCat", "https://app.revenuecat.com"], ["Open GitHub secrets", SECRETS]],
+    prompt: "I've added REVENUECAT_KEY as a GitHub secret (read-only). Wire it into the morning fill so the hub shows paid users and monthly revenue per app." },
+  plaus: { why: "Visits to a-glo.com, outandscout.com and lampwerk.com, so you can see which post sent people to the site. No cookies, no banner.",
+    steps: ["Pick one: Plausible (about £8 a month, nicest) or GoatCounter (free for small sites).", "Make the account yourself and add the three sites.", "Tell Claude which one. Claude adds the one-line script to each site on a preview link first, you check it on your phone, then it goes live."],
+    links: [["Plausible", "https://plausible.io"], ["GoatCounter", "https://www.goatcounter.com"]],
+    prompt: "I've made a site analytics account (say which: Plausible or GoatCounter) with a-glo.com, outandscout.com and lampwerk.com. Add the script to each site on a preview link first so I can check it on my phone, then wire visits into the hub." },
+  social: { why: "Posts and views per channel. TikTok, Instagram and Reddit don't give simple keys for this, so it's logged by hand.",
+    steps: ["Right after you post, tap Log a post or ad on this page. Ten seconds.", "On Friday, screenshot each app's analytics (TikTok Studio, Instagram Insights, Reddit post views) and send them to the Studio OS chat.", "Claude adds the views and clicks to each campaign row."],
+    links: [],
+    prompt: "Here are this week's TikTok, Instagram and Reddit screenshots. Add views, clicks and downloads to the matching campaign rows in the hub sheet." },
+  yt: { why: "Views on the Systems walkthrough videos.",
+    steps: ["The videos are private right now, so there's nothing to count.", "When you make one public, log it with Log a post or ad (channel YouTube).", "Views get added on Friday from a YouTube Studio screenshot."],
+    links: [["Open YouTube Studio", "https://studio.youtube.com"]], prompt: "" },
+  sheet: { why: "Email signups from the app sites, from the App signups sheet.", steps: ["Nothing to do. The morning fill reads it."], links: [], prompt: "" },
+  brain: { why: "Your to-dos, apps, money and direction, from the studio brain.", steps: ["Nothing to do. Every project writes its handover back to the brain."], links: [], prompt: "" },
+  gmail: { why: "Money owed and replies you're waiting on.", steps: ["Nothing to do. Read through the morning briefs."], links: [], prompt: "" },
+  cal: { why: "Shoots, holds and deadlines for the next six weeks.", steps: ["Nothing to do. Edit an event in Today or Timeline and your change wins."], links: [], prompt: "" }
+};
+function shead(t, close) { return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><b style="font-weight:600">' + t + '</b><button type="button" class="btn ghost sm" data-act="' + close + '">Close</button></div>'; }
+function stepsHtml(L) { return '<ol class="steps">' + L.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol>"; }
+function srcSheet() {
+  var s = rows("sources").filter(function (z) { return z.key === S.src; })[0], f = FIX[S.src] || { why: "", steps: [], links: [], prompt: "" }; if (!s) return "";
+  var st = STL[s.status] ? s.status : "plan";
+  return '<div class="scrim" data-act="closesrc"></div><div class="sheet long" role="dialog" aria-label="' + esc(s.name) + '">' + shead(esc(s.name), "closesrc") +
+    '<div style="display:flex;gap:8px;align-items:center"><span class="src st-' + st + '" style="padding:0;border:0"><span class="badge area">' + STL[st] + '</span></span><span class="muted" style="font-size:12px">' + esc(s.what) + "</span></div>" +
+    (f.why ? '<p style="font-size:13px;line-height:1.5">' + esc(f.why) + "</p>" : "") +
+    (f.steps.length ? '<div class="lab2">' + (st === "ok" ? "How it works" : "How to fix it") + "</div>" + stepsHtml(f.steps) : "") +
+    (f.links.length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + f.links.map(function (l, i) { return '<a class="btn' + (i ? "" : " primary") + ' sm" href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>"; }).join("") + "</div>" : "") +
+    (f.prompt ? '<button type="button" class="btn sm" data-act="copysrc">' + ic("copy") + "Copy the message for Claude</button>" : "") + "</div>";
+}
+var LINKHOW = {
+  store: ["In App Store Connect open the app, then Analytics, Acquisition, Campaigns.", "Press Generate campaign link. Name it after the channel and post, e.g. tiktok-launch.", "Copy the link and paste it below. Use it in that channel's bio or post only.", "Downloads from it then show up per channel here."],
+  tf: ["Lampwerk is on TestFlight, which has no campaign links.", "Instead, make one external testing group per channel in App Store Connect (TestFlight, + next to External Testing, e.g. WhatsApp gaffers), switch on its public link.", "Paste that group's public link below. Installs per group tell you which channel worked."]
+};
+function campSheet() {
+  var c = rows("campaigns").filter(function (z) { return z._r === S.camp; })[0]; if (!c) return "";
+  var a = appById(c.app), tf = a && (a.testflight === "1" || a.testflight === "yes"), ST = ["Planned", "Posted", "Ad live", "Done"];
+  var inp = function (id, lab, v, ph) { return '<label>' + lab + '<input class="in2" id="' + id + '" value="' + esc(v) + '"' + (ph ? ' placeholder="' + ph + '"' : "") + (/^cp-(v|vi|d|s)$/.test(id) ? ' inputmode="decimal"' : "") + "></label>"; };
+  return '<div class="scrim" data-act="closecamp"></div><div class="sheet long" role="dialog" aria-label="Campaign">' + shead(esc((a ? a.name : c.app) + " · " + c.channel), "closecamp") +
+    '<label style="display:grid;gap:4px;font-size:12px;color:var(--muted)">What it is<input class="in2" id="cp-t" value="' + esc(c.title) + '"></label>' +
+    '<div class="frm"><label>Status<select class="sel2" id="cp-st">' + ST.concat(ST.indexOf(c.status) < 0 && c.status ? [c.status] : []).map(function (x) { return "<option" + (x === c.status ? " selected" : "") + ">" + esc(x) + "</option>"; }).join("") + "</select></label>" + inp("cp-w", "When", c.when, "e.g. Fri 24 Oct") +
+    inp("cp-v", "Views", c.views, "0") + inp("cp-vi", "Visits", c.visits, "0") + inp("cp-d", tf ? "Installs" : "Downloads", c.downloads, "0") + inp("cp-s", "Spend", c.spend, "£0") + "</div>" +
+    '<label style="display:grid;gap:4px;font-size:12px;color:var(--muted)">' + (tf ? "Public TestFlight link for this channel" : "Campaign link") + '<input class="in2" id="cp-l" value="' + esc(c.link) + '" placeholder="https://"></label>' +
+    (c.link ? "" : '<div class="lab2">How to get the link</div>' + stepsHtml(LINKHOW[tf ? "tf" : "store"])) +
+    '<div style="display:flex;gap:8px"><button type="button" class="btn primary" data-act="savecamp" style="flex:1">Save</button><button type="button" class="btn" data-act="delcamp">Remove</button></div></div>';
+}
+function guideSheet() {
+  var G2 = [["The three numbers", "Spend, store visits and cost a download, added up from every campaign row."], ["Channels", "Views per channel this month. They fill in as you log posts and add Friday numbers."], ["Campaigns", "One row per post or ad. Tap a row to change its status, add numbers or paste its campaign link. No link means downloads can't be traced to it, so each row says so until it has one."], ["Log a post or ad", "Tap it right after you post. App, channel, what it was, spend if it's an ad."], ["Feeds", "Where the numbers come from. Green is live, yellow needs a key, orange is logged by hand. Tap one to see how to fix it."], ["Friday", "Selling day. Send screenshots of TikTok, Instagram and Reddit stats and Claude fills the numbers in."]];
+  return '<div class="scrim" data-act="closeguide"></div><div class="sheet long" role="dialog" aria-label="How this page works">' + shead("How this page works", "closeguide") +
+    G2.map(function (g) { return '<div style="display:grid;gap:3px"><b style="font-weight:500;font-size:13px">' + g[0] + '</b><span class="muted" style="font-size:13px;line-height:1.5">' + g[1] + "</span></div>"; }).join("") +
+    '<p class="note">The order that gets numbers fastest: campaign links for the three planned posts, then the App Store Connect key.</p></div>';
 }
 function evSheet() {
   var e = S.ev === "new" ? { area: "dp", title: "", start: iso(NOW), end: "", kind: "" } : evAt(S.ev); if (!e) return "";
@@ -412,7 +474,7 @@ function render() {
   if (mac) h = macView();
   else if (S.tab === "ask") h = '<div class="view">' + vAsk() + tabbar() + "</div>";
   else h = '<div class="view"><div class="main">' + body(false) + "</div>" + tabbar() + "</div>";
-  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet();
+  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet(); if (S.src) h += srcSheet(); if (S.camp) h += campSheet(); if (S.guide) h += guideSheet();
   $("scr").innerHTML = h; bindSwipe();
   var m2 = document.querySelector(".main,.center"); if (m2 && S.keep) m2.scrollTop = y; S.keep = false;
   var c = document.querySelector(".chat"); if (c && S.chat.length) { var m = c.closest(".main"); if (m) m.scrollTop = m.scrollHeight; }
@@ -476,6 +538,17 @@ document.addEventListener("click", function (e) {
   if (a === "setlater") { if (!S.pick) return; var t = item(S.sheet), dt = new Date(NOW.getFullYear(), NOW.getMonth(), S.pick); setCell("items", t, "later", iso(dt)); setCell("items", t, "status", "later"); S.sheet = null; render(); return toast("Back on " + S.pick + " " + MON[NOW.getMonth()]); }
   if (a === "fri") { S.fri = !S.fri; return render(); }
   if (a === "log") { S.log = true; return render(); }
+  if (a === "src") { S.src = d.k; return render(); }
+  if (a === "closesrc") { S.src = null; return render(); }
+  if (a === "copysrc") return copy(FIX[S.src].prompt, null);
+  if (a === "guide") { S.guide = true; return render(); }
+  if (a === "closeguide") { S.guide = false; return render(); }
+  if (a === "camp") { S.camp = +d.r; return render(); }
+  if (a === "closecamp") { S.camp = null; return render(); }
+  if (a === "savecamp") { var cr = rows("campaigns").filter(function (z) { return z._r === S.camp; })[0], cv = { title: $("cp-t").value.trim(), status: $("cp-st").value, when: $("cp-w").value.trim(), views: $("cp-v").value.trim(), visits: $("cp-vi").value.trim(), downloads: $("cp-d").value.trim(), spend: $("cp-s").value.replace(/[£\s]/g, ""), link: $("cp-l").value.trim() };
+    if (cv.link && !/^https:\/\//.test(cv.link)) return toast("The link should start with https://");
+    Object.keys(cv).forEach(function (f) { if (cr[f] !== cv[f]) setCell("campaigns", cr, f, cv[f]); }); setCell("campaigns", cr, "logged", new Date().toISOString()); S.camp = null; render(); return toast("Saved"); }
+  if (a === "delcamp") { var cr2 = rows("campaigns").filter(function (z) { return z._r === S.camp; })[0]; setCell("campaigns", cr2, "status", "gone"); S.camp = null; render(); return toast("Removed"); }
   if (a === "closelog") { S.log = false; return render(); }
   if (a === "savelog") { var sp = $("lg-sp").value.replace(/[£\s]/g, ""); append("campaigns", { app: $("lg-app").value, channel: $("lg-ch").value, title: ($("lg-t").value.trim() || $("lg-k").value), status: $("lg-k").value === "Ad" ? "Ad live" : "Posted", when: iso(new Date()), spend: sp, link: $("lg-url").value.trim(), logged: new Date().toISOString() }); S.log = false; render(); return toast("Logged. Numbers get added Friday"); }
   if (a === "ev") { S.ev = +d.r; return render(); }
@@ -502,7 +575,7 @@ document.addEventListener("click", function (e) {
 });
 document.addEventListener("keydown", function (e) {
   if (/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)) { if (e.key === "Enter" && !e.shiftKey && e.target.id === "ask-in") { e.preventDefault(); ask(e.target.value); } return; }
-  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
+  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev && !S.src && !S.camp && !S.guide) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
 });
 var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { S.keep = true; render(); }, 150); });
 document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && D && G.token && Date.now() < G.exp) load().then(function () { S.keep = true; render(); }).catch(function () {}); });

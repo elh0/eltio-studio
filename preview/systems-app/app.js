@@ -41,6 +41,10 @@ var D = { bookings: [], invoices: [], expenses: [], days: [], settings: {} };
 /* ---------- store: Google Sheets, or sample data in this browser ---------- */
 var CFG = window.ELTIO_CONFIG || {};
 var SCOPE = "https://www.googleapis.com/auth/drive.file openid email profile";
+/* Read-only Gmail, asked for only when someone taps Scan. */
+var GMAIL = "https://www.googleapis.com/auth/gmail.readonly";
+function scopeNow() { return SCOPE + (G.wantGmail ? " " + GMAIL : ""); }
+var NO_GMAIL = "Google didn't let Systems read your email. Tap Scan again and tick the Gmail box on Google's screen.";
 var G = { token: null, exp: 0, client: null, sheetId: null, email: "" };
 var mode = null; /* "google" | "demo" */
 var DEMO_KEY = "eltio-systems-demo-3";
@@ -116,13 +120,15 @@ function tokenFromHash() {
   try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
   if (q.state !== "eltio-systems") return false;
   if (q.access_token && (q.scope || "").indexOf("drive.file") < 0) { banner("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box."); G.needDrive = true; return false; }
-  if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
+  if (q.access_token && flag("sy-scan-pending") && (q.scope || "").indexOf("gmail") < 0) { try { localStorage.removeItem("sy-scan-pending"); } catch (e) {} SCAN.err = NO_GMAIL; }
+  if (q.access_token) { G.token = q.access_token; G.exp = Date.now() + ((+q.expires_in || 3600) - 60) * 1000; G.gmail = (q.scope || "").indexOf("gmail") >= 0; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} return true; }
   try { localStorage.removeItem("eltio-systems-signed-in"); } catch (e) {}
   return false;
 }
 function redirectToGoogle(silent) {
   var u = "https://accounts.google.com/o/oauth2/v2/auth?response_type=token&include_granted_scopes=true&state=eltio-systems" +
-    "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(SCOPE) + "&prompt=" + (silent ? "none" : (G.needDrive ? "consent" : "select_account"));
+    "&client_id=" + encodeURIComponent(CFG.googleClientId) + "&redirect_uri=" + encodeURIComponent(redirectUri()) + "&scope=" + encodeURIComponent(scopeNow()) + "&prompt=" + (silent ? "none" : (G.needDrive ? "consent" : "select_account")) + (G.email ? "&login_hint=" + encodeURIComponent(G.email) : "");
+  if (G.wantGmail) flag("sy-scan-pending", "1");
   location.assign(u);
   return new Promise(function () {}); /* the page is leaving */
 }
@@ -136,9 +142,11 @@ function getToken(silent) {
         if (r.error) return bad(new Error(r.error));
         /* Google lets people untick the Drive box on its consent screen. Without it there's nowhere to keep the sheet. */
         if (google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, "https://www.googleapis.com/auth/drive.file")) { G.needDrive = true; return bad(new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen.")); }
+        if (G.wantGmail && google.accounts.oauth2.hasGrantedAllScopes && !google.accounts.oauth2.hasGrantedAllScopes(r, GMAIL)) return bad(new Error(NO_GMAIL));
+        if (G.wantGmail) G.gmail = true;
         G.needDrive = false; G.token = r.access_token; G.exp = Date.now() + (r.expires_in - 60) * 1000; try { localStorage.setItem("eltio-systems-signed-in", "1"); } catch (e) {} ok(); };
       G.client.error_callback = function (e) { bad(new Error(e && e.type || "sign-in cancelled")); };
-      G.client.requestAccessToken({ prompt: silent ? "" : (G.needDrive ? "consent" : "select_account") });
+      G.client.requestAccessToken({ scope: scopeNow(), prompt: silent ? "" : (G.needDrive ? "consent" : G.wantGmail ? "" : "select_account"), hint: G.email || undefined });
     });
   });
 }
@@ -146,7 +154,9 @@ function api(url, opt) {
   opt = opt || {};
   var go = function () {
     return fetch(url, { method: opt.method || "GET", headers: Object.assign({ Authorization: "Bearer " + G.token }, opt.body ? { "Content-Type": "application/json" } : {}), body: opt.body ? JSON.stringify(opt.body) : undefined })
-      .then(function (r) { if (r.status === 401) { G.token = null; throw { retry: true }; } if (!r.ok) return r.text().then(function (t) { if (r.status === 403 && /insufficient/i.test(t)) { G.needDrive = true; G.token = null; throw new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen."); } throw new Error("Google said " + r.status + ": " + t.slice(0, 160)); }); return r.status === 204 ? {} : r.json(); });
+      .then(function (r) { if (r.status === 401) { G.token = null; throw { retry: true }; } if (!r.ok) return r.text().then(function (t) { if (r.status === 403 && /insufficient/i.test(t) && /gmail\.googleapis/.test(url)) { G.gmail = false; throw new Error(NO_GMAIL); }
+        if (r.status === 403 && /accessNotConfigured|has not been used|is disabled/i.test(t) && /gmail\.googleapis/.test(url)) throw new Error("Email scanning isn't switched on for Systems yet. Try again in a few minutes.");
+        if (r.status === 403 && /insufficient/i.test(t)) { G.needDrive = true; G.token = null; throw new Error("Google didn't give the app its sheet in your Drive. Tap Sign in again and tick the Google Drive box on Google's screen."); } throw new Error("Google said " + r.status + ": " + t.slice(0, 160)); }); return r.status === 204 ? {} : r.json(); });
   };
   var ensure = G.token && Date.now() < G.exp ? Promise.resolve() : getToken(true);
   return ensure.then(go).catch(function (e) { if (e && e.retry) return getToken(true).then(go); throw e; });
@@ -231,7 +241,7 @@ function nextInvoiceNumber() { var y = today().getFullYear(), pre = (D.settings.
 
 /* ---------- what needs the person ---------- */
 function todo() {
-  var t = today(), L = [];
+  var t = today(), L = mode === "google" ? scanTodos() : [];
   overdue().forEach(function (v) { var n = daysBetween(parse(v.due), t); L.push({ k: "chase", id: v.id, t: "Chase " + v.client + ", " + money(num(v.amount)), tag: n + " days late", amb: 1 }); });
   D.bookings.filter(isHold).forEach(function (b) { var d = parse(b.start); if (d && d >= t && daysBetween(t, d) <= 10) L.push({ k: "hold", id: b.id, t: (b.status === "Pencil" ? "Pencil" : b.status) + ": " + b.production + ", " + nice(b.start), tag: "Ask to confirm" }); });
   D.bookings.filter(function (b) { return isDone(b) && !invoiced(b.id); }).forEach(function (b) {
@@ -646,7 +656,7 @@ function onboard(asSheet) {
   }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
   return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero and your calendar, match your bank</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
+function dashTop() { if (mode === "google") return scanHero() + helpLine(); if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -1541,7 +1551,7 @@ function customClick(b) {
   }
   return false;
 }
-function tools() { return shaped((isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools())); }
+function tools() { return shaped((mode === "google" ? TOOLS_REAL : (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools())).concat(customTools()).concat(TOOLS_HELP)); }
 function tool(k0) { return (isProd() ? TOOLS_P : TOOLS_C).concat(deptTools()).concat(customTools()).find(function (t) { return t.k === k0; }); }
 function toolView() {
   var t = tool(S.tab); if (!t) { S.tab = "home"; return home(); }
@@ -1592,22 +1602,241 @@ function demoBar() { return '<div class="demobar"><span class="part">Sample data
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
-  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : !ready ? setup() : (VIEWS[S.tab] || toolView)());
-  if (ready && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
+  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : SCAN.stage ? scanScreen() : !ready ? (mode === "google" && !G.sheetId && !flag("sy-scan-seen") ? scanScreen() : setup()) : (VIEWS[S.tab] || toolView)());
+  if (ready && mode === "demo" && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
   $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + sideTools() + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
   $("tabs").innerHTML = ready ? '<nav class="tabs" aria-label="Sections">' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t || t === "more" && /^t-/.test(S.tab) ? "on" : "") + '"><i></i>' + TABN[t] + (t === "home" && n ? '<span class="badge">' + n + "</span>" : "") + "</button>"; }).join("") + '</nav><button class="fab" data-addbooking aria-label="Add a booking">+</button>' : "";
 }
 
+/* ---------- scan: read the last few months of email on this device, lay out the work ---------- */
+/* Only subjects, senders, dates and Gmail's short preview are read, in this browser. Nothing is sent and no email is kept. What the person ticks is added to their own sheet. */
+var SCAN = { stage: "", steps: [], found: null, err: "", todos: [], at: "" };
+var SCAN_Q = [
+  { k: "cs", n: "Call sheets", q: '(subject:("call sheet" OR callsheet OR "call-sheet") OR filename:callsheet OR filename:"call sheet")', days: 75 },
+  { k: "bk", n: "Holds, pencils and bookings", q: 'subject:(hold OR pencil OR pencilled OR availability OR avails OR "are you free" OR booking OR booked OR confirmed OR confirmation OR "start date")', days: 75 },
+  { k: "inv", n: "Invoices you've sent", q: "in:sent (subject:invoice OR filename:invoice)", days: 200 },
+  { k: "paid", n: "Payments and remittances", q: 'subject:(remittance OR "payment advice" OR "payment sent" OR "payment confirmation" OR "has been paid" OR paid)', days: 200 },
+  { k: "do", n: "Timesheets, start packs and POs", q: 'subject:(timesheet OR "time sheet" OR timecard OR "start pack" OR "start form" OR "crew form" OR "purchase order" OR "PO number" OR "PO #")', days: 60 }
+];
+var FREEMAIL = /^(gmail|googlemail|hotmail|outlook|live|icloud|me|mac|yahoo|aol|btinternet|sky|proton|protonmail|msn|virginmedia|talktalk)$/;
+var MONS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+function scanKey() { return "sy-scan-" + (G.email || "me"); }
+function scanLoad() { try { var x = JSON.parse(localStorage.getItem(scanKey()) || "null"); if (x) { SCAN.todos = x.todos || []; SCAN.mail = x.mail || []; SCAN.at = x.at || ""; } } catch (e) {} }
+function scanSaveLocal() { try { localStorage.setItem(scanKey(), JSON.stringify({ at: SCAN.at, todos: SCAN.todos, mail: SCAN.mail || [] })); } catch (e) {} }
+function hdr(m, n) { var h = ((m.payload || {}).headers || []).find(function (x) { return x.name.toLowerCase() === n; }); return h ? h.value : ""; }
+function party(v) {
+  var m = String(v || "").split(",")[0].match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>/) || [null, "", String(v || "").trim()];
+  var name = m[1].trim(), mail = m[2].trim().toLowerCase(), dom = (mail.split("@")[1] || "").split(".");
+  var lab = dom[0] === "mail" || dom[0] === "email" ? dom[1] : dom[0];
+  var co = lab && !FREEMAIL.test(lab) ? lab.replace(/[-_]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }) : "";
+  return { name: name || mail.split("@")[0], mail: mail, co: co || name || mail };
+}
+/* A date written in the subject or preview: "Thu 6 Nov", "6th-7th November", "Nov 6", "06/11". The year is the one nearest the email. */
+function findDate(text, sent) {
+  var t = " " + String(text).toLowerCase() + " ", out = null, M = "(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\.?";
+  var near = function (d, m, y) {
+    if (d < 1 || d > 31 || m < 0 || m > 11) return null;
+    if (y) { y = +y; if (y < 100) y += 2000; return new Date(y, m, d); }
+    var best = null; [-1, 0, 1].forEach(function (k) { var c = new Date(sent.getFullYear() + k, m, d), diff = (c - sent) / 864e5; if (diff > -60 && diff < 300 && (!best || Math.abs(diff) < Math.abs((best - sent) / 864e5))) best = c; });
+    return best;
+  };
+  var a = t.match(new RegExp("\\b(\\d{1,2})(?:st|nd|rd|th)?\\s*(?:-|–|to|&|and)\\s*(\\d{1,2})(?:st|nd|rd|th)?\\s+" + M + "(?:\\s+(\\d{2,4}))?"));
+  if (a) { var mi = MONS.indexOf(a[3]), s1 = near(+a[1], mi, a[4]), e1 = near(+a[2], mi, a[4]); if (s1) return { start: s1, end: e1 && e1 > s1 ? e1 : null }; }
+  a = t.match(new RegExp("\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?" + M + "(?:\\s+(\\d{4}|\\d{2}(?!:)))?"));
+  if (a) { out = near(+a[1], MONS.indexOf(a[2]), a[3]); if (out) return { start: out }; }
+  a = t.match(new RegExp("\\b" + M + "\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b(?:,?\\s+(\\d{4}))?"));
+  if (a) { out = near(+a[2], MONS.indexOf(a[1]), a[3]); if (out) return { start: out }; }
+  a = t.match(/\b(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b/);
+  if (a && !/\d[\/.]\d+[\/.]\d+[\/.]/.test(a[0])) { out = near(+a[1], +a[2] - 1, a[3]); if (out) return { start: out }; }
+  return null;
+}
+function amountIn(t) { var m = String(t).match(/£\s?([\d,]+(?:\.\d{2})?)/); return m ? m[1].replace(/,/g, "") : ""; }
+function invNo(t) { var m = String(t).match(/\b(INV[-\s#]?[\w-]*\d[\w-]*|#\s?\d{2,})/i); return m ? m[1].replace(/\s/g, "") : ""; }
+function jobName(subj, who) {
+  var s = String(subj).replace(/^\s*((re|fwd?|fw|aw)\s*:\s*)+/i, "");
+  s = s.replace(/\b(call ?sheets?|callsheet|invoice|inv[-#]?\s?\d+|remittance( advice)?|payment (advice|sent|confirmation)|has been paid|timesheets?|time sheets?|timecard|start (pack|form)|crew form|purchase order|po (number|#)\s*\w*|hold|pencil(led)?|avails?|availability|are you free|booking|booked|confirmed|confirmation|v\d+|version \d+|attached|please|thanks)\b/gi, " ");
+  s = s.replace(new RegExp("\\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\\b|\\b\\d{1,2}(st|nd|rd|th)?\\b|\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\b|\\d{1,2}[\\/.]\\d{1,2}([\\/.]\\d{2,4})?", "gi"), " ");
+  s = s.replace(/[|:\-–—_()\[\]#,!.?]+/g, " ").replace(/\s+/g, " ").trim();
+  s = s.replace(/^((for|on|re|the|of|about|your|our|a|an|and|to|send|please)\s+)+/i, "").replace(/(\s+(day|days|for|on|the|and|to|of|at|by|from|in))+$/i, "").trim();
+  if (s.length < 3) s = who + " job";
+  return s.charAt(0).toUpperCase() + s.slice(1, 60);
+}
+function gm(path) { return api("https://gmail.googleapis.com/gmail/v1/users/me/" + path); }
+function pool(items, n, fn) {
+  var i = 0, out = []; var next = function () { if (i >= items.length) return Promise.resolve(); var k = i++; return fn(items[k]).then(function (r) { out[k] = r; }, function () {}).then(next); };
+  var runners = []; for (var j = 0; j < Math.min(n, items.length); j++) runners.push(next()); return Promise.all(runners).then(function () { return out; });
+}
+function runScan() {
+  SCAN.stage = "run"; SCAN.err = ""; SCAN.steps = SCAN_Q.map(function (q) { return { n: q.n, c: 0, st: "" }; }); S.tab = "home"; render();
+  var seen = {}, mails = [];
+  var go = SCAN_Q.reduce(function (p, q, i) {
+    return p.then(function () {
+      SCAN.steps[i].st = "on"; render();
+      return gm("messages?maxResults=40&q=" + encodeURIComponent(q.q + " newer_than:" + q.days + "d -in:chats -category:promotions -category:social")).then(function (r) {
+        var ids = (r.messages || []).filter(function (m) { if (seen[m.id]) return false; seen[m.id] = 1; return true; });
+        return pool(ids, 6, function (m) { return gm("messages/" + m.id + "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Date&fields=id,threadId,labelIds,snippet,internalDate,payload/headers"); })
+          .then(function (full) { full.filter(Boolean).forEach(function (m) { m.k = q.k; mails.push(m); }); SCAN.steps[i].c = full.filter(Boolean).length; SCAN.steps[i].st = "ok"; render(); });
+      });
+    });
+  }, gmailReady());
+  return go.then(function () { SCAN.found = sortMail(mails); SCAN.stage = "review"; flag("sy-scan-seen", "1"); render(); })
+    .catch(function (e) { SCAN.stage = "intro"; SCAN.err = e && e.message || String(e); render(); });
+}
+function gmailReady() { if (G.gmail) return Promise.resolve(); G.wantGmail = true; G.token = null; return getToken(false).then(function () { G.wantGmail = false; }, function (e) { G.wantGmail = false; throw e; }); }
+/* Turn the emails into bookings, invoices and things to do. Rough on purpose: every row is shown to the person before anything is added. */
+function sortMail(mails) {
+  var t = today(), B = {}, I = {}, P = [], T = [], mail = [];
+  mails.forEach(function (m) {
+    var subj = hdr(m, "subject"), sentByMe = (m.labelIds || []).indexOf("SENT") >= 0, who = party(sentByMe ? hdr(m, "to") : hdr(m, "from"));
+    var when = new Date(+m.internalDate || Date.now()), txt = subj + " " + (m.snippet || ""), low = txt.toLowerCase(), job = jobName(subj, who.co);
+    mail.push({ id: m.id, th: m.threadId, subj: subj.slice(0, 120), who: who.co, at: iso(when), k: m.k, job: job });
+    if (m.k === "paid" || /remittance|payment (advice|sent|made|confirmation)|has been paid|we(’|')?ve paid|we have paid/.test(low)) { if (!sentByMe) P.push({ who: who.co, at: iso(when), amt: amountIn(txt), no: invNo(txt) }); return; }
+    if (m.k === "inv" || (/invoice/.test(subj.toLowerCase()) && sentByMe)) {
+      if (!sentByMe) return;
+      var no = invNo(subj) || invNo(m.snippet || "") || "", key = (no || who.co + job).toLowerCase();
+      if (!I[key]) I[key] = { id: "si" + m.id, number: no || "", client: who.co, contact: who.mail, amount: amountIn(txt), issued: iso(when), due: iso(addDays(when, num(D.settings.terms) || 30)), paid: "", notes: "Found in your email: " + subj.slice(0, 80), th: m.threadId, pick: true };
+      return;
+    }
+    if (m.k === "do" || /timesheet|time sheet|timecard|start (pack|form)|crew form|purchase order|po number/.test(low)) {
+      if (sentByMe) return;
+      var what = /timesheet|time sheet|timecard/.test(low) ? "Send your timesheet" : /purchase order|po number/.test(low) ? "Check the PO" : "Fill in the start pack";
+      if (daysBetween(when, t) <= 30) T.push({ id: "st" + m.threadId, t: what + " for " + job, who: who.co, at: iso(when), th: m.threadId, pick: true });
+      return;
+    }
+    var d = findDate(txt, when), cs = m.k === "cs" || /call ?sheet/.test(low);
+    var st = cs || /\b(confirmed|you're booked|you are booked|booking confirmation|confirming)\b/.test(low) ? "Confirmed" : /\b(second hold|2nd hold)\b/.test(low) ? "Second hold" : /\b(hold|first hold|1st hold)\b/.test(low) ? "First hold" : /pencil/.test(low) ? "Pencil" : /avail|are you free|free on/.test(low) ? "Pencil" : cs ? "Confirmed" : "";
+    if (!st) return;
+    var start = d ? d.start : null; if (start && daysBetween(start, t) > 45) return;
+    var bkey = (job + "|" + (start ? iso(start) : who.co)).toLowerCase(), prev = B[bkey], rank = { Confirmed: 3, "First hold": 2, "Second hold": 1, Pencil: 0 };
+    var row = { id: "sb" + m.id, start: start ? iso(start) : "", end: d && d.end ? iso(d.end) : "", client: who.co, production: job, contact: who.mail, status: st, rate: D.settings.rate || "", days: d && d.end ? String(daysBetween(d.start, d.end) + 1) : "1", agent: "", notes: "Found in your email: " + subj.slice(0, 80), terms: "", th: m.threadId, pick: !!start, cs: cs };
+    if (!prev || rank[st] > rank[prev.status] || (!prev.start && row.start)) B[bkey] = prev ? Object.assign(row, { cs: row.cs || prev.cs }) : row;
+  });
+  /* A remittance from the same company after the invoice marks it paid. */
+  Object.keys(I).forEach(function (k) { var v = I[k], p = P.find(function (x) { return (x.no && v.number && x.no.toLowerCase() === v.number.toLowerCase()) || (x.who === v.client && x.at >= v.issued && (!x.amt || !v.amount || x.amt === v.amount)); }); if (p) v.paid = p.at; });
+  var bk = Object.keys(B).map(function (k) { return B[k]; }).sort(function (a, b) { return (a.start || "9") < (b.start || "9") ? -1 : 1; });
+  var have = function (r) { return D.bookings.some(function (x) { return x.production.toLowerCase() === r.production.toLowerCase() && x.start === r.start; }); };
+  return { bookings: bk.filter(function (r) { return !have(r); }), invoices: Object.keys(I).map(function (k) { return I[k]; }).filter(function (v) { return !D.invoices.some(function (x) { return v.number && x.number === v.number; }); }), todos: T, mail: mail.sort(function (a, b) { return a.at < b.at ? 1 : -1; }).slice(0, 120), mails: mails.length };
+}
+function scanTodos() {
+  return (SCAN.todos || []).filter(function (x) { return !x.done; }).map(function (x) { return { k: "mail", id: x.th, t: x.t, tag: x.who }; });
+}
+function gmailLink(th) { return "https://mail.google.com/mail/u/" + encodeURIComponent(G.email || "0") + "/#all/" + encodeURIComponent(th); }
+function scanScreen() {
+  var who = first(G.name || D.settings.name || "");
+  if (SCAN.stage === "run") {
+    var done = SCAN.steps.filter(function (x) { return x.st === "ok"; }).length, pct = Math.max(6, done / SCAN.steps.length * 100);
+    return '<div class="hero scan"><p class="q">Scanning your email</p><h1>Finding your work.</h1>' +
+      '<span class="bar scan-bar"><i style="width:' + pct.toFixed(0) + '%"></i></span>' +
+      '<div class="rows">' + SCAN.steps.map(function (x) { return '<div class="row static scan-s ' + x.st + '"><span><i class="ck' + (x.st === "ok" ? " on" : "") + '"></i>' + esc(x.n) + '</span><span class="q">' + (x.st === "ok" ? x.c + (x.c === 1 ? " email" : " emails") : x.st === "on" ? "Looking…" : "") + "</span></div>"; }).join("") + "</div>" +
+      '<p class="q">Subjects, senders and dates only, read on this device. Nothing is sent and none of your email is kept.</p></div>';
+  }
+  if (SCAN.stage === "review" && SCAN.found) {
+    var F = SCAN.found, up = F.bookings.filter(function (b) { return !b.start || b.start >= iso(today()); }), past = F.bookings.filter(function (b) { return b.start && b.start < iso(today()); });
+    var n = F.bookings.length + F.invoices.length + F.todos.length;
+    var bRow = function (b) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + b.id + '"' + (b.pick ? " checked" : "") + '><span class="up-t">' + esc(b.production) + '<span class="q">' + esc(b.client) + (b.cs ? " · call sheet" : "") + '</span></span><span class="scan-a"><input type="date" data-scandate="' + b.id + '" value="' + esc(b.start) + '" aria-label="Date"><span class="tag' + (b.status === "Confirmed" ? " ok" : " amb") + '">' + esc(b.status) + "</span></span></label>"; };
+    var iRow = function (v) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + v.id + '"' + (v.pick ? " checked" : "") + '><span class="up-t">' + esc(v.client) + '<span class="q">' + esc(v.number || "Invoice") + " · sent " + nice(v.issued) + (v.paid ? " · paid " + nice(v.paid) : "") + '</span></span><span class="scan-a"><input type="text" inputmode="decimal" placeholder="£" data-scanamt="' + v.id + '" value="' + esc(v.amount) + '" aria-label="Amount"><span class="tag' + (v.paid ? " ok" : "") + '">' + (v.paid ? "Paid" : "Owed") + "</span></span></label>"; };
+    var tRow = function (x) { return '<label class="row static scan-r"><input type="checkbox" data-scanpick="' + x.id + '"' + (x.pick ? " checked" : "") + '><span class="up-t">' + esc(x.t) + '<span class="q">' + esc(x.who) + " · " + nice(x.at) + "</span></span></label>"; };
+    var grp = function (h, sub, L, f) { return L.length ? '<div class="part">' + h + " · " + L.length + '</div><p class="q">' + sub + '</p><div class="rows">' + L.map(f).join("") + "</div>" : ""; };
+    return '<div class="hero scan wide"><p class="q">Read ' + F.mails + " emails</p><h1>" + (n ? "Here's your work." : "Nothing obvious yet.") + "</h1>" +
+      (n ? '<p class="q">Untick anything that isn\'t right and fix any dates. Only what\'s ticked goes on your dashboard.</p>' : '<p class="q">We couldn\'t spot call sheets, holds or invoices in the last few months. Add your next job by hand and Systems takes it from there.</p>') +
+      grp("Coming up", "Call sheets mean booked. Holds and pencils go in as holds.", up, bRow) +
+      grp("Recently worked", "Add these to log your hours and invoice them.", past, bRow) +
+      grp("Invoices you sent", "We'll tell you when they're late and draft the chase.", F.invoices, iRow) +
+      grp("To do", "Asked for in your email. They go in Needs you.", F.todos, tRow) +
+      '<div class="acts">' + (n ? '<button class="btn solid wide" data-scanadd>Add to my dashboard</button>' : "") + '<button class="btn wide" data-scandone>' + (n ? "Skip, start empty" : "Add a job by hand") + "</button></div>" +
+      '<p class="q">Nothing was sent, changed or kept from your email. Scan again any time from Help.</p></div>';
+  }
+  return '<div class="hero scan"><p class="q">' + (who ? "Hi " + esc(who) : "Welcome") + '</p><h1>Let\'s find your work.</h1>' +
+    '<p class="q">Tap Scan and Systems looks back through the last few months of your email for call sheets, holds, invoices and payments, then lays out what\'s coming up, what you\'re owed and what needs doing.</p>' +
+    (SCAN.err ? '<p class="note">' + esc(SCAN.err) + "</p>" : "") +
+    '<button class="btn solid gbtn" data-scan>Scan my email</button>' +
+    '<div class="rows forrows"><div class="row static"><span>Call sheets</span><span class="q">Your next jobs, booked</span></div><div class="row static"><span>Holds and pencils</span><span class="q">Your diary</span></div><div class="row static"><span>Invoices you sent</span><span class="q">What you\'re owed</span></div><div class="row static"><span>Remittances</span><span class="q">Marked paid</span></div><div class="row static"><span>Timesheets and start packs</span><span class="q">What to do next</span></div></div>' +
+    '<p class="q">Google will ask you to let Systems read your email. It only reads subjects, senders and dates, on this device. It can\'t send, delete or change anything, and nothing is kept.</p>' +
+    '<div class="acts"><button class="lnk" data-scanskip>Skip, I\'ll add things myself</button><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Watch how it works · 1 min</a></div></div>';
+}
+function scanAdd() {
+  var F = SCAN.found, on = {}; document.querySelectorAll("[data-scanpick]").forEach(function (c) { on[c.dataset.scanpick] = c.checked; });
+  document.querySelectorAll("[data-scandate]").forEach(function (i) { var b = F.bookings.find(function (x) { return x.id === i.dataset.scandate; }); if (b) b.start = i.value; });
+  document.querySelectorAll("[data-scanamt]").forEach(function (i) { var v = F.invoices.find(function (x) { return x.id === i.dataset.scanamt; }); if (v) v.amount = i.value.replace(/[£,\s]/g, ""); });
+  var clean = function (r) { var o = Object.assign({}, r); delete o.th; delete o.pick; delete o.cs; o.id = uid(); return o; };
+  var nb = F.bookings.filter(function (b) { return on[b.id] && b.start; }).map(clean), ni = F.invoices.filter(function (v) { return on[v.id]; }).map(clean);
+  var nt = F.todos.filter(function (x) { return on[x.id]; });
+  var p = G.sheetId ? Promise.resolve() : (busy++, createSheet("Eltio Systems").then(function () { busy--; }));
+  SCAN.stage = ""; busy++; render();
+  p.then(function () { return nb.length ? change("Bookings", function (rows) { return rows.concat(nb); }) : null; })
+    .then(function () { return ni.length ? change("Invoices", function (rows) { return rows.concat(ni); }) : null; })
+    .then(function () { return change("Settings", function (st) { if (!st.name) st.name = G.name || ""; st.scanned = iso(today()); }); })
+    .then(function () {
+      busy = Math.max(0, busy - 1); SCAN.todos = (SCAN.todos || []).filter(function (x) { return !x.done; }).concat(nt.filter(function (x) { return !(SCAN.todos || []).some(function (y) { return y.id === x.id; }); }));
+      SCAN.mail = F.mail; SCAN.at = iso(today()); scanSaveLocal(); SCAN.found = null; S.tab = "home"; render();
+      banner(nb.length + ni.length + nt.length ? "Added " + (nb.length ? nb.length + " job" + (nb.length > 1 ? "s" : "") : "") + (nb.length && ni.length ? ", " : "") + (ni.length ? ni.length + " invoice" + (ni.length > 1 ? "s" : "") : "") + (nt.length ? (nb.length || ni.length ? " and " : "") + nt.length + " to do" : "") + "." : "Nothing added.");
+      if (!D.settings.role) setTimeout(function () { var k = D.settings.name; D.settings.name = ""; render(); D.settings.name = k; var n = $("s-name"); if (n) n.value = k; }, 900);
+    })
+    .catch(function (e) { busy = Math.max(0, busy - 1); SCAN.stage = "review"; render(); banner("Couldn't add: " + (e.message || e)); });
+}
+function scanDone() {
+  SCAN.stage = ""; SCAN.found = null; flag("sy-scan-seen", "1");
+  if (!G.sheetId) { D.settings.name = ""; render(); var n = $("s-name"); if (n && G.name) n.value = G.name; return; }
+  S.tab = "home"; render(); openSheet(bookingForm(null));
+}
+/* Home for a real account: Scan first while it's empty, then a quiet line back to it. */
+function scanHero() {
+  if (D.bookings.length || D.invoices.length) return "";
+  return '<button class="onb scanh" data-scan><span class="onb-t"><span class="part">Start here</span><span>Scan your email for call sheets, holds and invoices</span></span><span class="go" aria-hidden="true">→</span></button>';
+}
+function helpLine() {
+  if (flag("sy-help-off")) return "";
+  return '<div class="helpl"><span class="q">New here?</span><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Getting started, 1 min</a><button class="lnk" data-tab="t-help">All the how-tos</button><button class="lnk" data-helpoff aria-label="Hide">Hide</button></div>';
+}
+function scanInboxView() {
+  var M = SCAN.mail || [];
+  if (!M.length) return '<div class="top"><span>Inbox</span><span></span></div><h2>Work email, sorted by job.</h2><p class="q">Scan your email and Systems sorts call sheets, holds, invoices and payments under each job, with a link straight to the email.</p><div class="acts"><button class="btn solid" data-scan>Scan my email</button></div>';
+  var by = {}; M.forEach(function (m) { (by[m.job] = by[m.job] || []).push(m); });
+  var lab = { cs: "Call sheet", bk: "Booking", inv: "Invoice", paid: "Payment", "do": "To do" };
+  return '<div class="top"><span>Inbox</span><button class="lnk" data-scan>Scan again</button></div><h2>Work email, sorted by job.</h2><p class="q">From your last scan, ' + nice(SCAN.at) + ". Tap one to open it in Gmail.</p>" +
+    Object.keys(by).slice(0, 30).map(function (j) { return '<div class="part">' + esc(j) + '</div><div class="rows">' + by[j].slice(0, 6).map(function (m) { return '<a class="row" target="_blank" rel="noopener" href="' + gmailLink(m.th) + '"><span class="up-t">' + esc(m.subj || "(no subject)") + '<span class="q">' + esc(m.who) + " · " + nice(m.at) + '</span></span><span class="tag">' + (lab[m.k] || "Email") + "</span></a>"; }).join("") + "</div>"; }).join("");
+}
+/* Help: what to do first, and every tutorial. */
+var TUTS = [["01-systems-in-80-seconds", "Systems in 80 seconds", "1:13"], ["02-getting-started", "Getting started", "1:09"], ["03-systems-as-a-producer", "As a producer", "1:29"], ["04-systems-as-a-production-manager", "As a production manager", "0:49"], ["05-systems-as-a-dop", "As a DOP", "0:44"], ["06-systems-as-a-gaffer", "As a gaffer", "0:47"], ["07-systems-as-a-1st-ac", "As a 1st AC", "0:44"], ["08-systems-as-a-sound-recordist", "As a sound recordist", "0:35"], ["09-systems-as-a-director", "As a director", "0:29"], ["10-sign-off", "Sign-off: timesheet and invoice in one tap", "0:29"], ["11-call-sheets", "Call sheets: one link, every version", "0:35"], ["12-on-the-day", "On the day: wrap once, overtime by grade", "0:30"], ["13-rates", "APA and Bectu rates, built in", "0:28"], ["14-your-diary", "Your diary: holds and offers", "0:31"], ["15-passport-and-directory", "Crew passport and the directory", "0:29"], ["16-systems-with-xero", "With Xero, QuickBooks and FreeAgent", "0:27"], ["17-your-data-and-exports", "Your data in your Drive, and exports", "0:25"]];
+function tutUrl(id) { return siteUrl() + "tutorials/#" + id; }
+function helpView() {
+  var first3 = mode === "google" ? [
+    ["Scan your email", "Call sheets, holds and invoices from the last few months, laid out for you.", "data-scan", D.settings.scanned ? "Done " + nice(D.settings.scanned) : "Start"],
+    ["Add your next job", "A booking or a hold. Holds get a nudge before the date.", "data-addbooking", D.bookings.length ? "Done" : "Start"],
+    ["Log a day's hours", "Call and wrap in, overtime out, on APA or Bectu terms.", D.bookings.length ? 'data-tab="bookings"' : "data-addbooking", D.days.length ? "Done" : "Start"],
+    ["Chase what's late", "Late invoices show in Needs you, with the chase drafted.", 'data-tab="money"', ""]
+  ] : [["Try the sample job", "Everything here is sample data, so tap anything.", 'data-tab="home"', ""], ["Switch job", "See it as a producer, gaffer, costume designer and more.", "data-switchjob", ""]];
+  return '<div class="top"><span>Help</span><span></span></div><h2>How it works.</h2>' +
+    '<div class="part">What to do first</div><div class="rows">' + first3.map(function (x) { return '<button class="row" ' + x[2] + '><span class="up-t">' + esc(x[0]) + '<span class="q">' + esc(x[1]) + '</span></span><span class="q">' + esc(x[3] || "→") + "</span></button>"; }).join("") + "</div>" +
+    '<div class="part">Short videos</div><div class="rows">' + TUTS.map(function (t) { return '<a class="row" target="_blank" rel="noopener" href="' + tutUrl(t[0]) + '"><span>' + esc(t[1]) + '</span><span class="q">' + t[2] + "</span></a>"; }).join("") + "</div>" +
+    '<div class="part">Still stuck</div><p class="q">Email <a href="mailto:hello@eltio.studio?subject=Systems%20help">hello@eltio.studio</a> and say what you were trying to do. A person reads every one.</p>';
+}
+var TOOLS_REAL = [
+  { k: "t-inbox", n: "Inbox", g: "Your work", fn: scanInboxView },
+  { k: "t-rates", n: "Rate cards", g: "Money", fn: function () { return strip(rateSheet()); } },
+  { k: "t-bank", n: "Bank and receipts", g: "Money", fn: bankView }
+];
+var TOOLS_HELP = [{ k: "t-help", n: "How it works", g: "Help", fn: helpView }];
+function scanClick(b) {
+  var d = b.dataset;
+  if (b.hasAttribute("data-scan")) { if (mode !== "google") { banner("Scanning works once you sign in with Google. Here it's sample data."); return true; } closeSheet(); runScan(); return true; }
+  if (b.hasAttribute("data-scanskip")) { SCAN.stage = ""; scanDone(); return true; }
+  if (b.hasAttribute("data-scanadd")) { scanAdd(); return true; }
+  if (b.hasAttribute("data-scandone")) { scanDone(); return true; }
+  if (b.hasAttribute("data-helpoff")) { flag("sy-help-off", "1"); render(); return true; }
+  if (d.todo === "mail") { var x = (SCAN.todos || []).find(function (y) { return y.th === d.id; }); if (x) { window.open(gmailLink(x.th), "_blank", "noopener"); x.done = true; scanSaveLocal(); render(); banner("Opened in Gmail. Ticked off here."); } return true; }
+  return false;
+}
 /* ---------- start-up ---------- */
 function startGoogle(silent) {
   return getToken(silent).then(function () {
-    return api("https://www.googleapis.com/oauth2/v3/userinfo").then(function (u) { G.email = u.email || ""; }).catch(function () {});
+    return api("https://www.googleapis.com/oauth2/v3/userinfo").then(function (u) { G.email = u.email || ""; G.name = u.name || ""; }).catch(function () {});
   }).then(findSheet).then(function (id) {
     mode = "google";
     if (id) { G.sheetId = id; return ensureTabs().then(readAll).then(function (d) { D = d; extrasLoad(); }); }
     D = { bookings: [], invoices: [], expenses: [], days: [], settings: { name: "", rate: "", terms: "30", tax: "25", mileage: "45", mail: "Gmail", hasAgent: "No", invoicePrefix: "INV" } };
-  }).then(render);
+  }).then(function () { scanLoad(); render(); if (flag("sy-scan-pending")) { try { localStorage.removeItem("sy-scan-pending"); } catch (e) {} if (G.gmail) runScan(); } });
 }
 function saveSetup() {
   var s = D.settings;
@@ -1625,7 +1854,7 @@ document.addEventListener("click", function (e) {
   var d = b.dataset;
   if (d.pick) { var g = b.parentNode; g.querySelectorAll(".pill").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); if (d.pick === "hasAgent") { var f = $("agentf"); if (f) f.hidden = d.v !== "Yes"; } if (d.pick === "terms") { var ef = $("extraf"), tn = $("termsnote"); if (ef) ef.hidden = d.v !== "TV drama"; if (tn) tn.textContent = TERMN[d.v]; swapCard("b-grade", cardOf(d.v)); } if (d.pick === "cterms") swapCard("c-grade", cardOf(d.v)); if (d.pick === "work") swapCard("s-grade", cardOf(d.v)); if (d.pick === "rcard") { openSheet(rateSheet(d.v)); return; } if (d.pick === "pjterms") { pj().terms = d.v; pjSave(); openSheet(crewSheet()); render(); return; } liveCalc(); return; }
   if (b.hasAttribute("data-close")) { closeSheet(); return; }
-  if (pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
+  if (scanClick(b) || pjClick(b) || bankClick(b) || toolClick(b) || deptClick(b) || customClick(b)) return;
   if (b.hasAttribute("data-tournext")) { if (tourI < TOUR.length - 1) showTour(tourI + 1); else endTour(); return; }
   if (b.hasAttribute("data-tourback")) { showTour(Math.max(0, tourI - 1)); return; }
   if (b.hasAttribute("data-tourend")) { endTour(); return; }

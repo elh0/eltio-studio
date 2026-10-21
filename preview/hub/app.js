@@ -333,27 +333,46 @@ function vInbox() {
     '<textarea class="ta" id="idea-in" placeholder="Drop an idea. Rough is fine." aria-label="New idea"></textarea><div style="display:flex;gap:6px;flex-wrap:wrap">' + ORDER.map(function (a) { return '<button type="button" class="badge area" data-ia="' + a + '" style="--a:var(--' + a + ");cursor:pointer;" + (S.ideaA === a ? "outline:1.5px solid var(--a)" : "opacity:.7") + '"><span class="dot"></span>' + AREAS[a] + "</button>"; }).join("") + '</div><div><button type="button" class="btn primary" data-act="idea">Save idea</button></div>';
   return h + rows("ideas").map(function (z) { return '<div class="card idea"><span>' + esc(z.text) + '</span><div class="b"><span class="badge area" ' + av(z.area) + '><span class="dot"></span>' + (AREAS[z.area] || esc(z.area)) + "</span>" + (z.kind ? '<span class="badge">' + esc(z.kind) + "</span>" : "") + "</div></div>"; }).join("") + "</div>";
 }
-/* "Make the prompt" without a server: picks the area from the words, pulls that area's open items as context, and writes a prompt in the brain's format. */
+/* "Make the prompt" without a server: it only writes a prompt once there's a real goal and a clear project; otherwise it asks back. */
+var FILL = "so ok okay hi hey hello yes yep yeah no nope um uh hmm erm test testing lol ha the a an and or but it its this that these there then just like what why how who when where i me my you we to of in on for with is am are be do can could should would will please thanks idea thing stuff something".split(" ");
+var KEYS = {
+  sw: /\b(apps?|sites?|websites?|eltio|systems|testers?|launch\w*|testflight|aglo|lampwerk|grip|scout|marketing|ads?|posts?|tiktok|reddit|instagram|outreach|clients?|cargo|store|review)\b/,
+  dp: /\b(shoots?|shooting|dp|gaffers?|crew|camera|showreel|recce|uta|agent|holds?|kit|lens\w*|commercials?|director)\b/,
+  money: /\b(money|vat|tax|invoices?|invoicing|budget|isa|pay|paid|bank|monzo|freeagent|spend\w*|savings?|bills?|runway)\b/,
+  health: /\b(gym|climb\w*|weigh\w*|food|sleep|health|train\w*|bjj|run|running|diet|protein)\b/,
+  trading: /\b(trad\w*|bots?|ftmo|backtest\w*|markets?|stocks?|forex|strategy)\b/
+};
+function words(g) { return (g.toLowerCase().match(/[a-z0-9£']+/g) || []).filter(function (w) { return w.length > 1 && FILL.indexOf(w) < 0; }); }
+/* area from a close match with an open to-do, then app names and keywords; null when nothing points anywhere */
 function guessArea(g) {
-  var t = g.toLowerCase(), A = rows("apps").map(function (a) { return (a.name || "").toLowerCase(); });
-  if (A.some(function (x) { return x && t.indexOf(x) >= 0; }) || /app|site|website|eltio|systems|tester|launch|testflight/.test(t)) return "sw";
-  if (/shoot|dp|gaffer|crew|camera|edit|showreel|invoice a job/.test(t)) return "dp";
-  if (/money|vat|tax|invoice|budget|isa|pay|bank/.test(t)) return "money";
-  if (/gym|climb|weigh|food|sleep|health|train/.test(t)) return "health";
-  if (/trad|bot|ftmo|backtest|market/.test(t)) return "trading";
-  return "sw";
+  var t = g.toLowerCase(), W = words(g), best = null, top = 0;
+  rows("items").filter(open).forEach(function (x) { var T = words(x.title + " " + (x.why || "")), n = W.filter(function (w) { return T.indexOf(w) >= 0; }).length; if (n > top) { top = n; best = x.area; } });
+  if (top >= 2) return best;
+  if (rows("apps").some(function (a) { var n = (a.name || "").toLowerCase(); return n && t.indexOf(n) >= 0; })) return "sw";
+  var hit = ORDER.filter(function (a) { return KEYS[a].test(t); });
+  return hit.length ? hit[0] : best;
 }
 function makePrompt(m) {
   var a = m.area, ctx = rows("items").filter(function (x) { return x.area === a && open(x); }).slice(0, 3).map(function (x) { return "- " + x.title + (x.why ? ": " + x.why : ""); });
-  var L = ["Goal: " + m.g + ".", "", "Read studio-brain first: direction.md, " + BRAIN[a] + ", waiting-on-me.md."];
+  var L = ["Goal: " + m.g.replace(/[.!?\s]+$/, "") + ".", "", "Read studio-brain first: direction.md, " + BRAIN[a] + ", waiting-on-me.md."];
   if (!m.short && ctx.length) L = L.concat(["Open " + AREAS[a] + " items right now:"], ctx);
   L = L.concat(["Do: break the goal into the smallest steps, do the ones you can, and list the ones that need me.", "Success: say up front what done looks like, then check it before you report back.", "Rules: drafts only, never contact anyone, real numbers only.", "End with a handover to studio-brain: decisions, done, next."]);
   return L;
 }
+function areaChips(k) { return '<div class="reacts">' + ORDER.map(function (a) { return '<button type="button" data-act="setarea" data-k="' + k + '" data-a="' + a + '"><span class="dot" style="width:7px;height:7px;border-radius:50%;background:var(--' + a + ')"></span>' + AREAS[a] + "</button>"; }).join("") + "</div>"; }
+function askBub(m, k) {
+  if (m.q === "vague") {
+    var tops = rows("items").filter(open).slice(0, 3);
+    return '<div class="bub it rise"><span>That\'s not a goal yet. What do you want done? Say the outcome, like "get five gaffers testing Lampwerk this week".</span>' + (tops.length ? '<span class="muted" style="font-size:12px">Or start from something open:</span><div class="reacts">' + tops.map(function (x) { return '<button type="button" data-act="askitem" data-id="' + esc(x.id) + '">' + esc(x.title) + "</button>"; }).join("") + "</div>" : "") + "</div>";
+  }
+  if (!m.area || m.pick) return '<div class="bub it rise"><span>' + (m.area ? "Which project should it go to?" : "Which project is this for? I couldn't tell from the words.") + "</span>" + areaChips(k) + "</div>";
+  var L = makePrompt(m);
+  return '<div class="bub it rise"><span>Here\'s your prompt for the <b style="font-weight:500">' + PROJECT[m.area] + '</b> project.</span><div class="code">' + L.map(function (l, i) { return '<span class="ln">' + (i + 1) + '</span><span class="tx">' + esc(l) + "</span>"; }).join("") + '</div></div><div class="reacts rise"><button type="button" data-act="copyask" data-k="' + k + '">' + ic("copy") + 'Copy</button><button type="button" data-act="shorter" data-k="' + k + '">' + (m.short ? "Longer" : "Shorter") + '</button><button type="button" data-act="proj" data-k="' + k + '">Change project</button></div>';
+}
 function vAsk() {
   var h = topbar() + '<div class="main" style="display:flex;flex-direction:column"><div class="chat">';
   if (!S.chat.length) h += '<div class="empty" style="padding-top:30px"><div class="tile">' + ic("spark") + '</div><h3>Make the prompt</h3><p class="muted">Type or dictate a rough goal. You get a full prompt for the right project, using what\'s open in that area.</p></div>';
-  S.chat.forEach(function (m, k) { if (m.me) h += '<div class="bub me rise">' + esc(m.t) + "</div>"; else { var L = makePrompt(m); h += '<div class="bub it rise"><span>Here\'s your prompt for the <b style="font-weight:500">' + PROJECT[m.area] + '</b> project.</span><div class="code">' + L.map(function (l, i) { return '<span class="ln">' + (i + 1) + '</span><span class="tx">' + esc(l) + "</span>"; }).join("") + '</div></div><div class="reacts rise"><button type="button" data-act="copyask" data-k="' + k + '">' + ic("copy") + 'Copy</button><button type="button" data-act="shorter" data-k="' + k + '">' + (m.short ? "Longer" : "Shorter") + '</button><button type="button" data-act="proj" data-k="' + k + '">Change project</button></div>'; } });
+  S.chat.forEach(function (m, k) { h += m.me ? '<div class="bub me rise">' + esc(m.t) + "</div>" : askBub(m, k); });
   return h + '</div></div><div class="compose"><textarea id="ask-in" rows="1" placeholder="Rough goal… tap the keyboard mic to talk" aria-label="Rough goal"></textarea><button type="button" class="btn icon" data-act="ask" aria-label="Make the prompt">' + ic("send") + "</button></div>";
 }
 
@@ -405,7 +424,15 @@ function bindSwipe() {
 }
 function step(k) { var L = list(); if (!L.length) return; var c = $("card"); if (c) c.classList.add("out"); setTimeout(function () { S.i = (S.i + k + L.length) % L.length; S.keep = true; render(); }, 160); }
 function go(tab) { S.tab = tab; render(); var m = document.querySelector(".main,.center"); if (m) m.scrollTop = 0; }
-function ask(g) { g = (g || "").trim(); if (!g) return toast("Type a rough goal first"); S.chat.push({ me: 1, t: g }); S.chat.push({ g: g, area: guessArea(g) }); render(); }
+function ask(g) {
+  g = (g || "").trim(); if (!g) return toast("Type a rough goal first");
+  var last = S.chat[S.chat.length - 1], ta = $("ask-in"); if (ta) ta.value = "";
+  S.chat.push({ me: 1, t: g });
+  /* a reply to "which project?" can just name the project */
+  if (last && !last.me && !last.q && !last.area) { var na = ORDER.filter(function (a) { return AREAS[a].toLowerCase() === g.toLowerCase() || PROJECT[a].toLowerCase() === g.toLowerCase(); })[0]; if (na) { last.area = na; S.chat.pop(); return render(); } }
+  if (words(g).length < 2) { S.chat.push({ q: "vague" }); return render(); }
+  S.chat.push({ g: g, area: guessArea(g) }); render();
+}
 
 function gate(msg) {
   $("scr").innerHTML = '<div class="gate"><div class="box"><span class="logo">' + [0, 1, 2, 3, 4, 5, 6, 7, 8].map(function (i) { return "<i" + (i === 0 || i === 4 || i === 8 ? ' class="on"' : "") + "></i>"; }).join("") + "</span><h1>Mission control</h1><p class=\"muted\">" + esc(msg || "Sign in with the Google account that holds your hub sheet.") + '</p><button type="button" class="btn primary" data-act="signin">Continue with Google</button><p class="note">Your data stays in one sheet in your own Drive.</p></div></div>';
@@ -469,7 +496,9 @@ document.addEventListener("click", function (e) {
   var m = S.chat[+d.k];
   if (a === "copyask") return copy(makePrompt(m).join("\n"), null);
   if (a === "shorter") { m.short = !m.short; return render(); }
-  if (a === "proj") { m.area = ORDER[(ORDER.indexOf(m.area) + 1) % ORDER.length]; return render(); }
+  if (a === "proj") { m.pick = true; return render(); }
+  if (a === "setarea") { m.area = d.a; m.pick = false; return render(); }
+  if (a === "askitem") { var it = item(d.id); if (it) { S.chat.push({ me: 1, t: it.title }); S.chat.push({ g: it.title, area: it.area }); render(); } return; }
 });
 document.addEventListener("keydown", function (e) {
   if (/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)) { if (e.key === "Enter" && !e.shiftKey && e.target.id === "ask-in") { e.preventDefault(); ask(e.target.value); } return; }

@@ -289,3 +289,5 @@ html.mac .wide .two .cardpad{margin:0}
 .rows .addev svg{width:14px;height:14px}
 input.in2[type=date]{color-scheme:dark}
 .rows .r.tap .w+svg{margin-left:6px}
+.kpis.mine{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mac .kpis.mine{grid-template-columns:repeat(4,minmax(0,1fr))}

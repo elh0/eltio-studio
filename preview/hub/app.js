@@ -211,6 +211,13 @@ function studio() {
     return '<div class="card branch" ' + av(a) + '><button type="button" class="bh" data-br="' + a + '" aria-expanded="' + op + '"><b><span class="dot"></span>' + AREAS[a] + '</b><span style="display:flex;gap:6px;align-items:center">' + (w ? '<span class="badge"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--chart)"></span>' + w + " working</span>" : "") + (left(a) ? '<span class="badge area">' + left(a) + " on you</span>" : '<span class="badge">quiet</span>') + ic(op ? "down" : "chev") + "</span></button>" + (op ? '<div class="leaves">' + (q + l || '<p class="empty-note">Nothing here yet.</p>') + "</div>" : "") + "</div>";
   }).join("") + "</div>";
 }
+/* personal money: kpis rows keyed p_*; p_next* rows are upcoming bills (label = when, value = amount, sub = what). Never balances. */
+function myMoney() {
+  var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }); if (!P.length) return "";
+  var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; });
+  return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") +
+    (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span></div>"; }).join("") + "</div>" : "");
+}
 function top3() {
   var L = rows("top3").slice().sort(function (a, b) { return (+a.rank || 9) - (+b.rank || 9); }).map(function (t) { return [item(t.item_id), t.reason]; }).filter(function (t) { return t[0] && open(t[0]); }).slice(0, 3);
   if (!L.length) return "";
@@ -224,9 +231,9 @@ function friList() {
 }
 function fresh() { var src = rows("sources"), live = src.filter(function (s) { return s.status === "ok"; }).length, u = meta("updated"); return '<p class="note" style="padding:8px 18px 0">' + (u ? "Updated " + since(u) : "Not scanned yet") + " · " + live + " of " + src.length + ' feeds live · <button type="button" data-tab="apps" style="border:0;background:none;padding:0;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:11px">see feeds</button></p>'; }
 function vToday(mac) {
-  var K = rows("kpis").slice(0, 3), d = NOW;
+  var K = rows("kpis").filter(function (k) { return k.key.indexOf("p_") !== 0; }).slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Friday</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { var g = k.key === "apps" ? "tab:apps" : k.key === "owed" ? "area:money" : ""; return g ? kpi(k.label, k.value, k.sub).replace('class="card kpi"', 'class="card kpi tap" data-act="go" data-go="' + g + '"') : kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { var g = k.key === "apps" ? "tab:apps" : k.key === "owed" ? "area:money" : ""; return g ? kpi(k.label, k.value, k.sub).replace('class="card kpi"', 'class="card kpi tap" data-act="go" data-go="' + g + '"') : kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }

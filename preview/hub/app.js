@@ -5,7 +5,7 @@ var CFG = window.HUB_CONFIG || {};
 var SHEET_NAME = "Mission control data";
 var SCOPE = "https://www.googleapis.com/auth/drive.file";
 var TABS = {
-  items: ["id", "area", "title", "why", "when", "cash", "prompt1", "prompt2", "status", "later", "updated"],
+  items: ["id", "area", "title", "why", "when", "cash", "prompt1", "prompt2", "status", "later", "updated", "link"],
   top3: ["rank", "item_id", "reason"],
   since: ["date", "area", "text"],
   timeline: ["area", "title", "start", "end", "kind", "edited"],
@@ -155,7 +155,7 @@ function crumbs(last) { return '<nav class="crumbs" aria-label="Breadcrumb"><spa
 function topbar(last) { return '<div class="top">' + crumbs(last) + '<span style="display:flex;gap:6px"><button type="button" class="btn icon sm" data-act="guide" aria-label="How this page works" title="How this page works" style="font-weight:600">?</button><button type="button" class="btn icon sm" data-act="reload" aria-label="Refresh">' + ic("redo") + '</button><button type="button" class="btn icon sm" data-act="fb" aria-label="Feedback">' + ic("msg") + "</button></span></div>"; }
 function head(t, sub, extra) { return '<div class="head"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h1>' + t + "</h1>" + (extra || "") + '</div><p class="muted">' + sub + "</p></div>"; }
 function sec(t, sub, btn) { return '<div class="sec"><h3>' + t + "</h3>" + (btn || '<span class="muted">' + (sub || "") + "</span>") + "</div>"; }
-function kpi(k, v, s) { return '<div class="card kpi"><span class="k">' + esc(k) + "</span><b>" + esc(v) + "</b>" + (s ? '<span class="s">' + esc(s) + "</span>" : "") + "</div>"; }
+function kpi(k, v, s, key) { return '<div class="card kpi' + (key ? ' tap" data-act="kx" data-k="' + esc(key) + '"' : '"') + '><span class="k">' + esc(k) + "</span><b>" + esc(v) + "</b>" + (s ? '<span class="s">' + esc(s) + "</span>" : "") + "</div>"; }
 function none(t) { return '<div class="card cardpad"><p class="empty-note">' + t + "</p></div>"; }
 function plist(key, arr) { if (!arr.length) return ""; return '<div class="plist"><div class="lab"><span>Suggested prompts</span><span>tap to copy</span></div>' + arr.map(function (p, j) { return '<button type="button" class="pr" data-copy="' + esc(key) + "|" + j + '"><span>' + esc(p) + '</span><span class="cp">' + ic("copy") + "Copy</span></button>"; }).join("") + "</div>"; }
 function findPrompt(k) {
@@ -173,11 +173,17 @@ function areaTabs() {
 function itemCard(x) {
   return '<div class="card item rise" id="card"><div class="ih"><div class="badges"><span class="badge area" ' + av(x.area) + '><span class="dot"></span>' + (AREAS[x.area] || x.area) + "</span>" + (x.when ? '<span class="badge">' + ic("cal") + esc(x.when) + "</span>" : "") + (x.cash ? '<span class="badge">' + esc(x.cash) + "</span>" : "") + "</div>" +
     "<h2>" + esc(x.title) + '</h2><p class="muted">' + esc(x.why) + "</p></div>" +
-    '<div class="acts"><button type="button" class="btn primary" data-act="done" data-id="' + esc(x.id) + '">' + ic("check") + 'Done</button><button type="button" class="btn" data-act="later" data-id="' + esc(x.id) + '">' + ic("cal") + "Later</button></div>" + plist(x.id, prompts(x)) + "</div>";
+    '<div class="acts"><button type="button" class="btn primary" data-act="done" data-id="' + esc(x.id) + '">' + ic("check") + 'Done</button><button type="button" class="btn" data-act="later" data-id="' + esc(x.id) + '">' + ic("cal") + "Later</button>" + (itemLink(x) ? '<a class="btn" href="' + esc(itemLink(x)[1]) + '" target="_blank" rel="noopener">' + esc(itemLink(x)[0]) + " " + ic("chev") + "</a>" : "") + "</div>" + plist(x.id, prompts(x)) + "</div>";
+}
+/* the place a to-do gets done: the sheet's link column, else a known one from the title */
+var KNOWN = [[/\bvat\b/i, "Pay VAT on HMRC", "https://www.gov.uk/pay-vat"], [/self assessment/i, "Pay on HMRC", "https://www.gov.uk/pay-self-assessment-tax-bill"], [/corporation tax/i, "Pay on HMRC", "https://www.gov.uk/pay-corporation-tax"], [/chase|invoice/i, "Open Gmail drafts", "https://mail.google.com/mail/u/0/#drafts"], [/testflight|app store|apple approves|release/i, "Open App Store Connect", "https://appstoreconnect.apple.com/apps"], [/google test users/i, "Open Google Cloud", "https://console.cloud.google.com/auth/audience?project=systems-512310"]];
+function itemLink(x) {
+  if (x.link && /^https:\/\//.test(x.link)) { var h = x.link.split("/")[2].replace(/^www\./, ""); return [/gov\.uk$/.test(h) ? "Open HMRC" : /mail\.google/.test(h) ? "Open Gmail" : /freeagent/.test(h) ? "Open FreeAgent" : /appstoreconnect/.test(h) ? "Open App Store Connect" : "Open " + h, x.link]; }
+  var k = KNOWN.filter(function (r) { return r[0].test(x.title); })[0]; return k ? [k[1], k[2]] : null;
 }
 function waitBlock() {
   var L = list(); if (S.i >= L.length) S.i = 0; var x = L[S.i], doneN = rows("items").filter(function (z) { return z.status === "done" && iso(new Date(z.updated || 0)) === iso(new Date()) && (S.f === "all" || z.area === S.f); }).length;
-  var h = sec("Waiting on you", L.length + " left · cash first") + areaTabs();
+  var h = sec("Waiting on you", L.length + " left · money jobs first") + areaTabs();
   if (!L.length) return h + '<div class="card cardpad" style="margin-top:12px"><div class="empty rise"><div class="tile">' + ic("box") + "</div><h3>Nothing waiting on you</h3><p class=\"muted\">" + (rows("items").length ? (S.f === "all" ? "Everything is done or parked." : "Nothing left in " + AREAS[S.f] + ".") : "The 06:00 scan fills this from your projects.") + "</p></div></div>";
   return h + '<div class="prog"><span class="mono muted">' + (S.i + 1) + " / " + L.length + '</span><span class="track"><i style="width:' + Math.round((doneN + S.i + 1) / (doneN + L.length) * 100) + '%"></i></span><span class="mono faint">' + doneN + " done today</span></div>" + itemCard(x) +
     '<div class="nav"><button type="button" class="btn icon" data-act="prev" aria-label="Previous">' + ic("left") + '</button><span class="note">swipe or use the arrows</span><button type="button" class="btn icon" data-act="next" aria-label="Next">' + ic("chev") + "</button></div>";
@@ -208,7 +214,7 @@ function studio() {
   return '<div class="tree" style="padding:0 18px">' + ORDER.map(function (a) {
     var lv = rows("tree").filter(function (z) { return z.area === a; }), w = lv.filter(function (z) { return z.state === "working"; }).length, op = S.open === a;
     var q = rows("items").filter(function (x) { return x.area === a && open(x); }).map(function (x) { return '<button type="button" class="leaf" data-goto="' + esc(x.id) + '" ' + av(a) + '><span class="ring"></span>' + esc(x.title) + '<span class="st">waiting on you</span></button>'; }).join("");
-    var l = lv.map(function (z) { var k = z.state; return '<div class="leaf' + (k === "done" ? " done" : "") + (z.go ? ' tap" data-act="go" data-go="' + esc(z.go) + '"' : '"') + " " + av(a) + ">" + (k === "working" ? '<span class="pulse"></span>' : '<span class="dot" style="opacity:' + (k === "done" ? ".4" : ".6") + '"></span>') + esc(z.title) + '<span class="st">' + (k === "working" ? "agent working" : k === "hold" ? "in progress" : esc(k)) + "</span>" + (z.go ? ic("chev") : "") + "</div>"; }).join("");
+    var l = lv.map(function (z) { var k = z.state; return '<div class="leaf' + (k === "done" ? " done" : "") + (z.go ? ' tap" data-act="go" data-go="' + esc(z.go) + '"' : '"') + " " + av(a) + ">" + (k === "working" ? '<span class="pulse"></span>' : '<span class="dot" style="opacity:' + (k === "done" ? ".4" : ".6") + '"></span>') + esc(z.title) + '<span class="st">' + (k === "working" ? "Claude on it" : k === "hold" ? "on hold" : k === "idea" ? "idea" : esc(k)) + "</span>" + (z.go ? ic("chev") : "") + "</div>"; }).join("");
     return '<div class="card branch" ' + av(a) + '><button type="button" class="bh" data-br="' + a + '" aria-expanded="' + op + '"><b><span class="dot"></span>' + AREAS[a] + '</b><span style="display:flex;gap:6px;align-items:center">' + (w ? '<span class="badge"><span class="pulse" style="width:6px;height:6px;border-radius:50%;background:var(--chart)"></span>' + w + " working</span>" : "") + (left(a) ? '<span class="badge area">' + left(a) + " on you</span>" : '<span class="badge">quiet</span>') + ic(op ? "down" : "chev") + "</span></button>" + (op ? '<div class="leaves">' + (q + l || '<p class="empty-note">Nothing here yet.</p>') + "</div>" : "") + "</div>";
   }).join("") + "</div>";
 }
@@ -216,7 +222,7 @@ function studio() {
 function myMoney() {
   var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }); if (!P.length) return "";
   var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0 && k.key.indexOf("p_cat") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; }), C = P.filter(function (k) { return k.key.indexOf("p_cat") === 0; });
-  return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") +
+  return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") +
     (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span></div>"; }).join("") + "</div>" : "") + catCard(C);
 }
 /* p_cat rows: label = category, value = spent this month, sub = "of £400" (its budget) */
@@ -230,7 +236,7 @@ function top3() {
   if (!L.length) return "";
   return sec("Top 3 today", "most money per hour") + '<div class="card rows cardpad">' + L.map(function (t, i) { var x = t[0]; return '<button type="button" class="r" data-goto="' + esc(x.id) + '" style="--a:var(--' + x.area + ');width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;color:var(--fg)"><span class="mono faint">' + (i + 1) + '</span><span class="dot"></span><span class="t">' + esc(x.title) + (t[1] ? '<br><span class="faint" style="font-size:12px">' + esc(t[1]) + "</span>" : "") + "</span>" + ic("chev") + "</button>"; }).join("") + "</div>";
 }
-function sinceYesterday() { var C = rows("since").slice(0, 6); if (!C.length) return ""; return sec("Since yesterday", "from the 06:00 scan") + '<div class="card rows cardpad">' + C.map(function (c) { return '<div class="r" ' + av(c.area) + '><span class="dot"></span><span class="t">' + esc(c.text) + "</span></div>"; }).join("") + "</div>"; }
+function sinceYesterday() { var C = rows("since").slice(0, 6); if (!C.length) return ""; return sec("Since yesterday", "checked every morning at 6:52") + '<div class="card rows cardpad">' + C.map(function (c) { return '<div class="r" ' + av(c.area) + '><span class="dot"></span><span class="t">' + esc(c.text) + "</span></div>"; }).join("") + "</div>"; }
 function friList() {
   var F = rows("friday"), dn = F.filter(function (z) { return z.done === "yes"; }).length; if (!F.length) return sec("Selling checklist", "") + none("The Friday list lands with the morning scan.");
   return sec("Selling checklist", dn + " of " + F.length + " done") + '<div class="card rows cardpad">' + F.map(function (z, i) { var on = z.done === "yes"; return '<button type="button" class="r" data-chk="' + i + '" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;color:' + (on ? "var(--faint)" : "var(--fg)") + '"><span style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);display:grid;place-items:center;flex:none;' + (on ? "background:var(--primary);color:var(--onprimary);border-color:var(--primary)" : "") + '">' + (on ? ic("check") : "") + '</span><span class="t"' + (on ? ' style="text-decoration:line-through"' : "") + ">" + esc(z.text) + "</span></button>"; }).join("") + "</div>" +
@@ -240,7 +246,7 @@ function fresh() { var src = rows("sources"), live = src.filter(function (s) { r
 function vToday(mac) {
   var K = rows("kpis").filter(function (k) { return k.key.indexOf("p_") !== 0; }).slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Selling mode</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { var g = k.key === "apps" ? "tab:apps" : k.key === "owed" ? "area:money" : ""; return g ? kpi(k.label, k.value, k.sub).replace('class="card kpi"', 'class="card kpi tap" data-act="go" data-go="' + g + '"') : kpi(k.label, k.value, k.sub); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }
@@ -377,6 +383,24 @@ var HELP = {
   ask: { tip: "No AI reads what you type here. It builds the prompt from your open to-dos, then you paste it into the right project.", L: [["Make the prompt", "Type or dictate a rough goal, like \"get five gaffers testing Lampwerk this week\". You get a full prompt for the right project, with what's open in that area."], ["If it asks back", "One word or filler gets a nudge. If it can't tell the project, tap one."], ["Buttons", "Copy it, make it shorter, change the project, or delete it. Clear all is at the top. The chat empties every time you open the hub."]] },
   inbox: { tip: "", L: [["Idea inbox", "Drop app or product ideas here so they stop pulling you off the main work. Nothing gets built from here until you say. They go into the brain with the morning scan."]] }
 };
+/* tap a number tile: what it means, where it comes from, and where to go next */
+var KX = {
+  year: ["Money into Monzo Business since 6 April, the start of the tax year, VAT included. The goal is £150k by 5 April 2027, about £12.5k a month.", "From the finance project's monthly table, built from your Monzo statements.", []],
+  owed: ["Invoices you've sent that haven't been paid yet. The oldest is named underneath.", "From the money briefs and FreeAgent. Chases are always drafts in Gmail: you send them.", [["Money to-dos", "go:area:money"], ["Open Gmail drafts", "https://mail.google.com/mail/u/0/#drafts"], ["Open FreeAgent", "https://login.freeagent.com"]]],
+  apps: ["What the apps earn a month from subscriptions, all apps together.", "From RevenueCat once its key is in. Until then it stays at £0.", [["See the apps", "go:tab:apps"], ["Open RevenueCat", "https://app.revenuecat.com"]]],
+  p_light: ["Green: a job in the next 4 weeks and the Tax pot is on track, so the £3,300 budget stands. Amber: nothing booked in 4 weeks, so the budget drops to £2,900 and you take any job at £600+ a day. Red: pay or rent isn't covered, so essentials only.", "Set by the morning money brief from your bookings and pots.", [["Money to-dos", "go:area:money"]]],
+  p_runway: ["How many weeks Eltio could keep paying your £3,500 a month if no new money came in. The target is 12 weeks or more.", "From the morning money brief. It never shows the balance itself.", [["Money to-dos", "go:area:money"]]],
+  p_spend: ["What you've spent personally this month, against the monthly budget the traffic light sets.", "From the morning money brief (your Monzo spending).", []],
+  p_month: ["DP and studio fees booked for this month. About £5k a month covers your pay.", "From the job tracker and money brief.", [["See the timeline", "go:tab:time"]]]
+};
+function kxSheet() {
+  var k = rows("kpis").filter(function (z) { return z.key === S.kx; })[0]; if (!k) return "";
+  var x = KX[S.kx] || ["", "", []];
+  return '<div class="scrim" data-act="closekx"></div><div class="sheet long" role="dialog" aria-label="' + esc(k.label) + '">' + shead(esc(k.label), "closekx") +
+    '<div style="display:grid;gap:2px"><b style="font-size:28px;font-weight:600;letter-spacing:-.02em">' + esc(k.value) + '</b><span class="muted" style="font-size:13px">' + esc(k.sub) + "</span></div>" +
+    (x[0] ? '<p style="font-size:13px;line-height:1.5">' + x[0] + "</p>" : "") + (x[1] ? '<p class="note">' + x[1] + "</p>" : "") + (S.kx === "year" ? chartCard() : "") +
+    (x[2].length ? '<div style="display:flex;gap:8px;flex-wrap:wrap">' + x[2].map(function (l, i) { return l[1].indexOf("go:") === 0 ? '<button type="button" class="btn sm' + (i ? "" : " primary") + '" data-act="kxgo" data-go="' + esc(l[1].slice(3)) + '">' + esc(l[0]) + "</button>" : '<a class="btn sm' + (i ? "" : " primary") + '" href="' + esc(l[1]) + '" target="_blank" rel="noopener">' + esc(l[0]) + "</a>"; }).join("") + "</div>" : "") + "</div>";
+}
 function guideSheet() {
   var g = HELP[S.guide] || HELP[S.tab] || HELP.today;
   return '<div class="scrim" data-act="closeguide"></div><div class="sheet long" role="dialog" aria-label="How this page works">' + shead("How this page works", "closeguide") +
@@ -500,7 +524,7 @@ function render() {
   if (mac) h = macView();
   else if (S.tab === "ask") h = '<div class="view">' + vAsk() + tabbar() + "</div>";
   else h = '<div class="view"><div class="main">' + body(false) + "</div>" + tabbar() + "</div>";
-  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet(); if (S.src) h += srcSheet(); if (S.camp) h += campSheet(); if (S.guide) h += guideSheet();
+  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet(); if (S.src) h += srcSheet(); if (S.camp) h += campSheet(); if (S.guide) h += guideSheet(); if (S.kx) h += kxSheet();
   $("scr").innerHTML = h; bindSwipe();
   var m2 = document.querySelector(".main,.center"); if (m2 && S.keep) m2.scrollTop = y; S.keep = false;
   var c = document.querySelector(".chat"); if (c && S.chat.length) { var m = c.closest(".main"); if (m) m.scrollTop = m.scrollHeight; }
@@ -568,6 +592,9 @@ document.addEventListener("click", function (e) {
   if (a === "closesrc") { S.src = null; return render(); }
   if (a === "copysrc") return copy(FIX[S.src].prompt, null);
   if (a === "guide") { S.guide = S.tab; return render(); }
+  if (a === "kx") { S.kx = d.k; return render(); }
+  if (a === "closekx") { S.kx = null; return render(); }
+  if (a === "kxgo") { S.kx = null; return goTo(d.go); }
   if (a === "closeguide") { S.guide = false; return render(); }
   if (a === "camp") { S.camp = +d.r; return render(); }
   if (a === "closecamp") { S.camp = null; return render(); }
@@ -604,7 +631,7 @@ document.addEventListener("click", function (e) {
 });
 document.addEventListener("keydown", function (e) {
   if (/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)) { if (e.key === "Enter" && !e.shiftKey && e.target.id === "ask-in") { e.preventDefault(); ask(e.target.value); } return; }
-  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev && !S.src && !S.camp && !S.guide) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
+  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev && !S.src && !S.camp && !S.guide && !S.kx) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
 });
 var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { S.keep = true; render(); }, 150); });
 document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && D && G.token && Date.now() < G.exp) load().then(function () { S.keep = true; render(); }).catch(function () {}); });

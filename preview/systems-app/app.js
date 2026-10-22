@@ -658,7 +658,7 @@ function onboard(asSheet) {
   }).join("") + '</div><div class="acts"><button class="btn wide" data-close>Done</button><button class="lnk" data-onboff>Hide from home</button></div>';
   return '<button class="onb" data-onbopen><span class="onb-t"><span class="part">Set up your dashboard · ' + n + " of " + steps.length + '</span><span>Link Xero and your calendar, match your bank</span></span><span class="bar"><i style="width:' + (n / steps.length * 100).toFixed(0) + '%"></i></span><span class="go" aria-hidden="true">→</span></button>';
 }
-function dashTop() { if (mode === "google") return obNudge() + fwdLine() + (isFwd() ? "" : rescanLine()) + (isProd() ? (D.pj ? pjCard() + (D.pj.wrap ? signCard() : "") : pjNewCard()) : ""); if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
+function dashTop() { if (mode === "google") return obNudge() + fwdLine() + (FW.n ? "" : rescanLine()) + (isProd() ? (D.pj ? pjCard() + (D.pj.wrap ? signCard() : "") : pjNewCard()) : ""); if (mode !== "demo" || !job()) return onboard(); return isProd() ? shootCard() + onboard() + pjCard() + hotCost() + signCard() + poCard() : deptCard() + diaryCard() + onboard() + jobsCard(); }
 function takeOffer(id, st) {
   var o = (D.offers || []).find(function (x) { return x.id === id; }); if (!o) return;
   var inSheet = $("sheet").classList.contains("on") && $("of-msg"), reply = inSheet ? $("of-msg").value.trim() : "", fl = inSheet ? readFields(o.fields) : JSON.stringify(parseF(o.fields));
@@ -1680,7 +1680,7 @@ function pool(items, n, fn) {
 }
 function runScan(o) {
   o = o || {};
-  var useMail = o.mail !== false && !o.fwd, useFwd = !!o.fwd, useCal = !!o.cal, bank = o.bank || [];
+  var useMail = o.mail !== false, useFwd = !!o.fwd, useCal = !!o.cal, bank = o.bank || [];
   SCAN.stage = "run"; SCAN.err = ""; SCAN.steps = [];
   if (useCal) SCAN.steps.push({ n: "Your calendar", c: 0, st: "", u: ["event", "events"], cal: 1 });
   if (useMail) SCAN_Q.forEach(function (q) { SCAN.steps.push({ n: q.n, c: 0, st: "", u: ["email", "emails"], q: q }); });
@@ -1698,7 +1698,7 @@ function runScan(o) {
         return pool(ids, 6, function (m) { return gm("messages/" + m.id + "?format=metadata&metadataHeaders=Subject&metadataHeaders=From&metadataHeaders=To&metadataHeaders=Date&fields=id,threadId,labelIds,snippet,internalDate,payload/headers"); })
           .then(function (full) { full.filter(Boolean).forEach(function (m) { m.k = x.q.k; mails.push(m); }); x.c = full.filter(Boolean).length; x.st = "ok"; });
       });
-      if (x.fwd) return fwdPull().then(function (p) { var old = Date.now() - 200 * 864e5; p.filter(function (m) { return +m.internalDate > old; }).forEach(function (m) { mails.push(m); }); x.c = p.length; x.st = "ok"; });
+      if (x.fwd) return fwdPull().then(function (p) { var old = Date.now() - 200 * 864e5, had = {}; mails.forEach(function (m) { had[mailSig(m)] = 1; }); p.filter(function (m) { return +m.internalDate > old && !had[mailSig(m)]; }).forEach(function (m) { mails.push(m); }); x.c = p.length; x.st = "ok"; });
       if (x.bank) { x.c = bank.length; x.st = "ok"; return null; }
       if (x.fin) { SCAN.found = sortAll(mails, cal, bank); x.st = "ok"; }
     });
@@ -1707,6 +1707,8 @@ function runScan(o) {
     .catch(function (e) { var msg = e && e.message || String(e); if (OB.active) { SCAN.stage = ""; OB.err = msg; OB.step = 1; obSave(); } else { SCAN.stage = "intro"; SCAN.err = msg; } render(); });
 }
 function gmailReady() { return wantScope("gmail"); }
+/* The same email read from Gmail and forwarded to Systems counts once. */
+function mailSig(m) { var h = (m.payload && m.payload.headers || []).find(function (x) { return x.name === "Subject"; }); return String(h ? h.value : "").toLowerCase().replace(/^\s*((re|fwd?|fw)\s*:\s*)+/, "").trim() + "|" + iso(new Date(+m.internalDate)); }
 /* Turn the emails into bookings, invoices and things to do. Rough on purpose: every row is shown to the person before anything is added. */
 function sortMail(mails) {
   var t = today(), B = {}, I = {}, P = [], T = [], mail = [];
@@ -1886,13 +1888,13 @@ function scanClick(b) {
 /* ---------- onboarding: who you are, connect calendar, email and bank, your rate or your company and job, then build the dashboard ---------- */
 var CAL = "https://www.googleapis.com/auth/calendar.events.readonly";
 var NO_CAL = "Google didn't let Systems see your calendar. Tap Connect again and tick the Calendar box on Google's screen.";
-function obBlank() { return { active: false, step: 0, role: "", work: "Both", f: {}, cal: false, mail: false, kind: "", fwdN: 0, bank: [], files: [], err: "", email: "" }; }
+function obBlank() { return { active: false, step: 0, role: "", work: "Both", f: {}, cal: false, mail: false, kind: "", gfwd: false, fwdN: 0, bank: [], files: [], err: "", email: "" }; }
 var OB = (function () { try { return Object.assign(obBlank(), JSON.parse(localStorage.getItem("sy-ob") || "null") || {}); } catch (e) { return obBlank(); } })();
 function obSave() { try { localStorage.setItem("sy-ob", JSON.stringify(OB)); } catch (e) {} }
 function obStart(step) {
   var s = D.settings || {};
   OB = obBlank(); OB.active = true; OB.step = step || 0; OB.email = G.email || "";
-  OB.role = s.role ? roleKey() : ""; OB.work = s.work || "Both"; OB.cal = !!G.cal; OB.mail = !!G.gmail; OB.kind = mailKind();
+  OB.role = s.role ? roleKey() : ""; OB.work = s.work || "Both"; OB.cal = !!G.cal; OB.mail = !!G.gmail; OB.kind = mailKind(); OB.gfwd = s.gfwd === "1";
   OB.f = { name: s.name || G.name || "", trading: s.trading || "", grade: s.grade || "", rate: s.rate || "", terms: s.terms || "30", tax: s.tax || "25", addr: s.addr || "", bank: s.bank || "", vat: s.vat || "", hasAgent: s.hasAgent || "No", agent: s.agent || "", agentEmail: s.agentEmail || "", myMail: s.myMail || "", companyNo: s.companyNo || "", payroll: s.payroll || "", accountant: s.accountant || "", crewTerms: s.crewTerms || "30" };
   if (D.pj && D.pj.real) { var P = D.pj; Object.assign(OB.f, { job: P.name, client: P.client, brand: P.brand, accounts: P.accounts, po: P.po || "", budget: P.budget ? String(P.budget) : "", split: String(P.split), payDays: String(P.payDays), shoot: P.shoot, days: String(P.days), jterms: P.terms, pshoot: P.pshoot, permits: P.permits.slice(), crew: P.crew.map(function (c) { return [c.n, c.grade, c.email].filter(Boolean).join(", "); }).join("\n") }); }
   obSave(); SCAN.stage = ""; S.tab = "home"; closeSheet(); render(); window.scrollTo(0, 0);
@@ -1922,7 +1924,7 @@ function obScreen() {
       con("cal", "Google Calendar", P ? "Shoot days, recces, PPMs and holds." : "Your shoot days, holds and recces.", OB.cal) +
       "</div>" +
       '<div class="field"><span class="lab">Which email do you use for work?</span>' + pills("obmail", MAILK, mailKind()) + "</div>" +
-      (mailKind() === "Gmail" ? '<div class="rows">' + con("gmail", "Gmail", P ? "Awards, call sheets, invoices you've sent and remittances." : "Call sheets, holds, invoices you've sent and remittances.", OB.mail) + "</div>" : fwdPanel()) +
+      (mailKind() === "Gmail" ? '<div class="rows">' + con("gmail", "Gmail", P ? "Awards, call sheets, invoices you've sent and remittances." : "Call sheets, holds, invoices you've sent and remittances.", OB.mail) + "</div>" + gFwdBox() : fwdPanel()) +
       '<div class="rows">' +
       '<div class="row static ob-c ob-bank"><span class="up-t">Bank statements<span class="q">A CSV from each account you get paid into' + (P ? ", business account first" : "") + '. Payments are matched to invoices, and work costs are picked out.</span></span><label class="btn sm' + (OB.files.length ? "" : " solid") + '" for="ob-bankfile">' + (OB.files.length ? "Add another" : "Add a CSV") + '</label><input id="ob-bankfile" class="vh" type="file" accept=".csv,.xls,.txt,text/csv" multiple></div>' +
       (OB.files.length ? OB.files.map(function (x, j) { return '<div class="row static ob-f"><span class="q">' + esc(x.name) + " · " + x.n + ' lines</span><button class="lnk" data-obbankx="' + j + '">Remove</button></div>'; }).join("") : "") +
@@ -1960,7 +1962,7 @@ function obScreen() {
   if (k === "Build") {
     var crewN = crewParse(f.crew).length, row = function (t, v, ok) { return '<div class="row static"><span>' + t + '</span><span class="tag' + (ok ? " ok" : "") + '">' + esc(v) + "</span></div>"; };
     body = "<h1>Ready when you are.</h1><p class=\"q\">Systems reads and matches everything on this device, then shows you the list. Nothing is saved until you say so.</p><div class=\"rows\">" +
-      row("Calendar", OB.cal ? "Connected" : "Not connected", OB.cal) + row("Email", mailKind() === "Gmail" ? (OB.mail ? "Connected" : "Not connected") : obFwd() ? "Forwarding to Systems" : "Not set up", mailKind() === "Gmail" ? OB.mail : obFwd()) + row("Bank statements", OB.files.length ? OB.files.length + " file" + (OB.files.length > 1 ? "s" : "") : "None yet", OB.files.length) +
+      row("Calendar", OB.cal ? "Connected" : "Not connected", OB.cal) + row("Email", obFwd() ? (OB.mail ? "Connected, and forwarding to Systems" : "Forwarding to Systems") : mailKind() === "Gmail" ? (OB.mail ? "Connected" : "Not connected") : "Not set up", obFwd() || (mailKind() === "Gmail" && OB.mail)) + row("Bank statements", OB.files.length ? OB.files.length + " file" + (OB.files.length > 1 ? "s" : "") : "None yet", OB.files.length) +
       (P ? row("The job", f.job || "Add it later", !!f.job) + row("Crew", crewN ? crewN + " people" : "None yet", crewN) : row("Your rate", f.rate ? "£" + f.rate + " a day" : "Add it later", !!f.rate)) + "</div>" +
       (OB.cal || OB.mail || obFwd() || OB.files.length ? "" : '<p class="q">Nothing connected yet, so your dashboard starts empty. You can connect things later from Help.</p>');
   }
@@ -2103,7 +2105,7 @@ function sortAll(mails, cal, bank) {
   F.paid = B.paid; F.income = B.income; F.costs = B.costs; F.events = (cal || []).length; F.bankN = (bank || []).length;
   return F;
 }
-function obFwd() { return mailKind() !== "Gmail" && !!fwdGet(); }
+function obFwd() { return !!fwdGet() && (mailKind() !== "Gmail" || !!OB.gfwd); }
 function emptyFound() { return { bookings: [], invoices: [], todos: [], mail: [], mails: 0, paid: [], income: [], costs: [], events: 0, bankN: 0 }; }
 function obGo() {
   obRead(); OB.err = "";
@@ -2119,7 +2121,7 @@ function obApply(st) {
   if (P) { st.job = "prod"; ["companyNo", "payroll", "accountant", "crewTerms"].forEach(function (k) { if (f[k] != null) st[k] = f[k]; }); }
   else { ["grade", "rate", "tax", "hasAgent", "agent", "agentEmail"].forEach(function (k) { if (f[k] != null) st[k] = f[k]; }); st.terms = f.terms || st.terms || "30"; if (st.job === "prod") st.job = ""; }
   st.terms = st.terms || "30"; st.tax = st.tax || "25"; st.mileage = st.mileage || "45"; st.invoicePrefix = st.invoicePrefix || "INV"; st.mail = OB.kind || (OB.mail ? "Gmail" : st.mail || "Gmail");
-  if (f.myMail != null) st.myMail = f.myMail;
+  if (f.myMail != null) st.myMail = f.myMail; st.gfwd = OB.kind === "Gmail" && OB.gfwd ? "1" : "";
   if (obFwd()) { st.fwd = JSON.stringify(fwdGet()); st.scanned = iso(today()); }
   if (OB.cal) st.cal = "1"; if (OB.mail) st.scanned = iso(today()); st.onb = "2";
 }
@@ -2201,7 +2203,9 @@ function emptyNext(t, b, a) { return '<div class="empty nx"><span>' + esc(t) + '
 /* Idea 3: a nudge to scan again once a week. */
 function rescanLine() {
   var last = D.settings.scanned; if (!last) return "";
-  var n = daysBetween(parse(last), today()); if (n < 7) return "";
+  var n = daysBetween(parse(last), today()), f = isFwd(), full = !f || (mailKind() === "Gmail" && !!G.gmail);
+  /* Always a way to bring it up to date; a bigger nudge after a week without forwarding. */
+  if (f || n < 7) return '<div class="helpl refl"><span class="q">' + (f ? "New work email comes in on its own" : "Email last checked " + (n ? n + " day" + (n === 1 ? "" : "s") + " ago" : "today")) + "</span>" + '<button class="lnk" ' + (full ? "data-rescan" : "data-fwdrefresh") + ">Refresh</button></div>";
   return '<button class="onb scanh" data-rescan><span class="onb-t"><span class="part">' + n + ' days since your last scan</span><span>Check for new call sheets, holds' + (D.settings.cal === "1" ? ", calendar changes" : "") + ' and payments</span></span><span class="go" aria-hidden="true">→</span></button>';
 }
 /* Real accounts that haven't connected anything yet get one way back into setup. */
@@ -2269,15 +2273,19 @@ document.addEventListener("submit", function (e) { if (e.target.id === "qa") { e
 /* The address only keeps work emails (call sheets, holds, invoices, payments) and drops the rest. What it keeps is deleted once this app has collected it. */
 var MAILK = ["Gmail", "Outlook", "iCloud", "Other"];
 var FWD_HOW = {
+  Gmail: { url: "https://mail.google.com/mail/u/0/#settings/fwdandpop", url2: "https://mail.google.com/mail/u/0/#settings/filters", l1: "Gmail forwarding settings", l2: "Gmail filters", steps: ["In Gmail settings, open Forwarding and POP/IMAP, then Add a forwarding address.", "Paste your Systems address. Gmail sends a confirmation here first, so tap Confirm forwarding when it shows below.", "Leave forwarding off for all mail. In Filters, choose Create a new filter, paste the words below into Has the words, then pick Forward it to your Systems address."] },
   Outlook: { url: "https://outlook.live.com/mail/0/options/mail/forwarding", work: "https://outlook.office.com/mail/options/mail/forwarding", steps: ["Open Outlook's forwarding settings.", "Turn on forwarding and paste your Systems address.", "Tick Keep a copy of forwarded messages, then Save."] },
   iCloud: { url: "https://www.icloud.com/mail/", steps: ["Open iCloud Mail and tap the settings button, then Forwarding.", "Tick Forward my email to and paste your Systems address.", "Save. Your email stays in iCloud as well."] },
   Other: { url: "", steps: ["In your email settings, find Forwarding. On Yahoo it's Settings, More settings, Mailboxes.", "Forward to your Systems address and keep a copy.", "Save. If it sends a confirmation email, the link shows up here."] }
 };
 var FW = { busy: false, n: 0, confirm: "", err: "" };
+/* Gmail can forward just work email with one filter, so it comes in on its own like any other inbox. */
+var GFILTER = '{"call sheet" callsheet hold pencil avail booking confirmed invoice remittance payment timesheet "start pack" "purchase order" recce}';
+function gFwdOn() { return OB.active ? !!OB.gfwd : D.settings.gfwd === "1"; }
 function mailKind() { var m = (OB.active && OB.kind) || D.settings.mail || "Gmail"; return m === "Apple Mail" ? "iCloud" : MAILK.indexOf(m) >= 0 ? m : "Other"; }
 function fwdGet() { try { return JSON.parse(D.settings.fwd || localStorage.getItem("sy-fwd") || "null"); } catch (e) { return null; } }
-function isFwd() { return mailKind() !== "Gmail" && !!fwdGet(); }
-function scanOpts() { var f = isFwd(); return { mail: !f, fwd: f, cal: D.settings.cal === "1" }; }
+function isFwd() { return !!fwdGet() && (mailKind() !== "Gmail" || gFwdOn()); }
+function scanOpts() { var f = isFwd(); return { mail: !f || (mailKind() === "Gmail" && !!G.gmail), fwd: f, cal: D.settings.cal === "1" }; }
 function fwdApi(path, body) {
   if (!CFG.scanApi) return Promise.reject(new Error("Forwarding is switching on soon. Paste emails in from Help for now."));
   return fetch(CFG.scanApi + path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) })
@@ -2329,13 +2337,20 @@ function fwdPanel() {
   var addr = x ? '<div class="row static ob-c fwd-a"><span class="up-t">Your Systems address<span class="fwd-ad">' + esc(x.address) + '</span></span><button class="btn sm solid" data-fwdcopy>Copy</button></div>'
     : '<div class="row static ob-c"><span class="up-t">Your Systems address<span class="q">' + (FW.err ? esc(FW.err) : "Making it now…") + "</span></span>" + (FW.err ? '<button class="btn sm" data-fwdnew>Try again</button>' : "") + "</div>";
   return '<div class="rows">' + addr + "</div>" +
-    field("ob-myMail", "Your " + (k === "Other" ? "" : k + " ") + "email address", OB.f.myMail || "", "email", k === "Outlook" ? "you@outlook.com" : k === "iCloud" ? "you@icloud.com" : "you@yourdomain.com") +
+    field("ob-myMail", "Your " + (k === "Other" ? "" : k + " ") + "email address", OB.f.myMail || "", "email", k === "Outlook" ? "you@outlook.com" : k === "iCloud" ? "you@icloud.com" : k === "Gmail" ? "you@gmail.com" : "you@yourdomain.com") +
     '<ol class="fwd-s">' + h.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>" +
-    '<div class="acts">' + (h.url ? '<a class="btn" target="_blank" rel="noopener" href="' + h.url + '">Open ' + esc(k) + " settings</a>" : "") + (h.work ? '<a class="btn" target="_blank" rel="noopener" href="' + h.work + '">Work or school Outlook</a>' : "") + "</div>" +
+    '<div class="acts">' + (h.url ? '<a class="btn" target="_blank" rel="noopener" href="' + h.url + '">Open ' + esc(k) + " settings</a>" : "") + (h.work ? '<a class="btn" target="_blank" rel="noopener" href="' + h.work + '">Work or school Outlook</a>' : "") + (h.url2 ? '<a class="btn" target="_blank" rel="noopener" href="' + h.url2 + '">Open ' + esc(h.l2) + "</a>" : "") + "</div>" +
+    (k === "Gmail" ? '<div class="rows"><div class="row static ob-c fwd-a"><span class="up-t">Filter words<span class="fwd-ad">' + esc(GFILTER) + '</span></span><button class="btn sm" data-fwdcopyq>Copy</button></div></div>' : "") +
     (FW.confirm ? '<div class="note">Your email sent a confirmation first. <a class="lnk" target="_blank" rel="noopener" href="' + esc(/^https:/.test(FW.confirm) ? FW.confirm : (h.url || "#")) + '">Confirm forwarding</a></div>' : "") +
     '<div class="rows"><div class="row static ob-c"><span class="up-t">' + (n ? n + " work email" + (n === 1 ? "" : "s") + " in" : "Waiting for your first email") + '<span class="q">Send yourself a test with "call sheet" in the subject, then check.</span></span><button class="btn sm" data-fwdcheck' + (FW.busy ? " disabled" : "") + ">" + (FW.busy ? "Checking…" : "Check") + "</button></div></div>" +
-    '<details class="ob-how"><summary class="q">Got older call sheets and invoices?</summary><p class="q">Forwarding catches new email. For the last few months, select your call sheets, holds, invoices and remittances and forward them to your Systems address. In Outlook, Forward as attachment sends lots in one go.</p></details>' +
+    '<details class="ob-how"' + (k === "Gmail" ? " hidden" : "") + '><summary class="q">Got older call sheets and invoices?</summary><p class="q">Forwarding catches new email. For the last few months, select your call sheets, holds, invoices and remittances and forward them to your Systems address. In Outlook, Forward as attachment sends lots in one go.</p></details>' +
     '<p class="q">Only work emails are kept, like call sheets, holds, invoices and payments. Everything else is dropped straight away. What\'s kept is deleted once Systems has it, and never shared.</p>';
+}
+/* Gmail: an optional forwarding filter so new work email arrives without scanning. */
+function gFwdBox() {
+  if (!CFG.scanApi) return "";
+  if (!OB.gfwd) return '<div class="rows"><div class="row static ob-c"><span class="up-t">Keep it up to date on its own<span class="q">One Gmail filter forwards new work email to Systems, so you never have to scan again.</span></span><button class="btn sm" data-gfwdon>Set up</button></div></div>';
+  return '<div class="part">Up to date on its own</div>' + fwdPanel() + '<div class="acts"><button class="lnk" data-gfwdoff>Not now, I\'ll tap Refresh instead</button></div>';
 }
 /* On the dashboard: new forwarded email, ready to sort. */
 function fwdLine() {
@@ -2358,6 +2373,10 @@ function fwdForget() {
   });
 }
 function fwdClick(b) {
+  if (b.hasAttribute("data-gfwdon")) { obRead(); OB.gfwd = true; obSave(); render(); fwdNew(); return true; }
+  if (b.hasAttribute("data-gfwdoff")) { obRead(); OB.gfwd = false; obSave(); render(); return true; }
+  if (b.hasAttribute("data-fwdcopyq")) { (navigator.clipboard ? navigator.clipboard.writeText(GFILTER) : Promise.reject()).then(function () { banner("Copied. Paste it into Has the words."); }, function () { banner(GFILTER); }); return true; }
+  if (b.hasAttribute("data-fwdrefresh")) { fwdPull().then(function () { render(); banner(FW.n ? FW.n + " new work email" + (FW.n === 1 ? "" : "s") + " to sort." : "Up to date. Nothing new since last time."); }, function (e) { banner(e.message); }); return true; }
   if (b.hasAttribute("data-fwdforget")) { fwdForget(); return true; }
   if (b.hasAttribute("data-fwdcopy")) { var x = fwdGet(); if (x) { (navigator.clipboard ? navigator.clipboard.writeText(x.address) : Promise.reject()).then(function () { banner("Copied. Paste it into your forwarding settings."); }, function () { banner(x.address); }); } return true; }
   if (b.hasAttribute("data-fwdnew")) { fwdNew(); return true; }

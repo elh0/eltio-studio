@@ -1613,7 +1613,7 @@ function demoBar() { return '<div class="demobar"><span class="part">Sample data
 function render() {
   paintSky();
   var signedIn = !!mode, ready = signedIn && D.settings && D.settings.name && (mode === "demo" || G.sheetId);
-  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : SCAN.stage ? scanScreen() : OB.active && mode === "google" ? obScreen() : !ready ? setup() : tipFor(S.tab) + (VIEWS[S.tab] || toolView)());
+  $("main").innerHTML = (mode === "demo" && ready ? demoBar() : "") + (!signedIn ? welcome() : SCAN.stage ? scanScreen() : OB.active && mode === "google" ? obScreen() : !ready ? setup() : tipFor(S.tab) + (VIEWS[S.tab] || toolView)() + watchLine());
   if (ready && mode === "demo" && !flag("eltio-systems-tour-1") && !$("tour")) showTour(0);
   var n = ready ? todo().length : 0;
   $("side").innerHTML = ready ? '<div class="who"><span>' + esc(D.settings.trading || D.settings.name) + '</span><span class="q">Eltio Systems</span></div>' + Object.keys(TABN).map(function (t) { return '<button data-tab="' + t + '" class="' + (S.tab === t ? "on" : "") + '"><span>' + TABN[t] + '</span><span class="q">' + (t === "home" && n ? n : "") + "</span></button>"; }).join("") + sideTools() + '<button class="btn solid add" data-addbooking>Add a booking</button>' : "";
@@ -1785,7 +1785,7 @@ function scanScreen() {
     '<button class="btn solid gbtn" data-scan>Scan my email</button>' +
     '<div class="rows forrows"><div class="row static"><span>Call sheets</span><span class="q">Your next jobs, booked</span></div><div class="row static"><span>Holds and pencils</span><span class="q">Your diary</span></div><div class="row static"><span>Invoices you sent</span><span class="q">What you\'re owed</span></div><div class="row static"><span>Remittances</span><span class="q">Marked paid</span></div><div class="row static"><span>Timesheets and start packs</span><span class="q">What to do next</span></div></div>' +
     '<p class="q">Google will ask you to let Systems read your email. It only reads subjects, senders and dates, on this device. It can\'t send, delete or change anything, and nothing is kept.</p>' +
-    '<div class="acts"><button class="lnk" data-scanskip>Skip, I\'ll add things myself</button><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Watch how it works · 1 min</a></div></div>';
+    '<div class="acts"><button class="lnk" data-scanskip>Skip, I\'ll add things myself</button>' + tutLink(tutFor("scan")) + '</div></div>';
 }
 function scanAdd(none) {
   var F = SCAN.found || emptyFound(), on = {}; document.querySelectorAll("[data-scanpick]").forEach(function (c) { on[c.dataset.scanpick] = !none && c.checked; });
@@ -1825,7 +1825,7 @@ function scanDone() {
 function scanHero() { return ""; }
 function helpLine() {
   if (flag("sy-help-off")) return "";
-  return '<div class="helpl"><span class="q">New here?</span><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Getting started, 1 min</a><button class="lnk" data-tab="t-help">All the how-tos</button><button class="lnk" data-helpoff aria-label="Hide">Hide</button></div>';
+  return '<div class="helpl"><span class="q">New here?</span>' + tutLink(tutFor() || "02-getting-started", "Watch") + '<button class="lnk" data-tab="t-help">All the how-tos</button><button class="lnk" data-helpoff aria-label="Hide">Hide</button></div>';
 }
 function scanInboxView() {
   var M = SCAN.mail || [];
@@ -1838,6 +1838,22 @@ function scanInboxView() {
 /* Help: what to do first, and every tutorial. */
 var TUTS = [["01-systems-in-80-seconds", "Systems in 80 seconds", "1:13"], ["02-getting-started", "Getting started", "1:09"], ["03-systems-as-a-producer", "As a producer", "1:29"], ["04-systems-as-a-production-manager", "As a production manager", "0:49"], ["05-systems-as-a-dop", "As a DOP", "0:44"], ["06-systems-as-a-gaffer", "As a gaffer", "0:47"], ["07-systems-as-a-1st-ac", "As a 1st AC", "0:44"], ["08-systems-as-a-sound-recordist", "As a sound recordist", "0:35"], ["09-systems-as-a-director", "As a director", "0:29"], ["10-sign-off", "Sign-off: timesheet and invoice in one tap", "0:29"], ["11-call-sheets", "Call sheets: one link, every version", "0:35"], ["12-on-the-day", "On the day: wrap once, overtime by grade", "0:30"], ["13-rates", "APA and Bectu rates, built in", "0:28"], ["14-your-diary", "Your diary: holds and offers", "0:31"], ["15-passport-and-directory", "Crew passport and the directory", "0:29"], ["16-systems-with-xero", "With Xero, QuickBooks and FreeAgent", "0:27"], ["17-your-data-and-exports", "Your data in your Drive, and exports", "0:25"]];
 function tutUrl(id) { return siteUrl() + "tutorials/#" + id; }
+/* The video for wherever you are: the page, the setup step, or your job on Home. */
+var TUTJOB = { prod: "03-systems-as-a-producer", pm: "04-systems-as-a-production-manager", dop: "05-systems-as-a-dop", gaffer: "06-systems-as-a-gaffer", spark: "06-systems-as-a-gaffer", grip: "06-systems-as-a-gaffer", camera: "07-systems-as-a-1st-ac", sound: "08-systems-as-a-sound-recordist", dir: "09-systems-as-a-director" };
+var TUTPAGE = { bookings: "14-your-diary", money: "16-systems-with-xero", more: "17-your-data-and-exports", "t-help": "01-systems-in-80-seconds", "t-sign": "10-sign-off", "t-run": "10-sign-off", "t-cs": "11-call-sheets", "t-rates": "13-rates", "t-pass": "15-passport-and-directory", "t-dir": "15-passport-and-directory", "t-bank": "16-systems-with-xero", "t-inbox": "02-getting-started", "t-crew": "03-systems-as-a-producer", "t-permits": "03-systems-as-a-producer", "t-clients": "03-systems-as-a-producer", "t-rights": "03-systems-as-a-producer" };
+var TUTSTEP = { "You": "02-getting-started", "Connect": "02-getting-started", "Your rate": "13-rates", "Your company": "03-systems-as-a-producer", "The job": "03-systems-as-a-producer", "Crew and permits": "03-systems-as-a-producer", "Build": "02-getting-started" };
+function tutFor(where) {
+  var role = TUTJOB[jk()] || (roleKey() === "Producer" ? "03-systems-as-a-producer" : roleKey() === "Director" ? "09-systems-as-a-director" : "02-getting-started");
+  if (where === "ob") return TUTSTEP[obSteps()[OB.step]] || "02-getting-started";
+  if (where === "scan") return "02-getting-started";
+  var t = where || S.tab;
+  return TUTPAGE[t] || (t === "home" || /^t-(float|kit|made)/.test(t) ? role : "");
+}
+function tutLink(id, label) {
+  var t = TUTS.find(function (x) { return x[0] === id; }); if (!t) return "";
+  return '<a class="lnk" target="_blank" rel="noopener" href="' + tutUrl(id) + '">' + esc(label || "Watch how it works") + ": " + esc(t[1]) + " · " + t[2] + "</a>";
+}
+function watchLine() { var id = tutFor(); return id ? '<p class="q watchl">' + tutLink(id, "Watch how this works") + "</p>" : ""; }
 function helpView() {
   var first3 = mode === "google" ? [
     ["Connect calendar, email and bank", "Go back through setup and match everything up again.", 'data-obstart="1"', D.settings.onb === "2" ? "Done" : "Start"],
@@ -1949,7 +1965,7 @@ function obScreen() {
       (OB.cal || OB.mail || obFwd() || OB.files.length ? "" : '<p class="q">Nothing connected yet, so your dashboard starts empty. You can connect things later from Help.</p>');
   }
   var nav = '<div class="acts">' + (i ? '<button class="btn" data-obback>Back</button>' : "") + (k === "Build" ? '<button class="btn solid" data-obgo>Build my dashboard</button>' : '<button class="btn solid" data-obnext>' + (k === "Connect" && !OB.cal && !OB.mail && !obFwd() && !OB.files.length ? "Skip for now" : "Next") + "</button>") + "</div>";
-  return '<div class="hero scan wide ob">' + steps + (OB.err ? '<p class="note">' + esc(OB.err) + "</p>" : "") + body + nav + '<p class="q"><a class="lnk" target="_blank" rel="noopener" href="' + tutUrl("02-getting-started") + '">Watch how it works · 1 min</a></p></div>';
+  return '<div class="hero scan wide ob">' + steps + (OB.err ? '<p class="note">' + esc(OB.err) + "</p>" : "") + body + nav + '<p class="q">' + tutLink(tutFor("ob")) + '</p></div>';
 }
 function wantScope(k) {
   if (k === "gmail" ? G.gmail : G.cal) return Promise.resolve();
@@ -2208,7 +2224,7 @@ function tipFor(t) {
   if (mode !== "google" || flag("sy-tip-" + t)) return "";
   var x = TIPS[t]; if (t === "home" && isProd()) x = ["Run the job takes you from the award to the pay run, step by step. Type a job in the box to add a booking.", "03-systems-as-a-producer"];
   if (!x) return "";
-  return '<div class="tipl"><span>' + esc(x[0]) + "</span>" + (x[1] ? '<a class="lnk" target="_blank" rel="noopener" href="' + tutUrl(x[1]) + '">Watch, under a minute</a>' : "") + (t === "home" ? '<button class="lnk" data-tab="t-help">All the how-tos</button>' : "") + '<button class="lnk" data-tipoff="' + esc(t) + '">Got it</button></div>';
+  return '<div class="tipl"><span>' + esc(x[0]) + "</span>" + (tutFor(t) ? '<a class="lnk" target="_blank" rel="noopener" href="' + tutUrl(tutFor(t)) + '">Watch, under a minute</a>' : "") + (t === "home" ? '<button class="lnk" data-tab="t-help">All the how-tos</button>' : "") + '<button class="lnk" data-tipoff="' + esc(t) + '">Got it</button></div>';
 }
 
 /* Idea 5: paste an email from any mail app. */

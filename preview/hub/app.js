@@ -5,18 +5,19 @@ var CFG = window.HUB_CONFIG || {};
 var SHEET_NAME = "Mission control data";
 var SCOPE = "https://www.googleapis.com/auth/drive.file";
 var TABS = {
-  items: ["id", "area", "title", "why", "when", "cash", "prompt1", "prompt2", "status", "later", "updated", "link"],
+  items: ["id", "area", "title", "why", "when", "cash", "prompt1", "prompt2", "status", "later", "updated", "link", "added"],
   top3: ["rank", "item_id", "reason"],
   since: ["date", "area", "text"],
   timeline: ["area", "title", "start", "end", "kind", "edited"],
   tree: ["area", "title", "state", "go"],
-  apps: ["id", "name", "colour", "stage", "site", "testflight", "users", "downloads", "paid", "revenue", "step1", "step2", "step3", "step4", "value1", "value2", "value3", "value4", "blocker", "next", "target", "now", "tests", "flag", "note", "prompt1", "prompt2", "sources", "store"],
+  apps: ["id", "name", "colour", "stage", "site", "testflight", "users", "downloads", "paid", "revenue", "step1", "step2", "step3", "step4", "value1", "value2", "value3", "value4", "blocker", "next", "target", "now", "tests", "flag", "note", "prompt1", "prompt2", "sources", "store", "started"],
   channels: ["app", "channel", "visits", "downloads", "paid", "spend"],
   campaigns: ["app", "channel", "title", "status", "when", "result", "spend", "posts", "views", "visits", "downloads", "link", "logged"],
   sources: ["key", "name", "what", "status", "note", "updated"],
   kpis: ["key", "label", "value", "sub"],
   money: ["month", "earned"],
   friday: ["text", "done", "prompt"],
+  promises: ["date", "item_id", "title", "kept"],
   ideas: ["text", "area", "kind", "created"],
   feedback: ["time", "text"],
   meta: ["key", "value"]
@@ -110,6 +111,15 @@ function findSheet() {
     });
   }).then(function (id) { flag("hub-sheet-id", id); return id; });
 }
+/* a sheet made before a tab was added gets the tab and its header row */
+function ensureTabs() {
+  return api(SHEETS + G.sheetId + "?fields=sheets.properties.title").then(function (r) {
+    var have = (r.sheets || []).map(function (s) { return s.properties.title; }), miss = Object.keys(TABS).filter(function (t) { return have.indexOf(t) < 0; });
+    if (!miss.length) return;
+    return api(SHEETS + G.sheetId + ":batchUpdate", { method: "POST", body: { requests: miss.map(function (t) { return { addSheet: { properties: { title: t } } }; }) } })
+      .then(function () { return api(SHEETS + G.sheetId + "/values:batchUpdate", { method: "POST", body: { valueInputOption: "RAW", data: miss.map(function (t) { return { range: t + "!A1", values: [TABS[t]] }; }) } }); });
+  });
+}
 function load() {
   var names = Object.keys(TABS);
   return api(SHEETS + G.sheetId + "/values:batchGet?" + names.map(function (t) { return "ranges=" + encodeURIComponent(t + "!A1:AF1000"); }).join("&")).then(function (r) {
@@ -139,8 +149,10 @@ function append(t, o) {
 /* timeline rows Elliot removed in the app stay in the sheet as kind "gone" so the morning fill doesn't bring them back */
 function evs() { return rows("timeline").filter(function (e) { return e.kind !== "gone"; }); }
 function evAt(r) { return rows("timeline").filter(function (e) { return e._r === r; })[0]; }
-function open(x) { if (x.status === "done") return false; if (x.status === "later") { var d = di(x.later); return d !== null && d <= TODAY; } return true; }
-function items() { return rows("items").filter(open); }
+function open(x) { if (x.status === "done" || x.status === "dropped") return false; if (x.status === "later") { var d = di(x.later); return d !== null && d <= TODAY; } return true; }
+function items() { return rows("items").filter(open).map(function (x, i) { return [x, i]; }).sort(function (p, q) { return isPromise(q[0]) - isPromise(p[0]) || ((age(q[0]) || 0) >= 7) - ((age(p[0]) || 0) >= 7) || p[1] - q[1]; }).map(function (p) { return p[0]; }); }
+/* days a to-do has been open, from the date it first came up */
+function age(x) { var d = di(x.added); return d === null ? null : TODAY - d; }
 function list() { return items().filter(function (x) { return S.f === "all" || x.area === S.f; }); }
 function left(a) { return items().filter(function (x) { return !a || x.area === a; }).length; }
 function item(id) { return rows("items").filter(function (z) { return z.id === id; })[0]; }
@@ -171,10 +183,12 @@ function areaTabs() {
 
 /* ---------- Today ---------- */
 function itemCard(x) {
-  return '<div class="card item rise" id="card"><div class="ih"><div class="badges"><span class="badge area" ' + av(x.area) + '><span class="dot"></span>' + (AREAS[x.area] || x.area) + "</span>" + (x.when ? '<span class="badge">' + ic("cal") + esc(x.when) + "</span>" : "") + (x.cash ? '<span class="badge">' + esc(x.cash) + "</span>" : "") + "</div>" +
+  return '<div class="card item rise" id="card"><div class="ih"><div class="badges"><span class="badge area" ' + av(x.area) + '><span class="dot"></span>' + (AREAS[x.area] || x.area) + "</span>" + (x.when ? '<span class="badge">' + ic("cal") + esc(x.when) + "</span>" : "") + (x.cash ? '<span class="badge">' + esc(x.cash) + "</span>" : "") + (age(x) >= 3 ? '<span class="badge' + (age(x) >= 7 ? " old" : "") + '">open ' + age(x) + " days</span>" : "") + (isPromise(x) ? '<span class="badge promise">' + ic("check") + "today's promise</span>" : "") + "</div>" +
     "<h2>" + esc(x.title) + '</h2><p class="muted">' + esc(x.why) + "</p></div>" +
-    '<div class="acts"><button type="button" class="btn primary" data-act="done" data-id="' + esc(x.id) + '">' + ic("check") + 'Done</button><button type="button" class="btn" data-act="later" data-id="' + esc(x.id) + '">' + ic("cal") + "Later</button>" + (itemLink(x) ? '<a class="btn" href="' + esc(itemLink(x)[1]) + '" target="_blank" rel="noopener">' + esc(itemLink(x)[0]) + " " + ic("chev") + "</a>" : "") + "</div>" + plist(x.id, prompts(x)) + "</div>";
+    '<div class="acts"><button type="button" class="btn primary" data-act="done" data-id="' + esc(x.id) + '">' + ic("check") + 'Done</button><button type="button" class="btn" data-act="later" data-id="' + esc(x.id) + '">' + ic("cal") + "Later</button>" + (itemLink(x) ? '<a class="btn" href="' + esc(itemLink(x)[1]) + '" target="_blank" rel="noopener">' + esc(itemLink(x)[0]) + " " + ic("chev") + "</a>" : "") + "</div>" + (age(x) >= 14 ? '<div class="nudge">' + ic("alert") + "<span>Open " + age(x) + ' days. Do it today, drop it, or hand it to Claude.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn sm" data-act="handoff" data-id="' + esc(x.id) + '">' + ic("copy") + 'Hand to Claude</button><button type="button" class="btn sm ghost" data-act="drop" data-id="' + esc(x.id) + '">Drop it</button></span></div>' : "") + plist(x.id, prompts(x)) + "</div>";
 }
+/* a prompt that hands a stale job to its project */
+function handoff(x) { return x.prompt1 || PROJECT[x.area] + " project. Read studio-brain first. Take this off my plate: " + x.title + ". " + (x.why || "") + " Do what you can (drafts only) and tell me the one thing you need from me. End with a handover."; }
 /* the place a to-do gets done: the sheet's link column, else a known one from the title */
 var KNOWN = [[/\bvat\b/i, "Pay VAT on HMRC", "https://www.gov.uk/pay-vat"], [/self assessment/i, "Pay on HMRC", "https://www.gov.uk/pay-self-assessment-tax-bill"], [/corporation tax/i, "Pay on HMRC", "https://www.gov.uk/pay-corporation-tax"], [/chase|invoice/i, "Open Gmail drafts", "https://mail.google.com/mail/u/0/#drafts"], [/testflight|app store|apple approves|release/i, "Open App Store Connect", "https://appstoreconnect.apple.com/apps"], [/google test users/i, "Open Google Cloud", "https://console.cloud.google.com/auth/audience?project=systems-512310"]];
 function itemLink(x) {
@@ -239,6 +253,30 @@ function catPace(k) {
   var ahead = v / b - now.getDate() / dim;
   return money(b - v) + " left of " + money(b) + " with " + togo + " days to go, about " + money(Math.floor((b - v) / togo)) + " a day. " + (ahead > 0.1 ? "That's ahead of the month, so go easy." : ahead < -0.1 ? "Well under pace." : "Right on pace.");
 }
+/* one promise a day: a money or app-launch job picked in the morning. promises tab: date, item_id, title, kept */
+var LAUNCH = /\b(aglo|out & scout|lampwerk|grip|systems|launch|testflight|release|app store)\b/i;
+function eligible(x) { return open(x) && (!!x.cash || x.area === "money" || LAUNCH.test(x.title)); }
+function promiseOn(d) { return rows("promises").filter(function (p) { return p.date === d; })[0]; }
+function isPromise(x) { var p = promiseOn(iso(new Date())); return !!p && p.item_id === x.id; }
+function kept(p) { var it = item(p.item_id); return p.kept === "yes" || !!(it && it.status === "done" && iso(new Date(it.updated || 0)) === p.date); }
+function streak() {
+  var P = rows("promises").filter(function (p) { return /^\d{4}-/.test(p.date); }).sort(function (a, b) { return a.date < b.date ? 1 : -1; }), t = iso(new Date()), n = 0;
+  for (var i = 0; i < P.length; i++) { if (kept(P[i])) n++; else if (P[i].date !== t) break; }
+  return n;
+}
+function weekLine() {
+  var m = new Date(NOW); m.setDate(m.getDate() - (m.getDay() + 6) % 7); var from = iso(m), P = rows("promises").filter(function (p) { return /^\d{4}-/.test(p.date) && p.date >= from; }),
+    dn = rows("items").filter(function (x) { return x.status === "done" && iso(new Date(x.updated || 0)) >= from; }).length, dr = rows("items").filter(function (x) { return x.status === "dropped" && iso(new Date(x.updated || 0)) >= from; }).length;
+  return "This week: " + P.filter(kept).length + " of " + P.length + " promises kept · " + dn + (dn === 1 ? " job" : " jobs") + " done" + (dr ? " · " + dr + " dropped" : "");
+}
+function promiseCard() {
+  var p = promiseOn(iso(new Date())), st = streak();
+  if (!p) { var E = rows("items").filter(eligible).slice(0, 5); if (!E.length) return "";
+    return sec("Today's promise", st ? "streak " + st : "pick one") + '<div class="card cardpad promise-card"><p class="muted" style="font-size:13px;margin:0">Pick the one job you promise to finish today. Only money and app-launch jobs count.</p><div class="pchips">' + E.map(function (x) { return '<button type="button" class="chip" data-act="promise" data-id="' + esc(x.id) + '" ' + av(x.area) + '><span class="dot"></span>' + esc(x.title) + (x.cash ? " · " + esc(x.cash) : "") + "</button>"; }).join("") + '</div><p class="note">' + weekLine() + "</p></div>"; }
+  var k = kept(p), it = item(p.item_id);
+  return sec("Today's promise", st ? "streak " + st + (st > 1 ? " days" : " day") : "") + '<div class="card cardpad promise-card' + (k ? " kept" : "") + '"><div class="r' + (k || !it ? '"' : ' tap" data-act="go" data-go="item:' + esc(p.item_id) + '"') + " " + av(it ? it.area : "sw") + '><span class="pk">' + (k ? ic("check") : "") + '</span><span class="t">' + esc(p.title) + '</span><span class="w">' + (k ? "kept" : "not yet") + "</span>" + (k || !it ? "" : ic("chev")) + "</div>" +
+    '<p class="note">' + weekLine() + (k ? "" : ' · <button type="button" class="linkbtn" data-act="unpromise">change it</button>') + "</p></div>";
+}
 /* after 4pm: what got done, moved, logged and slipped today, from the sheet */
 function dueDay(w) { w = String(w || ""); if (/^\d{4}-\d\d-\d\d/.test(w)) return di(w); var m = w.match(/\b(\d{1,2})\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i); if (!m) return null;
   var d = new Date(NOW.getFullYear(), MON.map(function (x) { return x.toLowerCase(); }).indexOf(m[2].toLowerCase()), +m[1]); return Math.round((d - START) / 864e5); }
@@ -255,6 +293,7 @@ function recap() {
   var h = dn.map(function (x) { return r(x.area, x.title, "done"); }).join("") + mv.map(function (x) { return r(x.area, x.title, "moved to " + (di(x.later) !== null ? fmt(di(x.later)) : esc(x.later))); }).join("") +
     lg.map(function (t) { return r("sw", t, "logged"); }).join("") + sl.map(function (x) { return r(x.area, x.title, "slipped", x.id); }).join("") +
     (w.length ? r("sw", "Claude is on " + w.length + (w.length > 1 ? " things" : " thing") + ": " + w.slice(0, 3).map(function (z) { return z.title; }).join(", "), "Claude") : "");
+  var pr = promiseOn(iso(new Date())); if (pr) h = r("sw", "Promise: " + pr.title, kept(pr) ? "kept" : "not yet", kept(pr) ? null : pr.item_id) + h;
   return sec("Today so far", dn.length + " done · " + mv.length + " moved · " + sl.length + " slipped") + '<div class="card rows cardpad">' + (h || '<p class="empty-note">Nothing moved yet today.</p>') + "</div>";
 }
 function top3() {
@@ -272,7 +311,7 @@ function fresh() { var src = rows("sources"), live = src.filter(function (s) { r
 function vToday(mac) {
   var K = rows("kpis").filter(function (k) { return k.key.indexOf("p_") !== 0; }).slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Selling mode</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + recap() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + promiseCard() + recap() + (S.fri ? friList() : top3() + sinceYesterday()) + waitBlock() + myMoney();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }
@@ -292,7 +331,7 @@ function appLinks(a) {
 }
 function appCard(a) {
   var tf = a.testflight === "1" || a.testflight === "yes";
-  return '<button type="button" class="appc" data-app="' + esc(a.id) + '"><div class="ah">' + icon(a) + "<b>" + esc(a.name) + '</b><span class="badge">' + esc(a.stage) + '</span></div><div class="am"><div><span>' + (tf ? "Testers" : "Users") + "</span><b>" + n(a.users) + "</b></div><div><span>Downloads</span><b>" + n(a.downloads) + "</b></div><div><span>Paid</span><b>" + n(a.paid) + "</b></div><div><span>£ a month</span><b>" + money(a.revenue) + "</b></div></div>" +
+  return '<button type="button" class="appc" data-app="' + esc(a.id) + '"><div class="ah">' + icon(a) + "<b>" + esc(a.name) + '</b><span class="badge">' + esc(a.stage) + '</span></div><div class="am"><div><span>' + (tf ? "Testers" : "Users") + "</span><b>" + n(a.users) + "</b></div><div><span>Downloads</span><b>" + n(a.downloads) + "</b></div><div><span>Paid</span><b>" + n(a.paid) + "</b></div><div><span>£ a month</span><b>" + money(a.revenue) + "</b></div></div>" + (dayN(a) ? '<div class="dayn">Day ' + dayN(a) + " since the idea · " + n(a.users) + (tf ? " testers" : " users") + " · " + money(a.revenue) + " a month</div>" : "") +
     (a.blocker ? '<div class="bl">' + ic("alert") + esc(a.blocker) + "</div>" : "") + (a.flag === "amber" ? '<div class="bl" style="color:var(--money);background:color-mix(in srgb,var(--money) 10%,transparent)">' + ic("alert") + "Missed its target twice: one more change, or park it</div>" : "") + "</button>";
 }
 function srcCard(L) {
@@ -315,6 +354,18 @@ function scoreCard(a) {
   return sec("Scoreboard", "iterate or park") + '<div class="card rows cardpad"' + (fl ? ' style="border-color:color-mix(in srgb,var(--money) 50%,transparent)"' : "") + '><div class="r">' + lab("Target") + '<span class="t">' + esc(a.target || "not set") + '</span></div><div class="r">' + lab("Now") + '<span class="t">' + esc(a.now || "–") + '</span></div><div class="r">' + lab("Tests") + '<span class="t">' + esc(a.tests || "0 of 2") + "</span></div>" +
     (fl ? '<div class="r" style="color:var(--money)">' + ic("alert") + '<span class="t">Missed twice. Try one more change, or park it for fun app time.</span></div>' : '<div class="r"><span class="note">Two one-change tests that miss the target turn this amber. Parked, never deleted.</span></div>') + "</div>";
 }
+/* days since the idea first came up with Claude (apps "started", editable) */
+function dayN(a) { var d = di(a.started); return d === null ? null : TODAY - d + 1; }
+function sinceCard(a) {
+  var d = dayN(a), u = num(a.users) || 0, r = num(a.revenue) || 0, tf = a.testflight === "1" || a.testflight === "yes";
+  if (!d) return sec("Since the idea", "") + '<div class="card cardpad"><button type="button" class="btn sm" data-act="started" data-id="' + esc(a.id) + '">' + ic("cal") + "Set the day the idea started</button></div>";
+  var real = !u && !r && d >= 14 ? d + " days in and no " + (tf ? "testers using it" : "users") + " yet. The step that gets a real person on it: " + (a.next || "set one") + "." : u && !r ? u + (tf ? (u > 1 ? " testers" : " tester") : (u > 1 ? " users" : " user")) + " in " + d + " days, nobody paying yet." : r ? money(r) + " a month after " + d + " days." : "Early days.";
+  return sec("Since the idea", "") + '<div class="card cardpad since-card"><div class="dd"><span class="muted" style="font-size:12px">Day</span><b>' + d + '</b></div><div class="tx"><p style="font-size:13px;line-height:1.5;margin:0">' + esc(real) + '</p><p class="note">Started ' + fmt(di(a.started)) + ' · <button type="button" class="linkbtn" data-act="started" data-id="' + esc(a.id) + '">change the date</button></p></div></div>';
+}
+function stSheet() {
+  var a = appById(S.st); if (!a) return "";
+  return '<div class="scrim" data-act="closest"></div><div class="sheet" role="dialog" aria-label="When the idea started">' + shead("When did " + esc(a.name) + " start?", "closest") + '<p class="muted" style="font-size:13px;margin:0">The day you first talked the idea through with Claude.</p><label style="display:grid;gap:4px;font-size:12px;color:var(--muted)">Date<input class="in2" type="date" id="st-d" value="' + esc(a.started) + '"></label><button type="button" class="btn primary" data-act="savest">Save</button></div>';
+}
 function vApps() {
   var A = rows("apps"), h = topbar(S.app !== "all" && appById(S.app) ? appById(S.app).name : null) + head("Apps", "Ship, track, market. No new apps.") + (A.length ? appTabs() : "");
   if (!A.length) return h + none("Your apps land here with the first scan.");
@@ -324,7 +375,7 @@ function vApps() {
   }
   var a = appById(S.app), tf = a.testflight === "1" || a.testflight === "yes";
   return h + '<div class="sec" style="padding-top:16px"><span style="display:flex;gap:12px;align-items:center">' + icon(a, 1) + '<span style="display:grid"><h3 style="font-size:18px">' + esc(a.name) + '</h3><span class="muted" style="font-size:12px">' + (a.site ? '<a href="' + esc(url(a.site)) + '" target="_blank" rel="noopener" style="color:inherit">' + esc(a.site) + "</a>" : "") + '</span></span></span><span class="badge">' + esc(a.stage) + "</span></div>" + appLinks(a) +
-    '<div class="kpis">' + kpi(tf ? "Testers" : "Users", n(a.users)) + kpi("Paid", n(a.paid)) + kpi("£ a month", money(a.revenue)) + "</div>" + scoreCard(a) + sec("Funnel", tf ? "testing" : "store to paid") + funnel(a) + (tf ? "" : chTable(a)) +
+    '<div class="kpis">' + kpi(tf ? "Testers" : "Users", n(a.users)) + kpi("Paid", n(a.paid)) + kpi("£ a month", money(a.revenue)) + "</div>" + sinceCard(a) + scoreCard(a) + sec("Funnel", tf ? "testing" : "store to paid") + funnel(a) + (tf ? "" : chTable(a)) +
     sec("Blocker and next", "") + '<div class="card cardpad" style="overflow:hidden"><div class="rows"><div class="r">' + ic("alert") + "<span>" + esc(a.blocker || "–") + '</span></div><div class="r">' + ic("chev") + "<span>" + esc(a.next || "–") + "</span></div></div>" + plist("app:" + a.id, [a.prompt1, a.prompt2].filter(Boolean)) + "</div>" +
     sec("Feeds for " + esc(a.name), "") + srcCard(srcList(a.sources)) + '<div style="height:24px"></div>';
 }
@@ -402,8 +453,8 @@ function campSheet() {
 }
 /* "How this page works" for every tab: [heading, what it is and what tapping does] */
 var HELP = {
-  today: { tip: "", L: [["The date and the switch", "The switch is Selling mode. Friday is your marketing and sales day, so it turns on by itself on Fridays and puts the selling checklist at the top. Flip it any day you want a selling session. It never posts or sends anything."], ["The three numbers", "Money in since 6 Apr against the £150k goal, money owed to you, and app revenue a month. Tap Owed or App revenue to jump to the detail."], ["Today so far", "Shows from 4pm. What you ticked off, moved to later or logged today, what's slipped past its date (tap to open it) and what Claude is still on."], ["Top 3 today", "The three open jobs that earn the most per hour of your time. Tap one to open it."], ["Since yesterday", "What changed overnight, checked every morning at 6:52."], ["Waiting on you", "Everything that needs you, one card at a time. Tap Done, or Later to pick a day it comes back. Your taps win over the morning scan. Copy a prompt to hand a job to the right project."], ["Your money", "Private to you. Traffic light, runway, spend, this month's bookings, bills coming out next and spend by category. Tap any tile, bill or category to see what it means and how much is left. Never balances or account numbers."], ["Next 7 days", "Tap any event to change its date or time, or remove it. Add an event at the bottom. Your edits win over the calendar scan."], ["Studio", "Each area and what's being worked on. Tap a line to go to it."]] },
-  apps: { tip: "Tap an app for its numbers, links, blocker and next step.", L: [["Your apps", "One card per app: users, downloads, paid and its blocker. Tap a card for the detail."], ["App page", "Buttons for the website, App Store Connect and the store page once it's live. Then the scoreboard, funnel, by-channel numbers and the blocker."], ["Scoreboard", "Each app gets a target. Two one-change tests that miss it turn the app amber: one more try, or park it for fun app time."], ["Feeds", "Where the numbers come from. Tap one to see how to fix it."]] },
+  today: { tip: "", L: [["The date and the switch", "The switch is Selling mode. Friday is your marketing and sales day, so it turns on by itself on Fridays and puts the selling checklist at the top. Flip it any day you want a selling session. It never posts or sends anything."], ["The three numbers", "Money in since 6 Apr against the £150k goal, money owed to you, and app revenue a month. Tap Owed or App revenue to jump to the detail."], ["Today's promise", "Each morning, pick the one job you promise to finish today. Only money and app-launch jobs count, so the streak can't be kept with easy ones. Tap Done on it and it's kept. The streak counts kept promises in a row: a day you don't pick one doesn't break it, a broken promise does. The line underneath is this week's said vs did."], ["Today so far", "Shows from 4pm. What you ticked off, moved to later or logged today, what's slipped past its date (tap to open it) and what Claude is still on."], ["Top 3 today", "The three open jobs that earn the most per hour of your time. Tap one to open it."], ["Since yesterday", "What changed overnight, checked every morning at 6:52."], ["Waiting on you", "Everything that needs you, one card at a time. Tap Done, or Later to pick a day it comes back. Your taps win over the morning scan. Copy a prompt to hand a job to the right project. Each job shows how long it's been open: at 7 days it turns amber and moves to the front, and at 14 days it asks you to do it, drop it or hand it to Claude."], ["Your money", "Private to you. Traffic light, runway, spend, this month's bookings, bills coming out next and spend by category. Tap any tile, bill or category to see what it means and how much is left. Never balances or account numbers."], ["Next 7 days", "Tap any event to change its date or time, or remove it. Add an event at the bottom. Your edits win over the calendar scan."], ["Studio", "Each area and what's being worked on. Tap a line to go to it."]] },
+  apps: { tip: "Tap an app for its numbers, links, blocker and next step.", L: [["Your apps", "One card per app: users, downloads, paid and its blocker, and how many days since the idea started. Tap a card for the detail."], ["Since the idea", "On each app page: the day count from when you first talked the idea through with Claude, against its users and money. Tap change the date if it's wrong."], ["App page", "Buttons for the website, App Store Connect and the store page once it's live. Then the scoreboard, funnel, by-channel numbers and the blocker."], ["Scoreboard", "Each app gets a target. Two one-change tests that miss it turn the app amber: one more try, or park it for fun app time."], ["Feeds", "Where the numbers come from. Tap one to see how to fix it."]] },
   mkt: { tip: "The quickest way to get numbers: make the campaign links for the planned posts, then add the App Store Connect key.", L: [["The three numbers", "Spend, store visits and cost a download, added up from every campaign row."], ["Channels", "Views per channel this month. They fill in as you log posts and add Friday numbers."], ["Campaigns", "One row per post or ad. Tap a row to change its status, add numbers or paste its campaign link. No link means downloads can't be traced to it, so each row says so until it has one."], ["Log a post or ad", "Tap it right after you post. App, channel, what it was, spend if it's an ad."], ["Feeds", "Where the numbers come from. Green is live, yellow needs a key, orange is logged by hand. Tap one to see how to fix it."], ["Friday", "Selling day. Send screenshots of TikTok, Instagram and Reddit stats and Claude fills the numbers in."]] },
   time: { tip: "", L: [["The chart", "Six weeks of shoots, holds, launches and money dates, colour by area. A dashed outline means a hold or an estimate. Tap a bar to change or remove it."], ["Coming up", "The next 14 days as a list. Tap to change, or add an event."], ["Fridays", "Shaded columns are selling days."]] },
   ask: { tip: "No AI reads what you type here. It builds the prompt from your open to-dos, then you paste it into the right project.", L: [["Make the prompt", "Type or dictate a rough goal, like \"get five gaffers testing Lampwerk this week\". You get a full prompt for the right project, with what's open in that area."], ["If it asks back", "One word or filler gets a nudge. If it can't tell the project, tap one."], ["Buttons", "Copy it, make it shorter, change the project, or delete it. Clear all is at the top. The chat empties every time you open the hub."]] },
@@ -553,7 +604,7 @@ function render() {
   if (mac) h = macView();
   else if (S.tab === "ask") h = '<div class="view">' + vAsk() + tabbar() + "</div>";
   else h = '<div class="view"><div class="main">' + body(false) + "</div>" + tabbar() + "</div>";
-  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet(); if (S.src) h += srcSheet(); if (S.camp) h += campSheet(); if (S.guide) h += guideSheet(); if (S.kx) h += kxSheet();
+  if (S.sheet) h += calSheet(); if (S.log) h += logSheet(); if (S.ev) h += evSheet(); if (S.fb) h += fbSheet(); if (S.src) h += srcSheet(); if (S.camp) h += campSheet(); if (S.guide) h += guideSheet(); if (S.kx) h += kxSheet(); if (S.st) h += stSheet();
   $("scr").innerHTML = h; bindSwipe();
   var m2 = document.querySelector(".main,.center"); if (m2 && S.keep) m2.scrollTop = y; S.keep = false;
   var c = document.querySelector(".chat"); if (c && S.chat.length) { var m = c.closest(".main"); if (m) m.scrollTop = m.scrollHeight; }
@@ -580,7 +631,7 @@ function gate(msg) {
 }
 function boot(silent) {
   return getToken(silent).then(function () { $("scr").innerHTML = '<div class="gate"><p class="muted">Loading your hub…</p></div>'; return findSheet(); })
-    .then(function (id) { G.sheetId = id; return load(); }).then(function () { render(); })
+    .then(function (id) { G.sheetId = id; return ensureTabs(); }).then(load).then(function () { render(); })
     .catch(function (e) { if (e && e.message === "signed out") return; flag("hub-sheet-id", null); gate(e && e.message ? (/^Sign-in/.test(e.message) ? e.message : "Couldn't open your hub: " + e.message) : ""); });
 }
 /* tree "go": app:<id>, tab:<name>, item:<id>, area:<code> or an https link */
@@ -611,7 +662,14 @@ document.addEventListener("click", function (e) {
   if (a === "next") return step(1); if (a === "prev") return step(-1);
   S.keep = true;
   if (a === "reload") return reload();
-  if (a === "done") { var it = item(d.id); setCell("items", it, "updated", new Date().toISOString()); setCell("items", it, "status", "done"); toast("Done. It won't come back"); return render(); }
+  if (a === "done") { var it = item(d.id), tp = promiseOn(iso(new Date())); setCell("items", it, "updated", new Date().toISOString()); setCell("items", it, "status", "done"); if (tp && tp.item_id === it.id) { setCell("promises", tp, "kept", "yes"); toast("Promise kept. Streak " + streak()); return render(); } toast("Done. It won't come back"); return render(); }
+  if (a === "promise") { var px = item(d.id), op = promiseOn(iso(new Date())); if (op) { setCell("promises", op, "item_id", px.id); setCell("promises", op, "title", px.title); } else append("promises", { date: iso(new Date()), item_id: px.id, title: px.title, kept: "" }); render(); return toast("Promised. Tap Done when it's finished"); }
+  if (a === "unpromise") { var up = promiseOn(iso(new Date())); if (up) setCell("promises", up, "date", "changed " + up.date); return render(); }
+  if (a === "drop") { var dx = item(d.id); setCell("items", dx, "updated", new Date().toISOString()); setCell("items", dx, "status", "dropped"); toast("Dropped. It won't come back"); return render(); }
+  if (a === "handoff") { return copy(handoff(item(d.id)), b); }
+  if (a === "started") { S.st = d.id; return render(); }
+  if (a === "closest") { S.st = null; return render(); }
+  if (a === "savest") { var sa = appById(S.st), v = $("st-d").value; if (v) setCell("apps", sa, "started", v); S.st = null; render(); return toast("Saved"); }
   if (a === "later") { S.sheet = d.id; S.pick = null; return render(); }
   if (a === "close") { S.sheet = null; return render(); }
   if (a === "setlater") { if (!S.pick) return; var t = item(S.sheet), dt = new Date(NOW.getFullYear(), NOW.getMonth(), S.pick); setCell("items", t, "updated", new Date().toISOString()); setCell("items", t, "later", iso(dt)); setCell("items", t, "status", "later"); S.sheet = null; render(); return toast("Back on " + S.pick + " " + MON[NOW.getMonth()]); }
@@ -660,7 +718,7 @@ document.addEventListener("click", function (e) {
 });
 document.addEventListener("keydown", function (e) {
   if (/TEXTAREA|INPUT|SELECT/.test(e.target.tagName)) { if (e.key === "Enter" && !e.shiftKey && e.target.id === "ask-in") { e.preventDefault(); ask(e.target.value); } return; }
-  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev && !S.src && !S.camp && !S.guide && !S.kx) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
+  if (D && S.tab === "today" && !S.sheet && !S.log && !S.fb && !S.ev && !S.src && !S.camp && !S.guide && !S.kx && !S.st) { if (e.key === "ArrowRight") step(1); if (e.key === "ArrowLeft") step(-1); }
 });
 var rt; window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { S.keep = true; render(); }, 150); });
 document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible" && D && G.token && Date.now() < G.exp) load().then(function () { S.keep = true; render(); }).catch(function () {}); });

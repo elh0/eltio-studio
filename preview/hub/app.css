@@ -317,3 +317,30 @@ a.btn:not(.primary){color:inherit}
 .cats .w .ov{color:var(--health)}
 .cats .cat.tap{cursor:pointer;border-radius:8px}
 .cats .cat.tap:hover{background:var(--raised)}
+/* accountability: promise, ageing, since the idea */
+.badge.old{color:var(--money);border-color:color-mix(in srgb,var(--money) 45%,transparent)}
+.badge.promise{color:var(--dp);border-color:color-mix(in srgb,var(--dp) 45%,transparent)}
+.badge .i{width:12px;height:12px}
+.nudge{display:grid;gap:8px;margin:0 16px 12px;padding:10px 12px;border-radius:10px;font-size:13px;color:var(--money);background:color-mix(in srgb,var(--money) 10%,transparent)}
+.nudge>.i{display:none}
+.promise-card{display:grid;gap:10px;padding:14px 16px}
+.promise-card .r{padding:4px 0;border:0}
+.promise-card .pk{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);display:grid;place-items:center;flex:none}
+.promise-card.kept .pk{background:var(--dp);border-color:var(--dp);color:var(--card)}
+.promise-card.kept .t{color:var(--muted)}
+.promise-card .note{padding:0;margin:0}
+.pchips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);background:var(--raised);color:var(--fg);font:inherit;font-size:13px;cursor:pointer;text-align:left}
+.chip .dot{background:var(--a)}
+.chip:hover{border-color:var(--border2)}
+.linkbtn{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
+.dayn{padding:0 14px 12px;font-size:12px;color:var(--muted);text-align:left}
+.since-card{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;padding:14px 16px}
+.since-card .dd{display:grid;gap:2px;padding-right:16px;border-right:1px solid var(--border)}
+.since-card .dd b{font:600 28px/1.1 var(--sans);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.since-card .tx{display:grid;gap:4px}
+.since-card .note{padding:0;margin:0}
+.promise-card .r{display:flex;gap:10px;align-items:center;font-size:14px}
+.promise-card .r .t{flex:1;min-width:0}
+.promise-card .r .w{color:var(--muted);font-size:12px}
+.promise-card .r.tap{cursor:pointer}

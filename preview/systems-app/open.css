@@ -125,3 +125,5 @@ a.row{text-decoration:none;color:inherit}
 .bh-w{margin:8px 0 2px;font-family:var(--mono);font-size:12px;color:var(--q)}
 .watchl{margin:28px 0 8px;font-size:13px}
 .refl{margin:0 0 12px}
+.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}@media (max-width:700px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+button.tile.tsav{text-align:left;font:inherit;color:inherit;border:0;cursor:pointer}

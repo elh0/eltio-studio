@@ -235,6 +235,21 @@ function owed() { return outstanding().reduce(function (a, v) { return a + num(v
 function taxYearStart() { var t = today(), y = t.getMonth() > 3 || (t.getMonth() === 3 && t.getDate() >= 6) ? t.getFullYear() : t.getFullYear() - 1; return new Date(y, 3, 6); }
 function paidThisYear() { var s = taxYearStart(); return D.invoices.filter(function (v) { var p = parse(v.paid); return p && p >= s; }).reduce(function (a, v) { return a + num(v.amount); }, 0); }
 function rolling12() { var s = addDays(today(), -365); return D.invoices.filter(function (v) { var d = parse(v.issued); return d && d >= s; }).reduce(function (a, v) { return a + num(v.amount); }, 0); }
+/* Time saved: each thing Systems did this month, at a fair guess of how long it takes by hand. Shown as an estimate. */
+var SAVEDM = [["days", "Timesheet days worked out", 10], ["inv", "Invoices made", 15], ["paid", "Payments matched and marked paid", 5], ["late", "Late invoices with the chase drafted", 5], ["exp", "Receipts and costs logged", 3], ["book", "Jobs and holds kept in your diary", 3]];
+function savedItems() {
+  var t = today(), inM = function (x) { var d = parse(x); return !!d && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear(); };
+  var c = { days: D.days.filter(function (x) { return inM(x.date); }).length, inv: D.invoices.filter(function (v) { return inM(v.issued); }).length, paid: D.invoices.filter(function (v) { return inM(v.paid); }).length, late: overdue().length, exp: D.expenses.filter(function (x) { return inM(x.date); }).length, book: D.bookings.filter(function (b) { return inM(b.start) && b.status !== "Cancelled"; }).length };
+  return SAVEDM.map(function (m) { return { n: m[1], c: c[m[0]] || 0, min: m[2] }; }).filter(function (x) { return x.c; });
+}
+function dur(min) { var h = Math.floor(min / 60), m = min % 60; return h ? h + "h" + (m ? " " + m + "m" : "") : m + "m"; }
+function savedMin() { return savedItems().reduce(function (a, x) { return a + x.c * x.min; }, 0); }
+function savedSheet() {
+  var L = savedItems(), tot = savedMin();
+  return '<div class="top"><span class="q">Time saved · ' + esc(today().toLocaleString("en-GB", { month: "long" })) + '</span><span class="q">Estimate</span></div><h2>About ' + dur(tot) + " back this month.</h2>" +
+    '<div class="rows">' + (L.length ? L.map(function (x) { return '<div class="row static"><span>' + esc(x.n) + ' <span class="q">· ' + x.c + " × " + x.min + ' min</span></span><span class="tag ok">' + dur(x.c * x.min) + "</span></div>"; }).join("") : '<p class="empty">Nothing yet this month. Log a day or make an invoice and it starts counting.</p>') + "</div>" +
+    '<p class="q">Each line is a fair guess at how long it takes by hand: working out overtime, typing an invoice, checking who\'s paid. Your own times may be different.</p><div class="acts"><button class="btn wide" data-close>Done</button></div>';
+}
 function bookedThisMonth() { var t = today(); return D.bookings.filter(function (b) { var d = parse(b.start); return b.status === "Confirmed" && d && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear(); }).reduce(function (a, b) { return a + num(b.rate) * Math.max(1, num(b.days)); }, 0); }
 function bookingValue(b) { return daysFor(b.id).length ? sheetCalc(b).total : num(b.rate) * Math.max(1, num(b.days) || 1); }
 function isPaye(b) { return b.terms === "TV drama"; }
@@ -994,7 +1009,7 @@ function welcome() {
     (hasG ? "" : '<p class="q">Google sign-in switches on once the Eltio Google account is set up.</p>') +
     '<div class="part">Try it with sample data, as</div><div class="pills jobs">' + JOBS.map(function (j) { return '<button class="pill" data-job="' + j.k + '">' + esc(j.n) + "</button>"; }).join("") + "</div>" +
     '<div class="rows forrows"><div class="row static"><span>Crew</span><span class="q">APA and Bectu overtime, timesheets</span></div><div class="row static"><span>DPs and HODs</span><span class="q">Kit, mileage, holds via your agent</span></div><div class="row static"><span>Producers</span><span class="q">Check crew invoices before you pay</span></div><div class="row static"><span>Everyone</span><span class="q">What\'s owed, chasing, tax</span></div></div>' +
-    '<p class="q">On your phone, open this page and add it to your home screen. Sign in with the same Google account on your laptop and everything matches.</p><p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p></div>';
+    '<p class="q">On your phone, open this page and add it to your home screen. Sign in with the same Google account on your laptop and everything matches.</p><p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="dpa.html">Data processing</a></p></div>';
 }
 function setup() {
   var s = D.settings;
@@ -1020,7 +1035,7 @@ function home() {
   return '<div class="hd"><div class="hd-l"><span class="part">' + nice(iso(today())) + (mode === "demo" ? " · sample data" + (job() ? ", as " + esc(job().n) : "") : "") + "</span><h1>" + greet() + (s.name ? ", " + esc(first(s.name)) : "") + ".</h1></div>" + (mode === "demo" ? "" : '<span class="q">' + (busy ? "Saving…" : "") + "</span>") + "</div>" +
     quickAdd() + dashTop() +
     '<div class="hcard"><div class="hc-l"><span class="part">Owed to you</span><b>' + money(owed()) + '</b><span class="hc-s">' + (od ? '<i class="rd"></i><span class="late">' + money(od) + " late</span>" : '<i class="gd"></i>All on time') + '</span></div><button class="row-chart hc-chart" data-tab="money" aria-label="Open Money">' + barChart(true) + "</button></div>" +
-    '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + "</div>" +
+    '<div class="tiles">' + tile("Booked", money(bookedThisMonth()), conf + " confirmed") + tile("On hold", holds, holds === 1 ? "pencil" : "pencils") + tile("For tax", money(paidThisYear() * num(s.tax || 25) / 100), esc(s.tax || 25) + "% put aside") + '<button class="tile tsav" data-saved><span class="part">Saved you</span><b>' + dur(savedMin()) + '</b><span class="q">this month, est.</span></button>' + "</div>" +
     shareCards() + jobPart() +
     '<div class="two"><div class="stack"><div class="part">Needs you' + (L.length ? " · " + L.length : "") + '</div><div class="rows needs">' + (mode === "demo" && job() && !isProd() ? '<button class="row" data-confirmed><span><i class="gd" style="margin-right:10px"></i>Car commercial hours, confirmed by production</span><span class="tag ok">Confirmed</span></button>' : "") + (L.length ? L.map(function (x) { return '<button class="row" data-todo="' + x.k + '" data-id="' + x.id + '"><span><i class="' + (x.amb ? "rd" : "od") + '"></i>' + esc(x.t) + '</span><span class="tag' + (x.amb ? " amb" : "") + '">' + esc(x.tag) + "</span></button>"; }).join("") : '<p class="empty">All clear. Nothing needs you.</p>') + "</div>" + starter() + "</div>" +
     '<div class="stack"><div class="part">Coming up</div><div class="rows">' + (up.length ? up.slice(0, 5).map(upRow).join("") : emptyNext("Nothing booked yet.", "Add your next job", "data-addbooking")) + "</div></div></div>";
@@ -1092,7 +1107,7 @@ function more() {
       ? '<div class="rows"><div class="row static"><span>Hosted for you</span><span class="tag ok">Nothing to manage</span><span class="sub">Your jobs, crew and money run on Eltio\'s servers. No sheets to set up or look after, and everyone on the job sees the same thing.</span></div></div>'
       : '<div class="rows"><div class="row static"><span>Your work dashboard</span><span class="tag ok">In your Google Drive</span><span class="sub">Bookings, holds, invoices and timesheets live in your own Google Drive and feed this app. You never need to open Drive. Eltio can only see files this app made, and keeps no copy.</span></div></div>') +
     '<div class="part">Export</div><div class="exp"><button class="btn" data-export="csv">CSV</button><button class="btn" data-export="xls">Excel</button><button class="btn" data-export="pdf">PDF</button><button class="btn" data-export="acct">For your accountant</button>' + (roleKey() === "Producer" ? '<button class="btn" data-export="payroll">Payroll bureau</button>' : "") + '</div><p class="q">For your accountant, Xero or FreeAgent. Excel has a tab each for bookings, invoices, expenses and timesheet days. Nothing is ever sent for you: drafts open in your own email.</p>' +
-    '<div class="acts"><button class="btn" data-signout>' + (mode === "demo" ? "Leave sample data" : "Sign out") + "</button>" + (mode === "demo" ? '<button class="lnk" data-resetdemo>Reset sample data</button>' : "") + "</div>" + '<p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></p>';
+    '<div class="acts"><button class="btn" data-signout>' + (mode === "demo" ? "Leave sample data" : "Sign out") + "</button>" + (mode === "demo" ? '<button class="lnk" data-resetdemo>Reset sample data</button>' : "") + "</div>" + '<p class="q"><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a> · <a href="dpa.html">Data processing</a></p>';
 }
 
 /* ---------- export: CSV, Excel and PDF, made in the browser ---------- */
@@ -2438,6 +2453,7 @@ document.addEventListener("click", function (e) {
   if (b.hasAttribute("data-links")) { openSheet(linkSheet(b.getAttribute("data-links"))); return; }
   if (d.link) { var lk = LINKS.find(function (x) { return x.k === d.link; }); if (mode !== "demo") { banner(lk.n + " linking switches on once their review of Systems is done."); return; } var ls = linked(); ls.push(d.link); D.settings.links = ls.join("|"); demoSave(); render(); openSheet(linkSheet(LG)); banner(lk.n + " linked, with sample data."); return; }
   if (b.hasAttribute("data-onbopen")) { openSheet(onboard(true)); return; }
+  if (b.hasAttribute("data-saved")) { openSheet(savedSheet()); return; }
   if (b.hasAttribute("data-onboff")) { closeSheet(); flag("sy-onb-off", "1"); render(); banner("Hidden. Find it again in You, under Set up your dashboard."); return; }
   if (b.hasAttribute("data-onbon")) { try { localStorage.removeItem("sy-onb-off"); } catch (e) {} S.tab = "home"; render(); return; }
   if (b.hasAttribute("data-rates")) { openSheet(rateSheet()); return; }

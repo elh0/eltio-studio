@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter+Tight:wght@500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Index: one quiet list. Big client names, small caps details, the film opens in place under its name.
+   Only two lines on the page: under the filter, and above the footer. */
+body { overflow: hidden; }
+.scroll { position: fixed; inset: 0; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 52px) max(var(--pad), env(safe-area-inset-right, 0px)) 120px max(var(--pad), env(safe-area-inset-left, 0px)); }
+.caps { text-transform: uppercase; letter-spacing: .06em; }
+.filter { position: sticky; top: -52px; margin: -52px calc(-1 * var(--pad)) 0; padding: calc(env(safe-area-inset-top, 0px) + 52px) var(--pad) 12px; background: var(--bg); z-index: 5; display: flex; gap: 18px; flex-wrap: wrap; border-bottom: 1px solid color-mix(in srgb, var(--fg) 18%, transparent); transition: background .5s var(--ease); }
+.filter button { opacity: .38; transition: opacity .2s; }
+.filter button[aria-pressed="true"], .filter button:hover { opacity: 1; }
+.filter sup { font-size: .75em; margin-left: 1px; }
+.list { padding-top: 22px; }
+.row { display: block; width: 100%; text-align: left; padding: 6px 0; }
+.row .head { display: grid; width: 100%; text-align: left; grid-template-columns: 2.4em 1fr; align-items: start; column-gap: 8px; }
+.row .n { padding-top: .7em; opacity: .38; font: 400 var(--small)/1 var(--mono); }
+.row .c { transition: opacity .35s var(--ease); }
+.row .meta { grid-column: 2; display: flex; gap: 14px; opacity: .38; margin-top: 2px; }
+.row .meta .cr { display: none; }
+.inner .cr { opacity: .38; }
+.list:hover .row:not(:hover):not(.open) .c, .list.has-open .row:not(.open) .c { opacity: .3; }
+.drawer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .8s var(--ease); }
+.drawer > div { overflow: hidden; min-height: 0; }
+.row.open .drawer { grid-template-rows: 1fr; }
+.inner { padding: 14px 0 28px; display: grid; gap: 10px; }
+.inner .film { width: 100%; aspect-ratio: 2.42; }
+.ctl { display: flex; justify-content: space-between; gap: 12px; }
+.scrub { height: 1px; background: color-mix(in srgb, var(--fg) 22%, transparent); position: relative; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--fg); width: 0; }
+.foot { position: fixed; left: 0; right: 0; bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 48px); background: var(--bg); border-top: 1px solid color-mix(in srgb, var(--fg) 18%, transparent); z-index: 30; transition: background .5s var(--ease); }
+.float { display: none; }
+@media (min-width: 900px) {
+  .row .head { grid-template-columns: 3em 1fr 22vw; }
+  .row .meta .cr { display: block; }
+  .inner .cr { display: none; }
+  .row .meta { grid-column: 3; grid-row: 1; flex-direction: column; gap: 2px; padding-top: .55em; margin: 0; }
+  .inner { padding-left: calc(3em + 8px); padding-right: 22vw; }
+  .float { display: block; position: fixed; right: var(--pad); top: 50%; width: 20vw; aspect-ratio: 2.42; transform: translateY(-50%); opacity: 0; transition: opacity .3s; pointer-events: none; z-index: 4; }
+  .float.on { opacity: 1; }
+}
+</style>
+</head>
+<body>
+<div class="ways" aria-label="Colourway">
+  <button type="button" data-way-btn="ink" aria-label="Paper and ink"></button>
+  <button type="button" data-way-btn="red" aria-label="Paper and red"></button>
+  <button type="button" data-way-btn="dark" aria-label="Ink and paper"></button>
+</div>
+<a class="corner tl" href="#" id="home">Helical Sound.</a>
+<button type="button" class="corner tr" id="tr">Info</button>
+<div class="foot"></div>
+<a class="corner bl" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a>
+<a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+
+<div class="scroll" id="scroll">
+  <nav class="filter caps" id="filter" aria-label="Filter by work"></nav>
+  <div class="list" id="list"></div>
+</div>
+<div class="film float" id="float"><img alt=""></div>
+
+<section class="info" id="info" aria-label="Info">
+  <p>Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <p>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></p>
+</section>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', list = [], openI = -1, playing = false, t0 = 0, pos = 0;
+var L = document.getElementById('list'), fl = document.getElementById('float');
+function build() {
+  var h = '';
+  ['all'].concat(TAG_ORDER).forEach(function (k) {
+    h += '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '<sup>' + count(k) + '</sup></button>';
+  });
+  document.getElementById('filter').innerHTML = h;
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
+  h = '';
+  list.forEach(function (w, i) {
+    h += '<div class="row" data-i="' + i + '"><button type="button" class="head" aria-expanded="false"><span class="n">' + (i < 9 ? '0' : '') + (i + 1) + '</span><span class="c big">' + w.c + '</span>' +
+      '<span class="meta caps"><span>' + w.p + '</span><span class="cr">' + credits(w) + '</span></span></button>' +
+      '<div class="drawer"><div><div class="inner"><div class="film"><img alt="" loading="lazy" src="' + still(w) + '"></div><div class="scrub"><i></i></div><div class="cr caps">' + credits(w) + '</div>' +
+      '<div class="ctl caps"><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><span><button type="button" data-k="prev">Prev</button> &nbsp; <button type="button" data-k="next">Next</button></span></div></div></div></div></div>';
+  });
+  L.innerHTML = h; openI = -1; L.classList.remove('has-open');
+}
+function rows() { return L.querySelectorAll('.row'); }
+function setOpen(i, scroll) {
+  stop();
+  rows().forEach(function (r, j) { r.classList.toggle('open', j === i); r.querySelector('.head').setAttribute('aria-expanded', j === i); });
+  openI = i; L.classList.toggle('has-open', i > -1); fl.classList.remove('on');
+  if (i > -1) {
+    pos = 0; setTimeout(function () { play(true); }, 500);
+    if (scroll) setTimeout(function () { rows()[i].scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 120);
+  }
+}
+function stop() { playing = false; L.querySelectorAll('.film').forEach(function (f) { f.classList.remove('on'); }); L.querySelectorAll('[data-k=play]').forEach(function (b) { b.textContent = 'Play'; }); }
+function play(on) {
+  var r = rows()[openI]; if (!r) return;
+  playing = on; t0 = performance.now() - pos * 1000;
+  r.querySelector('.film').classList.toggle('on', on); r.querySelector('[data-k=play]').textContent = on ? 'Pause' : 'Play';
+  if (on) tick();
+}
+function tick() {
+  var r = rows()[openI]; if (!r || !playing) return;
+  var len = secs(list[openI].d); pos = (performance.now() - t0) / 1000;
+  if (pos >= len) { setOpen((openI + 1) % list.length, true); return; }
+  r.querySelector('.scrub i').style.width = pos / len * 100 + '%';
+  r.querySelector('.tm').textContent = clock(pos) + ' / ' + list[openI].d;
+  requestAnimationFrame(tick);
+}
+L.addEventListener('click', function (e) {
+  var k = e.target.closest('[data-k]'), r = e.target.closest('.row'); if (!r) return;
+  var i = +r.getAttribute('data-i');
+  if (k) {
+    var a = k.getAttribute('data-k');
+    if (a === 'play') play(!playing);
+    if (a === 'next') setOpen((i + 1) % list.length, true);
+    if (a === 'prev') setOpen((i - 1 + list.length) % list.length, true);
+    return;
+  }
+  if (e.target.closest('.head')) setOpen(openI === i ? -1 : i, false);
+  else if (e.target.closest('.film')) play(!playing);
+});
+L.addEventListener('mouseover', function (e) {
+  var r = e.target.closest('.row'); if (!r || openI > -1) { fl.classList.remove('on'); return; }
+  fl.querySelector('img').src = still(list[+r.getAttribute('data-i')]); fl.classList.add('on');
+});
+L.addEventListener('mouseleave', function () { fl.classList.remove('on'); });
+document.getElementById('filter').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-tag]'); if (!b) return; stop(); tag = b.getAttribute('data-tag'); build();
+});
+var info = document.getElementById('info'), tr = document.getElementById('tr');
+tr.onclick = function () { var o = info.classList.toggle('open'); tr.textContent = o ? 'Close' : 'Info'; };
+document.getElementById('home').onclick = function (e) { e.preventDefault(); info.classList.remove('open'); tr.textContent = 'Info'; setOpen(-1); document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+build();
+</script>
+</body>
+</html>

@@ -23,7 +23,13 @@ main { min-height: 100%; display: flex; flex-direction: column; justify-content:
 body::before, body::after { content: ""; position: fixed; left: 0; right: 0; z-index: 30; background: var(--bg); }
 body::before { top: 0; height: calc(env(safe-area-inset-top, 0px) + 48px); }
 body::after { bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 48px); }
-.group { opacity: .38; padding-top: 18px; }
+.wild { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 28px; max-width: 980px; }
+.wild .wh { margin: 0 0 6px; opacity: .38; }
+.wild a { display: grid; grid-template-columns: 7em 1fr; gap: 8px; padding: 9px 0; border-top: 1px solid color-mix(in srgb, var(--fg) 14%, transparent); }
+.wild a span { opacity: .38; }
+.wild b { font-weight: inherit; }
+.wild:hover a:not(:hover) { opacity: .45; }
+@media (min-width: 900px) { .wild { grid-template-columns: 1fr 1fr; column-gap: 32px; } .wild .wh { grid-column: 1 / -1; } }
 @media (min-width: 900px) { .dirs a { grid-template-columns: 3em 1fr 26vw; } .dirs .d { grid-column: 3; grid-row: 1; padding-top: .8em; } }
 </style>
 </head>
@@ -34,21 +40,21 @@ body::after { bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 48px); 
 <a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Eltio Studio</a>
 <main>
   <nav class="dirs" aria-label="Directions">
-    <p class="group" style="margin:0;padding-top:0">From your notes</p>
-    <a href="table/"><span class="n">A</span><span class="big">Table</span><span class="d">Your idea 1A and 1B. Big client names in three columns (client, project, tags), the film opens in place with director and agency above it, and the info is pinned at the bottom, so it's all one page.</span></a>
-    <a href="header/"><span class="n">B</span><span class="big">Header</span><span class="d">Your idea 2. The bio sits up top, the film plays underneath, and your Selected Work runs along the bottom as one line, with tags and a choice of symbols between names.</span></a>
-    <a href="split/"><span class="n">C</span><span class="big">Split</span><span class="d">A mix of your references. One slim header, huge names on the left, the film and credits held beside them.</span></a>
-    <p class="group" style="margin:0">First directions</p>
-    <a href="wheel/"><span class="n">01</span><span class="big">Wheel</span><span class="d">Your client names turn through the middle of the screen. Tap one and the player rolls up underneath.</span></a>
-    <a href="index/"><span class="n">02</span><span class="big">Index</span><span class="d">One quiet list. The film opens in place, under its name.</span></a>
-    <a href="console/"><span class="n">03</span><span class="big">Console</span><span class="d">The technical one: tabs, a search, and a proper player on every project.</span></a>
-    <a href="deck/" class="later"><span class="n">04</span><span class="big">Deck</span><span class="d">Phase two, quoted separately. Your work as the tracklist on a see-through deck, as a line drawing or in 3D.</span></a>
-    <p class="group" style="margin:0">New styling, from your references</p>
-    <a href="helix/"><span class="n">05</span><span class="big">Helix</span><span class="d">Your stills turn on a spiral, the name in front says what it is. Tap a still for the project, with a numbered pager.</span></a>
-    <a href="pedal/"><span class="n">06</span><span class="big">Pedal</span><span class="d">Studio hardware, studied from the meris LVX: a screen with dot meters, knobs that really turn (time, zoom, work, colour, project) and footswitches with lights.</span></a>
-    <a href="control/"><span class="n">07</span><span class="big">Control</span><span class="d">A soft app with rounded cards, on and off switches for the kinds of work, and a proper player.</span></a>
-    <a href="orb/"><span class="n">08</span><span class="big">Orb</span><span class="d">The Wheel, with a soft light orb behind the names. It swirls on its own, and spins and brightens as you scroll.</span></a>
+    <a href="table/"><span class="n">01</span><span class="big">Table</span><span class="d">Your idea 1A and 1B. Big client names in three columns (client, project, tags), the film opens in place with director and agency above it, and the info is pinned at the bottom, so it's all one page.</span></a>
+    <a href="header/"><span class="n">02</span><span class="big">Header</span><span class="d">Your idea 2. The bio sits up top, the film plays underneath, and your Selected Work runs along the bottom as one line, with tags and a choice of symbols between names.</span></a>
+    <a href="split/"><span class="n">03</span><span class="big">Split</span><span class="d">One slim header, huge names on the left, the film and credits held beside them.</span></a>
   </nav>
+  <section class="wild" aria-label="Wildcards">
+    <p class="wh">Wildcards</p>
+    <a href="wheel/"><b>Wheel</b><span>Names turn through the middle, the player rolls up underneath.</span></a>
+    <a href="orb/"><b>Orb</b><span>The Wheel, with a light orb that swirls as you scroll.</span></a>
+    <a href="index/"><b>Index</b><span>One quiet list, the film opens under its name.</span></a>
+    <a href="console/"><b>Console</b><span>Tabs, a search and a proper player.</span></a>
+    <a href="control/"><b>Control</b><span>A soft app with rounded cards and switches.</span></a>
+    <a href="helix/"><b>Helix</b><span>Your stills turn on a spiral.</span></a>
+    <a href="pedal/"><b>Pedal</b><span>Studio hardware: a screen, knobs and footswitches.</span></a>
+    <a href="deck/"><b>Deck</b><span>Phase two, quoted separately. Your work on a see-through deck.</span></a>
+  </section>
   <p class="note">Each one uses your real work and credits. The dots at the top switch colours: paper and ink, paper and red, or ink and paper. Fonts and colours are yours to change.</p>
 </main>
 <script src="shared.js"></script>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Header</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Header: Leo's idea 2. The info sits in a short pinned header (the name runs straight into
+   the bio, after laneandassociates.co), the film plays in the middle with its credits,
+   and the client list runs along the bottom like his current site, split by a symbol.
+   Tags fade the names that don't match rather than hiding them. Two sizes only. */
+:root { --rbig: clamp(24px, 3.1vw, 44px); --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); overflow: auto; }
+.page { min-height: 100svh; display: flex; flex-direction: column; padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(var(--pad), env(safe-area-inset-left, 0px)); }
+.hd { position: sticky; top: 0; z-index: 10; background: var(--bg); display: grid; grid-template-columns: 1fr; gap: 8px 24px; padding: calc(env(safe-area-inset-top, 0px) + 16px) 0 14px; transition: background .5s var(--ease); }
+.hd p { margin: 0; max-width: 52ch; }
+.hd a.nm { font-weight: 500; }
+.hd .ct { display: flex; flex-wrap: wrap; gap: 0 14px; }
+.hd .ct .q2, .q2 { opacity: .45; }
+.hd a:hover { opacity: .5; }
+.ways { position: static; transform: none; justify-self: start; margin-top: 4px; }
+@media (min-width: 900px) {
+  .hd { grid-template-columns: 1fr 22vw auto; align-items: start; }
+  .hd .ct { display: block; }
+  .hd .ct > * { display: block; }
+  .ways { justify-self: end; margin-top: 2px; }
+}
+.stage { flex: 1; display: grid; align-content: center; justify-items: center; gap: 10px; padding: 26px 0 30px; }
+.stage > * { width: min(100%, 960px); }
+.cap { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; }
+.cap .r { text-align: right; }
+.stage .film { aspect-ratio: 2.42; cursor: pointer; }
+.stage .film img { transition: transform 12s linear, opacity .5s var(--ease); }
+.bar { height: 1px; background: color-mix(in srgb, var(--fg) 18%, transparent); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
+.ctl { display: flex; justify-content: space-between; }
+
+.work { display: grid; gap: 10px; border-top: 1px solid var(--fg); padding-top: 12px; }
+.fl { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 18px; }
+.fl > span { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.fl button { opacity: .4; transition: opacity .2s; }
+.fl button[aria-pressed="true"], .fl button:hover { opacity: 1; }
+.run { margin: 0; font: 500 var(--rbig)/1.14 var(--sans); letter-spacing: -.02em; text-wrap: pretty; }
+.run b { font-weight: 500; }
+.run button { font: inherit; letter-spacing: inherit; transition: opacity .35s var(--ease); text-align: left; }
+.run button.off { opacity: .18; }
+.run button[aria-current="true"] { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
+.run button:hover { opacity: .55; }
+.run .it { white-space: nowrap; }
+.run .sym { display: inline-block; margin: 0 .22em; font-weight: 400; }
+.run .sym.dot { width: .62em; height: .62em; border-radius: 50%; background: currentColor; vertical-align: .02em; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hd">
+    <p><a href="#" class="nm" id="home">Helical Sound</a> is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+    <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></div>
+    <div class="ways" aria-label="Colourway">
+      <button type="button" data-way-btn="ink" aria-label="Off-white and black"></button>
+      <button type="button" data-way-btn="red" aria-label="Off-white and red"></button>
+      <button type="button" data-way-btn="dark" aria-label="Black and off-white"></button>
+    </div>
+  </header>
+
+  <section class="stage" aria-label="Now playing">
+    <div class="cap"><span id="c1"></span><span class="r q2" id="c2"></span><span class="q2" id="c3"></span><span class="r q2" id="c4"></span></div>
+    <div class="film" id="film"><img alt=""></div>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="ctl"><button type="button" id="prev">Prev</button><button type="button" id="play">Play</button><span id="tm"></span><button type="button" id="next">Next</button></div>
+  </section>
+
+  <section class="work" aria-label="Selected work">
+    <div class="fl"><span id="tags"></span><span id="syms"></span></div>
+    <p class="run" id="run"></p>
+    <div class="fl q2"><span></span><a href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+  </section>
+</div>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', sym = 'dot', cur = 0, playing = false, t0 = 0, pos = 0;
+var SYMS = { dot: '', arrow: '→', hook: '↳', bar: '⇥', chev: '›' };
+var film = document.getElementById('film');
+function on(w) { return tag === 'all' || w.t.indexOf(tag) > -1; }
+function symH() { return sym === 'dot' ? '<span class="sym dot" aria-hidden="true"></span>' : '<span class="sym" aria-hidden="true">' + SYMS[sym] + '</span>'; }
+function build() {
+  document.getElementById('tags').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + ' ' + count(k) + '</button>';
+  }).join('');
+  document.getElementById('syms').innerHTML = '<span class="q2">Symbol</span>' + Object.keys(SYMS).map(function (k) {
+    return '<button type="button" data-sym="' + k + '" aria-pressed="' + (k === sym) + '" aria-label="Use ' + k + '">' + (k === 'dot' ? '●' : SYMS[k]) + '</button>';
+  }).join('');
+  document.getElementById('run').innerHTML = '<b>Selected Work:</b>' + WORK.map(function (w, i) {
+    return ' <span class="it">' + symH() + '<button type="button" data-i="' + i + '" class="' + (on(w) ? '' : 'off') + '" aria-current="' + (i === cur) + '">' + w.c + '</button></span>';
+  }).join('');
+}
+function load(i, auto) {
+  cur = (i + WORK.length) % WORK.length; var w = WORK[cur]; pos = 0;
+  var img = film.querySelector('img'); img.style.opacity = 0;
+  setTimeout(function () { img.src = still(w); img.onload = function () { img.style.opacity = 1; }; }, 150);
+  document.getElementById('c1').textContent = w.c + ', ' + w.p;
+  document.getElementById('c2').textContent = credits(w);
+  document.getElementById('c3').textContent = 'Director: to add · Agency: to add';
+  document.getElementById('c4').textContent = (cur < 9 ? '0' : '') + (cur + 1) + ' / ' + WORK.length;
+  document.querySelectorAll('#run [data-i]').forEach(function (b) { b.setAttribute('aria-current', +b.getAttribute('data-i') === cur); });
+  draw(); setPlay(auto === undefined ? playing : auto);
+}
+function draw() { var len = secs(WORK[cur].d); document.getElementById('bar').style.width = Math.min(1, pos / len) * 100 + '%'; document.getElementById('tm').textContent = clock(pos) + ' / ' + WORK[cur].d; }
+function setPlay(p) { playing = p; t0 = performance.now() - pos * 1000; film.classList.toggle('on', p); document.getElementById('play').textContent = p ? 'Pause' : 'Play'; if (p) tick(); }
+function tick() {
+  if (!playing) return;
+  pos = (performance.now() - t0) / 1000;
+  if (pos >= secs(WORK[cur].d)) { step(1); return; }
+  draw(); requestAnimationFrame(tick);
+}
+/* next/prev skip names the tag has faded out */
+function step(d) { for (var k = 1; k <= WORK.length; k++) { var j = (cur + d * k + WORK.length * 2) % WORK.length; if (on(WORK[j])) { load(j); return; } } }
+document.getElementById('play').onclick = film.onclick = function () { setPlay(!playing); };
+document.getElementById('prev').onclick = function () { step(-1); };
+document.getElementById('next').onclick = function () { step(1); };
+document.querySelector('.work').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-i]');
+  if (b) { load(+b.getAttribute('data-i'), true); if (innerWidth < 900) scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  var t = e.target.closest('[data-tag]'); if (t) { tag = t.getAttribute('data-tag'); build(); if (!on(WORK[cur])) step(1); return; }
+  var s = e.target.closest('[data-sym]'); if (s) { sym = s.getAttribute('data-sym'); build(); }
+});
+document.getElementById('home').onclick = function (e) { e.preventDefault(); tag = 'all'; build(); load(0, false); scrollTo({ top: 0, behavior: 'smooth' }); };
+build(); load(0, false);
+</script>
+</body>
+</html>

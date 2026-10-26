@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Table</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500&family=Inter+Tight:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Table: Leo's idea 1A + 1B. Three columns (client, project, tags) set big like the Cargo
+   template he sent, hairlines between rows, no hover backgrounds. A short footer is always
+   pinned (after pal.tv), so there's no info page: everything lives on one page.
+   A row opens its film in place, with the credits above it. Two sizes only. */
+:root { --tbig: clamp(30px, 4.6vw, 64px); --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --cond: "Archivo Narrow", "Arial Narrow", sans-serif; --line: color-mix(in srgb, var(--fg) 16%, transparent); }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); }
+.ways { left: auto; right: max(var(--pad), env(safe-area-inset-right, 0px)); transform: none; }
+.scroll { position: fixed; inset: 0 0 var(--foot, 150px); overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 18px) max(var(--pad), env(safe-area-inset-right, 0px)) 40px max(var(--pad), env(safe-area-inset-left, 0px)); }
+.cols { display: grid; grid-template-columns: 1fr; column-gap: 24px; }
+@media (min-width: 900px) { .cols { grid-template-columns: 1.05fr 1.2fr 1fr; } }
+.head { position: sticky; top: calc(-18px - env(safe-area-inset-top, 0px)); z-index: 3; background: var(--bg); padding: 30px 0 8px; border-bottom: 1px solid var(--fg); transition: background .5s var(--ease); }
+.head .lab { opacity: .45; }
+.head .tg { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: flex-end; }
+.head .tg button { opacity: .38; transition: opacity .2s; }
+.head .tg button[aria-pressed="true"], .head .tg button:hover { opacity: 1; }
+.head .h2, .head .h3 { display: none; }
+@media (min-width: 900px) { .head .h2, .head .h3 { display: block; } .head .tg { justify-content: flex-end; } }
+@media (max-width: 899px) { .head .cols { grid-template-columns: auto 1fr; } }
+.row { border-bottom: 1px solid var(--line); }
+.row .r { width: 100%; text-align: left; padding: 6px 0 4px; align-items: baseline; font: 500 var(--tbig)/1.02 var(--cond); letter-spacing: -.005em; transition: opacity .3s; }
+.row .r span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .r .t { text-align: right; }
+.row .r .p, .row .r .t { display: none; }
+.row .sub { display: flex; justify-content: space-between; gap: 12px; opacity: .45; padding-bottom: 8px; }
+@media (min-width: 900px) { .row .r .p, .row .r .t { display: block; } .row .sub { display: none; } }
+.list:hover .row:not(:hover):not(.open) .r, .list.has-open .row:not(.open) .r { opacity: .32; }
+.drawer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .8s var(--ease); }
+.drawer > div { overflow: hidden; min-height: 0; }
+.row.open .drawer { grid-template-rows: 1fr; }
+.inner { display: grid; gap: 10px; padding: 6px 0 26px; }
+.credits { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 4px 24px; }
+.credits dt { opacity: .45; } .credits dd { margin: 0; }
+.inner .film { width: 100%; aspect-ratio: 2.42; cursor: pointer; }
+.ctl { display: flex; justify-content: space-between; gap: 12px; }
+.bar { height: 1px; background: var(--line); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
+
+/* the pinned footer, after pal.tv */
+.foot { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--bg); border-top: 1px solid var(--fg); display: grid; grid-template-columns: 1fr 1fr; padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(var(--pad), env(safe-area-inset-left, 0px)); transition: background .5s var(--ease); }
+.foot > * { padding: 12px 0 14px; }
+.foot .wm { grid-column: 1 / -1; font: 500 var(--tbig)/.9 var(--cond); padding-bottom: 8px; }
+.foot .bio { display: none; }
+.mbio { margin: 0; padding: 22px 0 0; max-width: 40ch; }
+@media (min-width: 900px) { .mbio { display: none; } .foot .bio { display: block; } }
+.foot .ct { padding-top: 10px; border-top: 1px solid var(--line); }
+.foot .ct + .ct { padding-left: 12px; border-left: 1px solid var(--fg); }
+.foot a:hover { opacity: .5; }
+.foot .q2 { opacity: .45; }
+@media (min-width: 900px) {
+  .foot { grid-template-columns: 1.05fr 1.2fr .5fr .5fr; column-gap: 0; }
+  .foot > * { padding: 14px 16px 18px; border-left: 1px solid var(--fg); }
+  .foot > :first-child { border-left: 0; padding-left: 0; }
+  .foot .wm, .foot .bio { grid-column: auto; }
+  .foot .bio { padding-top: 14px; }
+  .foot .ct { border-top: 0; padding-top: 14px; }
+  .foot .ct + .ct { padding-left: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="ways" aria-label="Colourway">
+  <button type="button" data-way-btn="ink" aria-label="Off-white and black"></button>
+  <button type="button" data-way-btn="red" aria-label="Off-white and red"></button>
+  <button type="button" data-way-btn="dark" aria-label="Black and off-white"></button>
+</div>
+
+<div class="scroll" id="scroll">
+  <p class="mbio">Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <div class="head cols">
+    <span class="lab">Client</span><span class="lab h2">Project</span>
+    <nav class="tg" id="tg" aria-label="Filter by work"></nav>
+  </div>
+  <div class="list" id="list"></div>
+</div>
+
+<footer class="foot" id="foot">
+  <a href="#" class="wm" id="home">Helical Sound</a>
+  <p class="bio" style="margin:0">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <div class="ct"><span class="q2">Contact</span><br>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a></div>
+  <div class="ct"><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a><br><a href="https://vimeo.com" target="_blank" rel="noopener">Vimeo</a><br><a class="q2" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+</footer>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', list = [], openI = -1, playing = false, t0 = 0, pos = 0;
+var L = document.getElementById('list');
+var SHORT = { comp: 'Comp', sd: 'SD', mix: 'Mix' };
+function tagsShort(w) { return w.t.map(function (k) { return SHORT[k]; }).join(', '); }
+function build() {
+  document.getElementById('tg').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '</button>';
+  }).join('');
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
+  L.innerHTML = list.map(function (w, i) {
+    return '<div class="row" data-i="' + i + '"><button type="button" class="r cols" aria-expanded="false"><span class="c">' + w.c + '</span><span class="p">' + w.p + '</span><span class="t">' + tagsShort(w) + '</span></button>' +
+      '<div class="sub"><span>' + w.p + '</span><span>' + credits(w) + '</span></div>' +
+      '<div class="drawer"><div><div class="inner">' +
+      '<dl class="credits" style="margin:0"><div><dt>Director</dt><dd>To add</dd></div><div><dt>Agency / creative director</dt><dd>To add</dd></div><div><dt>Helical Sound</dt><dd>' + credits(w) + '</dd></div></dl>' +
+      '<div class="film"><img alt="" loading="lazy" src="' + still(w) + '"></div><div class="bar"><i></i></div>' +
+      '<div class="ctl"><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><span><button type="button" data-k="prev">Prev</button> &nbsp; <button type="button" data-k="next">Next</button></span></div>' +
+      '</div></div></div></div>';
+  }).join('');
+  openI = -1; L.classList.remove('has-open');
+}
+function rows() { return L.querySelectorAll('.row'); }
+function stop() { playing = false; L.querySelectorAll('.film').forEach(function (f) { f.classList.remove('on'); }); L.querySelectorAll('[data-k=play]').forEach(function (b) { b.textContent = 'Play'; }); }
+function setOpen(i, scroll) {
+  stop();
+  rows().forEach(function (r, j) { r.classList.toggle('open', j === i); r.querySelector('.r').setAttribute('aria-expanded', j === i); });
+  openI = i; L.classList.toggle('has-open', i > -1);
+  if (i > -1) {
+    pos = 0; setTimeout(function () { play(true); }, 500);
+    if (scroll) setTimeout(function () { var r = rows()[i]; document.getElementById('scroll').scrollTo({ top: r.offsetTop - 60, behavior: 'smooth' }); }, 120);
+  }
+}
+function play(on) {
+  var r = rows()[openI]; if (!r) return;
+  playing = on; t0 = performance.now() - pos * 1000;
+  r.querySelector('.film').classList.toggle('on', on); r.querySelector('[data-k=play]').textContent = on ? 'Pause' : 'Play';
+  if (on) tick();
+}
+function tick() {
+  var r = rows()[openI]; if (!r || !playing || !list[openI]) return;
+  var len = secs(list[openI].d); pos = (performance.now() - t0) / 1000;
+  if (pos >= len) { setOpen((openI + 1) % list.length, true); return; }
+  r.querySelector('.bar i').style.width = pos / len * 100 + '%';
+  r.querySelector('.tm').textContent = clock(pos) + ' / ' + list[openI].d;
+  requestAnimationFrame(tick);
+}
+L.addEventListener('click', function (e) {
+  var k = e.target.closest('[data-k]'), r = e.target.closest('.row'); if (!r) return;
+  var i = +r.getAttribute('data-i');
+  if (k) { var a = k.getAttribute('data-k'); if (a === 'play') play(!playing); if (a === 'next') setOpen((i + 1) % list.length, true); if (a === 'prev') setOpen((i - 1 + list.length) % list.length, true); return; }
+  if (e.target.closest('.r') || e.target.closest('.sub')) setOpen(openI === i ? -1 : i, false);
+  else if (e.target.closest('.film')) play(!playing);
+});
+document.getElementById('tg').addEventListener('click', function (e) { var b = e.target.closest('[data-tag]'); if (!b) return; stop(); tag = b.getAttribute('data-tag'); build(); });
+document.getElementById('home').onclick = function (e) { e.preventDefault(); setOpen(-1); document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+function fit() { document.documentElement.style.setProperty('--foot', document.getElementById('foot').offsetHeight + 'px'); }
+addEventListener('resize', fit); document.fonts && document.fonts.ready.then(fit);
+build(); fit();
+</script>
+</body>
+</html>

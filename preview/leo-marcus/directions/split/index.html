@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Split</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Split: one column of client names as big as his current site, the film and its credits
+   held still beside them. A single streamlined header line (after anyother.name) carries
+   the info, the footer columns follow pal.tv. On a phone the player slides up over the list.
+   Two sizes only. */
+:root { --nbig: clamp(38px, 5.6vw, 88px); --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --line: color-mix(in srgb, var(--fg) 16%, transparent); }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); }
+.q2 { opacity: .45; }
+.hd { position: fixed; left: 0; right: 0; top: 0; z-index: 20; background: var(--bg); display: flex; gap: 8px 24px; align-items: baseline; padding: calc(env(safe-area-inset-top, 0px) + 14px) max(var(--pad), env(safe-area-inset-right, 0px)) 12px max(var(--pad), env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--fg); transition: background .5s var(--ease); }
+.hd .nm { font-weight: 500; }
+.hd .bio { flex: 1; display: none; }
+.hd .ct { margin-left: auto; display: flex; gap: 14px; }
+.hd .ct .em { display: none; }
+.hd a:hover { opacity: .5; }
+.ways { position: static; transform: none; align-self: center; }
+@media (min-width: 900px) { .hd .bio, .hd .ct .em { display: block; } }
+.scroll { position: fixed; inset: 0; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 56px) max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--pad), env(safe-area-inset-left, 0px)); }
+.grid { display: grid; grid-template-columns: 1fr; column-gap: 4vw; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1.1fr .9fr; } }
+.tg { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 14px 0 10px; }
+.tg button { opacity: .4; transition: opacity .2s; }
+.tg button[aria-pressed="true"], .tg button:hover { opacity: 1; }
+.names { display: grid; justify-items: start; padding-bottom: 40px; }
+.names button { font: 500 var(--nbig)/1 var(--sans); letter-spacing: -.035em; text-align: left; padding: .04em 0 .06em; display: flex; align-items: baseline; gap: .3em; transition: opacity .3s; }
+.names button sup { font: 400 var(--small)/1 var(--sans); letter-spacing: 0; opacity: .45; position: relative; top: -1.6em; white-space: nowrap; }
+.names:hover button:not(:hover):not([aria-current="true"]), .names.has button:not([aria-current="true"]):not(:hover) { opacity: .3; }
+
+.pane { display: none; }
+@media (min-width: 900px) { .pane { display: block; } .pane .in { position: sticky; top: 14px; padding-top: 14px; } }
+.in { display: grid; gap: 10px; }
+.in .film { aspect-ratio: 2.42; cursor: pointer; }
+.cr { display: grid; grid-template-columns: auto 1fr; gap: 3px 18px; margin: 4px 0 0; }
+.cr dt { opacity: .45; } .cr dd { margin: 0; }
+.bar { height: 1px; background: var(--line); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
+.ctl { display: flex; justify-content: space-between; }
+.empty { opacity: .45; }
+
+/* phone: the player slides up */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--bg); border-top: 1px solid var(--fg); padding: 14px max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(var(--pad), env(safe-area-inset-left, 0px)); transform: translateY(105%); transition: transform .7s var(--ease), background .5s var(--ease); }
+.sheet.open { transform: none; }
+.sheet .top { display: flex; justify-content: space-between; }
+@media (min-width: 900px) { .sheet { display: none; } }
+
+.foot { grid-column: 1 / -1; border-top: 1px solid var(--fg); display: grid; grid-template-columns: 1fr 1fr; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); }
+.foot > * { padding: 12px 12px 0 0; }
+.foot .bio2 { grid-column: 1 / -1; padding-bottom: 12px; max-width: 46ch; }
+.foot .c + .c { border-left: 1px solid var(--fg); padding-left: 12px; }
+@media (min-width: 900px) {
+  .foot { grid-template-columns: 1.1fr .6fr .3fr; column-gap: 0; }
+  .foot .bio2 { grid-column: auto; }
+  .foot > * + * { border-left: 1px solid var(--fg); padding-left: 14px; }
+}
+</style>
+</head>
+<body>
+<header class="hd">
+  <a href="#" class="nm" id="home">Helical Sound</a>
+  <span class="bio q2">Music and sound for fashion and advertising, London</span>
+  <span class="ct"><a class="em" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></span>
+  <div class="ways" aria-label="Colourway">
+    <button type="button" data-way-btn="ink" aria-label="Off-white and black"></button>
+    <button type="button" data-way-btn="red" aria-label="Off-white and red"></button>
+    <button type="button" data-way-btn="dark" aria-label="Black and off-white"></button>
+  </div>
+</header>
+
+<div class="scroll" id="scroll">
+  <div class="grid">
+    <div>
+      <nav class="tg" id="tg" aria-label="Filter by work"></nav>
+      <div class="names" id="names"></div>
+    </div>
+    <aside class="pane" aria-label="Now playing"><div class="in" id="pane"></div></aside>
+    <footer class="foot">
+      <p class="bio2" style="margin:0">Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+      <div class="c"><span class="q2">Contact</span><br>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a></div>
+      <div class="c"><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a><br><a class="q2" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+    </footer>
+  </div>
+</div>
+
+<section class="sheet" id="sheet" aria-label="Now playing"><div class="in" id="sheetIn"></div></section>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0;
+var SHORT = { comp: 'C', sd: 'SD', mix: 'M' };
+var phone = function () { return innerWidth < 900; };
+function build() {
+  document.getElementById('tg').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + ' ' + count(k) + '</button>';
+  }).join('');
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (x) { return x.t.indexOf(tag) > -1; });
+  document.getElementById('names').innerHTML = list.map(function (x, i) {
+    return '<button type="button" data-i="' + i + '" aria-current="' + (x === w) + '">' + x.c + '<sup>' + x.p + '</sup></button>';
+  }).join('');
+  document.getElementById('names').classList.toggle('has', !!w && list.indexOf(w) > -1);
+}
+function panel() {
+  if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
+  return '<div class="top ' + (phone() ? '' : 'q2') + '" style="display:flex;justify-content:space-between"><span>' + w.c + '</span>' + (phone() ? '<button type="button" data-k="close">Close</button>' : '') + '</div>' +
+    '<div class="film"><img alt="" src="' + still(w) + '"></div><div class="bar"><i></i></div>' +
+    '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
+    '<dl class="cr"><dt>Project</dt><dd>' + w.p + '</dd><dt>Director</dt><dd>To add</dd><dt>Agency</dt><dd>To add</dd><dt>Helical Sound</dt><dd>' + credits(w) + '</dd></dl>';
+}
+function root() { return document.getElementById(phone() ? 'sheetIn' : 'pane'); }
+function load(x, auto) {
+  w = x; pos = 0; playing = false;
+  document.getElementById('pane').innerHTML = panel(); document.getElementById('sheetIn').innerHTML = panel();
+  document.getElementById('sheet').classList.toggle('open', phone());
+  build(); setPlay(!!auto);
+}
+function setPlay(p) {
+  playing = p; t0 = performance.now() - pos * 1000;
+  var r = root(); if (!r.querySelector('.film')) return;
+  r.querySelector('.film').classList.toggle('on', p); r.querySelector('[data-k=play]').textContent = p ? 'Pause' : 'Play';
+  if (p) tick();
+}
+function tick() {
+  if (!playing || !w) return;
+  var r = root(), len = secs(w.d); pos = (performance.now() - t0) / 1000;
+  if (pos >= len) { step(1); return; }
+  r.querySelector('.bar i').style.width = pos / len * 100 + '%'; r.querySelector('.tm').textContent = clock(pos) + ' / ' + w.d;
+  requestAnimationFrame(tick);
+}
+function step(d) { var i = list.indexOf(w); load(list[((i < 0 ? 0 : i + d) + list.length) % list.length], true); }
+function ctl(e) {
+  var k = e.target.closest('[data-k]');
+  if (!k) { if (e.target.closest('.film')) setPlay(!playing); return; }
+  var a = k.getAttribute('data-k');
+  if (a === 'play') setPlay(!playing); if (a === 'next') step(1); if (a === 'prev') step(-1);
+  if (a === 'close') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+}
+document.getElementById('pane').addEventListener('click', ctl);
+document.getElementById('sheetIn').addEventListener('click', ctl);
+document.getElementById('names').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) load(list[+b.getAttribute('data-i')], true); });
+document.getElementById('tg').addEventListener('click', function (e) { var b = e.target.closest('[data-tag]'); if (!b) return; tag = b.getAttribute('data-tag'); build(); });
+document.getElementById('home').onclick = function (e) { e.preventDefault(); document.getElementById('sheet').classList.remove('open'); document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+build(); if (!phone()) load(WORK[0], false); else document.getElementById('pane').innerHTML = panel();
+</script>
+</body>
+</html>

@@ -36,22 +36,41 @@ main { padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--p
 .cap .c { font-weight: 500; }
 .cap .q2 { opacity: .45; }
 
-.deck { position: relative; max-width: min(1180px, calc((100svh - 70px) * 1.795)); transition: max-width .7s var(--ease); -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; margin: 0 auto; aspect-ratio: 2070 / 1153; container-type: inline-size; overflow: hidden; }
+.deck { position: relative; max-width: min(1180px, calc((100svh - 70px) * 1.795)); transition: max-width .7s var(--ease); -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent), linear-gradient(180deg, transparent, #000 5%, #000 92%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent), linear-gradient(180deg, transparent, #000 5%, #000 92%, transparent); mask-composite: intersect; margin: 0 auto; aspect-ratio: 2070 / 1153; container-type: inline-size; overflow: hidden; }
 .plate { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 2070 / 1153; container-type: inline-size; user-select: none; -webkit-user-select: none; }
 .plate > img { display: block; width: 100%; height: 100%; pointer-events: none; }
 @media (min-width: 700px) { body.open .deck { max-width: min(1180px, calc((100svh - 400px) * 1.795)); } body.open .stage { max-width: 620px; } }
 /* phone: crop in on the object */
 @media (max-width: 699px) {
-  .deck { aspect-ratio: 900 / 830; margin: 6px -4px 0; -webkit-mask-image: radial-gradient(closest-side, #000 86%, transparent 100%); mask-image: radial-gradient(closest-side, #000 86%, transparent 100%); }
-  .plate { width: 230%; left: -63.9%; top: -17.8cqw; }
+  .deck { aspect-ratio: 1150 / 975; margin: 6px -4px 0; }
+  .ov .lb text { font-size: 36px; }
+  .plate { width: 180%; left: -30%; top: -5.6cqw; }
 }
+.ov { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.ov .lb text { font: 500 24px var(--sans); fill: #5f5c56; text-anchor: middle; letter-spacing: .01em; }
+.ov .lb text[text-anchor="end"] { text-anchor: end; }
+.ov .lb .q { fill: #9a968e; font-weight: 400; }
+.ov .tick { stroke: rgba(18, 18, 17, .28); }
+.ov .track { stroke: rgba(18, 18, 17, .1); }
+.ov .prog { stroke: #F2210F; stroke-linecap: round; transition: stroke-dasharray .12s linear; }
+.ov .led, .ov .kd, .ov .vm { fill: #a8a49b; stroke: rgba(0, 0, 0, .18); stroke-width: 1.5; transition: fill .15s; }
+.ov .led.on { fill: #3BEA5B; filter: url(#glow); }
+.ov .led.amb { fill: #FF8A1F; filter: url(#glow); }
+.ov .kd.on { fill: #F2210F; filter: url(#glow); }
+.ov .vm.on { fill: #FF8A1F; }
+.hot { cursor: pointer; transition: box-shadow .15s; }
+.hot:hover { box-shadow: 0 0 0 .22cqw rgba(242, 33, 15, .55); }
+.hot[data-k=disc]:hover, .hot[data-k=vol]:hover { box-shadow: 0 0 0 .15cqw rgba(242, 33, 15, .3); }
+.screen { background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 .12cqw, transparent .12cqw .24cqw); border-radius: .4cqw; }
+.screen .mtr { display: flex; gap: .12cqw; align-items: flex-end; height: 1.3cqw; margin-top: auto; }
+.screen .mtr i { flex: 1; background: #E9F2DF; opacity: .85; }
 .hot { position: absolute; border-radius: 50%; touch-action: none; }
 .hot:active, .hot.dn { background: rgba(0, 0, 0, .14); }
 .hot:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
 .sq { border-radius: 14%; }
 .screen { position: absolute; color: #E9F2DF; font: 1.06cqw/1.22 "VT323", var(--mono); text-shadow: 0 0 .5cqw rgba(200, 255, 190, .45); padding: .55cqw .65cqw; overflow: hidden; pointer-events: none; text-transform: uppercase; display: flex; flex-direction: column; }
 .screen div { white-space: nowrap; overflow: hidden; text-overflow: clip; }
-.screen .bar { height: .22cqw; margin-top: auto; background: rgba(233, 242, 223, .22); }
+.screen .bar { height: .22cqw; margin-top: .25cqw; background: rgba(233, 242, 223, .22); }
 .screen .bar i { display: block; height: 100%; width: 0; background: #E9F2DF; }
 .cap-spin { position: absolute; border-radius: 50%; pointer-events: none; }
 .cap-spin::after { content: ""; position: absolute; left: 50%; top: 9%; width: 7%; height: 7%; margin-left: -3.5%; border-radius: 50%; background: rgba(255, 255, 255, .75); }
@@ -94,9 +113,25 @@ footer { display: flex; justify-content: space-between; gap: 12px; padding: 40px
   <div class="deck" id="deck">
     <div class="plate" id="plate">
       <img src="plate.jpg" alt="A clear see-through deck with a red centre, a small screen, a slider and round buttons">
+<svg class="ov" viewBox="0 0 2070 1153" aria-hidden="true">
+        <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+        <circle cx="921" cy="514" r="282" fill="none" class="tick" stroke-width="10" stroke-dasharray="2 14.8"/>
+        <circle cx="921" cy="514" r="266" fill="none" class="track" stroke-width="5"/>
+        <circle id="ring" cx="921" cy="514" r="266" fill="none" class="prog" stroke-width="6" pathLength="1000" stroke-dasharray="0 1000" transform="rotate(-90 921 514)" filter="url(#glow)"/>
+        <circle class="kd" data-tag="all" cx="629.6" cy="308.0" r="7"/><circle class="kd" data-tag="comp" cx="623.2" cy="259.4" r="7"/><circle class="kd" data-tag="sd" cx="653.0" cy="220.6" r="7"/><circle class="kd" data-tag="mix" cx="701.6" cy="214.2" r="7"/>
+        <g id="vm"><rect class="vm" x="1400" y="850" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="810" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="770" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="730" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="690" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="650" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="610" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="570" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="530" width="16" height="22" rx="4"/><rect class="vm" x="1400" y="490" width="16" height="22" rx="4"/></g>
+        <circle class="led" id="ledPrev" cx="1204" cy="126" r="7"/><circle class="led" id="ledNext" cx="1320" cy="126" r="7"/>
+        <circle class="led" id="ledPlay" cx="751" cy="776" r="8"/><circle class="led" id="ledInfo" cx="917" cy="776" r="8"/><circle class="led" id="ledList" cx="1081" cy="776" r="8"/>
+        <g class="lb">
+          <text x="1204" y="104">prev</text><text x="1320" y="104">next</text>
+          <text x="751" y="1010">play / stop</text><text x="917" y="1010">info</text><text x="1081" y="1010">all work</text>
+          <text x="1318" y="428">vol</text>
+          <text x="572" y="270" text-anchor="end">tags</text><text x="572" y="300" text-anchor="end" class="q" id="tagLb">all</text>
+          <text x="572" y="508" text-anchor="end">platter</text><text x="572" y="538" text-anchor="end" class="q">drag to scrub</text>
+        </g>
+      </svg>
       <div class="screen" id="screen" data-b="1219,261,195,130"></div>
       <div class="cap-spin" id="spin" data-b="831,424,180,180"></div>
-      <div class="led" id="led" data-c="751,778"></div>
       <button class="hot sq" data-k="prev" data-b="1172,148,64,62" aria-label="Previous"></button>
       <button class="hot sq" data-k="next" data-b="1288,148,64,62" aria-label="Next"></button>
       <button class="hot" data-k="play" data-b="694,794,114,114" aria-label="Play"></button>
@@ -107,7 +142,7 @@ footer { display: flex; justify-content: space-between; gap: 12px; padding: 40px
       <div class="hot sq" data-k="vol" data-b="1250,440,135,460" aria-label="Volume" role="slider"></div>
     </div>
   </div>
-  <p class="hint" id="hint">Press play. Turn the platter to scrub, slide for volume, the knob filters.</p>
+  
   <nav class="list" id="list" aria-label="All work"></nav>
 </main>
 <footer><span>hello@helical-sound.com</span><a href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></footer>
@@ -159,16 +194,33 @@ function cap() {
 function setPlay(p) {
   playing = p; last = performance.now();
   if (p) { $('stage').classList.add('open'); document.body.classList.add('open'); }
-  $('film').classList.toggle('on', p); $('led').classList.toggle('on', p);
-  $('hint').style.visibility = 'hidden';
+  $('film').classList.toggle('on', p); $('ledPlay').classList.toggle('on', p);
   screen();
 }
 function say(s) { flash = s; flashT = performance.now(); }
 function screen() {
   var w = cur(), d = secs(w.d), n = String(i + 1).padStart(2, '0') + '/' + String(list.length).padStart(2, '0');
   var line4 = (performance.now() - flashT < 1400 && flash) ? flash : (playing ? '▶ ' : '■ ') + clock(pos) + ' / ' + clock(d);
-  $('screen').innerHTML = '<div>' + n + ' ' + w.t.map(function (k) { return SHORT[k]; }).join(' ') + '</div><div>' + w.c + '</div><div>' + w.p + '</div><div>' + line4 + '</div><div class="bar"><i style="width:' + Math.min(100, pos / d * 100) + '%"></i></div>';
+  $('screen').innerHTML = '<div>' + n + ' ' + w.t.map(function (k) { return SHORT[k]; }).join(' ') + '</div><div>' + w.c + '</div><div>' + w.p + '</div><div>' + line4 + '</div><div class="mtr">' + meter() + '</div><div class="bar"><i style="width:' + Math.min(100, pos / d * 100) + '%"></i></div>';
 }
+function meter() {
+  var h = '', t = performance.now() / 1000;
+  for (var k = 0; k < 18; k++) {
+    var v = playing ? (.25 + .75 * Math.abs(Math.sin(t * (3 + k * .7) + k)) * (.4 + .6 * vol)) : .08;
+    h += '<i style="height:' + Math.round(v * 100) + '%"></i>';
+  }
+  return h;
+}
+function lights() {
+  var d = secs(cur().d);
+  $('ring').setAttribute('stroke-dasharray', Math.min(1000, pos / d * 1000) + ' 1000');
+  document.querySelectorAll('.kd').forEach(function (c) { c.classList.toggle('on', c.getAttribute('data-tag') === tag); });
+  document.querySelectorAll('.vm').forEach(function (r, k) { r.classList.toggle('on', k < Math.round(vol * 10)); });
+  $('ledInfo').classList.toggle('amb', $('info').classList.contains('on'));
+  $('ledList').classList.toggle('amb', $('list').classList.contains('on'));
+  $('tagLb').textContent = tag === 'all' ? 'all' : TAGS[tag].toLowerCase();
+}
+function blink(id) { var l = $(id); l.classList.add('amb'); setTimeout(function () { l.classList.remove('amb'); }, 220); }
 function frame(t) {
   var dt = (t - last) / 1000; last = t;
   if (playing && !dragging) {
@@ -176,7 +228,7 @@ function frame(t) {
     if (pos >= secs(cur().d)) load(i + 1, true);
   }
   $('spin').style.transform = 'rotate(' + angle + 'deg)';
-  screen();
+  screen(); lights();
   requestAnimationFrame(frame);
 }
 
@@ -215,8 +267,8 @@ document.addEventListener('click', function (e) {
   var k = e.target.closest('[data-k]'); if (!k) return;
   k = k.getAttribute('data-k');
   if (k === 'play') setPlay(!playing);
-  if (k === 'next') { load(i + 1, playing); say('NEXT'); }
-  if (k === 'prev') { load(i - 1, playing); say('PREV'); }
+  if (k === 'next') { load(i + 1, playing); say('NEXT'); blink('ledNext'); }
+  if (k === 'prev') { load(i - 1, playing); say('PREV'); blink('ledPrev'); }
   if (k === 'info') { $('info').classList.toggle('on'); say('INFO'); }
   if (k === 'list') { $('list').classList.toggle('on'); say($('list').classList.contains('on') ? 'LIST ON' : 'LIST OFF'); }
   if (k === 'knob') { var o = ['all'].concat(TAG_ORDER); setTag(o[(o.indexOf(tag) + 1) % o.length]); }

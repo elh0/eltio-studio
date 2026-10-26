@@ -7,73 +7,126 @@
 <title>Helical Sound: Pedal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter+Tight:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter+Tight:wght@300;400&display=swap">
 <link rel="stylesheet" href="../shared.css">
 <style>
-/* Pedal: the site as a piece of studio hardware (after the meris LVX and the RT-01).
-   One screen, one browse knob, four footswitches. Colourways are the casing: white, orange, black. */
-:root { --paper: #E3E1DB; --case: #F6F5F1; --case2: #E7E5DF; --silk: #2A2A28; --led: #FF4A1C; --screen: #0B0B0A; --sfg: #EDEBE4; --pbig: clamp(26px, 7.4vw, 54px); }
-[data-way="red"] { --fg: var(--chalk); --bg: #121211; --case: #EC5A24; --case2: #D84C19; --silk: #1A0D07; --led: #FFE7A8; }
-[data-way="dark"] { --case: #1C1C1A; --case2: #141413; --silk: #CFCDC6; --led: #FF4A1C; }
-.caps { text-transform: uppercase; letter-spacing: .08em; }
-main { position: fixed; inset: 0; display: grid; place-items: center; padding: calc(env(safe-area-inset-top, 0px) + 52px) max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 52px) max(var(--pad), env(safe-area-inset-left, 0px)); overflow-y: auto; }
-.panel { width: 100%; max-width: 760px; background: linear-gradient(180deg, var(--case), var(--case2)); border-radius: 22px; padding: 18px 18px 22px; color: var(--silk); display: grid; gap: 18px; box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 30px 60px -30px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.08); transition: background .5s var(--ease), color .5s var(--ease); }
-.silk { display: flex; justify-content: space-between; gap: 12px; font-size: 10px; }
-.silk span:last-child { opacity: .55; }
-
-.screen { position: relative; background: var(--screen); color: var(--sfg); border-radius: 10px; aspect-ratio: 1.55; overflow: hidden; box-shadow: 0 0 0 3px color-mix(in srgb, var(--silk) 14%, transparent), inset 0 0 40px rgba(0,0,0,.6); }
-@media (min-width: 700px) { .screen { aspect-ratio: 2.3; } }
-.screen .film { position: absolute; inset: 0; background: none; }
-.screen .film img { opacity: .5; filter: saturate(.7) contrast(1.05); }
-.screen::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11,11,10,.85), rgba(11,11,10,.15) 70%), repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px); pointer-events: none; }
-.hud { position: absolute; inset: 0; z-index: 2; padding: 14px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto 1fr auto auto; gap: 6px 14px; font-size: 11px; }
-.ctr { display: flex; align-items: center; gap: 8px; }
-.ctr b { font-weight: 400; border: 1px solid var(--sfg); padding: 2px 5px 1px; }
-.ctr span { opacity: .5; }
-.tags { justify-self: end; display: flex; gap: 10px; }
-.tags i { font-style: normal; opacity: .25; }
-.tags i.on { opacity: 1; }
-.nm { grid-column: 1; grid-row: 3; font: 500 var(--pbig)/.95 var(--sans); letter-spacing: -.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-bottom: .05em; }
-.pj { grid-column: 1; grid-row: 4; opacity: .6; }
-.vu { grid-column: 2; grid-row: 2 / 5; display: flex; gap: 4px; align-self: end; }
-.vu div { display: flex; flex-direction: column-reverse; gap: 2px; }
-.vu i { width: 14px; height: 4px; background: var(--sfg); opacity: .14; }
-.vu i.on { opacity: .9; }
-.vu i.on.hot { background: var(--led); opacity: 1; }
-.tm { position: absolute; right: 14px; top: 14px; z-index: 2; display: none; }
-.prog { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; z-index: 2; background: rgba(255,255,255,.1); }
-.prog i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--led); }
-
-.knobs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
-.small-k { display: grid; justify-items: center; gap: 8px; font-size: 10px; }
-.small-k button { width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #cfcdc6 60%, #9d9b95); box-shadow: 0 3px 6px rgba(0,0,0,.25), inset 0 -2px 3px rgba(0,0,0,.15); position: relative; }
-.small-k button::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px; border-top: 1.5px solid #333; border-right: 1.5px solid #333; transform: rotate(var(--r, 45deg)); }
-.small-k:first-child button { --r: -135deg; }
-.small-k:first-child button::after { margin-left: -3px; }
-.small-k:last-child button::after { margin-left: -7px; }
-.small-k button:active { transform: translateY(1px); box-shadow: 0 1px 2px rgba(0,0,0,.3); }
-.big-k { display: grid; justify-items: center; gap: 8px; font-size: 10px; }
-.dial { width: 132px; height: 132px; border-radius: 50%; position: relative; touch-action: none; cursor: grab; display: grid; place-items: center; }
-.dial::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: repeating-conic-gradient(from -135deg, var(--silk) 0 1.2deg, transparent 1.2deg 19.3deg); -webkit-mask: radial-gradient(circle, transparent 60px, #000 61px, #000 66px, transparent 67px); mask: radial-gradient(circle, transparent 60px, #000 61px, #000 66px, transparent 67px); clip-path: polygon(50% 50%, 0 100%, 0 0, 100% 0, 100% 100%); opacity: .7; }
-.cap { width: 104px; height: 104px; border-radius: 50%; background: radial-gradient(circle at 38% 30%, #3a3a37, #121211 70%); box-shadow: 0 10px 20px -6px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.18), 0 0 0 5px color-mix(in srgb, var(--silk) 10%, transparent); position: relative; transition: transform .35s var(--ease); }
-.cap::before { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: repeating-conic-gradient(rgba(255,255,255,.05) 0 2deg, transparent 2deg 6deg); }
-.cap::after { content: ""; position: absolute; left: 50%; top: 9px; width: 3px; height: 24px; margin-left: -1.5px; border-radius: 2px; background: var(--led); }
-
-.feet { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding-top: 6px; border-top: 1px solid color-mix(in srgb, var(--silk) 14%, transparent); }
-.fs { text-transform: inherit; letter-spacing: inherit; display: grid; justify-items: center; gap: 9px; font-size: 10px; padding-top: 12px; }
-.fs .led { width: 7px; height: 7px; border-radius: 50%; background: color-mix(in srgb, var(--silk) 25%, transparent); transition: background .2s, box-shadow .2s; }
-.fs.on .led { background: var(--led); box-shadow: 0 0 10px var(--led); }
-.fs .sw { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 50% 40%, #f4f4f1, #b9b7b1 55%, #7d7b76); box-shadow: 0 0 0 4px color-mix(in srgb, var(--silk) 12%, transparent), 0 6px 10px rgba(0,0,0,.25), inset 0 -3px 5px rgba(0,0,0,.2); transition: transform .08s; }
-.fs .sw::after { content: ""; display: block; margin: 15px; height: 24px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #fff, #c9c7c1); }
-.fs:active .sw { transform: scale(.95); }
-.fs.play.on .led { animation: blink 1s steps(2) infinite; }
-@keyframes blink { 50% { opacity: .35; } }
-@media (min-width: 700px) {
-  .panel { padding: 24px 28px 28px; gap: 22px; }
-  .hud { padding: 20px; font-size: 12px; }
-  .vu i { width: 20px; height: 5px; }
+/* Pedal: the site as a piece of studio hardware, studied from the meris LVX.
+   A blasted aluminium bezel, four off-white panels split by black seams, a black screen with
+   dot-matrix meters and a boxed counter, white and knurled black knobs on dotted scales,
+   chrome footswitches with LEDs and joined labels. Every control does something real.
+   Two sizes: the screen's name and counter, and the small lowercase labels. */
+:root {
+  --paper: #E4E3DF;
+  --bez1: #D9D8D5; --bez2: #BDBCB8; --seam: #121211; --pan: #F1F0EE; --pan2: #E9E8E5;
+  --lab: #4A4A47; --dot: #B3B2AE; --dot-on: #3A3A38; --led: #FF5A1F; --led-off: #A9A8A4;
+  --wk1: #FFFFFF; --wk2: #E6E5E2; --wring: #141413;
+  --pbig: clamp(22px, 4.6vw, 42px); --lsize: 12px;
+  --sans: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-@media (max-height: 760px) and (max-width: 699px) { .dial { width: 112px; height: 112px; } .cap { width: 88px; height: 88px; } .screen { aspect-ratio: 1.8; } }
+[data-way="red"] { --bg: #151514; --fg: var(--chalk); --bez1: #2B2B29; --bez2: #1C1C1B; --pan: #EE5B23; --pan2: #E04F1A; --lab: #2A1206; --dot: #F39A72; --dot-on: #1F0D05; --led: #FFF1C9; --led-off: #B2461A; --wk1: #FFF6EF; --wk2: #F1DFD3; }
+[data-way="dark"] { --bez1: #2E2E2C; --bez2: #1E1E1D; --seam: #050505; --pan: #1D1D1C; --pan2: #181817; --lab: #A9A8A2; --dot: #4A4A47; --dot-on: #D8D6CF; --led-off: #3E3E3B; --wk1: #DAD8D2; --wk2: #B9B7B1; --wring: #050505; }
+body { font: 300 var(--lsize)/1.25 var(--sans); }
+.corner { font: 400 var(--small)/1.35 var(--mono); }
+
+body::before, body::after { content: ""; position: fixed; left: 0; right: 0; z-index: 30; background: var(--bg); transition: background .5s var(--ease); }
+body::before { top: 0; height: calc(env(safe-area-inset-top, 0px) + 48px); }
+body::after { bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 48px); }
+main { position: fixed; inset: 0; overflow-y: auto; display: grid; place-items: center; padding: calc(env(safe-area-inset-top, 0px) + 54px) max(10px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 54px) max(10px, env(safe-area-inset-left, 0px)); }
+/* bezel: blasted aluminium, speckled */
+.unit { position: relative; width: 100%; max-width: 1120px; border-radius: 26px; padding: 14px 14px 34px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(170deg, var(--bez1), var(--bez2));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 3px rgba(0,0,0,.12), 0 40px 70px -40px rgba(0,0,0,.45), 0 3px 8px rgba(0,0,0,.12); transition: background .5s var(--ease); }
+.badge { position: absolute; right: 22px; bottom: 9px; display: flex; align-items: center; gap: 6px; color: color-mix(in srgb, var(--lab) 80%, transparent); font-size: 15px; letter-spacing: -.01em; }
+[data-way="red"] .badge, [data-way="dark"] .badge { color: #9C9B96; }
+.badge b { font-weight: 300; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; line-height: 1.15; }
+
+/* the board: panels split by black seams */
+.board { display: grid; gap: 3px; background: var(--seam); border: 3px solid var(--seam); border-radius: 12px; overflow: hidden;
+  grid-template-columns: 1fr 1fr; grid-template-areas: "s s" "c c" "l r" "f f"; }
+.pan { background: linear-gradient(180deg, var(--pan), var(--pan2)); border-radius: 8px; color: var(--lab); transition: background .5s var(--ease), color .5s var(--ease); }
+.l { grid-area: l; } .r { grid-area: r; } .c { grid-area: c; } .f { grid-area: f; }
+.side { display: flex; justify-content: space-around; align-items: center; padding: 18px 2px 14px; }
+.c { display: flex; justify-content: space-around; align-items: center; padding: 22px 8px 14px; }
+
+/* knobs */
+.kn { display: grid; justify-items: center; gap: 12px; user-select: none; -webkit-user-select: none; }
+.kw { position: relative; width: var(--s); height: var(--s); margin: 10px; touch-action: none; cursor: grab; }
+.kw .d { position: absolute; width: 3px; height: 3px; margin: -1.5px; border-radius: 50%; background: var(--dot); transition: background .2s; }
+.kw .d.on { background: var(--dot-on); }
+.cap { position: absolute; inset: 0; border-radius: 50%; transition: transform .25s cubic-bezier(.3,.7,.2,1); }
+.white .cap { background: radial-gradient(circle at 42% 30%, var(--wk1), var(--wk2) 75%); box-shadow: 0 0 0 calc(var(--s) * .035) var(--wring), 0 10px 16px -6px rgba(0,0,0,.35), inset 0 -3px 6px rgba(0,0,0,.08); }
+.white .cap::after { content: ""; position: absolute; left: 50%; top: 4%; width: calc(var(--s) * .055); height: 17%; margin-left: calc(var(--s) * -.0275); border-radius: 2px; background: var(--wring); }
+.black .cap { background:
+    radial-gradient(circle at 40% 28%, rgba(255,255,255,.22), transparent 45%),
+    repeating-conic-gradient(from 0deg, #0f0f0f 0 2deg, #2a2a2a 2deg 4deg, #161616 4deg 7deg),
+    #151515;
+  box-shadow: 0 0 0 calc(var(--s) * .045) #3a3a38, 0 0 0 calc(var(--s) * .06) #0c0c0c, 0 12px 18px -6px rgba(0,0,0,.55); }
+.black .cap::before { content: ""; position: absolute; inset: 18%; border-radius: 50%; background: radial-gradient(circle at 45% 35%, #3a3a3a, #121212 70%); box-shadow: 0 0 0 1px rgba(255,255,255,.05); }
+.black .cap::after { content: ""; position: absolute; left: 50%; top: 6%; width: 1.5px; height: 44%; margin-left: -.75px; background: #F4F3EF; border-radius: 1px; }
+.brk { display: flex; align-items: center; gap: 4px; }
+.brk::before, .brk::after { content: ""; width: 10px; height: calc(var(--s) * .95); border: 1.2px solid color-mix(in srgb, var(--lab) 55%, transparent); border-radius: 50%; }
+.brk::before { border-right: 0; border-top-color: transparent; border-bottom-color: transparent; }
+.brk::after { border-left: 0; border-top-color: transparent; border-bottom-color: transparent; }
+.kn span { white-space: nowrap; }
+
+/* screen */
+.s { grid-area: s; position: relative; overflow: hidden; color: #EDECE7; background: radial-gradient(120% 90% at 50% 25%, #2b2b2a, #0d0d0d 70%); aspect-ratio: 1.9; }
+.s .film { position: absolute; inset: 0; background: none; }
+.s .film img { opacity: .2; filter: grayscale(1) contrast(1.1); transition: opacity .8s var(--ease), transform 12s linear; }
+.s .film.on img { opacity: .34; }
+.s::after { content: ""; position: absolute; inset: 0; background: radial-gradient(75% 75% at 50% 45%, transparent, rgba(0,0,0,.7)); pointer-events: none; }
+.mid { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 0 22%; }
+.logo { width: 30px; height: 30px; border-radius: 7px; background: #F1F0EC; display: grid; place-items: center; box-shadow: 0 0 18px rgba(255,255,255,.18); transition: opacity .25s; }
+.logo svg { width: 22px; height: 22px; }
+.nm { font: 300 var(--pbig)/1.05 var(--sans); letter-spacing: -.02em; max-width: 100%; text-wrap: balance; }
+.pj { opacity: .55; margin-top: -4px; }
+.box { font: 300 var(--pbig)/1 var(--sans); border: 1.5px solid #EDECE7; border-radius: 8px; padding: .1em .32em .12em; letter-spacing: -.02em; min-width: 2.2em; }
+.mid > * { transition: opacity .2s; }
+.mid.swap > * { opacity: 0; }
+.mt { position: absolute; z-index: 2; bottom: 14px; display: grid; gap: 4px; }
+.mt.lft { left: 16px; } .mt.rgt { right: 16px; justify-items: end; text-align: right; }
+.mt canvas { width: 34px; height: 92px; display: block; }
+.mt .v { opacity: .5; } .mt .k { margin-top: -3px; }
+
+/* footswitches */
+.f { padding: 18px 10px 16px; display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 14px; }
+.fs { display: grid; justify-items: center; gap: 10px; font: inherit; color: inherit; }
+.fs .led { width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, color-mix(in srgb, var(--led-off) 60%, #fff), var(--led-off) 70%); box-shadow: inset 0 -1px 2px rgba(0,0,0,.25), 0 0 0 1.5px color-mix(in srgb, var(--lab) 20%, transparent); transition: background .2s, box-shadow .2s; }
+.fs.on .led { background: radial-gradient(circle at 40% 35%, #fff 0, var(--led) 45%, color-mix(in srgb, var(--led) 70%, #000)); box-shadow: 0 0 12px 2px color-mix(in srgb, var(--led) 70%, transparent), 0 0 0 1.5px color-mix(in srgb, var(--lab) 20%, transparent); }
+.fs .sw { --w: 50px; width: var(--w); height: var(--w); border-radius: 50%; position: relative;
+  background: repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.0) 0 1px, rgba(0,0,0,.035) 1px 2px), radial-gradient(circle at 50% 30%, #FFFFFF, #DCDBD8 38%, #A9A8A4 72%, #E2E1DD 100%);
+  box-shadow: 0 0 0 2px #8E8D89, 0 0 0 4px color-mix(in srgb, #fff 60%, transparent), 0 8px 12px -2px rgba(0,0,0,.35); transition: transform .08s; }
+.fs .sw::after { content: ""; position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle at 50% 30%, #fff, #D6D5D1 70%); box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+.fs:active .sw { transform: scale(.955); }
+.combo { display: none; }
+.combos { grid-column: 1 / -1; display: flex; justify-content: space-around; gap: 6px; }
+.combo, .combos button { align-items: center; gap: 8px; white-space: nowrap; font: inherit; color: inherit; }
+.combos button { display: flex; }
+.ln { height: 1px; flex: 1; min-width: 12px; background: color-mix(in srgb, var(--lab) 60%, transparent); position: relative; }
+.ln::before, .ln::after { content: ""; position: absolute; top: -2px; width: 0; height: 0; border-top: 2.5px solid transparent; border-bottom: 2.5px solid transparent; }
+.ln.a::before { left: -1px; border-right: 4px solid color-mix(in srgb, var(--lab) 60%, transparent); }
+.ln.b::after { right: -1px; border-left: 4px solid color-mix(in srgb, var(--lab) 60%, transparent); }
+.combos .ln { width: 14px; flex: none; }
+
+@media (min-width: 900px) {
+  :root { --lsize: 14px; }
+  .unit { padding: 26px 26px 46px; border-radius: 30px; }
+  .badge { right: 30px; bottom: 13px; font-size: 18px; }
+  .board { grid-template-columns: 1fr 2.45fr 1fr; grid-template-areas: "l s r" "l c r" "f f f"; }
+  .side { flex-direction: column; justify-content: space-around; padding: 26px 8px 22px; gap: 22px; }
+  .s { aspect-ratio: auto; min-height: 250px; }
+  .c { padding: 28px 30px 22px; }
+  .f { grid-template-columns: auto 1fr auto 1fr auto 1fr auto; padding: 26px 60px 26px; align-items: start; }
+  .combo { display: flex; margin-top: 34px; padding: 0 4px; }
+  .combos { display: none; }
+  .fs .sw { --w: 70px; }
+  .fs .led { width: 13px; height: 13px; }
+  .mt canvas { width: 46px; height: 130px; }
+  .mt { bottom: 20px; } .mt.lft { left: 30px; } .mt.rgt { right: 30px; }
+  .logo { width: 38px; height: 38px; border-radius: 9px; } .logo svg { width: 28px; height: 28px; }
+}
 </style>
 </head>
 <body>
@@ -88,30 +141,44 @@ main { position: fixed; inset: 0; display: grid; place-items: center; padding: c
 <a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
 
 <main>
-  <div class="panel">
-    <div class="silk caps"><span>Helical Sound HS-01</span><span>Music and sound, London</span></div>
-    <div class="screen" id="screen">
-      <div class="film" id="film"><img alt=""></div>
-      <div class="hud caps">
-        <div class="ctr"><b id="n">01</b><span id="of">/ 14</span></div>
-        <div class="tags" id="tags"></div>
-        <div class="nm" id="nm" style="text-transform:none;letter-spacing:-.04em"></div>
-        <div class="pj" id="pj"></div>
-        <div class="vu" id="vu"><div></div><div></div></div>
+  <div class="unit">
+    <div class="board">
+      <div class="pan side l">
+        <div class="kn"><div class="kw white" id="k-time" style="--s:var(--ks)"></div><span>time</span></div>
+        <div class="kn"><div class="kw black" id="k-zoom" style="--s:var(--ks)"></div><span>zoom</span></div>
       </div>
-      <div class="prog"><i id="pb"></i></div>
+      <div class="s" id="screen">
+        <div class="film" id="film"><img alt=""></div>
+        <div class="mid" id="mid">
+          <div class="logo" id="logo"><svg viewBox="0 0 28 28" fill="none" stroke="#121211" stroke-width="2.2" stroke-linecap="round"><path d="M8 3c0 6 12 5 12 11S8 19 8 25"/><path d="M20 3c0 6-12 5-12 11s12 5 12 11"/></svg></div>
+          <div class="nm" id="nm"></div>
+          <div class="pj" id="pj"></div>
+          <div class="box" id="box">01</div>
+        </div>
+        <div class="mt lft"><canvas id="mL"></canvas><span class="v" id="vL">0:00</span><span class="k">time</span></div>
+        <div class="mt rgt"><canvas id="mR"></canvas><span class="v" id="vR">0:15</span><span class="k">length</span></div>
+      </div>
+      <div class="pan c">
+        <div class="kn"><div class="kw black" id="k-left" style="--s:var(--kss)"></div><span>prev</span></div>
+        <div class="kn"><div class="brk" style="--s:var(--kb)"><div class="kw black" id="k-preset" style="--s:var(--kb)"></div></div><span>project / pages</span></div>
+        <div class="kn"><div class="kw black" id="k-right" style="--s:var(--kss)"></div><span>next</span></div>
+      </div>
+      <div class="pan side r">
+        <div class="kn"><div class="kw white" id="k-work" style="--s:var(--ks)"></div><span>work</span></div>
+        <div class="kn"><div class="kw black" id="k-colour" style="--s:var(--ks)"></div><span>colour</span></div>
+      </div>
+      <div class="pan f" id="feet">
+        <button type="button" class="fs" data-tag="comp"><span class="led"></span><span class="sw"></span>composition</button>
+        <button type="button" class="combo" data-do="prev"><span class="ln a"></span>prev<span class="ln"></span></button>
+        <button type="button" class="fs" data-tag="sd"><span class="led"></span><span class="sw"></span>sound design</button>
+        <button type="button" class="combo" data-do="all"><span class="ln a"></span>all work<span class="ln b"></span></button>
+        <button type="button" class="fs" data-tag="mix"><span class="led"></span><span class="sw"></span>mix</button>
+        <button type="button" class="combo" data-do="next"><span class="ln"></span>next<span class="ln b"></span></button>
+        <button type="button" class="fs" id="play"><span class="led"></span><span class="sw"></span>play / stop</button>
+        <div class="combos"><button type="button" data-do="prev"><span class="ln a"></span>prev</button><button type="button" data-do="all">all work</button><button type="button" data-do="next">next<span class="ln b"></span></button></div>
+      </div>
     </div>
-    <div class="knobs caps">
-      <div class="small-k"><button type="button" id="prev" aria-label="Previous"></button>Prev</div>
-      <div class="big-k"><div class="dial" id="dial" role="slider" aria-label="Browse work" tabindex="0"><div class="cap" id="cap"></div></div>Browse <span id="tm" style="opacity:.55">00:00 / 00:15</span></div>
-      <div class="small-k"><button type="button" id="next" aria-label="Next"></button>Next</div>
-    </div>
-    <div class="feet caps" id="feet">
-      <button type="button" class="fs" data-tag="comp"><span class="led"></span><span class="sw"></span>Composition</button>
-      <button type="button" class="fs" data-tag="sd"><span class="led"></span><span class="sw"></span>Sound</button>
-      <button type="button" class="fs" data-tag="mix"><span class="led"></span><span class="sw"></span>Mix</button>
-      <button type="button" class="fs play" id="play"><span class="led"></span><span class="sw"></span>Play</button>
-    </div>
+    <div class="badge">helical <b>hs01</b></div>
   </div>
 </main>
 
@@ -122,23 +189,79 @@ main { position: fixed; inset: 0; display: grid; place-items: center; padding: c
 
 <script src="../shared.js"></script>
 <script>
-var tag = 'all', list = WORK.slice(), cur = 0, playing = false, t0 = 0, pos = 0;
-var film = document.getElementById('film'), cap = document.getElementById('cap');
-(function () { var h = ''; for (var i = 0; i < 12; i++) h += '<i></i>'; document.querySelectorAll('#vu > div').forEach(function (d) { d.innerHTML = h; }); })();
+var R = document.documentElement;
+function sizes() {
+  var w = innerWidth >= 900;
+  R.style.setProperty('--ks', (w ? 104 : 50) + 'px');
+  R.style.setProperty('--kss', (w ? 56 : 40) + 'px');
+  R.style.setProperty('--kb', (w ? 96 : 70) + 'px');
+}
+sizes();
+var tag = 'all', list = WORK.slice(), cur = 0, playing = false, t0 = 0, pos = 0, zoom = 0;
+var film = document.getElementById('film'), mid = document.getElementById('mid');
 function pad(n) { return (n < 9 ? '0' : '') + (n + 1); }
-function show(i, keep) {
+function m(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + s % 60; }
+
+/* a knob: dotted scale, drag up or round to turn, wheel, arrow keys; steps snap */
+function Knob(id, o) {
+  var el = document.getElementById(id), k = { v: o.v || 0, steps: o.steps || 0, el: el };
+  el.setAttribute('role', 'slider'); el.setAttribute('tabindex', '0'); el.setAttribute('aria-label', o.label);
+  var n = o.dots || 11, h = '';
+  for (var i = 0; i < n; i++) h += '<i class="d"></i>';
+  el.innerHTML = h + '<div class="cap"></div>';
+  var dots = el.querySelectorAll('.d'), cap = el.querySelector('.cap');
+  k.layout = function () {
+    var s = el.offsetWidth, r = s / 2 + Math.max(9, s * .14);
+    dots.forEach(function (d, i) { var a = (-135 + i / (n - 1) * 270) * Math.PI / 180; d.style.left = s / 2 + Math.sin(a) * r + 'px'; d.style.top = s / 2 - Math.cos(a) * r + 'px'; });
+  };
+  k.set = function (v, quiet) {
+    v = Math.max(0, Math.min(1, v)); if (k.steps > 1) v = Math.round(v * (k.steps - 1)) / (k.steps - 1);
+    var ch = v !== k.v; k.v = v;
+    cap.style.transform = 'rotate(' + (-135 + v * 270) + 'deg)';
+    dots.forEach(function (d, i) { d.classList.toggle('on', i / (n - 1) <= v + .001); });
+    if (ch && !quiet && o.on) o.on(v);
+  };
+  var dn = null;
+  el.addEventListener('pointerdown', function (e) { dn = { x: e.clientX, y: e.clientY, v: k.v, mv: 0 }; el.setPointerCapture(e.pointerId); });
+  el.addEventListener('pointermove', function (e) { if (!dn) return; var d = (dn.y - e.clientY) + (e.clientX - dn.x); dn.mv = Math.max(dn.mv, Math.abs(d)); k.set(dn.v + d / (o.range || 160)); });
+  el.addEventListener('pointerup', function () { if (dn && dn.mv < 4 && o.tap) o.tap(); dn = null; });
+  el.addEventListener('wheel', function (e) { e.preventDefault(); k.set(k.v + (e.deltaY > 0 ? 1 : -1) * (k.steps > 1 ? 1 / (k.steps - 1) : .05)); }, { passive: false });
+  el.addEventListener('keydown', function (e) { var st = k.steps > 1 ? 1 / (k.steps - 1) : .05; if (e.key === 'ArrowUp' || e.key === 'ArrowRight') k.set(k.v + st); if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') k.set(k.v - st); });
+  k.layout(); k.set(k.v, true);
+  return k;
+}
+
+/* the screen: shows the project, or a parameter for a moment while a knob turns */
+var paramT;
+function param(name, val) {
+  clearTimeout(paramT);
+  document.getElementById('logo').style.opacity = 0;
+  document.getElementById('nm').textContent = name;
+  document.getElementById('pj').textContent = '';
+  document.getElementById('box').textContent = val;
+  paramT = setTimeout(face, 1300);
+}
+function face() {
+  var w = list[cur];
+  mid.classList.add('swap');
+  setTimeout(function () {
+    document.getElementById('logo').style.opacity = 1;
+    document.getElementById('nm').textContent = w.c;
+    document.getElementById('pj').textContent = w.p.toLowerCase();
+    document.getElementById('box').textContent = pad(cur);
+    mid.classList.remove('swap');
+  }, 160);
+}
+function show(i) {
   cur = (i + list.length) % list.length; var w = list[cur];
   film.querySelector('img').src = still(w);
-  document.getElementById('n').textContent = pad(cur);
-  document.getElementById('of').textContent = '/ ' + (list.length < 10 ? '0' : '') + list.length;
-  document.getElementById('nm').textContent = w.c;
-  document.getElementById('pj').textContent = w.p;
-  document.getElementById('tags').innerHTML = TAG_ORDER.map(function (k) { return '<i class="' + (w.t.indexOf(k) > -1 ? 'on' : '') + '">' + { comp: 'Comp', sd: 'Sound', mix: 'Mix' }[k] + '</i>'; }).join('');
-  cap.style.transform = 'rotate(' + (list.length > 1 ? cur / (list.length - 1) * 270 - 135 : 0) + 'deg)';
-  pos = 0; t0 = performance.now(); document.getElementById('pb').style.width = 0;
-  document.getElementById('tm').textContent = '00:00 / ' + w.d;
-  if (!keep) setPlay(playing);
+  pos = 0; t0 = performance.now();
+  document.getElementById('vR').textContent = m(secs(w.d));
+  K.preset.set(list.length > 1 ? cur / (list.length - 1) : 0, true);
+  K.time.set(0, true);
+  clearTimeout(paramT); face(); draw();
 }
+function draw() { document.getElementById('vL').textContent = m(pos); }
 function setPlay(on) {
   playing = on; t0 = performance.now() - pos * 1000;
   film.classList.toggle('on', on); document.getElementById('play').classList.toggle('on', on);
@@ -146,50 +269,70 @@ function setPlay(on) {
 }
 function tick() {
   if (!playing) return;
-  var w = list[cur], len = secs(w.d); pos = (performance.now() - t0) / 1000;
-  if (pos >= len) { show(cur + 1); return; }
-  document.getElementById('pb').style.width = pos / len * 100 + '%';
-  document.getElementById('tm').textContent = clock(pos) + ' / ' + w.d;
+  var len = secs(list[cur].d); pos = (performance.now() - t0) / 1000;
+  if (pos >= len) { show(cur + 1); setPlay(true); return; }
+  K.time.set(pos / len, true); draw();
   requestAnimationFrame(tick);
 }
-/* VU meters: soft random levels while playing, a low idle flicker otherwise */
-var lv = [0, 0];
-setInterval(function () {
-  var t = performance.now() / 1000;
-  document.querySelectorAll('#vu > div').forEach(function (d, k) {
-    var g = playing ? .45 + .3 * Math.sin(t * 2.1 + k) + Math.random() * .3 : .05 + Math.random() * .05;
-    lv[k] = Math.max(g, lv[k] * .82);
-    var on = Math.round(lv[k] * 12);
-    [].forEach.call(d.children, function (i, j) { i.className = j < on ? (j > 8 ? 'on hot' : 'on') : ''; });
-  });
-}, 70);
-document.getElementById('prev').onclick = function () { show(cur - 1); };
-document.getElementById('next').onclick = function () { show(cur + 1); };
+function setTag(t) {
+  tag = t;
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
+  document.querySelectorAll('.fs[data-tag]').forEach(function (b) { b.classList.toggle('on', tag === 'all' || b.getAttribute('data-tag') === tag); });
+  K.work.set(['all'].concat(TAG_ORDER).indexOf(tag) / 3, true);
+  K.preset.steps = list.length;
+  show(0);
+}
+
+var K = {};
+K.time = Knob('k-time', { label: 'Time', range: 200, on: function (v) { pos = v * secs(list[cur].d); t0 = performance.now() - pos * 1000; draw(); } });
+K.zoom = Knob('k-zoom', { label: 'Zoom', on: function (v) { zoom = v; film.querySelector('img').style.scale = 1 + v * .6; param('zoom', Math.round(100 + v * 60) + '%'); } });
+K.preset = Knob('k-preset', { label: 'Project', steps: WORK.length, range: 260, on: function (v) { show(Math.round(v * (list.length - 1))); if (playing) setPlay(true); } });
+K.left = Knob('k-left', { label: 'Previous', dots: 7, tap: function () { show(cur - 1); spin(K.left, -1); } });
+K.right = Knob('k-right', { label: 'Next', dots: 7, tap: function () { show(cur + 1); spin(K.right, 1); } });
+K.left.set(.5, true); K.right.set(.5, true);
+K.left.el.addEventListener('pointerup', function () {});
+function spin(k, d) { k.set(.5 + d * .17, true); setTimeout(function () { k.set(.5, true); }, 220); }
+var NAMES = { all: 'all work', comp: 'composition', sd: 'sound design', mix: 'mix' };
+K.work = Knob('k-work', { label: 'Work', steps: 4, dots: 4, on: function (v) { var t = ['all'].concat(TAG_ORDER)[Math.round(v * 3)]; setTag(t); param('work', NAMES[t]); } });
+K.colour = Knob('k-colour', { label: 'Colour', steps: 3, dots: 3, on: function (v) { var w = WAYS[Math.round(v * 2)]; setWay(w); param('colour', ['white', 'orange', 'black'][Math.round(v * 2)]); } });
+/* the dots at the top also turn the colour knob */
+document.querySelectorAll('[data-way-btn]').forEach(function (b) { b.addEventListener('click', function () { K.colour.set(WAYS.indexOf(b.getAttribute('data-way-btn')) / 2, true); }); });
+(function () { var w = R.getAttribute('data-way'); K.colour.set(WAYS.indexOf(w) / 2, true); })();
+
+document.querySelectorAll('.fs[data-tag]').forEach(function (b) { b.onclick = function () { var t = b.getAttribute('data-tag'); setTag(tag === t ? 'all' : t); param('work', NAMES[tag]); }; });
 document.getElementById('play').onclick = function () { setPlay(!playing); };
 document.getElementById('screen').onclick = function () { setPlay(!playing); };
-document.querySelectorAll('.fs[data-tag]').forEach(function (b) {
-  b.onclick = function () {
-    var k = b.getAttribute('data-tag'); tag = tag === k ? 'all' : k;
-    document.querySelectorAll('.fs[data-tag]').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-tag') === tag); });
-    list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
-    show(0);
-  };
+document.querySelectorAll('[data-do]').forEach(function (b) {
+  b.onclick = function () { var d = b.getAttribute('data-do'); if (d === 'prev') show(cur - 1); if (d === 'next') show(cur + 1); if (d === 'all') { setTag('all'); param('work', 'all work'); } };
 });
-/* browse knob: drag round (or up and down), scroll wheel, or arrow keys */
-var dial = document.getElementById('dial'), drag = null;
-dial.addEventListener('pointerdown', function (e) { drag = { y: e.clientY, x: e.clientX, i: cur }; dial.setPointerCapture(e.pointerId); });
-dial.addEventListener('pointermove', function (e) {
-  if (!drag) return; var d = Math.round(((drag.y - e.clientY) + (e.clientX - drag.x)) / 22);
-  var i = Math.max(0, Math.min(list.length - 1, drag.i + d)); if (i !== cur) show(i);
-});
-dial.addEventListener('pointerup', function () { drag = null; });
-dial.addEventListener('wheel', function (e) { e.preventDefault(); show(Math.max(0, Math.min(list.length - 1, cur + (e.deltaY > 0 ? 1 : -1)))); }, { passive: false });
-dial.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight' || e.key === 'ArrowUp') show(cur + 1); if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') show(cur - 1); });
+
+/* dot-matrix meters, drawn on canvas */
+var lv = [0, 0];
+function meter(id, level, peak) {
+  var c = document.getElementById(id), dpr = devicePixelRatio || 1, w = c.offsetWidth, h = c.offsetHeight;
+  if (c.width !== w * dpr) { c.width = w * dpr; c.height = h * dpr; }
+  var x = c.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, w, h);
+  var cols = 6, gap = w / cols, rows = Math.floor(h / gap), r = Math.max(.8, gap * .28);
+  for (var j = 0; j < rows; j++) for (var i = 0; i < cols; i++) {
+    var lit = (rows - j) / rows <= level - (i % 2) * .03;
+    x.fillStyle = lit ? 'rgba(237,236,231,' + (j < rows * .2 ? .95 : .78) + ')' : 'rgba(237,236,231,.13)';
+    x.beginPath(); x.arc(i * gap + gap / 2, j * gap + gap / 2, r, 0, 7); x.fill();
+  }
+}
+setInterval(function () {
+  var t = performance.now() / 1000;
+  [0, 1].forEach(function (k) {
+    var g = playing ? .5 + .28 * Math.sin(t * 2.3 + k * 1.7) + Math.random() * .25 : .06 + Math.random() * .04;
+    lv[k] = Math.max(g, lv[k] * .84);
+  });
+  meter('mL', lv[0]); meter('mR', lv[1]);
+}, 60);
 
 var info = document.getElementById('info'), tr = document.getElementById('tr');
 tr.onclick = function () { var o = info.classList.toggle('open'); tr.textContent = o ? 'Close' : 'Info'; };
 document.getElementById('home').onclick = function (e) { e.preventDefault(); info.classList.remove('open'); tr.textContent = 'Info'; };
-show(0);
+addEventListener('resize', function () { sizes(); for (var k in K) K[k].layout(); });
+setTag('all');
 </script>
 </body>
 </html>

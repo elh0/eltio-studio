@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Shapes: a geometric editorial page (after the "Phenomenally" phone layouts).
+   Two heavy rules, a plain statement, a composition of arrow, circle, bar and a rising sun
+   built around the film still, the work as a red list with dashes, and a ruled table for the kinds of work.
+   The circle plays the film, the sun rises with it. Two sizes only. */
+:root {
+  --paper: #DCDCDA; --hot: #E5321B; --hot2: #F39A3B; --shape: #0E0E0D;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --big: clamp(24px, 6.6vw, 40px); --small: 12px;
+}
+[data-way="red"] { --bg: #F1EFE9; --fg: #E5321B; --shape: #E5321B; --hot: #121211; --hot2: #E5321B; }
+[data-way="dark"] { --bg: #0F0F0E; --fg: #ECEAE3; --shape: #ECEAE3; }
+body { font: 400 var(--small)/1.3 var(--sans); overflow: hidden; }
+.corner { font-weight: 500; }
+.big { font: 400 var(--big)/1.12 var(--sans); letter-spacing: -.012em; }
+.up { text-transform: uppercase; letter-spacing: .02em; }
+body::before, body::after { content: ""; position: fixed; left: 0; right: 0; z-index: 30; background: var(--bg); transition: background .5s var(--ease); }
+body::before { top: 0; height: calc(env(safe-area-inset-top, 0px) + 44px); }
+body::after { bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 44px); }
+.scroll { position: fixed; inset: 0; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 52px) max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 64px) max(var(--pad), env(safe-area-inset-left, 0px)); }
+.page { max-width: 1240px; margin: 0 auto; display: grid; gap: 34px; }
+.rules { display: grid; gap: 9px; }
+.rules i { display: block; height: 5px; background: var(--shape); }
+.rules i + i { height: 13px; }
+.stmt { margin: 0; max-width: 17em; }
+.stmt .up { white-space: nowrap; }
+
+/* the composition */
+.comp { width: 100%; max-width: 560px; }
+.comp svg { display: block; width: 100%; height: auto; overflow: visible; }
+.comp .sh { fill: var(--shape); transition: fill .5s var(--ease); }
+.comp .st { stroke: var(--shape); transition: stroke .5s var(--ease); }
+.comp .hit { cursor: pointer; }
+.comp .disc { transition: opacity .6s var(--ease); }
+.comp .photo { filter: grayscale(1) contrast(1.05); }
+.comp .film-c { opacity: 0; transition: opacity .8s var(--ease); }
+.comp.on .film-c { opacity: 1; }
+.comp .drift { transform-box: fill-box; transform-origin: center; transition: transform 14s linear; }
+.comp.on .drift { transform: scale(1.18); }
+
+.now { display: grid; gap: 10px; max-width: 560px; }
+.now .meta { display: flex; justify-content: space-between; gap: 12px; }
+.now hr { border: 0; height: 2px; background: var(--shape); margin: 6px 0 4px; width: 66%; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.cols p { margin: 0; max-width: 22ch; }
+.nx { display: flex; align-items: center; gap: 10px; justify-self: start; margin-top: 6px; }
+.nx svg { width: 86px; height: 34px; }
+
+/* the work, as a red list with dashes */
+.list { display: grid; gap: 2px; justify-items: start; }
+.list button { color: var(--hot); text-align: left; transition: color .3s, opacity .3s; }
+.list button::after { content: " \2014"; }
+.list button[aria-current="true"] { color: var(--fg); }
+.list button:hover { opacity: .6; }
+[data-way="red"] .list button { color: color-mix(in srgb, var(--fg) 45%, transparent); }
+[data-way="red"] .list button[aria-current="true"] { color: var(--fg); }
+
+/* the ruled table: kinds of work */
+.tbl { width: 100%; max-width: 560px; }
+.tbl button { display: grid; grid-template-columns: 1fr 1fr; width: 100%; text-align: left; padding: 11px 0 9px 2px; border-bottom: 2px solid var(--shape); transition: opacity .25s; }
+.tbl button:first-child { border-bottom-width: 6px; }
+.tbl button:last-child { border-bottom: 0; }
+.tbl button[aria-pressed="false"] { opacity: .45; }
+.tbl button:hover { opacity: 1; }
+
+@media (min-width: 900px) {
+  :root { --small: 13px; --big: clamp(28px, 2.7vw, 40px); }
+  .page { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 7vw; align-items: start; }
+  .left, .right { display: grid; gap: 34px; align-content: start; }
+  .right { padding-top: 46px; }
+}
+@media (max-width: 899px) { .left, .right { display: grid; gap: 34px; } }
+</style>
+</head>
+<body>
+<div class="ways" aria-label="Colourway">
+  <button type="button" data-way-btn="ink" aria-label="Grey and ink"></button>
+  <button type="button" data-way-btn="red" aria-label="Paper and red"></button>
+  <button type="button" data-way-btn="dark" aria-label="Ink and paper"></button>
+</div>
+<a class="corner tl" href="#" id="home">Helical Sound</a>
+<button type="button" class="corner tr" id="tr">Info</button>
+<a class="corner bl" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a>
+<a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+
+<div class="scroll" id="scroll">
+  <div class="page">
+    <div class="left">
+      <div class="rules" aria-hidden="true"><i></i><i></i></div>
+      <p class="big stmt">Music and sound for fashion and advertising, written and mixed in London <span class="up">&mdash; Helical &copy;</span></p>
+      <div class="comp" id="comp">
+        <svg viewBox="0 0 400 300" role="img" aria-label="The current film, framed by shapes">
+          <defs>
+            <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--hot)" style="stop-color: var(--hot)"/><stop offset=".55" stop-color="var(--hot2)" style="stop-color: var(--hot2)"/><stop offset="1" stop-color="var(--hot2)" stop-opacity="0" style="stop-color: var(--hot2)"/></linearGradient>
+            <clipPath id="disc"><circle cx="196" cy="74" r="58"/></clipPath>
+            <clipPath id="rise"><rect id="riseR" x="60" y="282" width="140" height="0"/></clipPath>
+          </defs>
+          <path class="st" d="M24 24 L112 112 M42 118 H118 V42" fill="none" stroke-width="22" stroke-linejoin="miter"/>
+          <g class="hit" id="playC" role="button" aria-label="Play">
+            <circle class="sh disc" cx="196" cy="74" r="58"/>
+            <g clip-path="url(#disc)" class="film-c"><image class="drift" id="imC" x="120" y="16" width="240" height="116" preserveAspectRatio="xMidYMid slice"/></g>
+          </g>
+          <image class="photo" id="imP" x="236" y="96" width="150" height="200" preserveAspectRatio="xMidYMid slice"/>
+          <rect class="sh" x="22" y="166" width="38" height="116"/>
+          <circle cx="130" cy="224" r="58" fill="url(#sun)" opacity=".22"/>
+          <circle cx="130" cy="224" r="58" fill="url(#sun)" clip-path="url(#rise)"/>
+        </svg>
+      </div>
+      <div class="now" id="now">
+        <div class="big" id="nm"></div>
+        <div class="meta up"><span id="pj"></span><span id="tm"></span></div>
+        <hr>
+        <div class="cols"><span class="big" style="font-weight:500">Credits</span><p id="cr"></p></div>
+        <button type="button" class="nx up" id="next">Next <svg viewBox="0 0 86 34" fill="none"><path class="st" d="M0 17 H74 M66 11 L74 17 L66 23" stroke-width="2"/><circle class="st" cx="69" cy="17" r="15.5" stroke-width="2"/></svg></button>
+      </div>
+    </div>
+    <div class="right">
+      <nav class="list big" id="list" aria-label="Selected work"></nav>
+      <div class="tbl" id="tbl"></div>
+    </div>
+  </div>
+</div>
+
+<section class="info" id="info" aria-label="Info">
+  <p>Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <p>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></p>
+</section>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', list = WORK.slice(), w = WORK[0], playing = false, t0 = 0, pos = 0;
+var comp = document.getElementById('comp'), rise = document.getElementById('riseR');
+function sentence(x) {
+  var p = x.t.map(function (k) { return TAGS[k].toLowerCase(); });
+  return (p.length > 1 ? p.slice(0, -1).join(', ') + ' and ' + p[p.length - 1] : p[0]).replace(/^./, function (c) { return c.toUpperCase(); }) + ' by Helical Sound, for ' + x.c + '.';
+}
+function build() {
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (x) { return x.t.indexOf(tag) > -1; });
+  document.getElementById('list').innerHTML = list.map(function (x, i) { return '<button type="button" data-i="' + i + '" aria-current="' + (x === w) + '">' + x.c + '</button>'; }).join('');
+  document.getElementById('tbl').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (tag === k) + '"><span>' + (k === 'all' ? 'All work' : TAGS[k]) + '</span><span>' + count(k) + ' films</span></button>';
+  }).join('');
+}
+function load(x, auto) {
+  w = x; pos = 0;
+  ['imC', 'imP'].forEach(function (id) { document.getElementById(id).setAttribute('href', still(x)); });
+  document.getElementById('nm').textContent = x.c + ' —';
+  document.getElementById('pj').textContent = x.p + ' ©';
+  document.getElementById('cr').textContent = sentence(x);
+  document.getElementById('list').querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-current', list[+b.getAttribute('data-i')] === x); });
+  draw(); setPlay(auto === undefined ? playing : auto);
+}
+function draw() {
+  var len = secs(w.d), f = Math.min(1, pos / len);
+  rise.setAttribute('y', 282 - f * 116); rise.setAttribute('height', f * 116);
+  document.getElementById('tm').textContent = clock(pos) + ' / ' + w.d;
+}
+function setPlay(p) {
+  playing = p; t0 = performance.now() - pos * 1000; comp.classList.toggle('on', p);
+  document.getElementById('playC').setAttribute('aria-label', p ? 'Pause' : 'Play');
+  if (p) tick();
+}
+function tick() {
+  if (!playing) return;
+  pos = (performance.now() - t0) / 1000;
+  if (pos >= secs(w.d)) { step(1); return; }
+  draw(); requestAnimationFrame(tick);
+}
+function step(d) { var i = list.indexOf(w); load(list[((i < 0 ? 0 : i + d) + list.length) % list.length]); }
+document.getElementById('playC').addEventListener('click', function () { setPlay(!playing); });
+document.getElementById('imP').addEventListener('click', function () { setPlay(!playing); });
+document.getElementById('next').onclick = function () { step(1); };
+document.getElementById('list').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-i]'); if (!b) return; load(list[+b.getAttribute('data-i')], true);
+  if (innerWidth < 900) document.getElementById('scroll').scrollTo({ top: document.getElementById('comp').offsetTop - 60, behavior: 'smooth' });
+});
+document.getElementById('tbl').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-tag]'); if (!b) return; tag = b.getAttribute('data-tag'); build();
+  if (list.indexOf(w) < 0) load(list[0]); else load(w);
+});
+var info = document.getElementById('info'), tr = document.getElementById('tr');
+tr.onclick = function () { var o = info.classList.toggle('open'); tr.textContent = o ? 'Close' : 'Info'; };
+document.getElementById('home').onclick = function (e) { e.preventDefault(); info.classList.remove('open'); tr.textContent = 'Info'; document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+build(); load(WORK[0], false);
+</script>
+</body>
+</html>

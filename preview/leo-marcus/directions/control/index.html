@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500&family=Manrope:wght@500;700&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Control: the site as a soft studio app (after Sound Control and Phenomenon).
+   Rounded white cards, one electric colour, pill toggles for the three kinds of work.
+   Two sizes: wide display names, small text for everything else. */
+:root {
+  --acc: #1A2EFF; --acc-soft: #E4E7FF; --card: #FFFFFF; --mute: #7C7E92; --line: #ECEDF3;
+  --g1: #E7E3F8; --g2: #F7E4EE; --bg: #EEE8F5; --fg: #15162B;
+  --sans: "Manrope", "Helvetica Neue", Arial, sans-serif; --wide: "Unbounded", "Arial Black", sans-serif;
+  --big: clamp(24px, 6.2vw, 50px); --small: 13px;
+}
+[data-way="red"] { --acc: #F2210F; --acc-soft: #FFE3DD; --g1: #F8E9DD; --g2: #F4DCD6; --bg: #F6E4DA; --fg: #25120E; --mute: #94786F; --line: #F3E8E3; }
+[data-way="dark"] { --acc: #6676FF; --acc-soft: #23284D; --card: #181A2C; --g1: #0E0F1C; --g2: #1C1328; --bg: #121322; --fg: #ECEBF5; --mute: #8C8EA8; --line: #24263A; color-scheme: dark; }
+body { font: 500 var(--small)/1.4 var(--sans); background: linear-gradient(160deg, var(--g1), var(--g2)) fixed, var(--bg); overflow: hidden; }
+.corner { font-weight: 500; }
+.tl { font: 500 13px/1 var(--wide); letter-spacing: -.01em; padding-top: calc(var(--pad) + 1px); }
+.scroll { position: fixed; inset: 0; overflow-y: auto; padding: calc(env(safe-area-inset-top, 0px) + 56px) max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 60px) max(var(--pad), env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1160px; margin: 0 auto; display: grid; gap: 12px; }
+.card { background: var(--card); border-radius: 28px; padding: 14px; box-shadow: 0 1px 2px rgba(20,20,60,.04), 0 18px 40px -24px rgba(30,30,90,.25); transition: background .5s var(--ease); }
+.lbl { color: var(--mute); }
+.nowc { display: grid; gap: 14px; }
+.nowc .film { border-radius: 18px; aspect-ratio: 1.7; cursor: pointer; background: var(--acc-soft); }
+.nowc .top { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 99px; background: var(--acc-soft); color: var(--acc); font-weight: 700; }
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); }
+.playing .pill .dot { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .25; } }
+.nm { font: 500 var(--big)/1.02 var(--wide); letter-spacing: -.03em; color: var(--acc); padding: 0 4px; text-wrap: balance; }
+.pj { padding: 0 4px; margin-top: -8px; }
+.slider { position: relative; height: 22px; margin: 0 4px; touch-action: none; cursor: pointer; }
+.slider .tr { position: absolute; left: 0; right: 0; top: 9px; height: 4px; border-radius: 4px; background: var(--line); }
+.slider .fill { position: absolute; left: 0; top: 9px; height: 4px; border-radius: 4px; background: var(--acc); width: 0; }
+.slider .th { position: absolute; top: 2px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--card); box-shadow: 0 0 0 4px var(--acc), 0 4px 10px rgba(0,0,0,.2); left: 0; }
+.times { display: flex; justify-content: space-between; padding: 0 4px; margin-top: -8px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.ctl { display: flex; justify-content: center; align-items: center; gap: 18px; padding: 2px 0 4px; }
+.rb { width: 52px; height: 52px; border-radius: 50%; background: var(--acc-soft); color: var(--acc); display: grid; place-items: center; transition: transform .15s; }
+.rb.main { width: 68px; height: 68px; background: var(--acc); color: #fff; box-shadow: 0 12px 24px -10px var(--acc); }
+.rb:active { transform: scale(.94); }
+.rb svg { width: 20px; height: 20px; fill: currentColor; }
+.rb.main svg { width: 24px; height: 24px; }
+
+.tg h2, .ls h2 { font: inherit; margin: 0 4px 8px; color: var(--mute); }
+.trow { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px; border-top: 1px solid var(--line); }
+.trow:first-of-type { border-top: 0; }
+.trow .ct { color: var(--mute); margin-left: 6px; }
+.sw { width: 66px; height: 32px; border-radius: 99px; background: var(--line); position: relative; transition: background .3s var(--ease); display: flex; align-items: center; justify-content: flex-end; padding: 0 10px; font-weight: 700; font-size: 11px; color: var(--mute); }
+.sw::before { content: ""; position: absolute; left: 4px; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: var(--card); box-shadow: 0 2px 6px rgba(0,0,0,.18); transition: transform .3s var(--ease); }
+.sw::after { content: "Off"; }
+.sw[aria-checked="true"] { background: var(--acc); color: #fff; justify-content: flex-start; }
+.sw[aria-checked="true"]::before { transform: translateX(34px); }
+.sw[aria-checked="true"]::after { content: "On"; }
+
+.seg { display: flex; background: var(--line); border-radius: 99px; padding: 4px; margin: 0 0 10px; }
+.seg button { flex: 1; padding: 8px 0; border-radius: 99px; color: var(--mute); transition: background .25s, color .25s; }
+.seg button[aria-selected="true"] { background: var(--card); color: var(--fg); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.list { display: grid; gap: 4px; }
+.it { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; text-align: left; padding: 6px; border-radius: 18px; transition: background .2s; }
+.it:hover { background: color-mix(in srgb, var(--acc-soft) 60%, transparent); }
+.it.cur { background: var(--acc-soft); }
+.it .th2 { width: 64px; aspect-ratio: 1.4; border-radius: 12px; overflow: hidden; background: var(--line); }
+.it .th2 img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.it b { font-weight: 700; display: block; }
+.it span.p { color: var(--mute); }
+.it .d { color: var(--mute); font-variant-numeric: tabular-nums; }
+.it.cur .d { color: var(--acc); font-weight: 700; }
+.list.grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+.list.grid .it { grid-template-columns: 1fr; gap: 8px; align-items: start; padding: 6px 6px 10px; }
+.list.grid .it .th2 { width: 100%; }
+.list.grid .it .d { display: none; }
+.empty { color: var(--mute); padding: 18px 4px; }
+/* soft bars so the corners never sit on top of the cards */
+.band { position: fixed; left: 0; right: 0; z-index: 30; background: color-mix(in srgb, var(--bg) 72%, transparent); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); transition: background .5s var(--ease); }
+.band.t { top: 0; height: calc(env(safe-area-inset-top, 0px) + 48px); }
+.band.b { bottom: 0; height: calc(env(safe-area-inset-bottom, 0px) + 48px); }
+@media (min-width: 900px) {
+  :root { --small: 14px; }
+  .wrap { grid-template-columns: 420px 1fr; align-items: start; gap: 16px; }
+  .side { position: sticky; top: 0; display: grid; gap: 16px; }
+  .ls { grid-column: 2; grid-row: 1; }
+  .card { padding: 18px; }
+  .nowc .film { aspect-ratio: 2.3; }
+  .nowc { gap: 12px; }
+  .list.grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 899px) { .side { display: grid; gap: 12px; } }
+</style>
+</head>
+<body>
+<div class="ways" aria-label="Colourway">
+  <button type="button" data-way-btn="ink" aria-label="Lilac and blue"></button>
+  <button type="button" data-way-btn="red" aria-label="Peach and red"></button>
+  <button type="button" data-way-btn="dark" aria-label="Night and blue"></button>
+</div>
+<div class="band t"></div><div class="band b"></div>
+<a class="corner tl" href="#" id="home">Helical Sound</a>
+<button type="button" class="corner tr" id="tr">Info</button>
+<a class="corner bl" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a>
+<a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+
+<div class="scroll" id="scroll">
+  <div class="wrap">
+    <div class="side">
+      <section class="card nowc" id="nowc" aria-label="Now playing">
+        <div class="top"><span class="pill"><span class="dot"></span><span id="state">Ready</span></span><span class="lbl" id="ix">01 of 14</span></div>
+        <div class="film" id="film"><img alt=""></div>
+        <div class="nm" id="nm"></div>
+        <div class="pj lbl" id="pj"></div>
+        <div class="slider" id="slider" role="slider" aria-label="Position" tabindex="0"><div class="tr"></div><div class="fill" id="fill"></div><div class="th" id="th"></div></div>
+        <div class="times"><span id="t1">0:00</span><span id="t2">0:15</span></div>
+        <div class="ctl">
+          <button type="button" class="rb" id="prev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+          <button type="button" class="rb main" id="play" aria-label="Play"><svg viewBox="0 0 24 24" id="pi"><path d="M7 4v16l13-8z"/></svg></button>
+          <button type="button" class="rb" id="next" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg></button>
+        </div>
+      </section>
+      <section class="card tg" aria-label="Kinds of work">
+        <h2>What Helical did</h2>
+        <div id="toggles"></div>
+      </section>
+    </div>
+    <section class="card ls" aria-label="Work">
+      <div class="seg" role="tablist"><button type="button" role="tab" aria-selected="true" data-v="list">List</button><button type="button" role="tab" aria-selected="false" data-v="grid">Grid</button></div>
+      <div class="list" id="list"></div>
+    </section>
+  </div>
+</div>
+
+<section class="info" id="info" aria-label="Info">
+  <p>Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <p>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></p>
+</section>
+
+<script src="../shared.js"></script>
+<script>
+var on = { comp: true, sd: true, mix: true }, list = WORK.slice(), w = WORK[0], playing = false, t0 = 0, pos = 0;
+var L = document.getElementById('list'), film = document.getElementById('film');
+function pad(n) { return (n < 9 ? '0' : '') + (n + 1); }
+function m(d) { var s = secs(d); return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + s % 60; }
+function toggles() {
+  document.getElementById('toggles').innerHTML = TAG_ORDER.map(function (k) {
+    return '<div class="trow"><span>' + TAGS[k] + '<span class="ct">' + count(k) + '</span></span><button type="button" class="sw" role="switch" data-k="' + k + '" aria-checked="' + on[k] + '" aria-label="' + TAGS[k] + '"></button></div>';
+  }).join('');
+}
+function build() {
+  list = WORK.filter(function (x) { return x.t.some(function (k) { return on[k]; }); });
+  L.innerHTML = list.length ? list.map(function (x, i) {
+    return '<button type="button" class="it' + (x === w ? ' cur' : '') + '" data-i="' + i + '"><span class="th2"><img alt="" loading="lazy" src="' + still(x) + '"></span><span><b>' + x.c + '</b><span class="p">' + x.p + '</span></span><span class="d">' + m(x.d) + '</span></button>';
+  }).join('') : '<p class="empty">Switch one on to see the work.</p>';
+}
+function load(x, autoplay) {
+  w = x; pos = 0;
+  film.querySelector('img').src = still(x);
+  document.getElementById('nm').textContent = x.c;
+  document.getElementById('pj').textContent = x.p + ' · ' + credits(x);
+  var i = list.indexOf(x);
+  document.getElementById('ix').textContent = (i > -1 ? pad(i) : '–') + ' of ' + (list.length < 10 ? '0' : '') + list.length;
+  document.getElementById('t2').textContent = m(x.d);
+  L.querySelectorAll('.it').forEach(function (b) { b.classList.toggle('cur', list[+b.getAttribute('data-i')] === x); });
+  draw(); setPlay(autoplay === undefined ? playing : autoplay);
+}
+function draw() {
+  var len = secs(w.d), f = Math.min(1, pos / len) * 100;
+  document.getElementById('fill').style.width = f + '%'; document.getElementById('th').style.left = f + '%';
+  document.getElementById('t1').textContent = clock(pos).replace(/^0/, '');
+}
+function setPlay(p) {
+  playing = p; t0 = performance.now() - pos * 1000;
+  film.classList.toggle('on', p); document.getElementById('nowc').classList.toggle('playing', p);
+  document.getElementById('state').textContent = p ? 'Playing' : 'Ready';
+  document.getElementById('pi').innerHTML = p ? '<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>' : '<path d="M7 4v16l13-8z"/>';
+  document.getElementById('play').setAttribute('aria-label', p ? 'Pause' : 'Play');
+  if (p) tick();
+}
+function tick() {
+  if (!playing) return;
+  pos = (performance.now() - t0) / 1000;
+  if (pos >= secs(w.d)) { step(1); return; }
+  draw(); requestAnimationFrame(tick);
+}
+function step(d) { if (!list.length) return; var i = list.indexOf(w); load(list[((i < 0 ? 0 : i + d) + list.length) % list.length]); }
+document.getElementById('play').onclick = function () { setPlay(!playing); };
+film.onclick = function () { setPlay(!playing); };
+document.getElementById('prev').onclick = function () { step(-1); };
+document.getElementById('next').onclick = function () { step(1); };
+L.addEventListener('click', function (e) {
+  var b = e.target.closest('.it'); if (!b) return; load(list[+b.getAttribute('data-i')], true);
+  if (innerWidth < 900) document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' });
+});
+document.getElementById('toggles').addEventListener('click', function (e) {
+  var s = e.target.closest('.sw'); if (!s) return; var k = s.getAttribute('data-k');
+  on[k] = !on[k]; s.setAttribute('aria-checked', on[k]); build();
+  if (list.indexOf(w) < 0 && list.length) load(list[0]); else load(w);
+});
+document.querySelector('.seg').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-v]'); if (!b) return;
+  document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+  L.classList.toggle('grid', b.getAttribute('data-v') === 'grid');
+});
+/* slider: drag to scrub */
+var sl = document.getElementById('slider'), sd = false;
+function scrub(e) { var r = sl.getBoundingClientRect(); pos = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * secs(w.d); t0 = performance.now() - pos * 1000; draw(); }
+sl.addEventListener('pointerdown', function (e) { sd = true; sl.setPointerCapture(e.pointerId); scrub(e); });
+sl.addEventListener('pointermove', function (e) { if (sd) scrub(e); });
+sl.addEventListener('pointerup', function () { sd = false; });
+sl.addEventListener('keydown', function (e) { if (e.key === 'ArrowRight') pos = Math.min(secs(w.d), pos + 2); if (e.key === 'ArrowLeft') pos = Math.max(0, pos - 2); t0 = performance.now() - pos * 1000; draw(); });
+
+var info = document.getElementById('info'), tr = document.getElementById('tr');
+tr.onclick = function () { var o = info.classList.toggle('open'); tr.textContent = o ? 'Close' : 'Info'; };
+document.getElementById('home').onclick = function (e) { e.preventDefault(); info.classList.remove('open'); tr.textContent = 'Info'; document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+toggles(); build(); load(WORK[0], false);
+</script>
+</body>
+</html>

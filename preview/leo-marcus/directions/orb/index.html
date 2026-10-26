@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Orb</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&family=Inter+Tight:wght@500&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Orb: Wheel with a soft light orb behind the names (after the spiritual gradient sphere ref).
+   The orb swirls on its own and spins, brightens and swells with the scroll. */
+.ghost { display: none !important; }
+.orb { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+[data-way="dark"] .wheel { mix-blend-mode: difference; color: #F4F3EE; }
+/* Wheel: the client names are the site. They turn like a drum through the middle of the screen;
+   tap the one in the middle and the drum rolls up to reveal the player. Index drops it back down. */
+.layer { position: fixed; inset: 0; background: var(--bg); transition: transform .9s var(--ease), background .5s var(--ease); }
+
+/* the drum */
+#wl { z-index: 20; }
+#wl.up { transform: translateY(-100%); }
+.ghost { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s var(--ease); pointer-events: none; }
+.ghost img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(1) contrast(1.1); }
+.ghost.on { opacity: .09; }
+[data-way="dark"] .ghost.on { opacity: .2; }
+.wheel { position: absolute; inset: 0; overflow-y: auto; scroll-snap-type: y mandatory; scrollbar-width: none; overscroll-behavior: contain; perspective: 900px; -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 74%, transparent 88%); mask-image: linear-gradient(transparent, #000 14%, #000 74%, transparent 88%); }
+.wheel::-webkit-scrollbar { display: none; }
+.wheel .pad { height: calc(50% - .5 * var(--row)); }
+:root { --row: calc(var(--big) * 1.04); }
+.name { display: block; width: 100%; height: var(--row); scroll-snap-align: center; text-align: center; white-space: nowrap; padding: 0 var(--pad); transform-origin: 50% 50%; will-change: transform, opacity; }
+.name span { display: inline-block; }
+.name sup { font: 400 var(--small)/1 var(--mono); letter-spacing: 0; vertical-align: top; position: relative; top: .55em; margin-left: .35em; opacity: 0; transition: opacity .3s; }
+.name.mid sup { opacity: 1; }
+
+/* under the drum: the tags, Leo's own categories */
+.tags { position: absolute; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); display: flex; justify-content: center; gap: 18px; flex-wrap: wrap; padding: 0 var(--pad); }
+.tags button { opacity: .38; transition: opacity .2s; }
+.tags button[aria-pressed="true"], .tags button:hover { opacity: 1; }
+.tags sup { font-size: .75em; margin-left: 1px; }
+
+/* the player sits underneath */
+#pl { z-index: 10; display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: 72px max(var(--pad), env(safe-area-inset-right, 0px)) 96px max(var(--pad), env(safe-area-inset-left, 0px)); }
+#pl > * { transition: opacity .7s var(--ease) .25s, transform .9s var(--ease) .15s; }
+#pl:not(.in) > * { opacity: 0; transform: translateY(24px); }
+.p-name { margin: 0; padding: .08em 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-film { width: 100%; aspect-ratio: 2.42; max-height: 58vh; cursor: pointer; }
+.p-film .pp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #fff; mix-blend-mode: difference; transition: opacity .3s; }
+.p-film.on .pp { opacity: 0; }
+.p-line { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; }
+.p-line .r { text-align: right; }
+.scrub { height: 1px; background: color-mix(in srgb, var(--fg) 22%, transparent); position: relative; cursor: pointer; }
+.scrub::before { content: ""; position: absolute; inset: -10px 0; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--fg); width: 0; }
+.p-keys { display: flex; justify-content: space-between; }
+.p-keys button { min-width: 64px; text-align: left; }
+.p-keys button:last-child { text-align: right; }
+.p-keys .mid { text-align: center; }
+@media (min-width: 900px) {
+  #pl { padding-left: 12vw; padding-right: 12vw; }
+}
+</style>
+</head>
+<body>
+<div class="ways" aria-label="Colourway">
+  <button type="button" data-way-btn="ink" aria-label="Paper and ink"></button>
+  <button type="button" data-way-btn="red" aria-label="Paper and red"></button>
+  <button type="button" data-way-btn="dark" aria-label="Ink and paper"></button>
+</div>
+<a class="corner tl" href="#" id="home">Helical Sound.</a>
+<button type="button" class="corner tr" id="tr">Info</button>
+<a class="corner bl" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a>
+<a class="corner br" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+
+<main class="layer" id="wl">
+  <canvas class="orb" id="orb" aria-hidden="true"></canvas>
+  <div class="ghost" id="ghost"><img alt=""></div>
+  <div class="wheel" id="wheel" aria-label="Selected work"></div>
+  <nav class="tags" id="tags" aria-label="Filter by work"></nav>
+</main>
+
+<section class="layer" id="pl" aria-label="Player">
+  <h1 class="big p-name" id="p-name"></h1>
+  <div class="film p-film" id="p-film"><img alt=""><span class="pp">Play</span></div>
+  <div class="scrub" id="scrub"><i id="bar"></i></div>
+  <div class="p-line"><span id="p-proj"></span><span class="r" id="p-time"></span><span class="q" id="p-cred"></span><span class="r q" id="p-n"></span></div>
+  <div class="p-keys"><button type="button" id="prev">&larr; Prev</button><button type="button" class="mid" id="play">Play</button><button type="button" id="next">Next &rarr;</button></div>
+</section>
+
+<section class="info" id="info" aria-label="Info">
+  <p>Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <p>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></p>
+</section>
+
+<script src="../shared.js"></script>
+<script>
+var tag = 'all', list = WORK.slice(), mid = 0, cur = 0, playing = false, t0 = 0, pos = 0, mode = 'wheel', raf;
+var wheel = document.getElementById('wheel'), wl = document.getElementById('wl'), pl = document.getElementById('pl');
+var ghost = document.getElementById('ghost'), tr = document.getElementById('tr');
+
+function buildTags() {
+  var h = '';
+  ['all'].concat(TAG_ORDER).forEach(function (k) {
+    h += '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '<sup>' + count(k) + '</sup></button>';
+  });
+  document.getElementById('tags').innerHTML = h;
+}
+function buildWheel(keep) {
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
+  var h = '<div class="pad"></div>';
+  list.forEach(function (w, i) { h += '<button type="button" class="name big" data-i="' + i + '"><span>' + w.c + '<sup>' + (i + 1 < 10 ? '0' : '') + (i + 1) + '</sup></span></button>'; });
+  wheel.innerHTML = h + '<div class="pad"></div>';
+  wheel.scrollTop = 0; mid = -1; turn();
+}
+/* the drum: names tip back and fade as they leave the middle */
+function turn() {
+  var r = wheel.getBoundingClientRect(), c = r.top + r.height / 2, best = 0, bd = 1e9;
+  wheel.querySelectorAll('.name').forEach(function (el, i) {
+    var b = el.getBoundingClientRect(), d = (b.top + b.height / 2 - c) / (r.height / 2);
+    var a = Math.max(-1, Math.min(1, d));
+    el.style.transform = 'rotateX(' + (-a * 62) + 'deg) scale(' + (1 - Math.abs(a) * .12) + ')';
+    el.style.opacity = Math.max(.06, 1 - Math.pow(Math.abs(a), .8) * 1.05);
+    if (Math.abs(d) < bd) { bd = Math.abs(d); best = i; }
+  });
+  if (best !== mid) {
+    mid = best;
+    wheel.querySelectorAll('.name').forEach(function (el, i) { el.classList.toggle('mid', i === mid); });
+    ghost.classList.remove('on');
+    clearTimeout(turn.t);
+    turn.t = setTimeout(function () {
+      ghost.querySelector('img').src = still(list[mid]);
+      ghost.classList.add('on');
+    }, 380);
+  }
+}
+wheel.addEventListener('scroll', function () { cancelAnimationFrame(raf); raf = requestAnimationFrame(turn); }, { passive: true });
+window.addEventListener('resize', turn);
+wheel.addEventListener('click', function (e) {
+  var b = e.target.closest('.name'); if (!b) return;
+  var i = +b.getAttribute('data-i');
+  if (i === mid) open(i);
+  else b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+document.getElementById('tags').addEventListener('click', function (e) {
+  var b = e.target.closest('[data-tag]'); if (!b) return;
+  tag = b.getAttribute('data-tag'); buildTags(); buildWheel();
+});
+
+/* player */
+function load(i) {
+  cur = (i + list.length) % list.length; var w = list[cur];
+  document.getElementById('p-name').textContent = w.c;
+  var img = document.querySelector('#p-film img'); img.style.opacity = 0;
+  setTimeout(function () { img.src = still(w); img.onload = function () { img.style.opacity = 1; }; }, 200);
+  document.getElementById('p-proj').textContent = w.p;
+  document.getElementById('p-cred').textContent = credits(w);
+  document.getElementById('p-n').textContent = (cur + 1) + ' / ' + list.length;
+  pos = 0; setPlay(false); tick();
+}
+function setPlay(on) {
+  playing = on; t0 = performance.now() - pos * 1000;
+  document.getElementById('play').textContent = on ? 'Pause' : 'Play';
+  document.getElementById('p-film').classList.toggle('on', on);
+}
+function tick() {
+  var w = list[cur], len = secs(w.d);
+  if (playing) { pos = (performance.now() - t0) / 1000; if (pos >= len) { load(cur + 1); setPlay(true); } }
+  document.getElementById('bar').style.width = Math.min(100, pos / len * 100) + '%';
+  document.getElementById('p-time').textContent = clock(pos) + ' / ' + w.d;
+  if (playing) requestAnimationFrame(tick);
+}
+function open(i) {
+  load(i); mode = 'player'; tr.textContent = 'Index';
+  wl.classList.add('up'); pl.classList.add('in');
+  setTimeout(function () { setPlay(true); tick(); }, 700);
+}
+function back() {
+  setPlay(false); mode = 'wheel'; tr.textContent = 'Info';
+  var el = wheel.querySelectorAll('.name')[cur]; if (el) el.scrollIntoView({ block: 'center' });
+  wl.classList.remove('up'); setTimeout(function () { pl.classList.remove('in'); }, 600);
+}
+document.getElementById('play').onclick = document.getElementById('p-film').onclick = function () { setPlay(!playing); tick(); };
+document.getElementById('prev').onclick = function () { var p = playing; load(cur - 1); if (p) { setPlay(true); tick(); } };
+document.getElementById('next').onclick = function () { var p = playing; load(cur + 1); if (p) { setPlay(true); tick(); } };
+document.getElementById('scrub').onclick = function (e) {
+  var r = this.getBoundingClientRect(); pos = (e.clientX - r.left) / r.width * secs(list[cur].d); t0 = performance.now() - pos * 1000; tick();
+};
+
+/* corners */
+var info = document.getElementById('info');
+tr.onclick = function () {
+  if (info.classList.contains('open')) { info.classList.remove('open'); tr.textContent = mode === 'player' ? 'Index' : 'Info'; }
+  else if (mode === 'player') back();
+  else { info.classList.add('open'); tr.textContent = 'Close'; }
+};
+document.getElementById('home').onclick = function (e) {
+  e.preventDefault(); info.classList.remove('open');
+  if (mode === 'player') back(); else { tr.textContent = 'Info'; wheel.scrollTo({ top: 0, behavior: 'smooth' }); }
+};
+document.addEventListener('keydown', function (e) {
+  if (mode !== 'wheel' || info.classList.contains('open')) { if (e.key === 'Escape') { if (info.classList.contains('open')) tr.onclick(); else back(); } return; }
+  var els = wheel.querySelectorAll('.name');
+  if (e.key === 'ArrowDown' && els[mid + 1]) { e.preventDefault(); els[mid + 1].scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  if (e.key === 'ArrowUp' && els[mid - 1]) { e.preventDefault(); els[mid - 1].scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  if (e.key === 'Enter') open(mid);
+});
+buildTags(); buildWheel();
+</script>
+<script>
+/* the orb: one small WebGL shader, drawn at half resolution (it is soft anyway) */
+(function () {
+  var c = document.getElementById('orb'), gl = c.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+  if (!gl) { c.style.background = 'radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--fg) 70%, var(--bg)), var(--bg) 40%)'; return; }
+  var fs = [
+    'precision mediump float;',
+    'uniform vec2 res; uniform float t, spin, en, amt; uniform vec3 bg, fg;',
+    'void main() {',
+    '  vec2 p = (gl_FragCoord.xy - .5 * res) / min(res.x, res.y);',
+    '  p *= 1.55 - en * .25;',
+    '  vec2 q = p - vec2(sin(t * .6), cos(t * .47)) * .035;',
+    '  float r = length(p), a = atan(p.y, p.x);',
+    '  float core = exp(-dot(q, q) * (62. - 22. * en)) * .95;',
+    '  float halo = exp(-r * r * 7.) * (.1 + en * .08);',
+    '  float w = 0.;',
+    '  for (int i = 0; i < 3; i++) {',
+    '    float fi = float(i);',
+    '    float ph = spin * (1. + fi * .35) + t * (.22 + .1 * fi) + fi * 2.1;',
+    '    float arm = .5 + .5 * sin(a + ph - r * (4. + fi * 2.));',
+    '    float rr = .17 + fi * .085 + .03 * sin(t * .7 + fi * 1.3);',
+    '    float ring = exp(-pow((r - rr) / (.06 + .03 * fi), 2.));',
+    '    w += pow(arm, 2. + fi) * ring * (.75 - .15 * fi);',
+    '  }',
+    '  float I = clamp(core + halo + w * (1. + en * 1.4), 0., 1.);',
+    '  float d = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - .5) / 128.;',
+    '  gl_FragColor = vec4(mix(bg, fg, I * amt) + d, 1.);',
+    '}'].join('\n');
+  function sh(type, src) { var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; }
+  var pr = gl.createProgram();
+  gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 v; void main() { gl_Position = vec4(v, 0., 1.); }'));
+  gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(pr); gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(pr, 'v'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  var U = {}; ['res', 't', 'spin', 'en', 'amt', 'bg', 'fg'].forEach(function (n) { U[n] = gl.getUniformLocation(pr, n); });
+  function rgb(s) { var m = s.match(/[\d.]+/g) || [0, 0, 0]; return [m[0] / 255, m[1] / 255, m[2] / 255]; }
+  var bg = [0, 0, 0], fg = [1, 1, 1], amt = 1, n = 0, spin = 0, en = 0, last = null;
+  function colours() {
+    var cs = getComputedStyle(document.body); bg = rgb(cs.backgroundColor); fg = rgb(cs.color);
+    amt = document.documentElement.getAttribute('data-way') === 'dark' ? 1 : .62;
+  }
+  function size() { var k = .5 * Math.min(2, devicePixelRatio || 1); c.width = Math.round(c.offsetWidth * k); c.height = Math.round(c.offsetHeight * k); gl.viewport(0, 0, c.width, c.height); }
+  size(); addEventListener('resize', size);
+  var wh = document.getElementById('wheel');
+  wh.addEventListener('scroll', function () {
+    var rowH = wh.querySelector('.name') ? wh.querySelector('.name').offsetHeight : 100;
+    if (last !== null) { var v = (wh.scrollTop - last) / rowH; spin += v * .9; en = Math.min(1, en + Math.abs(v) * .35); }
+    last = wh.scrollTop;
+  }, { passive: true });
+  var t0 = performance.now();
+  (function f() {
+    if (n++ % 15 === 0) colours();
+    en *= .965;
+    gl.uniform2f(U.res, c.width, c.height); gl.uniform1f(U.t, (performance.now() - t0) / 1000);
+    gl.uniform1f(U.spin, spin); gl.uniform1f(U.en, en); gl.uniform1f(U.amt, amt);
+    gl.uniform3fv(U.bg, bg); gl.uniform3fv(U.fg, fg);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    requestAnimationFrame(f);
+  })();
+})();
+/* this one opens in the dark: the orb is light on black, as in the reference */
+document.addEventListener('DOMContentLoaded', function () {
+  document.documentElement.setAttribute('data-way', 'dark');
+  document.querySelectorAll('[data-way-btn]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-way-btn') === 'dark'); });
+});
+</script>
+</body>
+</html>

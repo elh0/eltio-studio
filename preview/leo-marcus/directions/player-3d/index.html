@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Player 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=DM+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Player 3D: the deck is a Blender model rendered top down (deck.jpg), with the red cap and
+   the knob rendered on their own (cap.png, knob.png) so they turn cleanly. Only what has to move
+   is laid over the render, placed in its own pixels (1036 x 650) as percentages. */
+:root { --bg: #F4F1EA; --fg: #121211; --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --line: color-mix(in srgb, var(--fg) 16%, transparent); }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); overflow-y: auto; }
+.hd { position: sticky; top: 0; z-index: 20; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; padding: calc(env(safe-area-inset-top, 0px) + 14px) max(var(--pad), env(safe-area-inset-right, 0px)) 12px max(var(--pad), env(safe-area-inset-left, 0px)); }
+.hd .nm { font-weight: 500; }
+.tags { display: flex; gap: 14px; order: 3; width: 100%; }
+.tags button { opacity: .38; transition: opacity .2s; }
+.tags button[aria-pressed="true"], .tags button:hover { opacity: 1; }
+.tags sup { font-size: .75em; margin-left: 2px; }
+.hd .inf { margin-left: auto; }
+.hd .inf:hover { opacity: .5; }
+@media (min-width: 900px) { .tags { order: 0; width: auto; position: absolute; left: 50%; transform: translateX(-50%); } }
+main { padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--pad), env(safe-area-inset-left, 0px)); }
+.stage { max-width: 660px; margin: 0 auto; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .7s var(--ease); }
+.stage.open { grid-template-rows: 1fr; }
+.stage > div { overflow: hidden; }
+.film { aspect-ratio: 2.39; margin-top: 10px; cursor: pointer; max-width: 100%; }
+.cap { display: flex; flex-wrap: wrap; gap: 2px 16px; padding: 8px 0 0; }
+.cap .c { font-weight: 500; }
+.cap .q2 { opacity: .45; }
+.info { max-width: 660px; margin: 0 auto; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease); }
+.info.on { grid-template-rows: 1fr; }
+.info > div { overflow: hidden; }
+.info p { margin: 12px 0 0; max-width: 52ch; }
+.info .row { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 10px 0 4px; }
+.info a:hover { opacity: .5; }
+
+.wrap { display: flex; justify-content: center; padding: 4vh 0 4vh; transition: padding .7s var(--ease); }
+.deck { position: relative; width: min(1000px, 100%, 140svh); aspect-ratio: 1036 / 650; container-type: inline-size; user-select: none; -webkit-user-select: none; transition: width .7s var(--ease);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(180deg, transparent, #000 5%, #000 92%, transparent); -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(180deg, transparent, #000 5%, #000 92%, transparent); mask-composite: intersect; }
+body.open .deck { width: min(820px, 100%, 90svh); }
+@media (max-width: 699px) { .wrap { margin: 0 -10px; } .deck { width: calc(100% + 20px); } body.open .deck { width: calc(100% + 20px); } }
+.deck > * { position: absolute; }
+.deck > img.base { inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.spr { pointer-events: none; will-change: transform; }
+.knobspr { transition: transform .35s var(--ease); }
+.scr { pointer-events: none; overflow: hidden; }
+.scr text { fill: #F2F2EE; font: 400 15.2px "DM Mono", ui-monospace, Menlo, monospace; text-transform: uppercase; }
+.led { border-radius: 50%; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.led.on { opacity: 1; }
+.led.g.on { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+.led.g { background: radial-gradient(circle, #E9FFE6 0 18%, #45F25F 34%, rgba(69,242,95,.45) 52%, rgba(69,242,95,0) 72%); }
+.led.a { background: radial-gradient(circle, #FFF3E0 0 18%, #FF9C2E 34%, rgba(255,156,46,.45) 52%, rgba(255,156,46,0) 72%); }
+.hot { cursor: pointer; border-radius: 50%; touch-action: none; transition: background .08s; }
+.hot.sq { border-radius: 14%; }
+.hot:active, .hot.dn { background: rgba(0,0,0,.16); }
+.hot:focus-visible { outline: 2px solid #E8331C; outline-offset: 2px; }
+.hot.plat { cursor: grab; }
+.hot.plat:active { background: none; cursor: grabbing; }
+.hint { text-align: center; opacity: .45; margin: -1vh 0 0; }
+
+.list { max-width: 660px; margin: 0 auto; display: none; padding: 0 0 10px; }
+.list.on { display: block; }
+.list button { display: flex; width: 100%; gap: 16px; text-align: left; padding: 9px 0; border-top: 1px solid var(--line); }
+.list button span:first-child { font-weight: 500; min-width: 9em; }
+.list button span:last-child { opacity: .45; }
+.list button.cur span:first-child::before { content: "\2192\00a0"; }
+.list button.off { display: none; }
+footer { display: flex; justify-content: space-between; gap: 12px; padding: 24px max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(var(--pad), env(safe-area-inset-left, 0px)); opacity: .45; }
+</style>
+</head>
+<body>
+<header class="hd">
+  <a class="nm" href="../">Helical Sound</a>
+  <nav class="tags" id="tags" aria-label="Filter work"></nav>
+  <button class="inf" id="infBtn">Info</button>
+</header>
+<main>
+  <section class="info" id="info" aria-label="Info"><div>
+    <p>Helical Sound is Leo Marcus, a London-based music and sound studio making composition, sound design and mixes for fashion and advertising.</p>
+    <div class="row"><span>hello@helical-sound.com</span><a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a></div>
+  </div></section>
+  <section class="stage" id="stage" aria-label="Now playing"><div>
+    <div class="film" id="film"><img alt="" id="still"></div>
+    <div class="cap" id="cap"></div>
+  </div></section>
+  <div class="wrap">
+    <div class="deck" id="deck">
+      <img class="base" src="deck.jpg" alt="A small clear deck with a red platter, a screen, a volume slider and play, info and list buttons">
+      <img class="spr" id="capspr" src="cap.png" alt="" style="left:19.788%;top:34%;width:19.112%;height:30.462%">
+      <img class="spr knobspr" id="knobspr" src="knob.png" alt="" style="left:9.266%;top:12.462%;width:5.985%;height:9.538%">
+      <svg class="scr" id="screen" viewBox="0 0 162 76" preserveAspectRatio="xMinYMin meet" style="left:65.637%;top:13.846%;width:15.637%;height:11.692%"></svg>
+      <span class="led g" id="ledPlay" style="left:55.212%;top:62.708%;width:2.896%;height:4.615%"></span>
+      <span class="led a" id="ledInfo" style="left:65.734%;top:62.708%;width:2.896%;height:4.615%"></span>
+      <span class="led a" id="ledList" style="left:76.544%;top:62.708%;width:2.896%;height:4.615%"></span>
+      <div class="hot plat" id="plat" data-k="disc" role="slider" aria-label="Platter: drag to scrub" style="left:8.784%;top:16.462%;width:41.12%;height:65.538%"></div>
+      <button class="hot" data-k="knob" aria-label="Turn to filter by tag" style="left:8.977%;top:12%;width:6.564%;height:10.462%"></button>
+      <button class="hot sq" data-k="prev" aria-label="Previous" style="left:44.402%;top:11.385%;width:7.722%;height:11.077%"></button>
+      <button class="hot sq" data-k="next" aria-label="Next" style="left:53.958%;top:11.385%;width:7.722%;height:11.077%"></button>
+      <button class="hot" data-k="play" aria-label="Play or stop" style="left:52.51%;top:67.846%;width:8.301%;height:13.231%"></button>
+      <button class="hot" data-k="info" aria-label="Info" style="left:63.031%;top:67.692%;width:8.301%;height:13.231%"></button>
+      <button class="hot" data-k="list" aria-label="All work" style="left:73.842%;top:67.692%;width:8.301%;height:13.231%"></button>
+      <div class="hot sq" id="track" data-k="vol" role="slider" aria-label="Volume" style="left:86.197%;top:21.385%;width:5.985%;height:56%"></div>
+    </div>
+  </div>
+  <p class="hint" id="hint">Press play. Turn the knob for tags, drag the platter to scrub.</p>
+  <nav class="list" id="list" aria-label="All work"></nav>
+</main>
+<footer><span>hello@helical-sound.com</span><a href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></footer>
+<script src="../shared.js"></script>
+<script>
+var SHORT = { comp: 'COMP', sd: 'SD', mix: 'MIX' };
+var tag = 'all', list = WORK.slice(), i = 0, playing = false, pos = 0, last = 0, angle = 0, vol = .7, flash = '', flashT = 0;
+var $ = function (id) { return document.getElementById(id); };
+function cur() { return list[i]; }
+function drawTags() {
+  $('tags').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button data-t="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '<sup>' + count(k) + '</sup></button>';
+  }).join('');
+}
+function drawList() {
+  $('list').innerHTML = WORK.map(function (w, n) {
+    var off = tag !== 'all' && w.t.indexOf(tag) < 0;
+    return '<button data-n="' + n + '" class="' + (off ? 'off' : '') + (w === cur() ? ' cur' : '') + '"><span>' + w.c + '</span><span>' + w.p + '</span></button>';
+  }).join('');
+}
+function setTag(t, quiet) {
+  var w = cur(); tag = t;
+  list = WORK.filter(function (x) { return t === 'all' || x.t.indexOf(t) > -1; });
+  i = Math.max(0, list.indexOf(w)); if (list[i] !== w) load(0, playing);
+  if (!quiet) say(t === 'all' ? 'ALL WORK ' + list.length : 'FILTER ' + SHORT[t] + ' ' + list.length);
+  $('knobspr').style.transform = 'rotate(' + ['all', 'comp', 'sd', 'mix'].indexOf(t) * 60 + 'deg)';
+  drawTags(); drawList(); screen(); cap();
+}
+function load(n, keep) {
+  $('still').src = still(cur()); cap(); drawList(); screen();
+  setPlay(!!keep);
+}
+function cap() {
+  var w = cur();
+  $('cap').innerHTML = '<span class="c">' + w.c + '</span><span>' + w.p + '</span><span class="q2">' + credits(w) + '</span><span class="q2">Director: to add</span><span class="q2">Agency: to add</span>';
+}
+function setPlay(p) {
+  playing = p; last = performance.now();
+  if (p) { $('stage').classList.add('open'); document.body.classList.add('open'); $('hint').style.visibility = 'hidden'; }
+  $('film').classList.toggle('on', p); $('ledPlay').classList.toggle('on', p);
+  screen();
+}
+function say(s) { flash = s; flashT = performance.now(); }
+function screen() {
+  var w = cur(), d = secs(w.d), n = String(i + 1).padStart(2, '0') + '/' + String(list.length).padStart(2, '0');
+  var l4 = (performance.now() - flashT < 1400 && flash) ? flash : (playing ? 'PLAY ' : 'STOP ') + clock(pos) + '\u2215' + clock(d);
+  var L = [n + ' ' + w.t.map(function (k) { return SHORT[k]; }).join(' '), w.c, w.p, l4], Y = [13.5, 29.5, 45.5, 67.5];
+  $('screen').innerHTML = L.map(function (t, k) { return '<text x="1" y="' + Y[k] + '">' + t.replace(/&/g, '&amp;').slice(0, 17) + '</text>'; }).join('');
+}
+function frame(t) {
+  var dt = (t - last) / 1000; last = t;
+  if (playing && !dragging) {
+    pos += dt; angle += dt * 120;
+    if (pos >= secs(cur().d)) load(i + 1, true);
+  }
+  $('capspr').style.transform = 'rotate(' + angle + 'deg)';
+  $('ledInfo').classList.toggle('on', $('info').classList.contains('on'));
+  $('ledList').classList.toggle('on', $('list').classList.contains('on'));
+  screen();
+  requestAnimationFrame(frame);
+}
+var dragging = null, a0 = 0;
+function centre(el) { var r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }
+[$('plat'), $('track')].forEach(function (el) {
+  el.addEventListener('pointerdown', function (e) {
+    dragging = el.getAttribute('data-k'); el.setPointerCapture(e.pointerId);
+    var c = centre(el); a0 = Math.atan2(e.clientY - c[1], e.clientX - c[0]);
+    if (dragging === 'vol') setVol(e, el.getBoundingClientRect());
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    if (dragging === 'vol') return setVol(e, el.getBoundingClientRect());
+    var c = centre(el), a = Math.atan2(e.clientY - c[1], e.clientX - c[0]), da = a - a0;
+    if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+    a0 = a; angle += da * 180 / Math.PI;
+    pos = Math.max(0, Math.min(secs(cur().d) - .1, pos + da / (2 * Math.PI) * 6));
+    say('SCRUB ' + clock(pos));
+  });
+  ['pointerup', 'pointercancel'].forEach(function (ev) { el.addEventListener(ev, function () { dragging = null; }); });
+});
+function setVol(e, r) {
+  vol = Math.max(0, Math.min(1, 1 - (e.clientY - r.top - r.height * .1) / (r.height * .8)));
+  var bars = Math.round(vol * 10);
+  say('VOL ' + '\u2588'.repeat(bars) + '\u2591'.repeat(10 - bars));
+}
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-t]'); if (t) return setTag(t.getAttribute('data-t'));
+  var n = e.target.closest('[data-n]'); if (n) { var w = WORK[+n.getAttribute('data-n')]; if (list.indexOf(w) < 0) setTag('all'); return load(list.indexOf(w), true); }
+  if (e.target.closest('#infBtn')) return $('info').classList.toggle('on');
+  if (e.target.closest('#film')) return setPlay(!playing);
+  var k = e.target.closest('[data-k]'); if (!k) return;
+  k = k.getAttribute('data-k');
+  if (k === 'play') setPlay(!playing);
+  if (k === 'next') { load(i + 1, playing); say('NEXT'); }
+  if (k === 'prev') { load(i - 1, playing); say('PREV'); }
+  if (k === 'info') { $('info').classList.toggle('on'); say('INFO'); }
+  if (k === 'list') { $('list').classList.toggle('on'); say($('list').classList.contains('on') ? 'LIST ON' : 'LIST OFF'); }
+  if (k === 'knob') { var o = ['all'].concat(TAG_ORDER); setTag(o[(o.indexOf(tag) + 1) % o.length]); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === ' ' && e.target === document.body) { e.preventDefault(); setPlay(!playing); }
+  if (e.key === 'ArrowRight') load(i + 1, playing);
+  if (e.key === 'ArrowLeft') load(i - 1, playing);
+});
+drawTags(); setTag('all', true); load(0, false); requestAnimationFrame(function (t) { last = t; frame(t); });
+</script>
+</body>
+</html>

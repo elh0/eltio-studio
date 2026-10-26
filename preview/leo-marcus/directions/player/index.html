@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=VT323&display=swap">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Player: the deck picture is the homepage and the remote. The picture stays as made;
+   tap areas, the screen text, the light and the spinning cap sit on top of it, placed in
+   the picture's own pixels (2070 x 1153) as percentages so they line up at any size.
+   Tags run along the top; the film opens above the deck when you press play. */
+:root { --bg: #F0EDE6; --fg: #121211; --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --line: color-mix(in srgb, var(--fg) 16%, transparent); }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); overflow-y: auto; }
+.hd { position: sticky; top: 0; z-index: 20; background: var(--bg); display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; padding: calc(env(safe-area-inset-top, 0px) + 14px) max(var(--pad), env(safe-area-inset-right, 0px)) 12px max(var(--pad), env(safe-area-inset-left, 0px)); }
+.hd .nm { font-weight: 500; }
+.tags { display: flex; gap: 14px; order: 3; width: 100%; }
+.tags button { opacity: .38; transition: opacity .2s; }
+.tags button[aria-pressed="true"], .tags button:hover { opacity: 1; }
+.tags sup { font-size: .75em; margin-left: 2px; }
+.hd .inf { margin-left: auto; }
+.hd .inf:hover { opacity: .5; }
+@media (min-width: 900px) { .tags { order: 0; width: auto; position: absolute; left: 50%; transform: translateX(-50%); } }
+
+main { padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--pad), env(safe-area-inset-left, 0px)); }
+.stage { max-width: 760px; margin: 0 auto; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .7s var(--ease); }
+.stage.open { grid-template-rows: 1fr; }
+.stage > div { overflow: hidden; }
+.film { aspect-ratio: 2.39; margin-top: 10px; cursor: pointer; max-width: 100%; }
+.cap { display: flex; flex-wrap: wrap; gap: 2px 16px; padding: 8px 0 0; }
+.cap .c { font-weight: 500; }
+.cap .q2 { opacity: .45; }
+
+.deck { position: relative; max-width: min(1180px, calc((100svh - 70px) * 1.795)); transition: max-width .7s var(--ease); -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); mask-image: radial-gradient(closest-side, #000 72%, transparent 100%); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; margin: 0 auto; aspect-ratio: 2070 / 1153; container-type: inline-size; overflow: hidden; }
+.plate { position: absolute; left: 0; top: 0; width: 100%; aspect-ratio: 2070 / 1153; container-type: inline-size; user-select: none; -webkit-user-select: none; }
+.plate > img { display: block; width: 100%; height: 100%; pointer-events: none; }
+@media (min-width: 700px) { body.open .deck { max-width: min(1180px, calc((100svh - 400px) * 1.795)); } body.open .stage { max-width: 620px; } }
+/* phone: crop in on the object */
+@media (max-width: 699px) {
+  .deck { aspect-ratio: 900 / 830; margin: 6px -4px 0; -webkit-mask-image: radial-gradient(closest-side, #000 86%, transparent 100%); mask-image: radial-gradient(closest-side, #000 86%, transparent 100%); }
+  .plate { width: 230%; left: -63.9%; top: -17.8cqw; }
+}
+.hot { position: absolute; border-radius: 50%; touch-action: none; }
+.hot:active, .hot.dn { background: rgba(0, 0, 0, .14); }
+.hot:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
+.sq { border-radius: 14%; }
+.screen { position: absolute; color: #E9F2DF; font: 1.06cqw/1.22 "VT323", var(--mono); text-shadow: 0 0 .5cqw rgba(200, 255, 190, .45); padding: .55cqw .65cqw; overflow: hidden; pointer-events: none; text-transform: uppercase; display: flex; flex-direction: column; }
+.screen div { white-space: nowrap; overflow: hidden; text-overflow: clip; }
+.screen .bar { height: .22cqw; margin-top: auto; background: rgba(233, 242, 223, .22); }
+.screen .bar i { display: block; height: 100%; width: 0; background: #E9F2DF; }
+.cap-spin { position: absolute; border-radius: 50%; pointer-events: none; }
+.cap-spin::after { content: ""; position: absolute; left: 50%; top: 9%; width: 7%; height: 7%; margin-left: -3.5%; border-radius: 50%; background: rgba(255, 255, 255, .75); }
+.led { position: absolute; width: .7cqw; height: .7cqw; border-radius: 50%; background: #8d8a82; box-shadow: inset 0 0 0 .08cqw rgba(0,0,0,.2); transition: background .2s, box-shadow .2s; pointer-events: none; }
+.led.on { background: #4BF26A; box-shadow: 0 0 .9cqw .2cqw rgba(75, 242, 106, .7); }
+.hint { text-align: center; opacity: .45; padding: 4px 0 0; }
+
+.list { max-width: 760px; margin: 0 auto; display: none; padding: 10px 0 0; }
+.list.on { display: block; }
+.list button { display: flex; width: 100%; gap: 16px; text-align: left; padding: 9px 0; border-top: 1px solid var(--line); }
+.list button span:first-child { font-weight: 500; min-width: 9em; }
+.list button span:last-child { opacity: .45; }
+.list button.cur span:first-child::before { content: "\2192\00a0"; }
+.list button.off { display: none; }
+
+.info { max-width: 760px; margin: 0 auto; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease); }
+.info.on { grid-template-rows: 1fr; }
+.info > div { overflow: hidden; }
+.info p { margin: 12px 0 0; max-width: 52ch; }
+.info .row { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 10px 0 4px; }
+.info a:hover { opacity: .5; }
+footer { display: flex; justify-content: space-between; gap: 12px; padding: 40px max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 16px) max(var(--pad), env(safe-area-inset-left, 0px)); opacity: .45; }
+</style>
+</head>
+<body>
+<header class="hd">
+  <a class="nm" href="../">Helical Sound</a>
+  <nav class="tags" id="tags" aria-label="Filter work"></nav>
+  <button class="inf" id="infBtn">Info</button>
+</header>
+<main>
+  <section class="info" id="info" aria-label="Info"><div>
+    <p>Helical Sound is Leo Marcus, a London-based music and sound studio making composition, sound design and mixes for fashion and advertising.</p>
+    <div class="row"><span>hello@helical-sound.com</span><a href="https://instagram.com/" target="_blank" rel="noopener">Instagram</a></div>
+  </div></section>
+  <section class="stage" id="stage" aria-label="Now playing"><div>
+    <div class="film" id="film"><img alt="" id="still"></div>
+    <div class="cap" id="cap"></div>
+  </div></section>
+  <div class="deck" id="deck">
+    <div class="plate" id="plate">
+      <img src="plate.jpg" alt="A clear see-through deck with a red centre, a small screen, a slider and round buttons">
+      <div class="screen" id="screen" data-b="1219,261,195,130"></div>
+      <div class="cap-spin" id="spin" data-b="831,424,180,180"></div>
+      <div class="led" id="led" data-c="751,778"></div>
+      <button class="hot sq" data-k="prev" data-b="1172,148,64,62" aria-label="Previous"></button>
+      <button class="hot sq" data-k="next" data-b="1288,148,64,62" aria-label="Next"></button>
+      <button class="hot" data-k="play" data-b="694,794,114,114" aria-label="Play"></button>
+      <button class="hot" data-k="info" data-b="860,794,114,114" aria-label="Info"></button>
+      <button class="hot" data-k="list" data-b="1024,794,114,114" aria-label="All work"></button>
+      <button class="hot" data-k="knob" data-b="647,238,76,76" aria-label="Filter by tag"></button>
+      <div class="hot" data-k="disc" data-b="662,255,518,518" aria-label="Platter: drag to scrub" role="slider"></div>
+      <div class="hot sq" data-k="vol" data-b="1250,440,135,460" aria-label="Volume" role="slider"></div>
+    </div>
+  </div>
+  <p class="hint" id="hint">Press play. Turn the platter to scrub, slide for volume, the knob filters.</p>
+  <nav class="list" id="list" aria-label="All work"></nav>
+</main>
+<footer><span>hello@helical-sound.com</span><a href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></footer>
+<script src="../shared.js"></script>
+<script>
+var W = 2070, H = 1153;
+document.querySelectorAll('[data-b]').forEach(function (el) {
+  var b = el.getAttribute('data-b').split(',').map(Number);
+  el.style.left = b[0] / W * 100 + '%'; el.style.top = b[1] / H * 100 + '%';
+  el.style.width = b[2] / W * 100 + '%'; el.style.height = b[3] / H * 100 + '%';
+});
+document.querySelectorAll('[data-c]').forEach(function (el) {
+  var c = el.getAttribute('data-c').split(',').map(Number);
+  el.style.left = 'calc(' + c[0] / W * 100 + '% - .35cqw)'; el.style.top = 'calc(' + c[1] / H * 100 + '% - .35cqw)';
+});
+
+var SHORT = { comp: 'COMP', sd: 'SD', mix: 'MIX' };
+var tag = 'all', list = WORK.slice(), i = 0, playing = false, pos = 0, last = 0, angle = 0, vol = .8, flash = '', flashT = 0;
+var $ = function (id) { return document.getElementById(id); };
+function cur() { return list[i]; }
+
+function drawTags() {
+  $('tags').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button data-t="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '<sup>' + count(k) + '</sup></button>';
+  }).join('');
+}
+function drawList() {
+  $('list').innerHTML = WORK.map(function (w, n) {
+    var off = tag !== 'all' && w.t.indexOf(tag) < 0;
+    return '<button data-n="' + n + '" class="' + (off ? 'off' : '') + (w === cur() ? ' cur' : '') + '"><span>' + w.c + '</span><span>' + w.p + '</span></button>';
+  }).join('');
+}
+function setTag(t) {
+  var w = cur(); tag = t;
+  list = WORK.filter(function (x) { return t === 'all' || x.t.indexOf(t) > -1; });
+  i = Math.max(0, list.indexOf(w)); if (list[i] !== w) load(0, playing);
+  say(t === 'all' ? 'ALL WORK ' + list.length : 'FILTER ' + SHORT[t] + ' ' + list.length);
+  drawTags(); drawList(); screen(); cap();
+}
+function load(n, keep) {
+  i = (n + list.length) % list.length; pos = 0;
+  $('still').src = still(cur()); cap(); drawList(); screen();
+  setPlay(!!keep);
+}
+function cap() {
+  var w = cur();
+  $('cap').innerHTML = '<span class="c">' + w.c + '</span><span>' + w.p + '</span><span class="q2">' + credits(w) + '</span><span class="q2">Director: to add</span><span class="q2">Agency: to add</span>';
+}
+function setPlay(p) {
+  playing = p; last = performance.now();
+  if (p) { $('stage').classList.add('open'); document.body.classList.add('open'); }
+  $('film').classList.toggle('on', p); $('led').classList.toggle('on', p);
+  $('hint').style.visibility = 'hidden';
+  screen();
+}
+function say(s) { flash = s; flashT = performance.now(); }
+function screen() {
+  var w = cur(), d = secs(w.d), n = String(i + 1).padStart(2, '0') + '/' + String(list.length).padStart(2, '0');
+  var line4 = (performance.now() - flashT < 1400 && flash) ? flash : (playing ? '▶ ' : '■ ') + clock(pos) + ' / ' + clock(d);
+  $('screen').innerHTML = '<div>' + n + ' ' + w.t.map(function (k) { return SHORT[k]; }).join(' ') + '</div><div>' + w.c + '</div><div>' + w.p + '</div><div>' + line4 + '</div><div class="bar"><i style="width:' + Math.min(100, pos / d * 100) + '%"></i></div>';
+}
+function frame(t) {
+  var dt = (t - last) / 1000; last = t;
+  if (playing && !dragging) {
+    pos += dt; angle += dt * 200;
+    if (pos >= secs(cur().d)) load(i + 1, true);
+  }
+  $('spin').style.transform = 'rotate(' + angle + 'deg)';
+  screen();
+  requestAnimationFrame(frame);
+}
+
+// platter scrub and volume drags
+var dragging = null, a0 = 0;
+function centre(el) { var r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r]; }
+document.querySelectorAll('[data-k=disc],[data-k=vol]').forEach(function (el) {
+  el.addEventListener('pointerdown', function (e) {
+    dragging = el.getAttribute('data-k'); el.setPointerCapture(e.pointerId); el.classList.add('dn');
+    var c = centre(el); a0 = Math.atan2(e.clientY - c[1], e.clientX - c[0]);
+    if (dragging === 'vol') setVol(e, c[2]);
+  });
+  el.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var c = centre(el);
+    if (dragging === 'vol') return setVol(e, c[2]);
+    var a = Math.atan2(e.clientY - c[1], e.clientX - c[0]), da = a - a0;
+    if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+    a0 = a; angle += da * 180 / Math.PI;
+    pos = Math.max(0, Math.min(secs(cur().d) - .1, pos + da / (2 * Math.PI) * 6));
+    $('stage').classList.add('open');
+  });
+  ['pointerup', 'pointercancel'].forEach(function (ev) { el.addEventListener(ev, function () { dragging = null; el.classList.remove('dn'); }); });
+});
+function setVol(e, r) {
+  vol = Math.max(0, Math.min(1, 1 - (e.clientY - r.top - r.height * .1) / (r.height * .8)));
+  var bars = Math.round(vol * 8);
+  say('VOL ' + '█'.repeat(bars) + '░'.repeat(8 - bars));
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-t]'); if (t) return setTag(t.getAttribute('data-t'));
+  var n = e.target.closest('[data-n]'); if (n) { var w = WORK[+n.getAttribute('data-n')]; if (list.indexOf(w) < 0) setTag('all'); return load(list.indexOf(w), true); }
+  if (e.target.closest('#infBtn')) return $('info').classList.toggle('on');
+  if (e.target.closest('#film')) return setPlay(!playing);
+  var k = e.target.closest('[data-k]'); if (!k) return;
+  k = k.getAttribute('data-k');
+  if (k === 'play') setPlay(!playing);
+  if (k === 'next') { load(i + 1, playing); say('NEXT'); }
+  if (k === 'prev') { load(i - 1, playing); say('PREV'); }
+  if (k === 'info') { $('info').classList.toggle('on'); say('INFO'); }
+  if (k === 'list') { $('list').classList.toggle('on'); say($('list').classList.contains('on') ? 'LIST ON' : 'LIST OFF'); }
+  if (k === 'knob') { var o = ['all'].concat(TAG_ORDER); setTag(o[(o.indexOf(tag) + 1) % o.length]); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === ' ' && e.target === document.body) { e.preventDefault(); setPlay(!playing); }
+  if (e.key === 'ArrowRight') load(i + 1, playing);
+  if (e.key === 'ArrowLeft') load(i - 1, playing);
+});
+
+drawTags(); load(0, false); requestAnimationFrame(function (t) { last = t; frame(t); });
+</script>
+</body>
+</html>

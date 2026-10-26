@@ -140,7 +140,7 @@ function setTag(t, quiet) {
   drawTags(); drawList(); screen(); cap();
 }
 function load(n, keep) {
-  i = (n + list.length) % list.length; pos = 0;
+  // the knob sprite is cut from the render, so it stays still (turning it broke up)
   $('still').src = still(cur()); cap(); drawList(); screen();
   setPlay(!!keep);
 }

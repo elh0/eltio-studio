@@ -65,6 +65,19 @@ a:hover, button:hover { opacity: .55; }
 .pfoot .home { font-weight: 500; }
 .pfoot .ct { display: flex; flex-wrap: wrap; gap: 0 14px; }
 @media (min-width: 900px) { .pfoot { grid-template-columns: 1fr 22vw auto; } .pfoot .ct { display: block; } .pfoot .ct > * { display: block; } }
+/* refine (28 Oct): calmer Close, looser tracking, more room between the film, the list and the footer */
+:root { --pbig: clamp(28px, 3.1vw, 46px); --mid: clamp(17px, 1.55vw, 22px); }
+.about { gap: 12px; line-height: 1.45; }
+.nav { gap: 6px 18px; top: calc(env(safe-area-inset-top, 0px) + var(--pad) + var(--mid) + 14px); }
+.close { letter-spacing: -.02em; }
+.pin { gap: 16px; padding-top: calc(env(safe-area-inset-top, 0px) + var(--pad) + 6px); }
+.ptop { margin-bottom: 6px; }
+.pt { margin-top: 6px; row-gap: 6px; }
+.pt .c { letter-spacing: -.015em; }
+.run { margin: 34px 0 44px; line-height: 1.4; letter-spacing: -.012em; }
+.run .sym { margin: 0 .35em 0 .2em; }
+.pfoot { padding-top: 16px; gap: 14px 28px; line-height: 1.45; }
+.pfoot .ct > * + * { margin-top: 1px; }
 </style>
 </head>
 <body>

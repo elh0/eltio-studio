@@ -70,6 +70,23 @@ a:hover { opacity: .5; }
 .bar2 { top: 0; border-bottom: 1px solid var(--fg); padding-top: calc(env(safe-area-inset-top, 0px) + 12px); }
 @media (min-width: 900px) { .bar2 { padding-top: env(safe-area-inset-top, 0px); } }
 .credit { bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); right: 0; }
+/* refine (28 Oct): looser tracking, clearer steps between the three sizes, more room */
+:root { --nbig: clamp(36px, 5.1vw, 80px); --mid: clamp(13px, 1.05vw, 15px); }
+.tg { gap: 6px 18px; padding: calc(env(safe-area-inset-top, 0px) * var(--safe, 0) + 26px) 0 26px; }
+.names { gap: clamp(16px, 1.8vw, 26px); padding-bottom: 120px; }
+.names button { padding: 0; gap: 7px; }
+.names .c { letter-spacing: -.022em; line-height: .98; }
+.names .pm { padding: 0 0 0 .08em; letter-spacing: -.02em; }
+@media (min-width: 900px) { .pane .in { top: 26px; padding-top: 26px; } }
+.in { gap: 14px; }
+.in .ttl { font: 500 clamp(18px, 1.5vw, 22px)/1.1 var(--sans); letter-spacing: -.015em; }
+.in .ttl button { font: 400 var(--small)/1.3 var(--sans); letter-spacing: 0; }
+.in > .pm { margin-top: -8px; opacity: .55; }
+.in .film { margin-top: 6px; }
+.cr { gap: 6px 22px; margin-top: 10px; line-height: 1.4; }
+.bar2 { padding-top: 16px; padding-bottom: 16px; row-gap: 10px; }
+.bar2 .bio { line-height: 1.45; }
+@media (min-width: 900px) { .bar2 { padding-top: 0; padding-bottom: 0; } .bar2 > * { padding: 18px 22px 20px; } .bar2 .ct > * + * { margin-top: 2px; } }
 </style>
 </head>
 <body class="vb">

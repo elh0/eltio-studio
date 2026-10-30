@@ -344,3 +344,9 @@ a.btn:not(.primary){color:inherit}
 .promise-card .r .t{flex:1;min-width:0}
 .promise-card .r .w{color:var(--muted);font-size:12px}
 .promise-card .r.tap{cursor:pointer}
+.rows a.r{color:var(--fg);text-decoration:none}
+.rows a.r.tap svg{margin-left:auto;color:var(--faint);flex:none;width:14px;height:14px}
+.rows a.r.tap .w+svg{margin-left:6px}
+.rows .r .btn{margin-left:auto;flex:none}
+.rows .r .w+.btn{margin-left:8px}
+.sec a.btn{text-decoration:none}

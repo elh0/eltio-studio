@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Helical Sound: Split, round 1 (B, footer as header)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2712%27 fill=%27%23F2210F%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
@@ -87,13 +88,20 @@ a:hover { opacity: .5; }
 .bar2 { padding-top: 16px; padding-bottom: 16px; row-gap: 10px; }
 .bar2 .bio { line-height: 1.45; }
 @media (min-width: 900px) { .bar2 { padding-top: 0; padding-bottom: 0; } .bar2 > * { padding: 18px 22px 20px; } .bar2 .ct > * + * { margin-top: 2px; } }
+/* detail pass (30 Oct): now-playing mark, progress under the playing name, hover nudge, sheet handle */
+.names button { position: relative; }
+.names .c { transition: transform .45s var(--ease); }
+.names button:hover .c { transform: translateX(.06em); }
+.names button[aria-current="true"] .pm::before { content: "\25B6\FE0E\00a0"; font-size: .78em; vertical-align: .08em; }
+.names button[aria-current="true"]::after { content: ""; position: absolute; left: .04em; bottom: -9px; height: 1px; width: var(--p, 0%); background: currentColor; opacity: .5; }
+.sheet::before { content: ""; display: block; width: 36px; height: 3px; border-radius: 2px; background: var(--fg); opacity: .22; margin: -2px auto 14px; }
 </style>
 </head>
 <body class="vb">
 <header class="bar2" id="bar2">
   <a href="#" class="nm" id="home">Helical Sound</a>
   <p class="bio">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
-  <div class="ct"><span class="c2 q2">Contact</span><a class="em" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></div>
+  <div class="ct"><span class="c2 q2">Contact</span><a class="em" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></div>
   <div class="ways" aria-label="Colourway">
     <button type="button" data-way-btn="ink" aria-label="Off-white and black"></button>
     <button type="button" data-way-btn="red" aria-label="Off-white and red"></button>
@@ -180,6 +188,32 @@ document.getElementById('home').onclick = function (e) { e.preventDefault(); doc
 function fit() { var h = document.getElementById('bar2').offsetHeight + 'px'; document.documentElement.style.setProperty('--top', h); }
 addEventListener('resize', fit); document.fonts && document.fonts.ready.then(fit);
 build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById('pane').innerHTML = panel();
+</script>
+<script>
+/* detail pass (30 Oct): tab title follows the film, progress under the playing name,
+   keys (arrows next/prev, space play, Esc close) and swipe down to close on phone */
+(function () {
+  var base = document.title, _load = load, _tick = tick;
+  load = function (x, a) { _load(x, a); document.title = x.c + ' \u00b7 ' + base; };
+  tick = function () {
+    _tick();
+    var b = document.querySelector('#names [aria-current="true"]');
+    if (b && w) b.style.setProperty('--p', Math.min(100, pos / secs(w.d) * 100) + '%');
+  };
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    else if (e.key === ' ' && w) { e.preventDefault(); setPlay(!playing); }
+    else if (e.key === 'Escape') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+  });
+  var sh = document.getElementById('sheet'), y0 = null;
+  sh.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+  sh.addEventListener('touchend', function (e) {
+    if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) { setPlay(false); sh.classList.remove('open'); }
+    y0 = null;
+  });
+})();
 </script>
 </body>
 </html>

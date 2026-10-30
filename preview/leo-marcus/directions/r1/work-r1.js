@@ -35,3 +35,8 @@ WORK.forEach(function (w) { w.d = '00:30'; });
 function still(w) { return w.s ? '../../stills/' + w.s + '.jpg' : w.th || 'https://vumbnail.com/' + w.v + '.jpg'; }
 function thumb(w) { return w.s && THUMBS[w.s] ? '../thumbs/' + w.s + '.jpg' : still(w); }
 function ratio(w) { return (w.s && THUMBS[w.s]) || 2.42; }
+
+/* 30 Oct, Elliot: one colour only, the grey. The colour switches go and every visitor gets grey. */
+setWay = function () { document.documentElement.setAttribute('data-way', 'ink'); };
+setWay();
+document.head.insertAdjacentHTML('beforeend', '<style>.ways{display:none!important}</style>');

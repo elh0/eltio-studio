@@ -91,30 +91,8 @@ var FX = (function () {
     if (ctx) { out.gain.cancelScheduledValues(ctx.currentTime); out.gain.setTargetAtTime(0, ctx.currentTime, .15); }
   }
 
-  /* the switch, bottom centre */
-  var btn = document.createElement('button');
-  btn.type = 'button'; btn.className = 'snd'; btn.setAttribute('aria-pressed', 'false');
-  btn.innerHTML = '<i aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>Sound off</span>';
-  document.body.appendChild(btn);
-  var wanted = false;
-  btn.addEventListener('click', function () {
-    wanted = !wanted; btn.setAttribute('aria-pressed', wanted); btn.querySelector('span').textContent = wanted ? 'Sound on' : 'Sound off';
-    if (wanted) start(); else stop();
-  });
-  /* the loop steps aside while a film is open */
-  new MutationObserver(function () {
-    var film = document.body.classList.contains('in-film') || (document.getElementById('proj') || {}).classList.contains('open');
-    if (!wanted) return;
-    if (film && on) stop(); else if (!film && !on) start();
-  }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ['class'] });
-
-  var css = document.createElement('style');
-  css.textContent = '.snd{position:fixed;z-index:42;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + var(--pad));display:flex;align-items:center;gap:8px;font:500 var(--small)/1 var(--sans);transition:opacity .3s}' +
-    '.snd i{display:flex;align-items:flex-end;gap:2px;height:11px}.snd b{display:block;width:2px;height:3px;background:currentColor;transition:height .2s}' +
-    '.snd[aria-pressed="true"] b{animation:snd .9s ease-in-out infinite alternate}.snd b:nth-child(2){animation-delay:-.3s}.snd b:nth-child(3){animation-delay:-.6s}.snd b:nth-child(4){animation-delay:-.15s}' +
-    '@keyframes snd{from{height:2px}to{height:11px}}body.in-film .snd{opacity:0;pointer-events:none}' +
-    '@media (max-width:899px){.snd{left:max(var(--pad),env(safe-area-inset-left,0px));transform:none}}';
-  document.head.appendChild(css);
+  /* 30 Oct, Elliot: no sound switch on the home page; the loop code stays for when Leo's own
+     music comes in, but nothing starts it for now */
 
   return { tick: tick, bump: bump, get fan() { return fan; } };
 })();

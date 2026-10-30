@@ -155,6 +155,7 @@ body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../vimeo-r1.js"></script>
 <script src="../helix-fx.js"></script>
 <script src="../helix-swap.js"></script>
 <script>
@@ -222,7 +223,7 @@ var cur = 0, playing = false, t0 = 0, pos = 0, pf = document.getElementById('pf'
 function creds(x) {
   var h = '';
   if (x.dir) h += '<dt>Director</dt><dd>' + x.dir + '</dd>';
-  if (x.ag) h += '<dt>Agency</dt><dd>' + x.ag + '</dd>';
+  if (x.ag) h += '<dt>Creative direction</dt><dd>' + x.ag + '</dd>';
   return h;
 }
 function openP(i) {

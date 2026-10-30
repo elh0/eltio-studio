@@ -280,6 +280,7 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../vimeo-r1.js"></script>
 <script src="../helix-fx.js"></script>
 <script src="../helix-swap.js"></script>
 <script>
@@ -408,14 +409,14 @@ function fill(i) {
   document.getElementById('pc').innerHTML = w.c + '<span>' + w.p + '</span>';
   var m = '';
   m += '<div><dt>Director</dt><dd>' + (w.dir || '—') + '</dd></div>';
-  m += '<div><dt>Agency</dt><dd>' + (w.ag || '—') + '</dd></div>';
+  m += '<div><dt>Creative direction</dt><dd>' + (w.ag || '—') + '</dd></div>';
   m += '<div><dt>Work</dt><dd>' + w.t.map(function (k) { return TAGS[k]; }).join(', ') + '</dd></div>';
   m += '<div><dt>Length</dt><dd>' + clock(secs(w.d)) + '</dd></div>';
   document.getElementById('pmeta').innerHTML = m;
   var jobs = w.t.map(function (k) { return lower(TAGS[k]); }), job = jobs.length > 1 ? jobs.slice(0, -1).join(', ') + ' and ' + jobs[jobs.length - 1] : jobs[0];
-  var line = w.p + ' for ' + w.c + '. ' + job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ' with ' + w.ag : '') + '.';
+  var line = w.p + ' for ' + w.c + '. ' + job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ', creative direction by ' + w.ag : '') + '.';
   var ws = function (t) { return t.split(' ').map(function (x) { return '<span class="w">' + x + '</span>'; }).join(' '); };
-  var l1 = w.p + ' for ' + w.c + '.', l2 = job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ' with ' + w.ag : '') + '.';
+  var l1 = w.p + ' for ' + w.c + '.', l2 = job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ', creative direction by ' + w.ag : '') + '.';
   stmt.innerHTML = '<sup>(' + ('0' + (i + 1)).slice(-2) + ')</sup>' + ws(l1);
   document.getElementById('stmt2').innerHTML = ws(l2);
   document.getElementById('sayimg').style.backgroundImage = 'url(' + still(w) + ')';

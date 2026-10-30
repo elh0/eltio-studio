@@ -188,12 +188,16 @@ function build() {
 function frame(now) {
   if (!proj.classList.contains('open')) {
     if (now - lastTouch > 2400) target += .016;
-    off += (target - off) * .1;
+    off += (target - off) * .17;
     H.style.transform = 'rotateZ(' + (innerWidth >= 900 ? -5 : -3) + 'deg) rotateX(-9deg)';
     FX.tick(off);
     for (var i = 0; i < N; i++) {
       var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, FA = G.F + FX.fan, cs = Math.cos((a + FA) * Math.PI / 180), flip = cs < 0 ? 180 : 0;
       var op = Math.min(1, Math.max(0, (Math.abs(cs) - .1) / .22));
+      /* 30 Oct, Elliot ("a little lag"): cards above or below the screen aren't drawn at all */
+      var off_ = Math.abs(u * G.rise) > innerHeight * .62 + G.ch;
+      if (off_ !== cards[i]._cull) { cards[i]._cull = off_; cards[i].style.display = off_ ? 'none' : ''; }
+      if (off_) continue;
       if (op !== cards[i]._op) { cards[i]._op = op; cards[i].style.opacity = op.toFixed(3); cards[i].style.visibility = op ? '' : 'hidden'; }
       cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + (G.R + FX.bump(u)).toFixed(1) + 'px) rotateY(' + (FA + flip) + 'deg)';
     }

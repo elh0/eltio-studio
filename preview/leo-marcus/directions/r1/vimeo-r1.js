@@ -16,13 +16,13 @@
       .then(function (j) {
         if (j.duration) x.d = clock(j.duration);
         if (j.width && j.height && !x.vrTrue) x.vr = j.width / j.height;
-        if (j.thumbnail_url && !x.s) sharpen(x, j.thumbnail_url.replace(/-d_\d+(x\d+)?/, '-d_1280'));
+        if (j.thumbnail_url && !x.s) sharpen(x, j.thumbnail_url.replace(/-d_\d+(x\d+)?/, '-d_640'));
         if (j.thumbnail_url && !x.fr) bars(x, j.thumbnail_url.replace(/-d_\d+(x\d+)?/, '-d_640'));
       })
       .catch(function () {});
   });
   /* 30 Oct, Elliot: the covers looked blurry. Swap the small stand-in covers for Vimeo's own
-     large frame wherever they're already on the page, and use it for anything drawn later. */
+     frame (640 wide: sharp at card size, and light enough that the helix scrolls smoothly) wherever they're already on the page, and use it for anything drawn later. */
   function sharpen(x, hi) {
     var lo = 'vumbnail.com/' + x.v + '.jpg', im = new Image();
     im.onload = function () {

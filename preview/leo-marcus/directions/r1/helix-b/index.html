@@ -279,6 +279,7 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
 <script src="../helix-fx.js"></script>
+<script src="../helix-swap.js"></script>
 <script>
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine = matchMedia('(pointer: fine)').matches;
@@ -525,8 +526,16 @@ build(); requestAnimationFrame(frame);
     document.title = base; lastTouch = performance.now();
   };
   go = function (j) {
-    proj.classList.add('swap');
-    setTimeout(function () { fill(j); proj.scrollTop = 0; sy = ty = 0; proj.classList.remove('swap'); play(true); }, reduceM ? 0 : 340);
+    if (j === cur) return;
+    var dir = j === (cur - 1 + list.length) % list.length ? -1 : 1;
+    function swap() {
+      spatialSwap({ film: pf, dir: dir, fill: function () { fill(j); play(true); }, text: [document.getElementById('pc'), document.getElementById('pmeta'), document.querySelector('.player .ctl')] });
+    }
+    /* from further down the page: fade, back to the top, then the film glides in */
+    if (proj.scrollTop > 40) {
+      proj.classList.add('swap');
+      setTimeout(function () { proj.scrollTop = 0; sy = ty = 0; proj.classList.remove('swap'); swap(); }, reduceM ? 0 : 340);
+    } else swap();
   };
   document.getElementById('close').onclick = function () { closeP(); };
 })();

@@ -154,6 +154,7 @@ body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
 <script src="../helix-fx.js"></script>
+<script src="../helix-swap.js"></script>
 <script>
 var tag = 'all', list = [], cards = [], step = 0, off = 0, target = 0, lastTouch = 0;
 var H = document.getElementById('helix'), S = document.getElementById('stage'), proj = document.getElementById('proj');
@@ -295,6 +296,17 @@ build(); requestAnimationFrame(frame);
   openP = function (i) { _o(i); document.body.classList.add('in-film'); };
   closeP = function () { _c(); document.body.classList.remove('in-film'); };
   document.getElementById('close').onclick = function () { closeP(); };
+})();
+</script>
+<script>
+/* 30 Oct: moving between films while one is open glides the next one in, then its words */
+(function () {
+  var open1 = openP;
+  openP = function (i) {
+    if (!proj.classList.contains('open') || i === cur) return open1(i);
+    var dir = i === (cur - 1 + list.length) % list.length ? -1 : 1, top = proj.scrollTop;
+    spatialSwap({ film: pf, dir: dir, fill: function () { open1(i); proj.scrollTop = top; }, text: [document.querySelector('#proj .pt'), document.querySelector('#proj .ctl'), document.getElementById('pcr')] });
+  };
 })();
 </script>
 </body>

@@ -63,7 +63,19 @@ var FX = (function () {
       next += S16; step++;
     }
   }
+  /* iPhones mute web audio when the side switch is on silent; asking for media playback (and a
+     silent looping track, for older iOS) makes the loop play like a video does */
+  var keep = null;
+  function wake() {
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    if (!keep) {
+      keep = new Audio('data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==');
+      keep.loop = true; keep.setAttribute('playsinline', '');
+    }
+    keep.play().catch(function () {});
+  }
   function start() {
+    wake();
     if (!ctx) {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       out = ctx.createGain(); out.gain.value = 0;
@@ -101,7 +113,7 @@ var FX = (function () {
     '.snd i{display:flex;align-items:flex-end;gap:2px;height:11px}.snd b{display:block;width:2px;height:3px;background:currentColor;transition:height .2s}' +
     '.snd[aria-pressed="true"] b{animation:snd .9s ease-in-out infinite alternate}.snd b:nth-child(2){animation-delay:-.3s}.snd b:nth-child(3){animation-delay:-.6s}.snd b:nth-child(4){animation-delay:-.15s}' +
     '@keyframes snd{from{height:2px}to{height:11px}}body.in-film .snd{opacity:0;pointer-events:none}' +
-    '@media (max-width:899px){.snd{left:auto;right:max(var(--pad),env(safe-area-inset-right,0px));transform:none}}';
+    '@media (max-width:899px){.snd{left:max(var(--pad),env(safe-area-inset-left,0px));transform:none}}';
   document.head.appendChild(css);
 
   return { tick: tick, bump: bump, get fan() { return fan; } };

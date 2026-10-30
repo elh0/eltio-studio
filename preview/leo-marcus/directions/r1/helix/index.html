@@ -120,6 +120,13 @@ body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter
 .stage, .stage * { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .stage img { -webkit-user-drag: none; }
 
+/* phones (30 Oct, Elliot: the title ran into the project and the work): the name on its own
+   line, the project under it, and the work under that, each with room to breathe */
+@media (max-width: 899px) {
+  .pt { display: grid; justify-content: start; row-gap: 4px; margin-top: 12px; }
+  .pt .c { display: block; font-size: 20px; line-height: 1.15; margin-bottom: 2px; }
+  .pt #pp2 { display: block; }
+}
 </style>
 </head>
 <body>

@@ -20,10 +20,10 @@
 body { font: 400 var(--small)/1.3 var(--sans); }
 .q2 { opacity: .45; }
 a:hover, button:hover { opacity: .55; }
-.stage { position: fixed; inset: 0; perspective: 1500px; overflow: hidden; touch-action: none; cursor: grab; }
+.stage { position: fixed; inset: 0; perspective: 2000px; overflow: hidden; touch-action: none; cursor: grab; }
 .stage.drag { cursor: grabbing; }
 .helix { position: absolute; left: 50%; top: 48%; width: 0; height: 0; transform-style: preserve-3d; }
-.card { position: absolute; width: var(--cw); aspect-ratio: var(--r, 2.42); left: calc(var(--cw) / -2); top: calc(var(--cw) / var(--r, 2.42) / -2); background: color-mix(in srgb, var(--fg) 10%, var(--bg)); overflow: hidden; }
+.card { position: absolute; width: var(--cw); height: var(--ch); left: calc(var(--cw) / -2); top: calc(var(--ch) / -2); will-change: transform; background: color-mix(in srgb, var(--fg) 10%, var(--bg)); overflow: hidden; }
 .card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 :root { --cw: 132px; --rad: 150px; --rise: 40px; }
 @media (min-width: 900px) { :root { --cw: 250px; --rad: 330px; --rise: 62px; } }
@@ -81,8 +81,10 @@ a:hover, button:hover { opacity: .55; }
 .pfoot .ct > * + * { margin-top: 1px; }
 /* detail pass (30 Oct): cards lift under the pointer, a pointer cursor on cards */
 .card img { transition: transform .5s var(--ease), filter .5s var(--ease); }
-.card:hover img { transform: scale(1.05); }
+
 .stage:not(.drag) .card { cursor: pointer; }
+/* phones: the helix softens out under the name, the filters and the bio */
+@media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); } }
 </style>
 </head>
 <body>
@@ -122,46 +124,53 @@ a:hover, button:hover { opacity: .55; }
 var tag = 'all', list = [], cards = [], step = 0, off = 0, target = 0, lastTouch = 0;
 var H = document.getElementById('helix'), S = document.getElementById('stage'), proj = document.getElementById('proj');
 function px(v) { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v)); }
+/* 30 Oct: the helix rebuilt from Elliot's reference: small cards set as fins around the axis,
+   face-on at the sides and edge-on through the middle, packed tight, no fades */
+var G = {}, N = 0;
+function geo() {
+  var W = innerWidth, Hh = innerHeight, wide = W >= 900;
+  G = wide
+    ? { R: Math.min(W * .29, Hh * .6), cw: Math.min(W * .047, 84), per: 64, pitch: Hh * .46 }
+    : { R: W * .37, cw: W * .082, per: 38, pitch: Hh * .3 };
+  G.ch = G.cw * 1.32; G.step = 360 / G.per; G.rise = G.pitch / G.per;
+  document.documentElement.style.setProperty('--cw', G.cw + 'px');
+  document.documentElement.style.setProperty('--ch', G.ch + 'px');
+  return Math.min(320, Math.ceil(Hh * 2.1 / G.rise));
+}
 function build() {
   document.getElementById('nav').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
     return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '</button>';
   }).join('');
   list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
-  step = 360 / list.length;
+  N = geo(); N -= N % list.length;
   var h = '';
-  for (var i = 0; i < list.length * 3; i++) { var w = list[i % list.length]; h += '<div class="card" data-i="' + (i % list.length) + '" style="--r:' + ratio(w) + '"><img alt="" src="' + thumb(w) + '"></div>'; }
+  for (var i = 0; i < N; i++) h += '<div class="card" data-i="' + (i % list.length) + '"><img alt="" decoding="async" src="' + still(list[i % list.length]) + '"></div>';
   H.innerHTML = h; cards = [].slice.call(H.children);
-  off = target = list.length;
 }
-function frame() {
+function frame(now) {
   if (!proj.classList.contains('open')) {
-    if (performance.now() - lastTouch > 2200) target += .0035;
-    off += (target - off) * .085;
-    var n = list.length;
-    if (off > 2 * n) { off -= n; target -= n; } else if (off < n) { off += n; target += n; }
-    var R = px('--rad'), rise = px('--rise'), wide = innerWidth >= 900;
-    H.style.transform = 'rotateZ(' + (wide ? -16 : -22) + 'deg) rotateX(-10deg) translateY(' + (-off * rise) + 'px) rotateY(' + (-off * step) + 'deg)';
-    cards.forEach(function (c, i) {
-      var d = i - off, a = d * step * Math.PI / 180, facing = (Math.cos(a) + 1) / 2, fade = Math.max(0, 1 - Math.abs(d) / (n * .9));
-      c.style.transform = 'translateY(' + (i * rise) + 'px) rotateY(' + (i * step) + 'deg) translateZ(' + R + 'px)';
-      c.style.opacity = (fade * (Math.abs(d) < .5 ? 1 : .6 + .4 * facing)).toFixed(3);
-      c.style.zIndex = Math.round(facing * 100);
-    });
+    if (now - lastTouch > 2400) target += .045;
+    off += (target - off) * .075;
+    H.style.transform = 'rotateZ(' + (innerWidth >= 900 ? -5 : -3) + 'deg) rotateX(-9deg)';
+    for (var i = 0; i < N; i++) {
+      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, flip = Math.sin(a * Math.PI / 180) > 0 ? 180 : 0;
+      cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (90 + flip) + 'deg)';
+    }
   }
   requestAnimationFrame(frame);
 }
-addEventListener('wheel', function (e) { if (proj.classList.contains('open')) return; target += (e.deltaY + e.deltaX) * .0035; lastTouch = performance.now(); }, { passive: true });
+addEventListener('wheel', function (e) { if (proj.classList.contains('open')) return; target += (e.deltaY + e.deltaX) * .045; lastTouch = performance.now(); }, { passive: true });
 var down = null;
 S.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: target, moved: 0 }; S.setPointerCapture(e.pointerId); S.classList.add('drag'); lastTouch = performance.now(); });
 S.addEventListener('pointermove', function (e) {
   if (!down) return; var dx = e.clientX - down.x, dy = e.clientY - down.y;
   down.moved = Math.max(down.moved, Math.abs(dx) + Math.abs(dy));
-  target = down.t - (dx + dy) / (innerWidth >= 900 ? 120 : 70); lastTouch = performance.now();
+  target = down.t + (dy - dx) / G.rise * .35; lastTouch = performance.now();
 });
 S.addEventListener('pointerup', function (e) {
   S.classList.remove('drag'); if (!down) return;
   var moved = down.moved; down = null;
-  if (moved > 6) { target = Math.round(target); return; }
+  if (moved > 6) return;
   S.releasePointerCapture(e.pointerId);
   var el = document.elementFromPoint(e.clientX, e.clientY), c = el && el.closest('.card');
   if (c) openP(+c.getAttribute('data-i'));
@@ -188,7 +197,6 @@ function openP(i) {
   }).join(' ');
   proj.classList.add('open'); proj.scrollTop = 0;
   pos = 0; play(true);
-  target = Math.round(off) + (((i - Math.round(off)) % list.length) + list.length) % list.length;
 }
 function play(on) { playing = on; t0 = performance.now() - pos * 1000; pf.classList.toggle('on', on); document.getElementById('pp').textContent = on ? 'Pause' : 'Play'; if (on) tick(); }
 function tick() {
@@ -209,6 +217,7 @@ document.getElementById('close').onclick = closeP;
 document.getElementById('home2').onclick = function (e) { e.preventDefault(); closeP(); };
 document.getElementById('home').onclick = function (e) { e.preventDefault(); closeP(); };
 addEventListener('keydown', function (e) { if (e.key === 'Escape') closeP(); });
+var rs; addEventListener('resize', function () { clearTimeout(rs); rs = setTimeout(build, 200); });
 build(); requestAnimationFrame(frame);
 </script>
 <script>

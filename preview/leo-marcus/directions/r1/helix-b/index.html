@@ -11,277 +11,398 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap">
 <link rel="stylesheet" href="../../shared.css">
 <style>
-/* Helix, round 1. Leo's notes: Split's typeface only (size and bold do the hierarchy), no
-   numbers or title on the helix, bio and contact instead of an info screen, more solid
-   overlaps, thumbnails at their own shape. A project opens with a straight cut (no zoom)
-   into a secondary view: bigger Close, client list with arrows, the bio as a footer. */
-:root { --paper: #E6E5E1; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mid: clamp(18px, 1.9vw, 26px); --pbig: clamp(34px, 4.6vw, 68px); --line: color-mix(in srgb, var(--fg) 16%, transparent); }
+/* Helix B, round 1 (rebuilt 30 Oct from Elliot's WAUI / fantik reference).
+   The helix: small cards set as fins around the axis, so they stack face-on at the sides and
+   turn edge-on as they cross the middle, packed tight with no fades.
+   Opening a film: the strand streams away along its own path, the picked card grows into the
+   player and the next films settle in as a stack beside it.
+   The film page is one scroll: film and credits, a statement that fills in word by word,
+   more work drifting past a pinned title, the client list, then the name rises as the footer. */
+:root {
+  --paper: #E6E5E1; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+  --mid: clamp(16px, 1.35vw, 20px); --title: clamp(24px, 2.3vw, 34px);
+  --line: color-mix(in srgb, var(--fg) 16%, transparent);
+  --gut: 12px; --side: max(var(--pad), env(safe-area-inset-left, 0px));
+  --ease2: cubic-bezier(.7, 0, .15, 1);
+}
+@media (min-width: 900px) { :root { --gut: 20px; } }
 [data-way="dark"] { --bg: #0E0E0D; }
-body { font: 400 var(--small)/1.3 var(--sans); }
+body { font: 400 var(--small)/1.4 var(--sans); }
 .q2 { opacity: .45; }
+a, button { transition: opacity .25s; }
 a:hover, button:hover { opacity: .55; }
-.stage { position: fixed; inset: 0; perspective: 1500px; overflow: hidden; touch-action: none; cursor: grab; }
-.stage.drag { cursor: grabbing; }
-.helix { position: absolute; left: 50%; top: 48%; width: 0; height: 0; transform-style: preserve-3d; }
-.card { position: absolute; width: var(--cw); aspect-ratio: var(--r, 2.42); left: calc(var(--cw) / -2); top: calc(var(--cw) / var(--r, 2.42) / -2); background: color-mix(in srgb, var(--fg) 10%, var(--bg)); overflow: hidden; }
-.card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
-:root { --cw: 132px; --rad: 150px; --rise: 40px; }
-@media (min-width: 900px) { :root { --cw: 250px; --rad: 330px; --rise: 62px; } }
+.nm { font: 500 var(--mid)/1.1 var(--sans); letter-spacing: -.012em; }
 
-.nm { font: 500 var(--mid)/1.1 var(--sans); letter-spacing: -.01em; }
-.nav { position: fixed; z-index: 40; top: calc(env(safe-area-inset-top, 0px) + var(--pad) + var(--mid) + 8px); left: max(var(--pad), env(safe-area-inset-left, 0px)); display: flex; gap: 4px 14px; flex-wrap: wrap; }
+/* ---------- the helix ---------- */
+.stage { position: fixed; inset: 0; perspective: 2000px; perspective-origin: 50% 50%; overflow: hidden; touch-action: none; cursor: grab; transition: opacity .5s var(--ease); }
+.stage.drag { cursor: grabbing; }
+.helix { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.card { position: absolute; left: 0; top: 0; width: var(--cw); height: var(--ch); margin: calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2); background: color-mix(in srgb, var(--fg) 10%, var(--bg)); backface-visibility: visible; will-change: transform; }
+.card img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.stage:not(.drag) .card { cursor: pointer; }
+
+.nav { position: fixed; z-index: 40; top: calc(env(safe-area-inset-top, 0px) + var(--pad) + var(--mid) + 14px); left: var(--side); display: flex; gap: 6px 18px; flex-wrap: wrap; }
 .nav button { opacity: .4; }
 .nav button[aria-pressed="true"] { opacity: 1; }
-.about { position: fixed; z-index: 30; right: max(var(--pad), env(safe-area-inset-right, 0px)); top: calc(env(safe-area-inset-top, 0px) + var(--pad)); max-width: 30ch; text-align: right; display: grid; gap: 8px; }
+.about { position: fixed; z-index: 30; right: max(var(--pad), env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad)); max-width: 30ch; text-align: right; display: grid; gap: 12px; line-height: 1.45; }
 .about p { margin: 0; }
 .ways { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad)); }
-@media (min-width: 900px) { .ways { left: max(var(--pad), env(safe-area-inset-left, 0px)); transform: none; } }
+@media (min-width: 900px) { .ways { left: var(--side); transform: none; } }
 .credit { font-size: 11px; opacity: .45; }
+.home-ui { transition: opacity .5s var(--ease); }
+body.in-film .home-ui { opacity: 0; pointer-events: none; }
 @media (max-width: 899px) {
-  .about { top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad) + 26px); left: max(var(--pad), env(safe-area-inset-left, 0px)); right: max(var(--pad), env(safe-area-inset-right, 0px)); max-width: none; text-align: left; }
+  .about { left: var(--side); right: max(var(--pad), env(safe-area-inset-right, 0px)); bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad) + 26px); max-width: none; text-align: left; }
   .about .bio { max-width: 34ch; }
+  .corner.br { display: none; }
 }
 
-/* the project view: a straight cut, no animation */
-.proj { position: fixed; inset: 0; z-index: 50; background: var(--bg); overflow-y: auto; display: none; }
-.proj.open { display: block; }
-.pin { max-width: 1180px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; gap: 12px; padding: calc(env(safe-area-inset-top, 0px) + var(--pad)) max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(var(--pad), env(safe-area-inset-left, 0px)); }
-.ptop { display: flex; justify-content: space-between; align-items: baseline; }
-.close { font: 500 var(--pbig)/1 var(--sans); letter-spacing: -.035em; }
+/* the picked card, growing into the player */
+.grow { position: fixed; z-index: 60; pointer-events: none; overflow: hidden; background: color-mix(in srgb, var(--fg) 10%, var(--bg));
+  transition: left 1s var(--ease2), top 1s var(--ease2), width 1s var(--ease2), height 1s var(--ease2); }
+.grow img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* ---------- the film page ---------- */
+.proj { position: fixed; inset: 0; z-index: 50; overflow-y: auto; overflow-x: hidden; visibility: hidden; opacity: 0; transition: opacity .3s var(--ease), visibility 0s .3s; overscroll-behavior: contain; }
+.proj.open { visibility: visible; opacity: 1; transition: opacity .45s var(--ease); }
+.proj.hold { visibility: hidden; transition: none; }
+.proj .back { position: absolute; inset: 0; background: var(--bg); z-index: -1; }
+.phead { position: fixed; z-index: 55; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: baseline; padding: calc(env(safe-area-inset-top, 0px) + var(--pad)) max(var(--pad), env(safe-area-inset-right, 0px)) 0 var(--side); pointer-events: none; visibility: hidden; opacity: 0; transition: opacity .45s var(--ease); }
+.phead > * { pointer-events: auto; }
+body.in-film .phead { visibility: visible; opacity: 1; }
+.close { font: 500 var(--mid)/1.1 var(--sans); }
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gut); padding-inline: var(--side) max(var(--pad), env(safe-area-inset-right, 0px)); }
+
+/* 1. film + credits: one screen */
+.hero { min-height: 100svh; align-content: end; row-gap: 36px; padding-top: calc(env(safe-area-inset-top, 0px) + var(--pad) + var(--mid) + 64px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad)); }
+.player { grid-column: 1 / -1; position: relative; display: grid; gap: 12px; }
 .proj .film { width: 100%; aspect-ratio: 2.42; cursor: pointer; }
-.pt { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 18px; align-items: baseline; }
-.pt .c { font: 500 var(--mid)/1.1 var(--sans); letter-spacing: -.01em; }
 .bar { height: 1px; background: var(--line); position: relative; }
 .bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
-.ctl { display: flex; justify-content: space-between; gap: 12px; }
-.cr { display: grid; grid-template-columns: auto 1fr; gap: 3px 18px; margin: 0; }
-.cr dt { opacity: .45; } .cr dd { margin: 0; }
-.run { margin: 14px 0 0; font: 500 var(--mid)/1.25 var(--sans); letter-spacing: -.01em; }
+.ctl { display: flex; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; }
+.stk { display: none; }
+.ttl { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; row-gap: 18px; align-items: end; }
+.ttl h1 { grid-column: 1 / -1; margin: 0; font: 500 var(--title)/1.05 var(--sans); letter-spacing: -.02em; }
+.ttl h1 span { display: block; font: 400 var(--mid)/1.3 var(--sans); letter-spacing: -.005em; opacity: .5; margin-top: 4px; }
+.meta { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px var(--gut); margin: 0; }
+.meta dt { opacity: .45; margin-bottom: 3px; }
+.meta dd { margin: 0; }
+@media (min-width: 900px) {
+  .player { grid-column: 1 / 11; }
+  .stk { display: block; position: absolute; left: 100%; top: 0; height: calc(100% - 40px); width: 30vw; perspective: 900px; pointer-events: none; }
+  .stk button { pointer-events: auto; position: absolute; left: 0; top: 9%; height: 82%; aspect-ratio: 1.1; background: center / cover no-repeat; transform-origin: 0 50%; opacity: 0;
+    transform: translateX(calc(var(--n) * 3.4vw + 22px)) translateZ(calc(var(--n) * -30px)) rotateY(-76deg);
+    transition: transform 1.1s var(--ease2), opacity .7s var(--ease); transition-delay: calc(var(--n) * 45ms + 80ms); }
+  .stk button:hover { opacity: .8 !important; }
+  .proj.open:not(.hold) .stk button { opacity: 1; }
+  .proj.entering .stk button { opacity: 0; transform: translateX(calc(var(--n) * 3.4vw + 22px + 30vw)) translateZ(calc(var(--n) * -40px)) rotateY(-80deg); transition: none; }
+  .ttl h1 { grid-column: 1 / 7; }
+  .meta { grid-column: 7 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+/* the page text rises in after the film lands */
+.rise { transition: transform .9s var(--ease2), opacity .7s var(--ease); }
+.proj.entering .rise { transform: translateY(24px); opacity: 0; transition: none; }
+.ttl .rise:nth-child(2) { transition-delay: .06s; } .ctl.rise { transition-delay: .1s; }
+
+/* 2. statement: fills in word by word as it scrolls through */
+.say { padding-block: 22vh 16vh; row-gap: 48px; }
+.say p { grid-column: 1 / -1; margin: 0; font: 400 var(--mid)/1.42 var(--sans); letter-spacing: -.01em; max-width: 34ch; }
+.say p .w { opacity: .2; transition: opacity .35s linear; }
+.say p .w.on { opacity: 1; }
+.say p .ar { font-size: .7em; vertical-align: .18em; margin-right: .4em; opacity: .5; }
+.say figure { grid-column: 1 / 9; margin: 0; }
+.say figure div { aspect-ratio: 1.5; background: center / cover no-repeat; }
+.say figcaption { margin-top: 8px; opacity: .5; }
+@media (min-width: 900px) {
+  .say p { grid-column: 5 / 10; }
+  .say figure { grid-column: 3 / 6; margin-top: -3em; }
+}
+
+/* 3. more work: a pinned title, films drifting past at their own speeds */
+.more { position: relative; height: 230vh; }
+.more .pin { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; pointer-events: none; z-index: 2; }
+.more h2 { margin: 0; font: 500 var(--title)/1 var(--sans); letter-spacing: -.02em; }
+.more h2 sup { font-size: .32em; vertical-align: .9em; margin-right: .3em; font-weight: 400; }
+.drift { position: absolute; z-index: 1; display: grid; gap: 6px; text-align: left; will-change: transform; }
+.drift i { display: block; aspect-ratio: 1.5; background: center / cover no-repeat; transition: transform .6s var(--ease); }
+.drift:hover i { transform: scale(1.03); }
+.drift span { opacity: .55; }
+
+/* 4. every client, with arrows (Leo's list) */
+.idx { padding-block: 10vh 16vh; }
+.idx .lab { grid-column: 1 / -1; margin-bottom: 18px; }
+.run { grid-column: 1 / -1; margin: 0; font: 500 var(--title)/1.22 var(--sans); letter-spacing: -.02em; }
 .run .it { white-space: nowrap; }
-.run .sym { margin: 0 .25em 0 .1em; font-weight: 400; opacity: .45; }
-.run button { opacity: .35; }
+.run .sym { margin: 0 .3em 0 .1em; font-weight: 400; opacity: .4; }
+.run button { opacity: .3; }
 .run button[aria-current="true"] { opacity: 1; }
-.pfoot { margin-top: auto; border-top: 1px solid var(--fg); padding-top: 12px; display: grid; gap: 10px 24px; }
-.pfoot p { margin: 0; max-width: 52ch; }
-.pfoot .home { font-weight: 500; }
-.pfoot .ct { display: flex; flex-wrap: wrap; gap: 0 14px; }
-@media (min-width: 900px) { .pfoot { grid-template-columns: 1fr 22vw auto; } .pfoot .ct { display: block; } .pfoot .ct > * { display: block; } }
-/* refine (28 Oct): calmer Close, looser tracking, more room between the film, the list and the footer */
-:root { --pbig: clamp(28px, 3.1vw, 46px); --mid: clamp(17px, 1.55vw, 22px); }
-.about { gap: 12px; line-height: 1.45; }
-.nav { gap: 6px 18px; top: calc(env(safe-area-inset-top, 0px) + var(--pad) + var(--mid) + 14px); }
-.close { letter-spacing: -.02em; }
-.pin { gap: 16px; padding-top: calc(env(safe-area-inset-top, 0px) + var(--pad) + 6px); }
-.ptop { margin-bottom: 6px; }
-.pt { margin-top: 6px; row-gap: 6px; }
-.pt .c { letter-spacing: -.015em; }
-.run { margin: 34px 0 44px; line-height: 1.4; letter-spacing: -.012em; }
-.run .sym { margin: 0 .35em 0 .2em; }
-.pfoot { padding-top: 16px; gap: 14px 28px; line-height: 1.45; }
-.pfoot .ct > * + * { margin-top: 1px; }
-/* detail pass (30 Oct): cards lift under the pointer, a pointer cursor on cards */
-.card img { transition: transform .5s var(--ease), filter .5s var(--ease); }
-.card:hover img { transform: scale(1.05); }
-.stage:not(.drag) .card { cursor: pointer; }
-/* Helix B (30 Oct, Elliot's reference): opening a project, the helix streams into a stack
-   behind the chosen film, which grows into the player; the page text rises in after it */
-.fly-layer { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
-.fly { position: fixed; background: center / cover no-repeat; will-change: left, top, width, height, opacity;
-  transition: left .85s var(--ease), top .85s var(--ease), width .85s var(--ease), height .85s var(--ease), opacity .5s var(--ease); }
-@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-.proj.enter .ptop, .proj.enter .pt, .proj.enter .bar, .proj.enter .ctl, .proj.enter .run, .proj.enter .pfoot { animation: rise .6s var(--ease) both; }
-.proj.enter .pt { animation-delay: .05s; } .proj.enter .ctl { animation-delay: .1s; } .proj.enter .run { animation-delay: .16s; } .proj.enter .pfoot { animation-delay: .22s; }
+@media (min-width: 900px) { .idx .lab { grid-column: 1 / 3; } .run { grid-column: 3 / -1; } }
+
+/* 5. the name rises as the footer */
+.foot { overflow: hidden; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--pad)); border-top: 1px solid var(--line); padding-top: 18px; row-gap: 28px; }
+.foot .bio, .foot .ct, .foot .credit { grid-column: 1 / -1; margin: 0; }
+.foot .bio { max-width: 36ch; }
+.foot .ct a, .foot .ct span { display: block; }
+.word { grid-column: 1 / -1; margin: 0; font: 500 clamp(56px, 15.2vw, 260px)/.8 var(--sans); letter-spacing: -.055em; white-space: nowrap; will-change: transform; padding-bottom: .04em; }
+@media (min-width: 900px) {
+  .foot .bio { grid-column: 1 / 5; } .foot .ct { grid-column: 7 / 10; } .foot .credit { grid-column: 10 / -1; text-align: right; align-self: start; }
+}
+@media (max-width: 899px) { .foot .credit { text-align: left; } .hero { min-height: 0; align-content: start; padding-top: calc(env(safe-area-inset-top, 0px) + 96px); padding-bottom: 6vh; } }
+/* phones: the helix softens out under the name, the filters and the bio */
+@media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); } }
 </style>
 </head>
 <body>
 <a class="corner tl nm" href="#" id="home">Helical Sound</a>
-<nav class="nav" id="nav" aria-label="Filter by work"></nav>
-<div class="about">
+<nav class="nav home-ui" id="nav" aria-label="Filter by work"></nav>
+<div class="about home-ui">
   <p class="bio">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
   <p><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></p>
 </div>
-<div class="ways" aria-label="Colourway">
+<div class="ways home-ui" aria-label="Colourway">
   <button type="button" data-way-btn="ink" aria-label="Grey and ink"></button>
   <button type="button" data-way-btn="red" aria-label="Grey and red"></button>
   <button type="button" data-way-btn="dark" aria-label="Ink and paper"></button>
 </div>
-<a class="corner br credit" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
 
 <div class="stage" id="stage"><div class="helix" id="helix"></div></div>
 
-<section class="proj" id="proj" aria-label="Project"><div class="pin">
-  <div class="ptop"><span></span><button type="button" class="close" id="close">Close</button></div>
-  <div class="film" id="pf"><img alt=""></div>
-  <div class="pt"><span><span class="c" id="pc"></span> <span class="q2" id="pp2"></span></span><span class="q2" id="pw"></span></div>
-  <div class="bar"><i id="pb"></i></div>
-  <div class="ctl"><button type="button" id="pp">Pause</button><span id="pt">00:00 / 00:00</span><span><button type="button" id="pprev">Prev</button> &nbsp; <button type="button" id="pnext">Next</button></span></div>
-  <dl class="cr" id="pcr"></dl>
-  <p class="run" id="run"></p>
-  <footer class="pfoot">
-    <p><a href="#" class="home" id="home2">Helical Sound</a> is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+<div class="phead"><span></span><button type="button" class="close" id="close">Close</button></div>
+<section class="proj" id="proj" aria-label="Film">
+  <div class="back"></div>
+  <div class="grid hero">
+    <div class="player">
+      <div class="film" id="pf"><img alt=""></div>
+      <div class="stk" id="stk"></div>
+      <div class="bar"><i id="pb"></i></div>
+      <div class="ctl rise"><button type="button" id="pp">Pause</button><span id="pt">00:00 / 00:00</span><span><button type="button" id="pprev">Prev</button> &nbsp; <button type="button" id="pnext">Next</button></span></div>
+    </div>
+    <div class="ttl">
+      <h1 class="rise" id="pc"></h1>
+      <dl class="meta rise" id="pmeta"></dl>
+    </div>
+  </div>
+  <div class="grid say" id="say">
+    <p id="stmt"></p>
+    <figure><div id="sayimg"></div><figcaption id="saycap"></figcaption></figure>
+  </div>
+  <div class="more" id="more">
+    <div class="pin"><h2><sup>→</sup>More work</h2></div>
+  </div>
+  <div class="grid idx"><span class="lab q2">All work</span><p class="run" id="run"></p></div>
+  <footer class="grid foot" id="foot">
+    <p class="bio">Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
     <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></div>
     <a class="credit" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+    <p class="word" id="word">Helical Sound</p>
   </footer>
-</div></section>
+</section>
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
 <script>
-var tag = 'all', list = [], cards = [], step = 0, off = 0, target = 0, lastTouch = 0;
+var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var fine = matchMedia('(pointer: fine)').matches;
 var H = document.getElementById('helix'), S = document.getElementById('stage'), proj = document.getElementById('proj');
-function px(v) { return parseFloat(getComputedStyle(document.documentElement).getPropertyValue(v)); }
+var tag = 'all', list = [], cards = [], G = {}, N = 0, off = 0, target = 0, lastTouch = -1e4;
+var reel = 0, reelFrom = 0, reelTo = 0, reelT0 = 0, reelDur = 1, pickU = 0, picked = null;
+function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+/* geometry: fins around a vertical axis, about 60 a turn on a laptop, 40 on a phone */
+function geo() {
+  var W = innerWidth, Hh = innerHeight, wide = W >= 900;
+  G = wide
+    ? { R: Math.min(W * .29, Hh * .6), cw: Math.min(W * .047, 84), per: 64, pitch: Hh * .46 }
+    : { R: W * .37, cw: W * .082, per: 38, pitch: Hh * .3 };
+  G.ch = G.cw * 1.32; G.step = 360 / G.per; G.rise = G.pitch / G.per;
+  document.documentElement.style.setProperty('--cw', G.cw + 'px');
+  document.documentElement.style.setProperty('--ch', G.ch + 'px');
+  return Math.min(320, Math.ceil(Hh * 2.1 / G.rise));
+}
 function build() {
   document.getElementById('nav').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
     return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '</button>';
   }).join('');
   list = tag === 'all' ? WORK.slice() : WORK.filter(function (w) { return w.t.indexOf(tag) > -1; });
-  step = 360 / list.length;
+  N = geo(); N -= N % list.length;
   var h = '';
-  for (var i = 0; i < list.length * 3; i++) { var w = list[i % list.length]; h += '<div class="card" data-i="' + (i % list.length) + '" style="--r:' + ratio(w) + '"><img alt="" src="' + thumb(w) + '"></div>'; }
+  for (var i = 0; i < N; i++) h += '<div class="card" data-i="' + (i % list.length) + '"><img alt="" decoding="async" src="' + still(list[i % list.length]) + '"></div>';
   H.innerHTML = h; cards = [].slice.call(H.children);
-  off = target = list.length;
 }
-function frame() {
-  if (!proj.classList.contains('open')) {
-    if (performance.now() - lastTouch > 2200) target += .0035;
-    off += (target - off) * .085;
-    var n = list.length;
-    if (off > 2 * n) { off -= n; target -= n; } else if (off < n) { off += n; target += n; }
-    var R = px('--rad'), rise = px('--rise'), wide = innerWidth >= 900;
-    H.style.transform = 'rotateZ(' + (wide ? -16 : -22) + 'deg) rotateX(-10deg) translateY(' + (-off * rise) + 'px) rotateY(' + (-off * step) + 'deg)';
-    cards.forEach(function (c, i) {
-      var d = i - off, a = d * step * Math.PI / 180, facing = (Math.cos(a) + 1) / 2, fade = Math.max(0, 1 - Math.abs(d) / (n * .9));
-      c.style.transform = 'translateY(' + (i * rise) + 'px) rotateY(' + (i * step) + 'deg) translateZ(' + R + 'px)';
-      c.style.opacity = (fade * (Math.abs(d) < .5 ? 1 : .6 + .4 * facing)).toFixed(3);
-      c.style.zIndex = Math.round(facing * 100);
-    });
+function place() {
+  var wide = innerWidth >= 900;
+  H.style.transform = 'rotateZ(' + (wide ? -5 : -3) + 'deg) rotateX(-9deg)';
+  var r = reduce ? (reelTo ? 1 : 0) : reel, er = ease(r);
+  for (var i = 0; i < N; i++) {
+    var c = cards[i], u = ((i - off) % N + N) % N - N / 2;
+    if (r > 0 && c !== picked) {
+      var d = u - pickU, s = d >= 0 ? 1 : -1;
+      u += s * er * (N * .55) * (1 - Math.min(1, Math.abs(d) / N) * .4);
+      c.style.opacity = Math.max(0, 1 - er * 1.4).toFixed(3);
+    } else if (c.style.opacity !== '') c.style.opacity = '';
+    var a = u * G.step, rad = a * Math.PI / 180, flip = Math.sin(rad) > 0 ? 180 : 0;
+    c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (90 + flip) + 'deg)';
   }
+}
+function frame(now) {
+  if (reelT0) {
+    var t = Math.min(1, (now - reelT0) / reelDur); reel = reelFrom + (reelTo - reelFrom) * t;
+    if (t >= 1) { reelT0 = 0; if (!reelTo) { if (picked) picked.style.visibility = ''; picked = null; } }
+  }
+  if (!document.body.classList.contains('in-film') || reelT0) {
+    if (!reelT0 && !reel && now - lastTouch > 2400) target += .045;
+    off += (target - off) * .075;
+    place();
+  }
+  if (document.body.classList.contains('in-film')) filmFrame();
   requestAnimationFrame(frame);
 }
-addEventListener('wheel', function (e) { if (proj.classList.contains('open')) return; target += (e.deltaY + e.deltaX) * .0035; lastTouch = performance.now(); }, { passive: true });
+addEventListener('wheel', function (e) { if (document.body.classList.contains('in-film')) return; target += (e.deltaY + e.deltaX) * .045; lastTouch = performance.now(); }, { passive: true });
 var down = null;
-S.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: target, moved: 0 }; S.setPointerCapture(e.pointerId); S.classList.add('drag'); lastTouch = performance.now(); });
+S.addEventListener('pointerdown', function (e) { if (reel) return; down = { x: e.clientX, y: e.clientY, t: target, moved: 0 }; S.setPointerCapture(e.pointerId); S.classList.add('drag'); lastTouch = performance.now(); });
 S.addEventListener('pointermove', function (e) {
   if (!down) return; var dx = e.clientX - down.x, dy = e.clientY - down.y;
   down.moved = Math.max(down.moved, Math.abs(dx) + Math.abs(dy));
-  target = down.t - (dx + dy) / (innerWidth >= 900 ? 120 : 70); lastTouch = performance.now();
+  target = down.t + (dy - dx) / G.rise * .35; lastTouch = performance.now();
 });
 S.addEventListener('pointerup', function (e) {
   S.classList.remove('drag'); if (!down) return;
-  var moved = down.moved; down = null;
-  if (moved > 6) { target = Math.round(target); return; }
+  var moved = down.moved; down = null; lastTouch = performance.now();
+  if (moved > 6) return;
   S.releasePointerCapture(e.pointerId);
   var el = document.elementFromPoint(e.clientX, e.clientY), c = el && el.closest('.card');
-  if (c) openP(+c.getAttribute('data-i'));
+  if (c) openFrom(c);
 });
 document.getElementById('nav').addEventListener('click', function (e) { var b = e.target.closest('[data-tag]'); if (b) { tag = b.getAttribute('data-tag'); build(); } });
+var rs; addEventListener('resize', function () { clearTimeout(rs); rs = setTimeout(function () { if (!picked) build(); }, 200); });
 
-/* the project view */
-var cur = 0, playing = false, t0 = 0, pos = 0, pf = document.getElementById('pf');
-function creds(x) {
-  var h = '';
-  if (x.dir) h += '<dt>Director</dt><dd>' + x.dir + '</dd>';
-  if (x.ag) h += '<dt>Agency</dt><dd>' + x.ag + '</dd>';
-  return h;
+/* ---------- opening: the strand streams away, the card grows into the player ---------- */
+function runReel(to, dur) { reelFrom = reel; reelTo = to; reelDur = dur; reelT0 = performance.now(); }
+function openFrom(c) {
+  if (reel || document.body.classList.contains('in-film')) return;
+  var i = +c.getAttribute('data-i'), k = cards.indexOf(c);
+  picked = c; pickU = ((k - off) % N + N) % N - N / 2;
+  var r0 = c.getBoundingClientRect();
+  fill(i);
+  proj.classList.add('open', 'hold', 'entering'); proj.scrollTop = 0; sy = ty = 0;
+  document.body.classList.add('in-film');
+  if (reduce) { proj.classList.remove('hold', 'entering'); runReel(1, 1); play(true); return; }
+  var r1 = pf.getBoundingClientRect();
+  var g = document.createElement('div'); g.className = 'grow';
+  g.innerHTML = '<img alt="" src="' + still(list[i]) + '">';
+  box(g, r0); document.body.appendChild(g);
+  c.style.visibility = 'hidden';
+  runReel(1, 1100);
+  g.offsetWidth;
+  setTimeout(function () { box(g, r1); }, 60);
+  setTimeout(function () {
+    proj.classList.remove('hold'); proj.offsetWidth; proj.classList.remove('entering');
+    setTimeout(function () { g.remove(); }, 80);
+    play(true);
+  }, 1080);
 }
-function openP(i) {
+function box(el, r) { el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.width = r.width + 'px'; el.style.height = r.height + 'px'; }
+function closeP() {
+  if (!document.body.classList.contains('in-film')) return;
+  playing = false; pf.classList.remove('on');
+  proj.classList.remove('open'); document.body.classList.remove('in-film');
+  document.title = base;
+  if (picked) runReel(0, reduce ? 1 : 1000); else reel = 0;
+  lastTouch = performance.now();
+}
+
+/* ---------- the film page ---------- */
+var cur = 0, playing = false, t0 = 0, pos = 0, pf = document.getElementById('pf'), base = document.title;
+var stmt = document.getElementById('stmt'), more = document.getElementById('more'), word = document.getElementById('word'), drifts = [];
+function lower(s) { return s.charAt(0).toLowerCase() + s.slice(1); }
+function fill(i) {
   cur = i; var w = list[i];
+  document.title = w.c + ' · ' + base;
   pf.querySelector('img').src = still(w);
-  document.getElementById('pc').textContent = w.c;
-  document.getElementById('pp2').textContent = w.p;
-  document.getElementById('pw').textContent = credits(w);
-  document.getElementById('pcr').innerHTML = creds(w);
+  document.getElementById('pc').innerHTML = w.c + '<span>' + w.p + '</span>';
+  var m = '';
+  m += '<div><dt>Director</dt><dd>' + (w.dir || '—') + '</dd></div>';
+  m += '<div><dt>Agency</dt><dd>' + (w.ag || '—') + '</dd></div>';
+  m += '<div><dt>Work</dt><dd>' + w.t.map(function (k) { return TAGS[k]; }).join(', ') + '</dd></div>';
+  m += '<div><dt>Length</dt><dd>' + clock(secs(w.d)) + '</dd></div>';
+  document.getElementById('pmeta').innerHTML = m;
+  var jobs = w.t.map(function (k) { return lower(TAGS[k]); }), job = jobs.length > 1 ? jobs.slice(0, -1).join(', ') + ' and ' + jobs[jobs.length - 1] : jobs[0];
+  var line = w.p + ' for ' + w.c + '. ' + job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ' with ' + w.ag : '') + '.';
+  stmt.innerHTML = '<span class="ar" aria-hidden="true">→</span>' + line.split(' ').map(function (x) { return '<span class="w">' + x + '</span>'; }).join(' ');
+  document.getElementById('sayimg').style.backgroundImage = 'url(' + still(w) + ')';
+  document.getElementById('saycap').textContent = 'Still, ' + w.c;
+  /* the stack: the next films, as fins beside the player */
+  var s = '';
+  for (var n = 1; n <= Math.min(9, list.length - 1); n++) { var j = (i + n) % list.length; s += '<button type="button" data-j="' + j + '" style="--n:' + (n - 1) + ';z-index:' + (20 - n) + ';background-image:url(' + still(list[j]) + ')" aria-label="' + list[j].c + '"></button>'; }
+  document.getElementById('stk').innerHTML = s;
+  /* more work: every other film, scattered, each at its own speed */
+  var spots = [[4, 6, 22, .5], [66, 2, 26, 1.1], [30, 18, 14, .8], [76, 30, 18, .35], [8, 38, 16, 1.25], [52, 42, 20, .6], [20, 58, 24, .9], [70, 56, 15, 1.3], [40, 70, 13, .45], [2, 76, 18, .7], [62, 80, 22, 1], [34, 90, 16, 1.2], [80, 92, 14, .55]];
+  var others = list.filter(function (x, j) { return j !== i; }), d = '';
+  others.forEach(function (x, n) {
+    var p = spots[n % spots.length], small = innerWidth < 900;
+    d += '<button type="button" class="drift" data-j="' + list.indexOf(x) + '" data-sp="' + p[3] + '" style="left:' + (small ? p[0] * .7 : p[0]) + '%;top:' + p[1] + '%;width:' + (small ? p[2] * 1.9 : p[2]) + '%"><i style="background-image:url(' + still(x) + ')"></i><span>' + x.c + '</span></button>';
+  });
+  more.querySelectorAll('.drift').forEach(function (e) { e.remove(); });
+  more.insertAdjacentHTML('beforeend', d);
+  drifts = [].slice.call(more.querySelectorAll('.drift'));
   document.getElementById('run').innerHTML = list.map(function (x, j) {
     return '<span class="it"><span class="sym" aria-hidden="true">→</span><button type="button" data-j="' + j + '" aria-current="' + (j === i) + '">' + x.c + '</button></span>';
   }).join(' ');
-  proj.classList.add('open'); proj.scrollTop = 0;
-  pos = 0; play(true);
-  target = Math.round(off) + (((i - Math.round(off)) % list.length) + list.length) % list.length;
+  pos = 0;
 }
-function play(on) { playing = on; t0 = performance.now() - pos * 1000; pf.classList.toggle('on', on); document.getElementById('pp').textContent = on ? 'Pause' : 'Play'; if (on) tick(); }
-function tick() {
-  if (!playing || !proj.classList.contains('open')) return;
-  var len = secs(list[cur].d); pos = (performance.now() - t0) / 1000;
-  if (pos >= len) { openP((cur + 1) % list.length); return; }
-  document.getElementById('pb').style.width = pos / len * 100 + '%';
-  document.getElementById('pt').textContent = clock(pos) + ' / ' + clock(len);
-  requestAnimationFrame(tick);
+/* jumping between films from inside the page: a quick fade and back to the top */
+function go(j) {
+  proj.style.transition = 'opacity .3s'; proj.style.opacity = 0;
+  setTimeout(function () {
+    fill(j); proj.scrollTop = 0; sy = ty = 0; proj.classList.add('entering'); proj.offsetWidth;
+    proj.style.opacity = ''; proj.classList.remove('entering');
+    setTimeout(function () { proj.style.transition = ''; }, 300);
+    play(true);
+  }, 300);
 }
-function closeP() { proj.classList.remove('open'); playing = false; pf.classList.remove('on'); lastTouch = performance.now(); }
-document.getElementById('run').addEventListener('click', function (e) { var b = e.target.closest('[data-j]'); if (b) openP(+b.getAttribute('data-j')); });
+proj.addEventListener('click', function (e) { var b = e.target.closest('[data-j]'); if (b) go(+b.getAttribute('data-j')); });
+function play(on) { playing = on; t0 = performance.now() - pos * 1000; pf.classList.toggle('on', on); document.getElementById('pp').textContent = on ? 'Pause' : 'Play'; }
 document.getElementById('pp').onclick = function () { play(!playing); };
-document.getElementById('pnext').onclick = function () { openP((cur + 1) % list.length); };
-document.getElementById('pprev').onclick = function () { openP((cur - 1 + list.length) % list.length); };
+document.getElementById('pnext').onclick = function () { go((cur + 1) % list.length); };
+document.getElementById('pprev').onclick = function () { go((cur - 1 + list.length) % list.length); };
 pf.onclick = function () { play(!playing); };
 document.getElementById('close').onclick = closeP;
-document.getElementById('home2').onclick = function (e) { e.preventDefault(); closeP(); };
 document.getElementById('home').onclick = function (e) { e.preventDefault(); closeP(); };
-addEventListener('keydown', function (e) { if (e.key === 'Escape') closeP(); });
+
+/* smooth scroll on a mouse or trackpad; phones keep their own scroll */
+var sy = 0, ty = 0;
+proj.addEventListener('wheel', function (e) {
+  if (!fine || reduce) return; e.preventDefault();
+  ty = Math.max(0, Math.min(proj.scrollHeight - proj.clientHeight, ty + e.deltaY));
+}, { passive: false });
+proj.addEventListener('scroll', function () { if (Math.abs(proj.scrollTop - Math.round(sy)) > 2) sy = ty = proj.scrollTop; });
+function filmFrame() {
+  if (fine && !reduce && Math.abs(ty - sy) > .3) { sy += (ty - sy) * .1; proj.scrollTop = sy; }
+  if (playing) {
+    var len = secs(list[cur].d); pos = (performance.now() - t0) / 1000;
+    if (pos >= len) { pos = 0; t0 = performance.now(); }
+    document.getElementById('pb').style.width = pos / len * 100 + '%';
+    document.getElementById('pt').textContent = clock(pos) + ' / ' + clock(len);
+  }
+  var y = proj.scrollTop, vh = innerHeight;
+  /* statement fills as it passes the middle of the screen */
+  var r = stmt.getBoundingClientRect(), p = Math.max(0, Math.min(1, (vh * .85 - r.top) / (vh * .55))), ws = stmt.querySelectorAll('.w'), on = Math.round(p * ws.length);
+  for (var k = 0; k < ws.length; k++) ws[k].classList.toggle('on', k < on);
+  /* drifting films */
+  var mr = more.getBoundingClientRect(), mp = (vh - mr.top) / (mr.height + vh) - .5;
+  for (k = 0; k < drifts.length; k++) drifts[k].style.transform = 'translate3d(0,' + (-mp * vh * 1.3 * +drifts[k].getAttribute('data-sp')).toFixed(1) + 'px,0)';
+  /* the name rises out of the footer */
+  var wr = word.parentNode.getBoundingClientRect(), wp = Math.max(0, Math.min(1, (vh - wr.top) / wr.height));
+  word.style.transform = 'translate3d(0,' + ((1 - wp) * 60).toFixed(1) + '%,0)';
+}
+addEventListener('keydown', function (e) {
+  if (!document.body.classList.contains('in-film')) return;
+  if (e.key === 'Escape') closeP();
+  else if (e.key === 'ArrowRight') { e.preventDefault(); go((cur + 1) % list.length); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); go((cur - 1 + list.length) % list.length); }
+  else if (e.key === ' ') { e.preventDefault(); play(!playing); }
+});
 build(); requestAnimationFrame(frame);
-</script>
-<script>
-/* detail pass (30 Oct): tab title follows the film; arrows for prev / next and space to play */
-(function () {
-  var base = document.title, _open = openP, _close = closeP;
-  openP = function (i) { _open(i); document.title = list[i].c + ' \u00b7 ' + base; };
-  closeP = function () { _close(); document.title = base; };
-  document.getElementById('close').onclick = function () { closeP(); };
-  addEventListener('keydown', function (e) {
-    if (!proj.classList.contains('open')) return;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); openP((cur + 1) % list.length); }
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); openP((cur - 1 + list.length) % list.length); }
-    else if (e.key === ' ') { e.preventDefault(); play(!playing); }
-    else if (e.key === 'Escape') closeP();
-  });
-})();
-</script>
-<script>
-/* Helix B: the stack-into-the-film opening */
-(function () {
-  var picked = null, pickedAt = 0, busy = false, _open = openP;
-  addEventListener('pointerup', function (e) {
-    var el = document.elementFromPoint(e.clientX, e.clientY);
-    picked = el && el.closest('.card'); pickedAt = performance.now();
-  }, true);
-  function box(el, r) { el.style.left = r.left + 'px'; el.style.top = r.top + 'px'; el.style.width = r.width + 'px'; el.style.height = r.height + 'px'; }
-  openP = function (i) {
-    var fromHelix = picked && performance.now() - pickedAt < 300 && !proj.classList.contains('open');
-    picked = null;
-    if (!fromHelix || busy || matchMedia('(prefers-reduced-motion: reduce)').matches) { _open(i); return; }
-    busy = true;
-    var all = cards.filter(function (c) { return +c.style.opacity > .04; });
-    var hit = all.reduce(function (b, c) { var z = +c.style.zIndex; return (+c.getAttribute('data-i') === i && (!b || z > +b.style.zIndex)) ? c : b; }, null);
-    var ci = cards.indexOf(hit);
-    var start = all.map(function (c) { return { c: c, r: c.getBoundingClientRect(), o: +c.style.opacity, k: Math.abs(cards.indexOf(c) - ci) }; })
-      .sort(function (a, b) { return a.k - b.k; });
-    _open(i); proj.style.visibility = 'hidden';
-    var fr = pf.getBoundingClientRect();
-    var layer = document.createElement('div'); layer.className = 'fly-layer'; document.body.appendChild(layer);
-    var flies = start.map(function (s, n) {
-      var d = document.createElement('div'); d.className = 'fly';
-      d.style.backgroundImage = 'url(' + (n === 0 ? still(list[i]) : s.c.querySelector('img').src) + ')';
-      d.style.opacity = s.o; d.style.zIndex = 200 - n; box(d, s.r); layer.appendChild(d); return d;
-    });
-    S.style.visibility = 'hidden';
-    layer.offsetWidth;
-    flies.forEach(function (d, n) {
-      d.style.transitionDelay = (n === 0 ? 0 : 40 + n * 22) + 'ms';
-      if (n === 0) { d.style.opacity = 1; box(d, fr); return; }
-      var sc = Math.max(.3, 1 - n * .085), w = fr.width * sc, h = fr.height * sc;
-      box(d, { left: fr.right - w * .82 + n * fr.width * .028, top: fr.top + (fr.height - h) / 2 - n * fr.height * .05, width: w, height: h });
-      d.style.opacity = n < 7 ? 1 : 0;
-    });
-    setTimeout(function () {
-      proj.style.visibility = ''; proj.classList.add('enter');
-      flies.forEach(function (d, n) { if (n) { d.style.transitionDelay = '0ms'; d.style.opacity = 0; } });
-      setTimeout(function () { layer.remove(); busy = false; }, 120);
-      setTimeout(function () { proj.classList.remove('enter'); }, 900);
-    }, 980);
-  };
-  var _close = closeP;
-  closeP = function () { _close(); S.style.visibility = ''; };
-  document.getElementById('close').onclick = function () { closeP(); };
-})();
 </script>
 </body>
 </html>

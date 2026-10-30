@@ -95,6 +95,20 @@ a:hover { opacity: .5; }
 .names button[aria-current="true"] .pm::before { content: "\25B6\FE0E\00a0"; font-size: .78em; vertical-align: .08em; }
 .names button[aria-current="true"]::after { content: ""; position: absolute; left: .04em; bottom: -9px; height: 1px; width: var(--p, 0%); background: currentColor; opacity: .5; }
 .sheet::before { content: ""; display: block; width: 36px; height: 3px; border-radius: 2px; background: var(--fg); opacity: .22; margin: -2px auto 14px; }
+/* smooth pass (30 Oct): names fade between states instead of snapping, the film and its
+   credits cross-fade when the film changes, the list eases in on load and on filter, and
+   a mouse or trackpad scroll glides */
+.names button { transition: opacity .5s var(--ease); }
+.names.in-go button { animation: nm-in .9s var(--ease) both; animation-delay: calc(var(--k, 0) * 35ms); }
+@keyframes nm-in { from { opacity: 0; transform: translateY(14px); } }
+.names.out button { opacity: 0 !important; transition: opacity .22s linear; }
+.in.swap > * { animation: pn-in .6s var(--ease) both; }
+.in.swap > :nth-child(2) { animation-delay: .03s; } .in.swap > :nth-child(3) { animation-delay: .06s; }
+.in.swap > :nth-child(n+4) { animation-delay: .1s; }
+@keyframes pn-in { from { opacity: 0; transform: translateY(8px); } }
+.in .film img { opacity: 0; transition: opacity .7s var(--ease), transform 12s linear; }
+.in .film img.ok { opacity: 1; }
+.tg button { transition: opacity .35s var(--ease); }
 </style>
 </head>
 <body class="vb">
@@ -213,6 +227,64 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
     if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) { setPlay(false); sh.classList.remove('open'); }
     y0 = null;
   });
+})();
+</script>
+<script>
+/* smooth pass (30 Oct) */
+(function () {
+  var names = document.getElementById('names'), sc = document.getElementById('scroll'), lastTag = null, first = true;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* the list is only rebuilt when the filter changes; otherwise just the playing name moves */
+  var _build = build;
+  build = function () {
+    if (lastTag === tag && names.children.length) {
+      [].forEach.call(names.children, function (b) { b.setAttribute('aria-current', list[+b.getAttribute('data-i')] === w); });
+      names.classList.toggle('has', !!w && list.indexOf(w) > -1);
+      [].forEach.call(document.querySelectorAll('#tg [data-tag]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-tag') === tag); });
+      return;
+    }
+    var swap = lastTag !== null && !reduce;
+    lastTag = tag;
+    function go() {
+      _build();
+      [].forEach.call(names.children, function (b, k) { b.style.setProperty('--k', Math.min(k, 14)); });
+      names.classList.remove('out', 'in-go'); names.offsetWidth;
+      if (!reduce) names.classList.add('in-go');
+      setTimeout(function () { names.classList.remove('in-go'); }, 1600);
+    }
+    if (swap) { names.classList.add('out'); setTimeout(go, 220); } else go();
+  };
+  /* the film and its credits cross-fade in, the still only shows once it has loaded */
+  function settle(r) {
+    var im = r.querySelector('.film img'); if (!im) return;
+    var show = function () { im.classList.add('ok'); };
+    if (im.complete) requestAnimationFrame(show); else im.addEventListener('load', show);
+    if (!reduce && !first) { r.classList.remove('swap'); r.offsetWidth; r.classList.add('swap'); }
+  }
+  var _load = load;
+  load = function (x, a) {
+    _load(x, a);
+    settle(document.getElementById('pane')); settle(document.getElementById('sheetIn'));
+    first = false;
+  };
+  lastTag = null; build();
+  if (w) { settle(document.getElementById('pane')); first = false; }
+  else first = false;
+  /* gliding scroll for a mouse or trackpad; touch keeps the phone's own scroll */
+  if (!matchMedia('(pointer: fine)').matches || reduce) return;
+  var y = sc.scrollTop, ty = y, run = false;
+  sc.addEventListener('wheel', function (e) {
+    if (e.ctrlKey) return; e.preventDefault();
+    ty = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight, ty + e.deltaY));
+    if (!run) { run = true; requestAnimationFrame(glide); }
+  }, { passive: false });
+  sc.addEventListener('scroll', function () { if (!run) y = ty = sc.scrollTop; });
+  function glide() {
+    y += (ty - y) * .12;
+    if (Math.abs(ty - y) < .5) { y = ty; run = false; }
+    sc.scrollTop = y;
+    if (run) requestAnimationFrame(glide);
+  }
 })();
 </script>
 </body>

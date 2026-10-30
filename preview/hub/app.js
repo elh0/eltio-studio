@@ -49,9 +49,6 @@ var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb"
 
 var G = { token: null, exp: 0, client: null, sheetId: null };
 var D = null; /* tab name -> array of row objects, each with _r (sheet row number) */
-/* preview of the next hub: open it once with ?next=1 (Links tab, Yapcine card, income by stream); ?next=0 goes back */
-(function () { var m = /[?&]next=([01])/.exec(location.search); if (m) try { if (m[1] === "1") localStorage.setItem("hub-next", "1"); else localStorage.removeItem("hub-next"); } catch (e) {} })();
-var NEXT = (function () { try { return localStorage.getItem("hub-next") === "1"; } catch (e) { return false; } })();
 var S = { tab: "today", f: "all", i: 0, sheet: null, pick: null, app: "all", log: false, fb: false, open: null, fri: new Date().getDay() === 5, ideaA: "sw", chat: [], busy: false };
 var $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -240,7 +237,7 @@ function studio() {
 }
 /* personal money: kpis rows keyed p_*; p_next* rows are upcoming bills (label = when, value = amount, sub = what). Never balances. */
 function myMoney() {
-  var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }), inc = NEXT ? incCard() : ""; if (!P.length && !inc) return "";
+  var P = rows("kpis").filter(function (k) { return k.key.indexOf("p_") === 0; }), inc = incCard(); if (!P.length && !inc) return "";
   var T = P.filter(function (k) { return k.key.indexOf("p_next") !== 0 && k.key.indexOf("p_cat") !== 0; }).slice(0, 4), N = P.filter(function (k) { return k.key.indexOf("p_next") === 0; }), C = P.filter(function (k) { return k.key.indexOf("p_cat") === 0; });
   return sec("Your money", "private to you", '<button type="button" class="btn ghost sm" data-act="go" data-go="area:money">To-dos ' + ic("chev") + "</button>") + (T.length ? '<div class="kpis mine">' + T.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") +
     (N.length ? '<div class="card rows cardpad" style="margin-top:8px"><div class="cap">Coming out next</div>' + N.map(function (k) { return '<div class="r tap" data-act="kx" data-k="' + esc(k.key) + '" ' + av("money") + '><span class="dot"></span><span class="t">' + esc(k.sub) + '</span><span class="w">' + esc(k.label) + " · " + esc(k.value) + "</span>" + ic("chev") + "</div>"; }).join("") + "</div>" : "") + inc + catCard(C);
@@ -343,7 +340,7 @@ function top3() {
   if (!L.length) return "";
   return sec("Top 3 today", "most money per hour") + '<div class="card rows cardpad">' + L.map(function (t, i) { var x = t[0]; return '<button type="button" class="r" data-goto="' + esc(x.id) + '" style="--a:var(--' + x.area + ');width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;color:var(--fg)"><span class="mono faint">' + (i + 1) + '</span><span class="dot"></span><span class="t">' + esc(x.title) + (t[1] ? '<br><span class="faint" style="font-size:12px">' + esc(t[1]) + "</span>" : "") + "</span>" + ic("chev") + "</button>"; }).join("") + "</div>";
 }
-function sinceYesterday() { var C = NEXT ? rows("since").map(function (c, i) { return [c, i]; }).sort(function (p, q) { return String(q[0].date) < String(p[0].date) ? -1 : String(q[0].date) > String(p[0].date) ? 1 : q[1] - p[1]; }).map(function (p) { return p[0]; }).slice(0, 8) : rows("since").slice(0, 6); if (!C.length) return ""; return sec("Since yesterday", NEXT ? "6:52 scan, then each session as it finishes" : "checked every morning at 6:52") + '<div class="card rows cardpad">' + C.map(function (c) { return '<div class="r" ' + av(c.area) + '><span class="dot"></span><span class="t">' + esc(c.text) + "</span></div>"; }).join("") + "</div>"; }
+function sinceYesterday() { var C = rows("since").map(function (c, i) { return [c, i]; }).sort(function (p, q) { return String(q[0].date) < String(p[0].date) ? -1 : String(q[0].date) > String(p[0].date) ? 1 : q[1] - p[1]; }).map(function (p) { return p[0]; }).slice(0, 8); if (!C.length) return ""; return sec("Since yesterday", "6:52 scan, then each session as it finishes") + '<div class="card rows cardpad">' + C.map(function (c) { return '<div class="r" ' + av(c.area) + '><span class="dot"></span><span class="t">' + esc(c.text) + "</span></div>"; }).join("") + "</div>"; }
 function friList() {
   var F = rows("friday"), dn = F.filter(function (z) { return z.done === "yes"; }).length; if (!F.length) return sec("Selling checklist", "") + none("The Friday list lands with the morning scan.");
   return sec("Selling checklist", dn + " of " + F.length + " done") + '<div class="card rows cardpad">' + F.map(function (z, i) { var on = z.done === "yes"; return '<button type="button" class="r" data-chk="' + i + '" style="width:100%;border-left:0;border-right:0;border-bottom:0;background:none;text-align:left;cursor:pointer;color:' + (on ? "var(--faint)" : "var(--fg)") + '"><span style="width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border2);display:grid;place-items:center;flex:none;' + (on ? "background:var(--primary);color:var(--onprimary);border-color:var(--primary)" : "") + '">' + (on ? ic("check") : "") + '</span><span class="t"' + (on ? ' style="text-decoration:line-through"' : "") + ">" + esc(z.text) + "</span></button>"; }).join("") + "</div>" +
@@ -353,7 +350,7 @@ function fresh() { var src = rows("sources"), live = src.filter(function (s) { r
 function vToday(mac) {
   var K = rows("kpis").filter(function (k) { return k.key.indexOf("p_") !== 0; }).slice(0, 3), d = NOW;
   var h = topbar() + head(S.fri ? DOW[d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()] + " · selling" : ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][d.getDay()] + " " + d.getDate() + " " + MON[d.getMonth()], S.fri ? "Marketing and sales come first today." : left() + " waiting on you", '<button type="button" class="switch" data-act="fri" aria-pressed="' + S.fri + '"><span class="tr"></span>Selling mode</button>') +
-    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + promiseCard() + recap() + (S.fri ? friList() : top3() + sinceYesterday()) + (NEXT ? yapCard() : "") + waitBlock() + myMoney();
+    (K.length ? '<div class="kpis">' + K.map(function (k) { return kpi(k.label, k.value, k.sub, k.key); }).join("") + "</div>" : "") + fresh() + promiseCard() + recap() + (S.fri ? friList() : top3() + sinceYesterday()) + yapCard() + waitBlock() + myMoney();
   if (!mac) h += sec("Next 7 days", "") + agenda(TODAY, TODAY + 6) + sec("Pace", "") + '<div class="cardpad">' + chartCard() + "</div>";
   return h + sec("Studio", "tap an area") + studio() + sec("Idea inbox", "", '<button type="button" class="btn ghost sm" data-tab="inbox">' + rows("ideas").length + " ideas " + ic("chev") + "</button>") + '<div style="height:24px"></div>';
 }
@@ -642,7 +639,7 @@ function calSheet() {
 function fbSheet() { return '<div class="scrim" data-act="closefb"></div><div class="sheet" role="dialog" aria-label="Feedback"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-weight:600">What should change?</b><button type="button" class="btn ghost sm" data-act="closefb">Close</button></div><textarea class="ta" id="fb-in" placeholder="Rough is fine. It goes to os-feedback.md and the top 3 get looked at every week."></textarea><button type="button" class="btn primary" data-act="savefb">Send</button></div>'; }
 
 /* ---------- shell ---------- */
-var NAV = [["today", "Today", "home"], ["apps", "Apps", "grid"], ["mkt", "Marketing", "mega"], ["time", "Timeline", "gantt"]].concat(NEXT ? [["links", "Links", "out"]] : []).concat([["ask", "Ask", "spark"]]);
+var NAV = [["today", "Today", "home"], ["apps", "Apps", "grid"], ["mkt", "Marketing", "mega"], ["time", "Timeline", "gantt"], ["links", "Links", "out"], ["ask", "Ask", "spark"]];
 function isMac() { return window.matchMedia("(min-width: 900px)").matches; }
 function tabbar() { return '<nav class="tabbar" aria-label="Views">' + NAV.map(function (t) { return '<button type="button" data-tab="' + t[0] + '" class="' + (S.tab === t[0] || (S.tab === "inbox" && t[0] === "today") ? "on" : "") + '">' + ic(t[2]) + t[1] + "</button>"; }).join("") + "</nav>"; }
 function body(mac) { return S.tab === "today" ? vToday(mac) : S.tab === "apps" ? vApps() : S.tab === "mkt" ? vMkt() : S.tab === "time" ? vTime(mac) : S.tab === "links" ? vLinks() : vInbox(); }

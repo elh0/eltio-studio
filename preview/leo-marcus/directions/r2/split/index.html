@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en" data-way="ink">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound: Split, round 2</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2712%27 fill=%27%23F2210F%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="../../shared.css">
+<style>
+/* Split, round 1 (A, footer only). Leo's notes: a third size for project names (set in a mono),
+   no separate header (pinned at the bottom), "Helical Sound" bold as home, the credit small in a corner,
+   and director / agency only when filled in. */
+:root { --nbig: clamp(38px, 5.6vw, 88px); --mid: clamp(14px, 1.25vw, 17px); --small: 12px; --sans: "Inter Tight", "Helvetica Neue", Arial, sans-serif; --line: color-mix(in srgb, var(--fg) 16%, transparent); --top: 0px; --bot: 0px; }
+@media (min-width: 900px) { :root { --small: 13px; } }
+body { font: 400 var(--small)/1.3 var(--sans); }
+.q2 { opacity: .45; }
+.pm { font: 400 var(--mid)/1.15 var(--mono); letter-spacing: -.01em; }
+a:hover { opacity: .5; }
+.scroll { position: fixed; left: 0; right: 0; top: var(--top); bottom: var(--bot); overflow-y: auto; padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)) 0 max(var(--pad), env(safe-area-inset-left, 0px)); }
+.grid { display: grid; grid-template-columns: 1fr; column-gap: 4vw; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1.1fr .9fr; } }
+.tg { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: calc(env(safe-area-inset-top, 0px) * var(--safe, 0) + 16px) 0 10px; }
+.tg button { opacity: .4; transition: opacity .2s; }
+.tg button[aria-pressed="true"], .tg button:hover { opacity: 1; }
+.names { display: grid; justify-items: start; padding-bottom: 90px; }
+.names button { text-align: left; padding: .06em 0 .1em; display: grid; transition: opacity .3s; }
+.names .c { font: 500 var(--nbig)/1 var(--sans); letter-spacing: -.035em; }
+.names .pm { opacity: .5; padding: 2px 0 6px .08em; }
+.names:hover button:not(:hover):not([aria-current="true"]), .names.has button:not([aria-current="true"]):not(:hover) { opacity: .3; }
+
+.pane { display: none; }
+@media (min-width: 900px) { .pane { display: block; } .pane .in { position: sticky; top: 16px; padding-top: 16px; } }
+.in { display: grid; gap: 10px; }
+.in .ttl { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.in .film { aspect-ratio: 2.42; cursor: pointer; }
+.cr { display: grid; grid-template-columns: auto 1fr; gap: 3px 18px; margin: 4px 0 0; }
+.cr dt { opacity: .45; } .cr dd { margin: 0; }
+.bar { height: 1px; background: var(--line); position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); }
+.ctl { display: flex; justify-content: space-between; }
+.empty { opacity: .45; }
+
+/* phone: the player slides up */
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--bg); border-top: 1px solid var(--fg); padding: 14px max(var(--pad), env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(var(--pad), env(safe-area-inset-left, 0px)); transform: translateY(105%); transition: transform .7s var(--ease), background .5s var(--ease); }
+.sheet.open { transform: none; }
+@media (min-width: 900px) { .sheet { display: none; } }
+
+/* the info bar (pal.tv): pinned, here as pinned at the bottom */
+.bar2 { position: fixed; left: 0; right: 0; z-index: 20; background: var(--bg); display: grid; grid-template-columns: 1fr auto; gap: 6px 18px; padding: 12px max(var(--pad), env(safe-area-inset-right, 0px)) 12px max(var(--pad), env(safe-area-inset-left, 0px)); transition: background .5s var(--ease); }
+.bar2 .nm { font: 500 var(--mid)/1.1 var(--sans); letter-spacing: -.01em; }
+.bar2 .bio, .bar2 .c2 { display: none; }
+.bar2 .ct { display: flex; gap: 14px; grid-column: 1 / -1; order: 3; }
+.ways { position: static; transform: none; align-self: center; }
+@media (min-width: 900px) {
+  .bar2 .ct { grid-column: auto; order: 0; }
+  .bar2 { grid-template-columns: 1.1fr 1.2fr .6fr auto; gap: 0; padding-top: 0; padding-bottom: 0; }
+  .bar2 > * { padding: 14px 16px 16px; }
+  .bar2 > :first-child { padding-left: 0; }
+  .bar2 > * + * { border-left: 1px solid var(--fg); }
+  .bar2 .bio { display: block; margin: 0; max-width: 46ch; }
+  .bar2 .ct { display: block; } .bar2 .ct > * { display: block; } .bar2 .ct .em { display: block; }
+  .bar2 .ways { padding-right: 0; align-self: start; }
+}
+.credit { position: fixed; z-index: 21; font-size: 11px; opacity: .45; padding: 0 max(var(--pad), env(safe-area-inset-right, 0px)); }
+.credit:hover { opacity: .8; }
+/* A: the info bar is the footer, pinned. The list fades out above it so it reads as scrollable. */
+.bar2 { bottom: 0; border-top: 1px solid var(--fg); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); }
+@media (min-width: 900px) { .bar2 { padding-bottom: env(safe-area-inset-bottom, 0px); } }
+.tg { padding-top: calc(env(safe-area-inset-top, 0px) + 16px); }
+.scroll { -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)); mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)); }
+.credit { bottom: calc(env(safe-area-inset-bottom, 0px) + 13px); right: 0; z-index: 22; }
+@media (min-width: 900px) { .credit { bottom: calc(var(--bot) + 10px); } }
+/* refine (28 Oct): looser tracking, clearer steps between the three sizes, more room */
+:root { --nbig: clamp(36px, 5.1vw, 80px); --mid: clamp(13px, 1.05vw, 15px); }
+.tg { gap: 6px 18px; padding: calc(env(safe-area-inset-top, 0px) * var(--safe, 0) + 26px) 0 26px; }
+.names { gap: clamp(16px, 1.8vw, 26px); padding-bottom: 120px; }
+.names button { padding: 0; gap: 7px; }
+.names .c { letter-spacing: -.022em; line-height: .98; }
+.names .pm { padding: 0 0 0 .08em; letter-spacing: -.02em; }
+@media (min-width: 900px) { .pane .in { top: 26px; padding-top: 26px; } }
+.in { gap: 14px; }
+.in .ttl { font: 500 clamp(18px, 1.5vw, 22px)/1.1 var(--sans); letter-spacing: -.015em; }
+.in .ttl button { font: 400 var(--small)/1.3 var(--sans); letter-spacing: 0; }
+.in > .pm { margin-top: -8px; opacity: .55; }
+.in .film { margin-top: 6px; }
+.cr { gap: 6px 22px; margin-top: 10px; line-height: 1.4; }
+.bar2 { padding-top: 16px; padding-bottom: 16px; row-gap: 10px; }
+.bar2 .bio { line-height: 1.45; }
+@media (min-width: 900px) { .bar2 { padding-top: 0; padding-bottom: 0; } .bar2 > * { padding: 18px 22px 20px; } .bar2 .ct > * + * { margin-top: 2px; } }
+/* detail pass (30 Oct): now-playing mark, progress under the playing name, hover nudge, sheet handle */
+.names button { position: relative; }
+.names .c { transition: transform .45s var(--ease); }
+.names button:hover .c { transform: translateX(.06em); }
+.names button[aria-current="true"] .pm::before { content: "\25B6\FE0E\00a0"; font-size: .78em; vertical-align: .08em; }
+.names button[aria-current="true"]::after { content: ""; position: absolute; left: .04em; bottom: -9px; height: 1px; width: var(--p, 0%); background: currentColor; opacity: .5; }
+.sheet::before { content: ""; display: block; width: 36px; height: 3px; border-radius: 2px; background: var(--fg); opacity: .22; margin: -2px auto 14px; }
+/* smooth pass (30 Oct): names fade between states instead of snapping, the film and its
+   credits cross-fade when the film changes, the list eases in on load and on filter, and
+   a mouse or trackpad scroll glides */
+.names button { transition: opacity .5s var(--ease); }
+.names.in-go button { animation: nm-in .9s var(--ease) both; animation-delay: calc(var(--k, 0) * 35ms); }
+@keyframes nm-in { from { opacity: 0; transform: translateY(14px); } }
+.names.out button { opacity: 0 !important; transition: opacity .22s linear; }
+.in.swap > * { animation: pn-in .6s var(--ease) both; }
+.in.swap > :nth-child(2) { animation-delay: .03s; } .in.swap > :nth-child(3) { animation-delay: .06s; }
+.in.swap > :nth-child(n+4) { animation-delay: .1s; }
+@keyframes pn-in { from { opacity: 0; transform: translateY(8px); } }
+.in .film img { opacity: 0; transition: opacity .7s var(--ease), transform 12s linear; }
+.in .film img.ok { opacity: 1; }
+.tg button { transition: opacity .35s var(--ease); }
+/* tidy pass (30 Oct): the player's title lines up with the filters, the controls read as
+   play and time on the left with prev / next together on the right, the colourway cell in the
+   info bar gets a full-height rule, and the film switch glides (helix-swap.js) */
+@media (min-width: 900px) { .pane .in { top: 0; padding-top: 26px; } }
+.ctl { justify-content: flex-start; gap: 18px; }
+.ctl [data-k=play] { order: 1; min-width: 3.4em; text-align: left; }
+.ctl .tm { order: 2; opacity: .5; font-variant-numeric: tabular-nums; }
+.ctl [data-k=prev] { order: 3; margin-left: auto; }
+.ctl [data-k=next] { order: 4; }
+.ctl button:hover { opacity: .5; }
+.ttl .x { display: grid; place-items: center; width: 30px; height: 30px; margin: -6px -6px 0 0; }
+@media (min-width: 900px) { .bar2 .ways { align-self: stretch; } }
+.in .film { overflow: hidden; }
+</style>
+</head>
+<body class="va">
+<header class="bar2" id="bar2">
+  <a href="#" class="nm" id="home">Helical Sound</a>
+  <button type="button" class="infob" id="infob">Info</button>
+  <p class="bio">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a class="em" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a></div>
+  <div class="ig"><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a><a class="cred" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+</header>
+
+<div class="scroll" id="scroll">
+  <div class="grid">
+    <div>
+      <nav class="tg" id="tg" aria-label="Filter by work"></nav>
+      <div class="names" id="names"></div>
+    </div>
+    <aside class="pane" aria-label="Now playing"><div class="in" id="pane"></div></aside>
+  </div>
+</div>
+<section class="info" id="info" aria-label="Info" aria-hidden="true">
+  <button type="button" class="back" id="infox">Back</button>
+  <p>Helical Sound is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
+  <p><span class="q2">Contact</span><br>Leo Marcus<br><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></p>
+  <a class="cred" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
+</section>
+
+<section class="sheet" id="sheet" aria-label="Now playing"><div class="in" id="sheetIn"></div></section>
+
+<script src="../../shared.js"></script>
+<script src="../work.js"></script>
+<script src="../vimeo.js"></script>
+<script src="../swap.js"></script>
+<script>
+var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0;
+var phone = function () { return innerWidth < 900; };
+function build() {
+  document.getElementById('tg').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + ' ' + count(k) + '</button>';
+  }).join('');
+  list = tag === 'all' ? WORK.slice() : WORK.filter(function (x) { return x.t.indexOf(tag) > -1; });
+  document.getElementById('names').innerHTML = list.map(function (x, i) {
+    return '<button type="button" data-i="' + i + '" aria-current="' + (x === w) + '"><span class="c">' + x.c + '</span><span class="pm">' + x.p + '</span></button>';
+  }).join('');
+  document.getElementById('names').classList.toggle('has', !!w && list.indexOf(w) > -1);
+}
+/* only the credits that exist: no empty Director or Creative direction lines */
+function creds(x) {
+  var h = '';
+  if (x.dir) h += '<dt>Director</dt><dd>' + x.dir + '</dd>';
+  if (x.ag) h += '<dt>Creative direction</dt><dd>' + x.ag + '</dd>';
+  return h + '<dt>Helical Sound</dt><dd>' + credits(x) + '</dd>';
+}
+function panel() {
+  if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
+  return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' + (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
+    '<div class="pm">' + w.p + '</div>' +
+    '<div class="film"><img alt="" src="' + still(w) + '"></div><div class="bar"><i></i></div>' +
+    '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
+    '<dl class="cr">' + creds(w) + '</dl>';
+}
+function root() { return document.getElementById(phone() ? 'sheetIn' : 'pane'); }
+function load(x, auto) {
+  w = x; pos = 0; playing = false;
+  document.getElementById('pane').innerHTML = panel(); document.getElementById('sheetIn').innerHTML = panel();
+  document.getElementById('sheet').classList.toggle('open', phone());
+  build(); setPlay(!!auto);
+}
+function setPlay(p) {
+  playing = p; t0 = performance.now() - pos * 1000;
+  var r = root(); if (!r.querySelector('.film')) return;
+  r.querySelector('.film').classList.toggle('on', p); r.querySelector('[data-k=play]').textContent = p ? 'Pause' : 'Play';
+  if (p) tick();
+}
+function tick() {
+  if (!playing || !w) return;
+  var r = root(), len = secs(w.d); pos = (performance.now() - t0) / 1000;
+  if (pos >= len) { step(1); return; }
+  r.querySelector('.bar i').style.width = pos / len * 100 + '%'; r.querySelector('.tm').textContent = clock(pos) + ' / ' + w.d;
+  requestAnimationFrame(tick);
+}
+function step(d) { var i = list.indexOf(w); load(list[((i < 0 ? 0 : i + d) + list.length) % list.length], true); }
+function ctl(e) {
+  var k = e.target.closest('[data-k]');
+  if (!k) { if (e.target.closest('.film')) setPlay(!playing); return; }
+  var a = k.getAttribute('data-k');
+  if (a === 'play') setPlay(!playing); if (a === 'next') step(1); if (a === 'prev') step(-1);
+  if (a === 'close') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+}
+document.getElementById('pane').addEventListener('click', ctl);
+document.getElementById('sheetIn').addEventListener('click', ctl);
+document.getElementById('names').addEventListener('click', function (e) { var b = e.target.closest('[data-i]'); if (b) load(list[+b.getAttribute('data-i')], true); });
+document.getElementById('tg').addEventListener('click', function (e) { var b = e.target.closest('[data-tag]'); if (!b) return; tag = b.getAttribute('data-tag'); build(); });
+document.getElementById('home').onclick = function (e) { e.preventDefault(); document.getElementById('sheet').classList.remove('open'); document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
+function fit() { var h = document.getElementById('bar2').offsetHeight + 'px'; document.documentElement.style.setProperty('--bot', h); }
+addEventListener('resize', fit); document.fonts && document.fonts.ready.then(fit);
+build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById('pane').innerHTML = panel();
+</script>
+<script>
+/* detail pass (30 Oct): tab title follows the film, progress under the playing name,
+   keys (arrows next/prev, space play, Esc close) and swipe down to close on phone */
+(function () {
+  var base = document.title, _load = load, _tick = tick;
+  load = function (x, a) { _load(x, a); document.title = x.c + ' \u00b7 ' + base; };
+  tick = function () {
+    _tick();
+    var b = document.querySelector('#names [aria-current="true"]');
+    if (b && w) b.style.setProperty('--p', Math.min(100, pos / secs(w.d) * 100) + '%');
+  };
+  addEventListener('keydown', function (e) {
+    if (e.target.closest && e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    else if (e.key === ' ' && w) { e.preventDefault(); setPlay(!playing); }
+    else if (e.key === 'Escape') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+  });
+  var sh = document.getElementById('sheet'), y0 = null;
+  sh.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
+  sh.addEventListener('touchend', function (e) {
+    if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) { setPlay(false); sh.classList.remove('open'); }
+    y0 = null;
+  });
+})();
+</script>
+<script>
+/* smooth pass (30 Oct) */
+(function () {
+  var names = document.getElementById('names'), sc = document.getElementById('scroll'), lastTag = null, first = true;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* the list is only rebuilt when the filter changes; otherwise just the playing name moves */
+  var _build = build;
+  build = function () {
+    if (lastTag === tag && names.children.length) {
+      [].forEach.call(names.children, function (b) { b.setAttribute('aria-current', list[+b.getAttribute('data-i')] === w); });
+      names.classList.toggle('has', !!w && list.indexOf(w) > -1);
+      [].forEach.call(document.querySelectorAll('#tg [data-tag]'), function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-tag') === tag); });
+      return;
+    }
+    var swap = lastTag !== null && !reduce;
+    lastTag = tag;
+    function go() {
+      _build();
+      [].forEach.call(names.children, function (b, k) { b.style.setProperty('--k', Math.min(k, 14)); });
+      names.classList.remove('out', 'in-go'); names.offsetWidth;
+      if (!reduce) names.classList.add('in-go');
+      setTimeout(function () { names.classList.remove('in-go'); }, 1600);
+    }
+    if (swap) { names.classList.add('out'); setTimeout(go, 220); } else go();
+  };
+  /* the film and its credits cross-fade in, the still only shows once it has loaded */
+  function settle(r, quiet) {
+    var im = r.querySelector('.film img'); if (!im) return;
+    var show = function () { im.classList.add('ok'); };
+    if (im.complete) requestAnimationFrame(show); else im.addEventListener('load', show);
+    if (!reduce && !first && !quiet) { r.classList.remove('swap'); r.offsetWidth; r.classList.add('swap'); }
+  }
+  var _load = load;
+  load = function (x, a) {
+    /* 30 Oct: when a film is already showing, the next one glides in in depth, then its words */
+    var r = root(), old = r.querySelector('.film'), from = list.indexOf(w), to = list.indexOf(x);
+    /* back to the top of the player column for the next film */
+    var pin = document.querySelector('.pane .in'); if (pin && pin.scrollTop && x !== w) pin.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    if (old && w && x !== w && !reduce && r.getBoundingClientRect().height) {
+      spatialSwap({
+        film: old, dir: to < from ? -1 : 1, axis: 'y',
+        fill: function () { _load(x, a); settle(document.getElementById(r.id === 'pane' ? 'sheetIn' : 'pane'), true); },
+        getFilm: function () { var f = r.querySelector('.film'), im = f && f.querySelector('img'); if (im) im.classList.add('ok'); return f; },
+        text: function () { return [r.querySelector('.ttl'), r.querySelector('.in > .pm'), r.querySelector('.ctl'), r.querySelector('.cr')]; }
+      });
+      first = false; return;
+    }
+    _load(x, a);
+    settle(document.getElementById('pane')); settle(document.getElementById('sheetIn'));
+    first = false;
+  };
+  lastTag = null; build();
+  if (w) { settle(document.getElementById('pane')); first = false; }
+  else first = false;
+  /* gliding scroll for a mouse or trackpad; touch keeps the phone's own scroll */
+  if (!matchMedia('(pointer: fine)').matches || reduce) return;
+  var y = sc.scrollTop, ty = y, run = false;
+  sc.addEventListener('wheel', function (e) {
+    if (e.ctrlKey) return;
+    var pn = e.target.closest && e.target.closest('.pane .in');
+    if (pn && pn.scrollHeight > pn.clientHeight + 1) return;
+    e.preventDefault();
+    ty = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight, ty + e.deltaY));
+    if (!run) { run = true; requestAnimationFrame(glide); }
+  }, { passive: false });
+  sc.addEventListener('scroll', function () { if (!run) y = ty = sc.scrollTop; });
+  function glide() {
+    y += (ty - y) * .18;
+    if (Math.abs(ty - y) < .5) { y = ty; run = false; }
+    sc.scrollTop = y;
+    if (run) requestAnimationFrame(glide);
+  }
+})();
+</script>
+<style>
+/* the player as a monitor (30 Oct, Elliot: "smarter and tidier, more cool UI"): a header line
+   with the index and count, crop marks round the film, a timecode and frame ratio on the
+   picture, a ticked scrub bar with a playhead, symbol controls and credits as ruled rows */
+.in { gap: 0; }
+.mhd { display: flex; align-items: center; gap: 10px; font: 400 11px/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.mhd .lab { opacity: .5; }
+.mhd .lab::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 8px; vertical-align: 1px; opacity: .35; transition: opacity .3s; }
+.in:has(.film.on) .mhd .lab::before { opacity: 1; animation: rec 1.6s steps(1) infinite; }
+@keyframes rec { 50% { opacity: .25; } }
+.mhd .cnt { margin-left: auto; font-variant-numeric: tabular-nums; }
+.mhd .x { display: grid; place-items: center; width: 28px; height: 28px; margin: -8px -6px -8px 4px; }
+.in .ttl { margin-top: 18px; font: 500 clamp(22px, 2vw, 30px)/1.05 var(--sans); letter-spacing: -.02em; }
+.in > .pm { margin: 6px 0 0; opacity: .55; }
+.fw { margin-top: 22px; padding: 9px; position: relative;
+  --k: color-mix(in srgb, var(--fg) 70%, transparent);
+  background:
+    linear-gradient(var(--k), var(--k)) top left / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) top left / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) top right / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) top right / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) bottom left / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) bottom left / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) bottom right / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) bottom right / 1px 12px no-repeat; }
+.in .film { margin: 0; position: relative; }
+.hud { position: absolute; z-index: 2; font: 400 10px/1 var(--mono); letter-spacing: .04em; color: #fff; text-shadow: 0 0 6px rgba(0, 0, 0, .35); pointer-events: none; font-variant-numeric: tabular-nums; }
+.hud.tl { top: 10px; left: 12px; } .hud.br { bottom: 10px; right: 12px; opacity: .8; } .hud.bl { bottom: 10px; left: 12px; }
+.in .bar { margin-top: 12px; height: 9px; background:
+  linear-gradient(var(--line), var(--line)) bottom / 100% 1px no-repeat,
+  repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 10%) bottom left / 100% 5px no-repeat; }
+.in .bar i { top: auto; bottom: 0; height: 1px; }
+.in .bar i::after { content: ""; position: absolute; right: -1px; bottom: 0; width: 1px; height: 9px; background: var(--fg); }
+.in .ctl { margin-top: 12px; font: 400 11px/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; align-items: center; }
+.ctl [data-k=play]::before { content: "\25B6\FE0E"; display: inline-block; width: 1.6em; font-size: .9em; }
+.in:has(.film.on) .ctl [data-k=play]::before { content: "\2759\2759"; letter-spacing: -.12em; }
+.ctl [data-k=prev]::before { content: "\2039\00a0"; } .ctl [data-k=next]::after { content: "\00a0\203A"; }
+.ctl .tm { opacity: .5; }
+.in .cr { margin-top: 26px; display: grid; grid-template-columns: minmax(7em, auto) 1fr; gap: 0; }
+.in .cr dt, .in .cr dd { padding: 9px 0; border-top: 1px solid var(--line); }
+.in .cr dt { font: 400 11px/1.5 var(--mono); letter-spacing: .02em; text-transform: uppercase; opacity: .5; }
+.in .cr dd { padding-left: 14px; }
+@media (max-width: 899px) { .in .ttl { margin-top: 14px; } .fw { margin-top: 16px; padding: 7px; } .in .cr { margin-top: 18px; } }
+</style>
+<script>
+(function () {
+  function n2(v) { return ('0' + v).slice(-2); }
+  function tc(s) { var f = Math.floor((s % 1) * 25); s = Math.floor(s); return n2(Math.floor(s / 3600)) + ':' + n2(Math.floor(s / 60) % 60) + ':' + n2(s % 60) + ':' + n2(f); }
+  panel = function () {
+    if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
+    var i = list.indexOf(w), n = i < 0 ? '' : n2(i + 1);
+    return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' +
+      (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
+      '<div class="pm">' + w.p + '</div>' +
+      '<div class="fw"><div class="film"><img alt="" src="' + still(w) + '"></div></div><div class="bar"><i></i></div>' +
+      '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
+      '<dl class="cr">' + creds(w) + '</dl>';
+  };
+  var _tick = tick;
+  tick = function () { _tick(); var e = root().querySelector('.tc'); if (e && w) e.textContent = tc(pos); };
+  if (w) {
+    ['pane', 'sheetIn'].forEach(function (id) { var r = document.getElementById(id); r.innerHTML = panel(); var im = r.querySelector('.film img'); if (im) im.classList.add('ok'); });
+    setPlay(playing);
+  }
+})();
+</script>
+<style>
+/* 30 Oct, Elliot: the player sits on the info bar's columns. The page uses the bar's own grid,
+   the names take the first column, the player spans the next two with the bar's cell padding,
+   and faint rules carry the bar's dividers up the page. */
+@media (min-width: 900px) {
+  :root { --c4: 104px; }
+  .bar2 { grid-template-columns: 1.1fr 1.2fr .6fr var(--c4); }
+  .grid { grid-template-columns: 1.1fr 1.2fr .6fr var(--c4); column-gap: 0; }
+  .grid > div:first-child { grid-column: 1; min-width: 0; padding-right: 22px; }
+  .pane { grid-column: 2 / 4; padding: 0 22px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .grid::after { content: ""; grid-column: 4; grid-row: 1; }
+}
+</style>
+<style>
+/* 30 Oct, Elliot: no corner marks (too techy); the picture sits on its own in its real shape */
+.fw { background: none; padding: 0; margin-top: 22px; }
+@media (max-width: 899px) { .fw { margin-top: 16px; padding: 0; } }
+.in .film { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+</style>
+<style>
+/* the player scrolls on its own (30 Oct, Elliot: "you need in the player column to be able to
+   scroll down"): on a computer the player column is its own scroll, so the credits are always
+   reachable without running the list to the end */
+@media (min-width: 900px) {
+  .pane .in { max-height: calc(100dvh - var(--top) - var(--bot)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding-bottom: 48px; }
+  .pane .in::-webkit-scrollbar { display: none; }
+}
+</style>
+<style>
+/* Round 2 (Leo's notes, 30 Oct). Red on white; no Now playing line, timecode or ratio on the
+   picture; a plain progress line; the film sized so the credits always fit under it on a
+   laptop; the footer as four columns (name, bio, contact with Leo's name, Instagram and the
+   credit); on phones the footer is just the name and Info, which opens an info page. */
+.in .ttl { margin-top: 0; }
+.in .bar { height: 1px; background: var(--line); margin-top: 14px; }
+.in .bar i { height: 1px; }
+.in .bar i::after { display: none; }
+.in .cr { margin-top: 20px; }
+.bar2 .ig, .bar2 .bio, .bar2 .ct { display: none; }
+.bar2 { grid-template-columns: 1fr auto; align-items: baseline; }
+.infob { font: 400 var(--small)/1 var(--sans); justify-self: end; }
+.bar2 .ig a, .bar2 .ct > * { display: block; }
+.cred { font-size: 11px; opacity: .5; }
+.cred:hover { opacity: .8; }
+@media (min-width: 900px) {
+  :root { --c4: 150px; }
+  .bar2, .grid { grid-template-columns: 1.1fr 1.2fr .6fr var(--c4); }
+  .bar2 { align-items: stretch; }
+  .infob { display: none; }
+  .bar2 .bio, .bar2 .ct, .bar2 .ig { display: block; }
+  .bar2 .ig { display: flex; flex-direction: column; gap: 2px; }
+  .bar2 .ct > * + * { margin-top: 2px; }
+  .pane .in { padding-top: 26px; padding-bottom: 26px; }
+}
+/* the info page, phones only */
+.info { justify-content: center; gap: 22px; transform: translateY(100%); }
+.info.open { transform: none; }
+.info .back { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: max(var(--pad), env(safe-area-inset-right, 0px)); font: 400 var(--small)/1 var(--sans); padding: 6px 0; }
+.info p { line-height: 1.45; }
+@media (min-width: 900px) { .info { display: none; } }
+</style>
+<script>
+/* the film never pushes the credits off a laptop screen */
+function fitCap(film) {
+  var inn = film.closest('.pane .in'); if (!inn || innerWidth < 900) return 0;
+  return Math.max(220, inn.clientHeight - (inn.scrollHeight - film.offsetHeight));
+}
+(function () {
+  var info = document.getElementById('info');
+  function show(on) { info.classList.toggle('open', on); info.setAttribute('aria-hidden', !on); }
+  document.getElementById('infob').onclick = function () { show(true); };
+  document.getElementById('infox').onclick = function () { show(false); };
+})();
+</script>
+</body>
+</html>

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
 <title>Helical Sound: Helix, round 1</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2712%27 fill=%27%23F2210F%27/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&display=swap">
@@ -78,6 +79,10 @@ a:hover, button:hover { opacity: .55; }
 .run .sym { margin: 0 .35em 0 .2em; }
 .pfoot { padding-top: 16px; gap: 14px 28px; line-height: 1.45; }
 .pfoot .ct > * + * { margin-top: 1px; }
+/* detail pass (30 Oct): cards lift under the pointer, a pointer cursor on cards */
+.card img { transition: transform .5s var(--ease), filter .5s var(--ease); }
+.card:hover img { transform: scale(1.05); }
+.stage:not(.drag) .card { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -85,7 +90,7 @@ a:hover, button:hover { opacity: .55; }
 <nav class="nav" id="nav" aria-label="Filter by work"></nav>
 <div class="about">
   <p class="bio">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
-  <p><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></p>
+  <p><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><br><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></p>
 </div>
 <div class="ways" aria-label="Colourway">
   <button type="button" data-way-btn="ink" aria-label="Grey and ink"></button>
@@ -106,7 +111,7 @@ a:hover, button:hover { opacity: .55; }
   <p class="run" id="run"></p>
   <footer class="pfoot">
     <p><a href="#" class="home" id="home2">Helical Sound</a> is a London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
-    <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a></div>
+    <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></div>
     <a class="credit" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a>
   </footer>
 </div></section>
@@ -205,6 +210,22 @@ document.getElementById('home2').onclick = function (e) { e.preventDefault(); cl
 document.getElementById('home').onclick = function (e) { e.preventDefault(); closeP(); };
 addEventListener('keydown', function (e) { if (e.key === 'Escape') closeP(); });
 build(); requestAnimationFrame(frame);
+</script>
+<script>
+/* detail pass (30 Oct): tab title follows the film; arrows for prev / next and space to play */
+(function () {
+  var base = document.title, _open = openP, _close = closeP;
+  openP = function (i) { _open(i); document.title = list[i].c + ' \u00b7 ' + base; };
+  closeP = function () { _close(); document.title = base; };
+  document.getElementById('close').onclick = function () { closeP(); };
+  addEventListener('keydown', function (e) {
+    if (!proj.classList.contains('open')) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); openP((cur + 1) % list.length); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); openP((cur - 1 + list.length) % list.length); }
+    else if (e.key === ' ') { e.preventDefault(); play(!playing); }
+    else if (e.key === 'Escape') closeP();
+  });
+})();
 </script>
 </body>
 </html>

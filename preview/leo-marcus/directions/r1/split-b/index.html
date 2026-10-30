@@ -151,6 +151,7 @@ a:hover { opacity: .5; }
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../vimeo-r1.js"></script>
 <script src="../helix-swap.js"></script>
 <script>
 var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0;
@@ -165,11 +166,11 @@ function build() {
   }).join('');
   document.getElementById('names').classList.toggle('has', !!w && list.indexOf(w) > -1);
 }
-/* only the credits that exist: no empty Director or Agency lines */
+/* only the credits that exist: no empty Director or Creative direction lines */
 function creds(x) {
   var h = '';
   if (x.dir) h += '<dt>Director</dt><dd>' + x.dir + '</dd>';
-  if (x.ag) h += '<dt>Agency</dt><dd>' + x.ag + '</dd>';
+  if (x.ag) h += '<dt>Creative direction</dt><dd>' + x.ag + '</dd>';
   return h + '<dt>Helical Sound</dt><dd>' + credits(x) + '</dd>';
 }
 function panel() {

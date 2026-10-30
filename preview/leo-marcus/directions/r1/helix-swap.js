@@ -9,6 +9,7 @@ function spatialSwap(o) {
   /* the old film: a copy left where it was, which drifts back and away */
   var ghost = f.cloneNode(true);
   ghost.removeAttribute('id');
+  [].forEach.call(ghost.querySelectorAll('iframe'), function (n) { n.remove(); });
   ghost.style.cssText = 'position:fixed;margin:0;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;z-index:80;pointer-events:none;transform-origin:50% 50%';
   document.body.appendChild(ghost);
   o.fill();

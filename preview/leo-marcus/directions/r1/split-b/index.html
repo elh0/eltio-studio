@@ -375,5 +375,18 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   }
 })();
 </script>
+<style>
+/* 30 Oct, Elliot: the player sits on the info bar's columns. The page uses the bar's own grid,
+   the names take the first column, the player spans the next two with the bar's cell padding,
+   and faint rules carry the bar's dividers up the page. */
+@media (min-width: 900px) {
+  :root { --c4: 104px; }
+  .bar2 { grid-template-columns: 1.1fr 1.2fr .6fr var(--c4); }
+  .grid { grid-template-columns: 1.1fr 1.2fr .6fr var(--c4); column-gap: 0; }
+  .grid > div:first-child { grid-column: 1; min-width: 0; padding-right: 22px; }
+  .pane { grid-column: 2 / 4; padding: 0 22px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .grid::after { content: ""; grid-column: 4; grid-row: 1; }
+}
+</style>
 </body>
 </html>

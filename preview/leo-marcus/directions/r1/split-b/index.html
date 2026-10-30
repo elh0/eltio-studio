@@ -282,7 +282,7 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
     var r = root(), old = r.querySelector('.film'), from = list.indexOf(w), to = list.indexOf(x);
     if (old && w && x !== w && !reduce && r.getBoundingClientRect().height) {
       spatialSwap({
-        film: old, dir: to < from ? -1 : 1,
+        film: old, dir: to < from ? -1 : 1, axis: 'y',
         fill: function () { _load(x, a); settle(document.getElementById(r.id === 'pane' ? 'sheetIn' : 'pane'), true); },
         getFilm: function () { var f = r.querySelector('.film'), im = f && f.querySelector('img'); if (im) im.classList.add('ok'); return f; },
         text: function () { return [r.querySelector('.ttl'), r.querySelector('.in > .pm'), r.querySelector('.ctl'), r.querySelector('.cr')]; }
@@ -364,7 +364,7 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
       (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
       '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span></div>' +
       '<div class="pm">' + w.p + '</div>' +
-      '<div class="fw"><div class="film"><img alt="" src="' + still(w) + '"><span class="hud bl tc">00:00:00:00</span><span class="hud br">2.42 : 1</span></div></div><div class="bar"><i></i></div>' +
+      '<div class="fw"><div class="film"><img alt="" src="' + still(w) + '"><span class="hud bl tc">00:00:00:00</span><span class="hud br"></span></div></div><div class="bar"><i></i></div>' +
       '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
       '<dl class="cr">' + creds(w) + '</dl>';
   };
@@ -388,6 +388,12 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   .pane { grid-column: 2 / 4; padding: 0 22px; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
   .grid::after { content: ""; grid-column: 4; grid-row: 1; }
 }
+</style>
+<style>
+/* 30 Oct, Elliot: no corner marks (too techy); the picture sits on its own in its real shape */
+.fw { background: none; padding: 0; margin-top: 22px; }
+@media (max-width: 899px) { .fw { margin-top: 16px; padding: 0; } }
+.in .film { background: color-mix(in srgb, var(--fg) 6%, transparent); }
 </style>
 </body>
 </html>

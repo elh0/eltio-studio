@@ -283,6 +283,8 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   load = function (x, a) {
     /* 30 Oct: when a film is already showing, the next one glides in in depth, then its words */
     var r = root(), old = r.querySelector('.film'), from = list.indexOf(w), to = list.indexOf(x);
+    /* back to the top of the player column for the next film */
+    var pin = document.querySelector('.pane .in'); if (pin && pin.scrollTop && x !== w) pin.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
     if (old && w && x !== w && !reduce && r.getBoundingClientRect().height) {
       spatialSwap({
         film: old, dir: to < from ? -1 : 1, axis: 'y',
@@ -303,7 +305,10 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   if (!matchMedia('(pointer: fine)').matches || reduce) return;
   var y = sc.scrollTop, ty = y, run = false;
   sc.addEventListener('wheel', function (e) {
-    if (e.ctrlKey) return; e.preventDefault();
+    if (e.ctrlKey) return;
+    var pn = e.target.closest && e.target.closest('.pane .in');
+    if (pn && pn.scrollHeight > pn.clientHeight + 1) return;
+    e.preventDefault();
     ty = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight, ty + e.deltaY));
     if (!run) { run = true; requestAnimationFrame(glide); }
   }, { passive: false });
@@ -397,6 +402,15 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
 .fw { background: none; padding: 0; margin-top: 22px; }
 @media (max-width: 899px) { .fw { margin-top: 16px; padding: 0; } }
 .in .film { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+</style>
+<style>
+/* the player scrolls on its own (30 Oct, Elliot: "you need in the player column to be able to
+   scroll down"): on a computer the player column is its own scroll, so the credits are always
+   reachable without running the list to the end */
+@media (min-width: 900px) {
+  .pane .in { max-height: calc(100dvh - var(--top) - var(--bot)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding-bottom: 48px; }
+  .pane .in::-webkit-scrollbar { display: none; }
+}
 </style>
 </body>
 </html>

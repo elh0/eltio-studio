@@ -109,6 +109,19 @@ a:hover { opacity: .5; }
 .in .film img { opacity: 0; transition: opacity .7s var(--ease), transform 12s linear; }
 .in .film img.ok { opacity: 1; }
 .tg button { transition: opacity .35s var(--ease); }
+/* tidy pass (30 Oct): the player's title lines up with the filters, the controls read as
+   play and time on the left with prev / next together on the right, the colourway cell in the
+   info bar gets a full-height rule, and the film switch glides (helix-swap.js) */
+@media (min-width: 900px) { .pane .in { top: 0; padding-top: 26px; } }
+.ctl { justify-content: flex-start; gap: 18px; }
+.ctl [data-k=play] { order: 1; min-width: 3.4em; text-align: left; }
+.ctl .tm { order: 2; opacity: .5; font-variant-numeric: tabular-nums; }
+.ctl [data-k=prev] { order: 3; margin-left: auto; }
+.ctl [data-k=next] { order: 4; }
+.ctl button:hover { opacity: .5; }
+.ttl .x { display: grid; place-items: center; width: 30px; height: 30px; margin: -6px -6px 0 0; }
+@media (min-width: 900px) { .bar2 .ways { align-self: stretch; } }
+.in .film { overflow: hidden; }
 </style>
 </head>
 <body class="vb">
@@ -138,6 +151,7 @@ a:hover { opacity: .5; }
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../helix-swap.js"></script>
 <script>
 var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0;
 var phone = function () { return innerWidth < 900; };
@@ -160,7 +174,7 @@ function creds(x) {
 }
 function panel() {
   if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
-  return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' + (phone() ? '<button type="button" data-k="close">Close</button>' : '') + '</div>' +
+  return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' + (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
     '<div class="pm">' + w.p + '</div>' +
     '<div class="film"><img alt="" src="' + still(w) + '"></div><div class="bar"><i></i></div>' +
     '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
@@ -255,14 +269,25 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
     if (swap) { names.classList.add('out'); setTimeout(go, 220); } else go();
   };
   /* the film and its credits cross-fade in, the still only shows once it has loaded */
-  function settle(r) {
+  function settle(r, quiet) {
     var im = r.querySelector('.film img'); if (!im) return;
     var show = function () { im.classList.add('ok'); };
     if (im.complete) requestAnimationFrame(show); else im.addEventListener('load', show);
-    if (!reduce && !first) { r.classList.remove('swap'); r.offsetWidth; r.classList.add('swap'); }
+    if (!reduce && !first && !quiet) { r.classList.remove('swap'); r.offsetWidth; r.classList.add('swap'); }
   }
   var _load = load;
   load = function (x, a) {
+    /* 30 Oct: when a film is already showing, the next one glides in in depth, then its words */
+    var r = root(), old = r.querySelector('.film'), from = list.indexOf(w), to = list.indexOf(x);
+    if (old && w && x !== w && !reduce && r.getBoundingClientRect().height) {
+      spatialSwap({
+        film: old, dir: to < from ? -1 : 1,
+        fill: function () { _load(x, a); settle(document.getElementById(r.id === 'pane' ? 'sheetIn' : 'pane'), true); },
+        getFilm: function () { var f = r.querySelector('.film'), im = f && f.querySelector('img'); if (im) im.classList.add('ok'); return f; },
+        text: function () { return [r.querySelector('.ttl'), r.querySelector('.in > .pm'), r.querySelector('.ctl'), r.querySelector('.cr')]; }
+      });
+      first = false; return;
+    }
     _load(x, a);
     settle(document.getElementById('pane')); settle(document.getElementById('sheetIn'));
     first = false;

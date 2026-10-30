@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yapcine: credits &amp; removals</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@500;600;800&display=swap">
+<link rel="stylesheet" href="../site.css">
+</head>
+<body data-upcoming="1">
+<div class="page">
+  <header><a class="yap" style="position:static" href="../">YAP</a><a class="m q" href="https://www.instagram.com/yapcine/">@yapcine</a></header>
+  <h1>credits &amp; removals</h1>
+  <p>Yapcine is a reference feed. Every work here belongs to its makers. We show a short loop, credit the people who made it and link to the official source.</p>
+
+  <h2>Made it? Want it down?</h2>
+  <p>If you made, own or represent a work on Yapcine and want a credit fixed or the work removed, email us with the title and your link to it. We take things down the same day, no questions asked, on the site and on Instagram.</p>
+  <p><a class="mail" href="mailto:hello@yapcine.com?subject=Credit%20or%20removal">hello@yapcine.com</a></p>
+
+  <h2>Want to be featured?</h2>
+  <p>Send us your work at the same address, with credits and an official link.</p>
+
+  <h2>On the feed</h2>
+  <ul class="list m" id="list"></ul>
+</div>
+<script>
+fetch("../works.json", {cache: "no-cache"}).then(r => r.json()).then(all => {
+  const up = document.body.dataset.upcoming === "1";
+  const E = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  document.getElementById('list').innerHTML = all.filter(w => w.ig || up).sort((a, b) => a.t.localeCompare(b.t)).map(w =>
+    `<li><span>${E(w.t)} · ${w.y}</span><span class="q">${E(w.dir)} · <a href="${E(w.src)}" target="_blank" rel="noopener">source ↗</a></span></li>`).join('');
+});
+</script>
+</body>
+</html>

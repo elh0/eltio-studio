@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yapcine</title>
+<meta name="description" content="A visual reference feed of music videos, films and commercials. Every work credited to its makers.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@500;600;800&display=swap">
+<link rel="stylesheet" href="site.css">
+</head>
+<body data-upcoming="1">
+<section class="open" aria-label="Yapcine">
+  <video id="hero" muted autoplay loop playsinline></video>
+  <a class="yap" href="./" id="home">YAP</a>
+  <a class="crl m" href="credits/">credits &amp; removals</a>
+  <div class="find"><label for="q"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="M11 11l3.5 3.5"/></svg>
+    <input id="q" type="search" autocomplete="off" enterkeyhint="search" placeholder="search references…" aria-label="Search references"></label></div>
+  <a class="now m" id="now" href="#" target="_blank" rel="noopener"></a>
+</section>
+
+<nav class="chips" id="chips" aria-label="Filter"></nav>
+<main class="feed" id="feed"></main>
+<p class="empty m" id="empty" hidden>nothing yet. try a director, a decade or a colour.</p>
+
+<footer class="foot m">
+  <a href="credits/">credits &amp; removals</a>
+  <span>every work belongs to its makers. linked to official sources.</span>
+  <a href="https://www.instagram.com/yapcine/">@yapcine</a>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Loop" hidden>
+  <button class="x m" type="button" id="lbx">close</button>
+  <figure><video id="lbv" muted loop playsinline></video>
+    <figcaption>
+      <div><b id="lbt"></b><span class="m q" id="lbd"></span></div>
+      <div class="links"><a class="m" id="lbi" href="#" target="_blank" rel="noopener">on @yapcine ↗</a><a class="m q" id="lba" href="#" target="_blank" rel="noopener">source ↗</a></div>
+    </figcaption></figure>
+</div>
+<script src="site.js"></script>
+</body>
+</html>

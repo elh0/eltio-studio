@@ -12,6 +12,7 @@ function spatialSwap(o) {
   ghost.style.cssText = 'position:fixed;margin:0;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;z-index:80;pointer-events:none;transform-origin:50% 50%';
   document.body.appendChild(ghost);
   o.fill();
+  if (o.getFilm) f = o.getFilm() || f;
   ghost.animate([
     { transform: 'perspective(1400px) translate3d(0,0,0) rotateY(0)', opacity: 1, filter: 'blur(0)' },
     { transform: 'perspective(1400px) translate3d(' + (-dir * 38) + '%,0,-520px) rotateY(' + (dir * 22) + 'deg)', opacity: 0, filter: 'blur(6px)' }
@@ -22,7 +23,7 @@ function spatialSwap(o) {
     { transform: 'perspective(1400px) translate3d(0,0,0) rotateY(0)', opacity: 1, filter: 'blur(0)' }
   ], { duration: 1050, delay: 90, easing: ease, fill: 'backwards' });
   /* then the words, one line at a time */
-  (o.text || []).forEach(function (el, k) {
+  (typeof o.text === 'function' ? o.text() : o.text || []).forEach(function (el, k) {
     if (!el) return;
     el.animate([
       { transform: 'translate3d(' + (dir * 24) + 'px,10px,0)', opacity: 0, filter: 'blur(6px)' },

@@ -149,7 +149,6 @@ body.in-film .phead { visibility: visible; opacity: 1; }
 }
 @media (max-width: 899px) { .foot .credit { text-align: left; } .hero { min-height: 0; align-content: start; padding-top: calc(env(safe-area-inset-top, 0px) + 96px); padding-bottom: 6vh; } }
 /* phones: the helix softens out under the name, the filters and the bio */
-@media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); } }
 /* negative space (30 Oct, Elliot): no stack left over, the film opens as a smaller player with
    room around it, and every section gets more air, closer to the reference */
 .stk { display: none !important; }
@@ -219,14 +218,17 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
 .stage.hov .card img { opacity: .5; }
 .stage.hov .card.hot img { opacity: 1; transform: scale(1.06); }
 
-/* 30 Oct: the helix fades out before the name and filters, and above the bottom line, so nothing sits across the text */
-.stage { -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 70px, #000 210px, #000 calc(100% - 110px), transparent calc(100% - 30px)); mask-image: linear-gradient(to bottom, transparent 0, transparent 70px, #000 210px, #000 calc(100% - 110px), transparent calc(100% - 30px)); }
-
+/* 30 Oct: the helix fades out before the name and filters, and above the bottom line, so nothing
+   sits across the text. Painted bands in the page colour rather than a mask, which is much cheaper to draw. */
+.stage::before, .stage::after { content: ""; position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none; }
+.stage::before { top: 0; height: 210px; background: linear-gradient(var(--bg) 70px, color-mix(in srgb, var(--bg) 0%, transparent)); }
+.stage::after { bottom: 0; height: 110px; background: linear-gradient(color-mix(in srgb, var(--bg) 0%, transparent), var(--bg) 80px); }
+@media (max-width: 899px) { .stage::before { height: 180px; background: linear-gradient(var(--bg) 90px, color-mix(in srgb, var(--bg) 0%, transparent)); } .stage::after { height: 230px; } }
+.card { overflow: hidden; }
 /* clicking a card never selects it (that was the blue highlight) */
 .stage, .stage * { -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
 .stage img { -webkit-user-drag: none; }
 
-@media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 90px, #000 180px, #000 calc(100% - 230px), transparent calc(100% - 150px)); mask-image: linear-gradient(to bottom, transparent 0, transparent 90px, #000 180px, #000 calc(100% - 230px), transparent calc(100% - 150px)); } }
 </style>
 </head>
 <body>
@@ -335,7 +337,7 @@ function frame(now) {
   }
   if (!document.body.classList.contains('in-film') || reelT0) {
     if (!reelT0 && !reel && now - lastTouch > 2400) target += .016;
-    off += (target - off) * .075;
+    off += (target - off) * .1;
     place();
   }
   if (document.body.classList.contains('in-film')) filmFrame();

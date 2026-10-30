@@ -312,5 +312,68 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   }
 })();
 </script>
+<style>
+/* the player as a monitor (30 Oct, Elliot: "smarter and tidier, more cool UI"): a header line
+   with the index and count, crop marks round the film, a timecode and frame ratio on the
+   picture, a ticked scrub bar with a playhead, symbol controls and credits as ruled rows */
+.in { gap: 0; }
+.mhd { display: flex; align-items: center; gap: 10px; font: 400 11px/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+.mhd .lab { opacity: .5; }
+.mhd .lab::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 8px; vertical-align: 1px; opacity: .35; transition: opacity .3s; }
+.in:has(.film.on) .mhd .lab::before { opacity: 1; animation: rec 1.6s steps(1) infinite; }
+@keyframes rec { 50% { opacity: .25; } }
+.mhd .cnt { margin-left: auto; font-variant-numeric: tabular-nums; }
+.mhd .x { display: grid; place-items: center; width: 28px; height: 28px; margin: -8px -6px -8px 4px; }
+.in .ttl { margin-top: 18px; font: 500 clamp(22px, 2vw, 30px)/1.05 var(--sans); letter-spacing: -.02em; }
+.in > .pm { margin: 6px 0 0; opacity: .55; }
+.fw { margin-top: 22px; padding: 9px; position: relative;
+  --k: color-mix(in srgb, var(--fg) 70%, transparent);
+  background:
+    linear-gradient(var(--k), var(--k)) top left / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) top left / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) top right / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) top right / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) bottom left / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) bottom left / 1px 12px no-repeat,
+    linear-gradient(var(--k), var(--k)) bottom right / 12px 1px no-repeat, linear-gradient(var(--k), var(--k)) bottom right / 1px 12px no-repeat; }
+.in .film { margin: 0; position: relative; }
+.hud { position: absolute; z-index: 2; font: 400 10px/1 var(--mono); letter-spacing: .04em; color: #fff; text-shadow: 0 0 6px rgba(0, 0, 0, .35); pointer-events: none; font-variant-numeric: tabular-nums; }
+.hud.tl { top: 10px; left: 12px; } .hud.br { bottom: 10px; right: 12px; opacity: .8; } .hud.bl { bottom: 10px; left: 12px; }
+.in .bar { margin-top: 12px; height: 9px; background:
+  linear-gradient(var(--line), var(--line)) bottom / 100% 1px no-repeat,
+  repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 10%) bottom left / 100% 5px no-repeat; }
+.in .bar i { top: auto; bottom: 0; height: 1px; }
+.in .bar i::after { content: ""; position: absolute; right: -1px; bottom: 0; width: 1px; height: 9px; background: var(--fg); }
+.in .ctl { margin-top: 12px; font: 400 11px/1 var(--mono); letter-spacing: .02em; text-transform: uppercase; align-items: center; }
+.ctl [data-k=play]::before { content: "\25B6\FE0E"; display: inline-block; width: 1.6em; font-size: .9em; }
+.in:has(.film.on) .ctl [data-k=play]::before { content: "\2759\2759"; letter-spacing: -.12em; }
+.ctl [data-k=prev]::before { content: "\2039\00a0"; } .ctl [data-k=next]::after { content: "\00a0\203A"; }
+.ctl .tm { opacity: .5; }
+.in .cr { margin-top: 26px; display: grid; grid-template-columns: minmax(7em, auto) 1fr; gap: 0; }
+.in .cr dt, .in .cr dd { padding: 9px 0; border-top: 1px solid var(--line); }
+.in .cr dt { font: 400 11px/1.5 var(--mono); letter-spacing: .02em; text-transform: uppercase; opacity: .5; }
+.in .cr dd { padding-left: 14px; }
+@media (max-width: 899px) { .in .ttl { margin-top: 14px; } .fw { margin-top: 16px; padding: 7px; } .in .cr { margin-top: 18px; } }
+</style>
+<script>
+(function () {
+  function n2(v) { return ('0' + v).slice(-2); }
+  function tc(s) { var f = Math.floor((s % 1) * 25); s = Math.floor(s); return n2(Math.floor(s / 3600)) + ':' + n2(Math.floor(s / 60) % 60) + ':' + n2(s % 60) + ':' + n2(f); }
+  panel = function () {
+    if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
+    var i = list.indexOf(w), n = i < 0 ? '' : n2(i + 1);
+    return '<div class="mhd"><span>(' + n + ')</span><span class="lab">Now playing</span><span class="cnt">' + n + ' / ' + n2(list.length) + '</span>' +
+      (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
+      '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span></div>' +
+      '<div class="pm">' + w.p + '</div>' +
+      '<div class="fw"><div class="film"><img alt="" src="' + still(w) + '"><span class="hud bl tc">00:00:00:00</span><span class="hud br">2.42 : 1</span></div></div><div class="bar"><i></i></div>' +
+      '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
+      '<dl class="cr">' + creds(w) + '</dl>';
+  };
+  var _tick = tick;
+  tick = function () { _tick(); var e = root().querySelector('.tc'); if (e && w) e.textContent = tc(pos); };
+  if (w) {
+    ['pane', 'sheetIn'].forEach(function (id) { var r = document.getElementById(id); r.innerHTML = panel(); var im = r.querySelector('.film img'); if (im) im.classList.add('ok'); });
+    setPlay(playing);
+  }
+})();
+</script>
 </body>
 </html>

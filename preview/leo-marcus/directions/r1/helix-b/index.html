@@ -269,6 +269,7 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../helix-fx.js"></script>
 <script>
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine = matchMedia('(pointer: fine)').matches;
@@ -302,6 +303,7 @@ function place() {
   var wide = innerWidth >= 900;
   H.style.transform = 'rotateZ(' + (wide ? -5 : -3) + 'deg) rotateX(-9deg)';
   var r = reduce ? (reelTo ? 1 : 0) : reel, er = ease(r);
+  FX.tick(off);
   for (var i = 0; i < N; i++) {
     var c = cards[i], u = ((i - off) % N + N) % N - N / 2;
     if (r > 0 && c !== picked) {
@@ -309,8 +311,8 @@ function place() {
       u += s * er * (N * .55) * (1 - Math.min(1, Math.abs(d) / N) * .4);
       c.style.opacity = Math.max(0, 1 - er * 1.4).toFixed(3);
     } else if (c.style.opacity !== '') c.style.opacity = '';
-    var a = u * G.step, rad = a * Math.PI / 180, flip = Math.cos((a + G.F) * Math.PI / 180) < 0 ? 180 : 0;
-    c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (G.F + flip) + 'deg)';
+    var a = u * G.step, rad = a * Math.PI / 180, FA = G.F + FX.fan, flip = Math.cos((a + FA) * Math.PI / 180) < 0 ? 180 : 0;
+    c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + (G.R + FX.bump(u)).toFixed(1) + 'px) rotateY(' + (FA + flip) + 'deg)';
   }
 }
 function frame(now) {

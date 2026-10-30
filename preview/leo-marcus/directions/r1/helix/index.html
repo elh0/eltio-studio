@@ -144,6 +144,7 @@ body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter
 
 <script src="../../shared.js"></script>
 <script src="../work-r1.js"></script>
+<script src="../helix-fx.js"></script>
 <script>
 var tag = 'all', list = [], cards = [], step = 0, off = 0, target = 0, lastTouch = 0;
 var H = document.getElementById('helix'), S = document.getElementById('stage'), proj = document.getElementById('proj');
@@ -176,9 +177,10 @@ function frame(now) {
     if (now - lastTouch > 2400) target += .016;
     off += (target - off) * .075;
     H.style.transform = 'rotateZ(' + (innerWidth >= 900 ? -5 : -3) + 'deg) rotateX(-9deg)';
+    FX.tick(off);
     for (var i = 0; i < N; i++) {
-      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, flip = Math.cos((a + G.F) * Math.PI / 180) < 0 ? 180 : 0;
-      cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (G.F + flip) + 'deg)';
+      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, FA = G.F + FX.fan, flip = Math.cos((a + FA) * Math.PI / 180) < 0 ? 180 : 0;
+      cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + (G.R + FX.bump(u)).toFixed(1) + 'px) rotateY(' + (FA + flip) + 'deg)';
     }
   }
   requestAnimationFrame(frame);

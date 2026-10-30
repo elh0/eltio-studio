@@ -85,6 +85,20 @@ a:hover, button:hover { opacity: .55; }
 .stage:not(.drag) .card { cursor: pointer; }
 /* phones: the helix softens out under the name, the filters and the bio */
 @media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); } }
+/* negative space (30 Oct, Elliot): the film page sits in a narrower column with more room around it */
+.pin { max-width: 880px; padding-top: calc(env(safe-area-inset-top, 0px) + var(--pad) + 9vh); gap: 18px; }
+.ptop { position: fixed; top: calc(env(safe-area-inset-top, 0px) + var(--pad)); right: max(var(--pad), env(safe-area-inset-right, 0px)); z-index: 2; }
+.close { font-size: var(--mid); }
+.run { margin: 9vh 0 12vh; }
+@media (max-width: 899px) { .pin { padding-top: calc(env(safe-area-inset-top, 0px) + 18vh); } }
+/* split the diff (30 Oct, Elliot): fewer, bigger cards turned half way, so they keep the
+   reference's stacked look but are never edge-on and are easy to tap; the helix pauses under
+   the pointer and the client's name follows it */
+.lbl { position: fixed; z-index: 45; pointer-events: none; font: 500 var(--small)/1 var(--sans); padding: 6px 8px; background: var(--bg); color: var(--fg); opacity: 0; transform: translate(14px, 14px); transition: opacity .2s; white-space: nowrap; }
+.lbl.on { opacity: 1; }
+.card img { transition: transform .45s var(--ease), filter .45s var(--ease); }
+.stage.hov .card img { filter: saturate(.6) brightness(1.04); }
+.stage.hov .card.hot img { filter: none; transform: scale(1.06); }
 </style>
 </head>
 <body>
@@ -130,12 +144,12 @@ var G = {}, N = 0;
 function geo() {
   var W = innerWidth, Hh = innerHeight, wide = W >= 900;
   G = wide
-    ? { R: Math.min(W * .29, Hh * .6), cw: Math.min(W * .047, 84), per: 64, pitch: Hh * .46 }
-    : { R: W * .37, cw: W * .082, per: 38, pitch: Hh * .3 };
-  G.ch = G.cw * 1.32; G.step = 360 / G.per; G.rise = G.pitch / G.per;
+    ? { R: Math.min(W * .26, Hh * .52), cw: Math.min(W * .074, 124), per: 30, pitch: Hh * .5, F: 52 }
+    : { R: W * .32, cw: W * .15, per: 22, pitch: Hh * .3, F: 52 };
+  G.ch = G.cw * 1.25; G.step = 360 / G.per; G.rise = G.pitch / G.per;
   document.documentElement.style.setProperty('--cw', G.cw + 'px');
   document.documentElement.style.setProperty('--ch', G.ch + 'px');
-  return Math.min(320, Math.ceil(Hh * 2.1 / G.rise));
+  return Math.min(320, Math.ceil(Hh * 2.3 / G.rise));
 }
 function build() {
   document.getElementById('nav').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
@@ -149,23 +163,23 @@ function build() {
 }
 function frame(now) {
   if (!proj.classList.contains('open')) {
-    if (now - lastTouch > 2400) target += .045;
+    if (now - lastTouch > 2400) target += .016;
     off += (target - off) * .075;
     H.style.transform = 'rotateZ(' + (innerWidth >= 900 ? -5 : -3) + 'deg) rotateX(-9deg)';
     for (var i = 0; i < N; i++) {
-      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, flip = Math.sin(a * Math.PI / 180) > 0 ? 180 : 0;
-      cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (90 + flip) + 'deg)';
+      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, flip = Math.cos((a + G.F) * Math.PI / 180) < 0 ? 180 : 0;
+      cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (G.F + flip) + 'deg)';
     }
   }
   requestAnimationFrame(frame);
 }
-addEventListener('wheel', function (e) { if (proj.classList.contains('open')) return; target += (e.deltaY + e.deltaX) * .045; lastTouch = performance.now(); }, { passive: true });
+addEventListener('wheel', function (e) { if (proj.classList.contains('open')) return; target += (e.deltaY + e.deltaX) * .012; lastTouch = performance.now(); }, { passive: true });
 var down = null;
 S.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: target, moved: 0 }; S.setPointerCapture(e.pointerId); S.classList.add('drag'); lastTouch = performance.now(); });
 S.addEventListener('pointermove', function (e) {
   if (!down) return; var dx = e.clientX - down.x, dy = e.clientY - down.y;
   down.moved = Math.max(down.moved, Math.abs(dx) + Math.abs(dy));
-  target = down.t + (dy - dx) / G.rise * .35; lastTouch = performance.now();
+  target = down.t + (dy - dx) / G.rise * .12; lastTouch = performance.now();
 });
 S.addEventListener('pointerup', function (e) {
   S.classList.remove('drag'); if (!down) return;
@@ -234,6 +248,21 @@ build(); requestAnimationFrame(frame);
     else if (e.key === ' ') { e.preventDefault(); play(!playing); }
     else if (e.key === 'Escape') closeP();
   });
+})();
+</script>
+<script>
+/* split the diff: pause under the pointer, name label, hot card */
+(function () {
+  var L = document.createElement('div'); L.className = 'lbl'; document.body.appendChild(L); var hot = null;
+  S.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    var c = e.target.closest && e.target.closest('.card');
+    if (c !== hot) { if (hot) hot.classList.remove('hot'); hot = c; if (c) c.classList.add('hot'); }
+    S.classList.toggle('hov', !!c); L.classList.toggle('on', !!c);
+    if (c) { L.textContent = list[+c.getAttribute('data-i')].c; L.style.left = e.clientX + 'px'; L.style.top = e.clientY + 'px'; lastTouch = performance.now(); }
+  });
+  S.addEventListener('pointerleave', function () { if (hot) hot.classList.remove('hot'); hot = null; S.classList.remove('hov'); L.classList.remove('on'); });
+  addEventListener('pointerdown', function () { L.classList.remove('on'); });
 })();
 </script>
 </body>

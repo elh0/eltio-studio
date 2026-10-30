@@ -150,6 +150,43 @@ body.in-film .phead { visibility: visible; opacity: 1; }
 @media (max-width: 899px) { .foot .credit { text-align: left; } .hero { min-height: 0; align-content: start; padding-top: calc(env(safe-area-inset-top, 0px) + 96px); padding-bottom: 6vh; } }
 /* phones: the helix softens out under the name, the filters and the bio */
 @media (max-width: 899px) { .stage { -webkit-mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); mask-image: linear-gradient(transparent 70px, #000 130px, #000 62%, transparent 74%); } }
+/* negative space (30 Oct, Elliot): no stack left over, the film opens as a smaller player with
+   room around it, and every section gets more air, closer to the reference */
+.stk { display: none !important; }
+@media (min-width: 900px) {
+  .hero { align-content: center; row-gap: 26px; padding-top: calc(env(safe-area-inset-top, 0px) + 12vh); padding-bottom: 10vh; }
+  .player { grid-column: 3 / 11; }
+  .ttl { grid-column: 3 / 11; display: flex; justify-content: space-between; align-items: start; gap: var(--gut); }
+  .ttl h1 { flex: 1; }
+  .meta { flex: none; width: 50%; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .say { padding-block: 30vh 24vh; row-gap: 72px; }
+  .say p { grid-column: 5 / 10; }
+  .say figure { grid-column: 3 / 5; margin-top: 0; }
+  .more { height: 260vh; }
+  .drift { max-width: 15vw; }
+  .idx { padding-block: 22vh 26vh; }
+  .idx .lab { grid-column: 3 / 5; }
+  .run { grid-column: 5 / 11; font-size: clamp(20px, 1.9vw, 28px); }
+  .foot { padding-top: 26px; }
+  .foot .bio { grid-column: 3 / 6; } .foot .ct { grid-column: 7 / 9; } .foot .credit { grid-column: 9 / 11; }
+}
+.run { line-height: 1.3; }
+.say p { line-height: 1.5; }
+@media (max-width: 899px) {
+  .hero { padding-top: calc(env(safe-area-inset-top, 0px) + 22vh); row-gap: 22px; }
+  .player, .ttl { padding-inline: 4vw; }
+  .say { padding-block: 18vh 14vh; }
+  .idx { padding-block: 12vh 18vh; }
+  .run { font-size: 22px; }
+}
+/* split the diff (30 Oct, Elliot): fewer, bigger cards turned half way, so they keep the
+   reference's stacked look but are never edge-on and are easy to tap; the helix pauses under
+   the pointer and the client's name follows it */
+.lbl { position: fixed; z-index: 45; pointer-events: none; font: 500 var(--small)/1 var(--sans); padding: 6px 8px; background: var(--bg); color: var(--fg); opacity: 0; transform: translate(14px, 14px); transition: opacity .2s; white-space: nowrap; }
+.lbl.on { opacity: 1; }
+.card img { transition: transform .45s var(--ease), filter .45s var(--ease); }
+.stage.hov .card img { filter: saturate(.6) brightness(1.04); }
+.stage.hov .card.hot img { filter: none; transform: scale(1.06); }
 </style>
 </head>
 <body>
@@ -212,12 +249,12 @@ function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) /
 function geo() {
   var W = innerWidth, Hh = innerHeight, wide = W >= 900;
   G = wide
-    ? { R: Math.min(W * .29, Hh * .6), cw: Math.min(W * .047, 84), per: 64, pitch: Hh * .46 }
-    : { R: W * .37, cw: W * .082, per: 38, pitch: Hh * .3 };
-  G.ch = G.cw * 1.32; G.step = 360 / G.per; G.rise = G.pitch / G.per;
+    ? { R: Math.min(W * .26, Hh * .52), cw: Math.min(W * .074, 124), per: 30, pitch: Hh * .5, F: 52 }
+    : { R: W * .32, cw: W * .15, per: 22, pitch: Hh * .3, F: 52 };
+  G.ch = G.cw * 1.25; G.step = 360 / G.per; G.rise = G.pitch / G.per;
   document.documentElement.style.setProperty('--cw', G.cw + 'px');
   document.documentElement.style.setProperty('--ch', G.ch + 'px');
-  return Math.min(320, Math.ceil(Hh * 2.1 / G.rise));
+  return Math.min(320, Math.ceil(Hh * 2.3 / G.rise));
 }
 function build() {
   document.getElementById('nav').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
@@ -240,8 +277,8 @@ function place() {
       u += s * er * (N * .55) * (1 - Math.min(1, Math.abs(d) / N) * .4);
       c.style.opacity = Math.max(0, 1 - er * 1.4).toFixed(3);
     } else if (c.style.opacity !== '') c.style.opacity = '';
-    var a = u * G.step, rad = a * Math.PI / 180, flip = Math.sin(rad) > 0 ? 180 : 0;
-    c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (90 + flip) + 'deg)';
+    var a = u * G.step, rad = a * Math.PI / 180, flip = Math.cos((a + G.F) * Math.PI / 180) < 0 ? 180 : 0;
+    c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + G.R.toFixed(1) + 'px) rotateY(' + (G.F + flip) + 'deg)';
   }
 }
 function frame(now) {
@@ -250,20 +287,20 @@ function frame(now) {
     if (t >= 1) { reelT0 = 0; if (!reelTo) { if (picked) picked.style.visibility = ''; picked = null; } }
   }
   if (!document.body.classList.contains('in-film') || reelT0) {
-    if (!reelT0 && !reel && now - lastTouch > 2400) target += .045;
+    if (!reelT0 && !reel && now - lastTouch > 2400) target += .016;
     off += (target - off) * .075;
     place();
   }
   if (document.body.classList.contains('in-film')) filmFrame();
   requestAnimationFrame(frame);
 }
-addEventListener('wheel', function (e) { if (document.body.classList.contains('in-film')) return; target += (e.deltaY + e.deltaX) * .045; lastTouch = performance.now(); }, { passive: true });
+addEventListener('wheel', function (e) { if (document.body.classList.contains('in-film')) return; target += (e.deltaY + e.deltaX) * .012; lastTouch = performance.now(); }, { passive: true });
 var down = null;
 S.addEventListener('pointerdown', function (e) { if (reel) return; down = { x: e.clientX, y: e.clientY, t: target, moved: 0 }; S.setPointerCapture(e.pointerId); S.classList.add('drag'); lastTouch = performance.now(); });
 S.addEventListener('pointermove', function (e) {
   if (!down) return; var dx = e.clientX - down.x, dy = e.clientY - down.y;
   down.moved = Math.max(down.moved, Math.abs(dx) + Math.abs(dy));
-  target = down.t + (dy - dx) / G.rise * .35; lastTouch = performance.now();
+  target = down.t + (dy - dx) / G.rise * .12; lastTouch = performance.now();
 });
 S.addEventListener('pointerup', function (e) {
   S.classList.remove('drag'); if (!down) return;
@@ -403,6 +440,21 @@ addEventListener('keydown', function (e) {
   else if (e.key === ' ') { e.preventDefault(); play(!playing); }
 });
 build(); requestAnimationFrame(frame);
+</script>
+<script>
+/* split the diff: pause under the pointer, name label, hot card */
+(function () {
+  var L = document.createElement('div'); L.className = 'lbl'; document.body.appendChild(L); var hot = null;
+  S.addEventListener('pointermove', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    var c = e.target.closest && e.target.closest('.card');
+    if (c !== hot) { if (hot) hot.classList.remove('hot'); hot = c; if (c) c.classList.add('hot'); }
+    S.classList.toggle('hov', !!c); L.classList.toggle('on', !!c);
+    if (c) { L.textContent = list[+c.getAttribute('data-i')].c; L.style.left = e.clientX + 'px'; L.style.top = e.clientY + 'px'; lastTouch = performance.now(); }
+  });
+  S.addEventListener('pointerleave', function () { if (hot) hot.classList.remove('hot'); hot = null; S.classList.remove('hov'); L.classList.remove('on'); });
+  addEventListener('pointerdown', function () { L.classList.remove('on'); });
+})();
 </script>
 </body>
 </html>

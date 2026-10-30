@@ -17,6 +17,7 @@
         if (j.duration) x.d = clock(j.duration);
         if (j.width && j.height && !x.vrTrue) x.vr = j.width / j.height;
         if (j.thumbnail_url && !x.s) sharpen(x, j.thumbnail_url.replace(/-d_\d+(x\d+)?/, '-d_1280'));
+        if (j.thumbnail_url && !x.fr) bars(x, j.thumbnail_url.replace(/-d_\d+(x\d+)?/, '-d_640'));
       })
       .catch(function () {});
   });
@@ -31,6 +32,32 @@
     };
     im.src = hi;
   }
+  /* 30 Oct, Elliot: "kill the black bars". Some files have bars baked in (Canada Goose is a 3:2
+     picture inside a 16:9 file). Read Vimeo's cover frame, find any pure black edges, and give the
+     player the picture's real shape so the bars sit outside the frame. Works for films Leo adds
+     later too; fr in work-r1.js still wins where it's set by hand. */
+  function bars(x, u) {
+    var im = new Image(); im.crossOrigin = 'anonymous';
+    im.onload = function () {
+      try {
+        var W = im.naturalWidth, H = im.naturalHeight, c = document.createElement('canvas'); c.width = W; c.height = H;
+        var g = c.getContext('2d'); g.drawImage(im, 0, 0); var d = g.getImageData(0, 0, W, H).data;
+        var dark = function (x0, y0, dx, dy, n) { for (var k = 0; k < n; k += 2) { var i = ((y0 + dy * k) * W + x0 + dx * k) * 4; if (d[i] > 20 || d[i + 1] > 20 || d[i + 2] > 20) return false; } return true; };
+        var l = 0, r = 0, t = 0, b = 0;
+        while (l < W / 3 && dark(l, 0, 0, 1, H)) l++;
+        while (r < W / 3 && dark(W - 1 - r, 0, 0, 1, H)) r++;
+        while (t < H / 3 && dark(0, t, 1, 0, W)) t++;
+        while (b < H / 3 && dark(0, H - 1 - b, 1, 0, W)) b++;
+        /* only even bars on both sides count, so a dark shot isn't mistaken for them */
+        var side = l > W * .015 && Math.abs(l - r) <= W * .01, flat = t > H * .015 && Math.abs(t - b) <= H * .01;
+        if (!side && !flat) return;
+        var cw = W - (side ? l + r + 4 : 0), ch = H - (flat ? t + b + 4 : 0);
+        x.fr = cw / ch;
+        var cx = item(); if (cx === x) document.querySelectorAll('.film').forEach(function (f) { var rr = players.get(f); if (rr && rr.v === x.v) fit(f, rr.ifr, x.vr || W / H, x); });
+      } catch (e) {}
+    };
+    im.src = u;
+  }
   function item() {
     if (typeof w !== 'undefined' && w && w.v) return w;
     if (typeof list !== 'undefined' && typeof cur !== 'undefined') return list[cur];
@@ -43,13 +70,16 @@
     /* fr: the picture's real shape when a video has bars baked into the file; the player takes
        that shape and the video is scaled up behind it so the bars sit outside the frame */
     var fr = x && x.fr || vr;
-    var par = film.parentElement, W = par ? par.clientWidth : film.offsetWidth;
+    var par = film.parentElement, cs = par && getComputedStyle(par);
+    var W = par ? par.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) : film.offsetWidth;
     var cap = innerHeight * (innerWidth < 900 ? .5 : .62), h = Math.min(W / fr, cap), ww = h * fr;
     if (!film.style.height) { film.style.height = (lastH || film.offsetHeight) + 'px'; film.offsetHeight; }
     film.style.transition = 'height .8s cubic-bezier(.16,1,.3,1), width .8s cubic-bezier(.16,1,.3,1)';
     film.style.aspectRatio = 'auto'; film.style.height = h + 'px'; film.style.width = ww + 'px';
     film.style.marginLeft = film.style.marginRight = ww < W - 1 ? 'auto' : '';
     lastH = h;
+    /* Helix (30 Oct, Elliot): the bar, controls and credits take the film's width too */
+    if (film.id === 'pf') document.documentElement.style.setProperty('--pw', ww + 'px');
     var lab = film.querySelector('.hud.br'); if (lab) lab.textContent = fr.toFixed(2) + ' : 1';
     if (ifr) {
       /* a hair of bleed so no sub-pixel edge of the embed ever shows */
@@ -107,6 +137,9 @@
   }, true);
   addEventListener('resize', function () { document.querySelectorAll('.film').forEach(function (f) { var r = players.get(f); if (r) { f.style.height = ''; fit(f, r.ifr, item() && item().vr || 16 / 9, item()); } }); });
   var st = document.createElement('style');
-  st.textContent = '.film{position:relative;overflow:hidden}.film iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .6s ease}.film iframe.vm.on{opacity:1}#pf>img,.in .film>img{visibility:hidden}';
+  st.textContent = '.film{position:relative;overflow:hidden}.film iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .6s ease}.film iframe.vm.on{opacity:1}#pf>img,.in .film>img{visibility:hidden}'
+    + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'
+    + '.hero>.ttl{justify-self:center;width:min(100%,var(--pw,100%));transition:width .8s cubic-bezier(.16,1,.3,1)}'
+    + '@media(max-width:899px){.hero>.ttl{width:min(100%,calc(var(--pw,100%) + 8vw))}}';
   document.head.appendChild(st);
 })();

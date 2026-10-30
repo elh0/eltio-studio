@@ -16,7 +16,7 @@ WORK = [
   { c: 'Polène', p: 'Winter 26 Campaign', dir: 'Théo Vincent', t: ['comp'], v: '1237555872' },
   { c: 'Polène', p: 'Winter 25 Campaign', dir: 'Guillaume Lebel', t: ['comp', 'sd', 'mix'], s: 'polene-winter25', v: '1164646469' },
   { c: 'BMW', p: 'The New iX3', dir: 'Joshua Vii', t: ['comp', 'sd', 'mix'], s: 'bmw-ix3', v: '1164617765' },
-  { c: 'Canada Goose', p: 'Sea Mantra', dir: 'Alexis Zabé', ag: 'BeGOOD Studios', t: ['comp', 'sd', 'mix'], v: '1080249781' },
+  { c: 'Canada Goose', p: 'Sea Mantra', dir: 'Alexis Zabé', ag: 'BeGOOD Studios', t: ['comp', 'sd', 'mix'], v: '1080249781', fr: 1.49 },
   { c: 'Loro Piana', p: 'Resort 25 Campaign', dir: 'Beltran Gonzalez', ag: 'Thomas Persson', t: ['comp'], s: 'loropiana-resort25', v: '1095040150' },
   { c: 'Moncler', p: 'An Invitation to Dream', dir: 'Jack Davison', ag: 'Dazed Studio', t: ['comp', 'mix'], s: 'moncler-dream', v: '938171024' },
   { c: 'Tiffany & Co.', p: 'Icon Campaign', dir: 'Oldie', ag: 'Any Other Name', t: ['comp', 'sd', 'mix'], s: 'tiffany-icon', v: '943982351' },

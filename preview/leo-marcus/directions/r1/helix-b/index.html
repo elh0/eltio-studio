@@ -267,7 +267,7 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
     <div class="s2col"><p class="s2" id="stmt2"></p><span class="cap" id="saycap"></span></div>
   </div>
   <div class="more" id="more">
-    <div class="pin"><h2><sup>→</sup>More work</h2></div>
+    
   </div>
   <div class="grid idx"><span class="lab q2">All work</span><p class="run" id="run"></p></div>
   <footer class="grid foot" id="foot">
@@ -426,11 +426,14 @@ function fill(i) {
   for (var n = 1; n <= Math.min(9, list.length - 1); n++) { var j = (i + n) % list.length; s += '<button type="button" data-j="' + j + '" style="--n:' + (n - 1) + ';z-index:' + (20 - n) + ';background-image:url(' + still(list[j]) + ')" aria-label="' + list[j].c + '"></button>'; }
   document.getElementById('stk').innerHTML = s;
   /* more work: every other film, scattered, each at its own speed */
-  var spots = [[4, 6, 22, .5], [66, 2, 26, 1.1], [30, 18, 14, .8], [76, 30, 18, .35], [8, 38, 16, 1.25], [52, 42, 20, .6], [20, 58, 24, .9], [70, 56, 15, 1.3], [40, 70, 13, .45], [2, 76, 18, .7], [62, 80, 22, 1], [34, 90, 16, 1.2], [80, 92, 14, .55]];
   var others = list.filter(function (x, j) { return j !== i; }), d = '';
+  /* 30 Oct, Elliot: films were drifting over each other. Each film now sits in a column that
+     moves at its own speed, spaced down that column, so nothing ever passes over anything else */
   others.forEach(function (x, n) {
-    var p = spots[n % spots.length], small = innerWidth < 900;
-    d += '<button type="button" class="drift" data-j="' + list.indexOf(x) + '" data-sp="' + p[3] + '" style="left:' + (small ? p[0] * .7 : p[0]) + '%;top:' + p[1] + '%;width:' + (small ? p[2] * 1.9 : p[2]) + '%"><i style="background-image:url(' + still(x) + ')"></i><span>' + x.c + '</span></button>';
+    var small = innerWidth < 900, C = small ? 2 : 4, col = n % C, row = Math.floor(n / C);
+    var left = small ? [4, 52][col] : [4, 30, 56, 78][col], wd = small ? 40 : [18, 14, 20, 16][col];
+    var top = 2 + row * (small ? 9.5 : 18) + (small ? [0, 5] : [0, 9, 4, 13])[col], sp = small ? [.6, 1.1][col] : [.5, 1.1, .75, 1.25][col];
+    d += '<button type="button" class="drift" data-j="' + list.indexOf(x) + '" data-sp="' + sp + '" style="left:' + left + '%;top:' + top + '%;width:' + wd + '%"><i style="background-image:url(' + still(x) + ')"></i><span>' + x.c + '</span></button>';
   });
   more.querySelectorAll('.drift').forEach(function (e) { e.remove(); });
   more.insertAdjacentHTML('beforeend', d);

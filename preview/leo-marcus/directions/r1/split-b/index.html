@@ -311,7 +311,7 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
   }, { passive: false });
   sc.addEventListener('scroll', function () { if (!run) y = ty = sc.scrollTop; });
   function glide() {
-    y += (ty - y) * .12;
+    y += (ty - y) * .18;
     if (Math.abs(ty - y) < .5) { y = ty; run = false; }
     sc.scrollTop = y;
     if (run) requestAnimationFrame(glide);

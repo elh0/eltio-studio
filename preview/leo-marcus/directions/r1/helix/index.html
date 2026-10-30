@@ -106,9 +106,9 @@ body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter
    the pointer and the client's name follows it */
 .lbl { position: fixed; z-index: 45; pointer-events: none; font: 500 var(--small)/1 var(--sans); padding: 6px 8px; background: var(--bg); color: var(--fg); opacity: 0; transform: translate(14px, 14px); transition: opacity .2s; white-space: nowrap; }
 .lbl.on { opacity: 1; }
-.card img { transition: transform .45s var(--ease), filter .45s var(--ease); }
-.stage.hov .card img { filter: saturate(.6) brightness(1.04); }
-.stage.hov .card.hot img { filter: none; transform: scale(1.06); }
+.card img { transition: transform .45s var(--ease), opacity .45s var(--ease); }
+.stage.hov .card img { opacity: .5; }
+.stage.hov .card.hot img { opacity: 1; transform: scale(1.06); }
 </style>
 </head>
 <body>
@@ -179,7 +179,9 @@ function frame(now) {
     H.style.transform = 'rotateZ(' + (innerWidth >= 900 ? -5 : -3) + 'deg) rotateX(-9deg)';
     FX.tick(off);
     for (var i = 0; i < N; i++) {
-      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, FA = G.F + FX.fan, flip = Math.cos((a + FA) * Math.PI / 180) < 0 ? 180 : 0;
+      var u = ((i - off) % N + N) % N - N / 2, a = u * G.step, FA = G.F + FX.fan, cs = Math.cos((a + FA) * Math.PI / 180), flip = cs < 0 ? 180 : 0;
+      var op = Math.min(1, Math.max(0, (Math.abs(cs) - .1) / .22));
+      if (op !== cards[i]._op) { cards[i]._op = op; cards[i].style.opacity = op.toFixed(3); cards[i].style.visibility = op ? '' : 'hidden'; }
       cards[i].style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + (G.R + FX.bump(u)).toFixed(1) + 'px) rotateY(' + (FA + flip) + 'deg)';
     }
   }

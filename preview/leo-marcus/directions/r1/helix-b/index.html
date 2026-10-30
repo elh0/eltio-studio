@@ -215,9 +215,9 @@ body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filte
    the pointer and the client's name follows it */
 .lbl { position: fixed; z-index: 45; pointer-events: none; font: 500 var(--small)/1 var(--sans); padding: 6px 8px; background: var(--bg); color: var(--fg); opacity: 0; transform: translate(14px, 14px); transition: opacity .2s; white-space: nowrap; }
 .lbl.on { opacity: 1; }
-.card img { transition: transform .45s var(--ease), filter .45s var(--ease); }
-.stage.hov .card img { filter: saturate(.6) brightness(1.04); }
-.stage.hov .card.hot img { filter: none; transform: scale(1.06); }
+.card img { transition: transform .45s var(--ease), opacity .45s var(--ease); }
+.stage.hov .card img { opacity: .5; }
+.stage.hov .card.hot img { opacity: 1; transform: scale(1.06); }
 </style>
 </head>
 <body>
@@ -305,13 +305,16 @@ function place() {
   var r = reduce ? (reelTo ? 1 : 0) : reel, er = ease(r);
   FX.tick(off);
   for (var i = 0; i < N; i++) {
-    var c = cards[i], u = ((i - off) % N + N) % N - N / 2;
+    var c = cards[i], u = ((i - off) % N + N) % N - N / 2, op;
     if (r > 0 && c !== picked) {
       var d = u - pickU, s = d >= 0 ? 1 : -1;
       u += s * er * (N * .55) * (1 - Math.min(1, Math.abs(d) / N) * .4);
-      c.style.opacity = Math.max(0, 1 - er * 1.4).toFixed(3);
-    } else if (c.style.opacity !== '') c.style.opacity = '';
-    var a = u * G.step, rad = a * Math.PI / 180, FA = G.F + FX.fan, flip = Math.cos((a + FA) * Math.PI / 180) < 0 ? 180 : 0;
+      var op = Math.max(0, 1 - er * 1.4);
+    } else op = 1;
+    var a = u * G.step, FA = G.F + FX.fan, cs = Math.cos((a + FA) * Math.PI / 180), flip = cs < 0 ? 180 : 0;
+    /* cards turning edge-on fade out instead of drawing as slivers (and Chrome glitching on them) */
+    op *= Math.min(1, Math.max(0, (Math.abs(cs) - .1) / .22));
+    if (op !== c._op) { c._op = op; c.style.opacity = op.toFixed(3); c.style.visibility = op && c !== picked ? '' : 'hidden'; }
     c.style.transform = 'translate3d(0,' + (-u * G.rise).toFixed(2) + 'px,0) rotateY(' + a.toFixed(2) + 'deg) translateZ(' + (G.R + FX.bump(u)).toFixed(1) + 'px) rotateY(' + (FA + flip) + 'deg)';
   }
 }

@@ -12,7 +12,7 @@ var FX = (function () {
 
   function tick(off) {
     if (last !== null && !reduce) {
-      var v = Math.abs(off - last), want = Math.min(34, v * 120);
+      var v = Math.abs(off - last), want = Math.min(16, v * 80);
       fan += (want - fan) * (want > fan ? .25 : .06);
     }
     last = off;

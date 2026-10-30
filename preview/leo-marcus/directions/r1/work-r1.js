@@ -32,6 +32,6 @@ WORK = [
   { c: 'Ferragamo', p: 'PS23 Bags', dir: 'Antoine Asseraf', ag: 'Edward Quarmby', t: ['comp', 'sd', 'mix'], s: 'ferragamo-ps23', v: '799082801' }
 ];
 WORK.forEach(function (w) { w.d = '00:30'; });
-function still(w) { return w.s ? '../../stills/' + w.s + '.jpg' : 'https://vumbnail.com/' + w.v + '.jpg'; }
+function still(w) { return w.s ? '../../stills/' + w.s + '.jpg' : w.th || 'https://vumbnail.com/' + w.v + '.jpg'; }
 function thumb(w) { return w.s && THUMBS[w.s] ? '../thumbs/' + w.s + '.jpg' : still(w); }
 function ratio(w) { return (w.s && THUMBS[w.s]) || 2.42; }

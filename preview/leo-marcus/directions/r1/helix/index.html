@@ -91,6 +91,16 @@ a:hover, button:hover { opacity: .55; }
 .close { font-size: var(--mid); }
 .run { margin: 9vh 0 12vh; }
 @media (max-width: 899px) { .pin { padding-top: calc(env(safe-area-inset-top, 0px) + 18vh); } }
+/* 30 Oct, Elliot: the film page slides down and layers over the helix, which eases back
+   behind it; the name stays put in the corner and Close is an X */
+.proj { display: block; visibility: hidden; transform: translate3d(0, -101%, 0); transition: transform 1s var(--ease2, cubic-bezier(.7, 0, .15, 1)), visibility 0s 1s; box-shadow: 0 0 80px rgba(0, 0, 0, .14); }
+.proj.open { visibility: visible; transform: none; transition: transform 1s cubic-bezier(.7, 0, .15, 1); }
+.stage { transition: transform 1s cubic-bezier(.7, 0, .15, 1), opacity 1s, filter 1s; }
+body.in-film .stage { transform: translateY(8vh) scale(.94); opacity: .4; filter: blur(2px); }
+.corner.tl { z-index: 56; }
+.close { display: grid; place-items: center; width: 34px; height: 34px; margin: -6px -6px 0 0; }
+.close svg { transition: transform .5s var(--ease); }
+.close:hover svg { transform: rotate(90deg); }
 /* split the diff (30 Oct, Elliot): fewer, bigger cards turned half way, so they keep the
    reference's stacked look but are never edge-on and are easy to tap; the helix pauses under
    the pointer and the client's name follows it */
@@ -118,7 +128,7 @@ a:hover, button:hover { opacity: .55; }
 <div class="stage" id="stage"><div class="helix" id="helix"></div></div>
 
 <section class="proj" id="proj" aria-label="Project"><div class="pin">
-  <div class="ptop"><span></span><button type="button" class="close" id="close">Close</button></div>
+  <div class="ptop"><span></span><button type="button" class="close" id="close" aria-label="Close"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button></div>
   <div class="film" id="pf"><img alt=""></div>
   <div class="pt"><span><span class="c" id="pc"></span> <span class="q2" id="pp2"></span></span><span class="q2" id="pw"></span></div>
   <div class="bar"><i id="pb"></i></div>
@@ -263,6 +273,15 @@ build(); requestAnimationFrame(frame);
   });
   S.addEventListener('pointerleave', function () { if (hot) hot.classList.remove('hot'); hot = null; S.classList.remove('hov'); L.classList.remove('on'); });
   addEventListener('pointerdown', function () { L.classList.remove('on'); });
+})();
+</script>
+<script>
+/* 30 Oct: mark the page while a film is open, for the slide and the helix easing back */
+(function () {
+  var _o = openP, _c = closeP;
+  openP = function (i) { _o(i); document.body.classList.add('in-film'); };
+  closeP = function () { _c(); document.body.classList.remove('in-film'); };
+  document.getElementById('close').onclick = function () { closeP(); };
 })();
 </script>
 </body>

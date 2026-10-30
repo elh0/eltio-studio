@@ -179,6 +179,37 @@ body.in-film .phead { visibility: visible; opacity: 1; }
   .idx { padding-block: 12vh 18vh; }
   .run { font-size: 22px; }
 }
+/* 30 Oct, Elliot: the film page slides in from the left and layers over the helix, which
+   eases back behind it; the name stays put in the corner (no flashing) and Close is an X */
+.proj { background: var(--bg); opacity: 1; transform: translate3d(-101%, 0, 0); transition: transform 1s var(--ease2), visibility 0s 1s; box-shadow: 0 0 80px rgba(0, 0, 0, .14); }
+.proj.open { opacity: 1; transform: none; transition: transform 1s var(--ease2); }
+.proj > :not(.back) { transition: opacity .35s var(--ease); }
+.proj.swap > :not(.back) { opacity: 0; }
+.stage { transition: transform 1s var(--ease2), opacity 1s var(--ease2), filter 1s var(--ease2); }
+body.in-film .stage { transform: translateX(10vw) scale(.94); opacity: .4; filter: blur(2px); }
+.corner.tl { z-index: 56; }
+.close { display: grid; place-items: center; width: 34px; height: 34px; margin: -6px -6px 0 0; }
+.close svg { transition: transform .5s var(--ease); }
+.close:hover svg { transform: rotate(90deg); }
+.proj .rise { transition-delay: .45s; }
+/* statement laid out like the reference (Elliot, 30 Oct): big line with a (01) marker, the still
+   tucked under it, the rest of the sentence beside the still with a caption at its foot */
+.say { padding-block: 26vh 22vh; row-gap: 14px; align-items: start; }
+.say p { max-width: none; font: 400 clamp(24px, 2.5vw, 38px)/1.24 var(--sans); letter-spacing: -.02em; margin: 0; }
+.say .s1 { grid-column: 1 / -1; position: relative; }
+.say .s1 sup { font-size: 11px; letter-spacing: 0; vertical-align: top; position: absolute; left: -2.4em; top: .7em; opacity: .7; }
+.say figure { grid-column: 1 / -1; margin: 0; }
+.say figure div { aspect-ratio: 1.48; }
+.say .s2col { grid-column: 1 / -1; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; align-self: stretch; }
+.say .cap { opacity: .85; }
+.say p .w { opacity: .28; }
+@media (max-width: 899px) { .say .s1 { padding-left: 2.2em; } .say .s1 sup { left: 0; } }
+@media (min-width: 900px) {
+  .say { column-gap: var(--gut); }
+  .say .s1 { grid-column: 4 / 10; }
+  .say figure { grid-column: 3 / 6; margin-top: 4px; }
+  .say .s2col { grid-column: 6 / 10; }
+}
 /* split the diff (30 Oct, Elliot): fewer, bigger cards turned half way, so they keep the
    reference's stacked look but are never edge-on and are easy to tap; the helix pauses under
    the pointer and the client's name follows it */
@@ -204,7 +235,7 @@ body.in-film .phead { visibility: visible; opacity: 1; }
 
 <div class="stage" id="stage"><div class="helix" id="helix"></div></div>
 
-<div class="phead"><span></span><button type="button" class="close" id="close">Close</button></div>
+<div class="phead"><span></span><button type="button" class="close" id="close" aria-label="Close"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button></div>
 <section class="proj" id="proj" aria-label="Film">
   <div class="back"></div>
   <div class="grid hero">
@@ -220,8 +251,9 @@ body.in-film .phead { visibility: visible; opacity: 1; }
     </div>
   </div>
   <div class="grid say" id="say">
-    <p id="stmt"></p>
-    <figure><div id="sayimg"></div><figcaption id="saycap"></figcaption></figure>
+    <p class="s1" id="stmt"></p>
+    <figure><div id="sayimg"></div></figure>
+    <div class="s2col"><p class="s2" id="stmt2"></p><span class="cap" id="saycap"></span></div>
   </div>
   <div class="more" id="more">
     <div class="pin"><h2><sup>→</sup>More work</h2></div>
@@ -365,7 +397,10 @@ function fill(i) {
   document.getElementById('pmeta').innerHTML = m;
   var jobs = w.t.map(function (k) { return lower(TAGS[k]); }), job = jobs.length > 1 ? jobs.slice(0, -1).join(', ') + ' and ' + jobs[jobs.length - 1] : jobs[0];
   var line = w.p + ' for ' + w.c + '. ' + job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ' with ' + w.ag : '') + '.';
-  stmt.innerHTML = '<span class="ar" aria-hidden="true">→</span>' + line.split(' ').map(function (x) { return '<span class="w">' + x + '</span>'; }).join(' ');
+  var ws = function (t) { return t.split(' ').map(function (x) { return '<span class="w">' + x + '</span>'; }).join(' '); };
+  var l1 = w.p + ' for ' + w.c + '.', l2 = job.charAt(0).toUpperCase() + job.slice(1) + ' by Helical Sound' + (w.dir ? ', for a film directed by ' + w.dir : '') + (w.ag ? ' with ' + w.ag : '') + '.';
+  stmt.innerHTML = '<sup>(' + ('0' + (i + 1)).slice(-2) + ')</sup>' + ws(l1);
+  document.getElementById('stmt2').innerHTML = ws(l2);
   document.getElementById('sayimg').style.backgroundImage = 'url(' + still(w) + ')';
   document.getElementById('saycap').textContent = 'Still, ' + w.c;
   /* the stack: the next films, as fins beside the player */
@@ -423,7 +458,7 @@ function filmFrame() {
   }
   var y = proj.scrollTop, vh = innerHeight;
   /* statement fills as it passes the middle of the screen */
-  var r = stmt.getBoundingClientRect(), p = Math.max(0, Math.min(1, (vh * .85 - r.top) / (vh * .55))), ws = stmt.querySelectorAll('.w'), on = Math.round(p * ws.length);
+  var r = stmt.getBoundingClientRect(), p = Math.max(0, Math.min(1, (vh * .85 - r.top) / (vh * .55))), ws = document.getElementById('say').querySelectorAll('.w'), on = Math.round(p * ws.length);
   for (var k = 0; k < ws.length; k++) ws[k].classList.toggle('on', k < on);
   /* drifting films */
   var mr = more.getBoundingClientRect(), mp = (vh - mr.top) / (mr.height + vh) - .5;
@@ -454,6 +489,32 @@ build(); requestAnimationFrame(frame);
   });
   S.addEventListener('pointerleave', function () { if (hot) hot.classList.remove('hot'); hot = null; S.classList.remove('hov'); L.classList.remove('on'); });
   addEventListener('pointerdown', function () { L.classList.remove('on'); });
+})();
+</script>
+<script>
+/* 30 Oct: open = slide over from the left; switching films fades only the page content */
+(function () {
+  var reduceM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  openFrom = function (c) {
+    if (document.body.classList.contains('in-film')) return;
+    fill(+c.getAttribute('data-i'));
+    proj.scrollTop = 0; sy = ty = 0;
+    proj.classList.add('entering'); document.body.classList.add('in-film');
+    proj.offsetWidth; proj.classList.add('open');
+    requestAnimationFrame(function () { proj.classList.remove('entering'); });
+    play(true);
+  };
+  closeP = function () {
+    if (!document.body.classList.contains('in-film')) return;
+    playing = false; pf.classList.remove('on');
+    proj.classList.remove('open'); document.body.classList.remove('in-film');
+    document.title = base; lastTouch = performance.now();
+  };
+  go = function (j) {
+    proj.classList.add('swap');
+    setTimeout(function () { fill(j); proj.scrollTop = 0; sy = ty = 0; proj.classList.remove('swap'); play(true); }, reduceM ? 0 : 340);
+  };
+  document.getElementById('close').onclick = function () { closeP(); };
 })();
 </script>
 </body>

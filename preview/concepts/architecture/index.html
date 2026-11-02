@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Architecture concept — three directions</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap">
+<style>
+:root{--bg:#F3F3F0;--fg:#0B0B0A;--grey:#8A8A83;--line:#D6D6D0;--pad:max(16px,env(safe-area-inset-left,0px))}
+@media (prefers-color-scheme:dark){:root{--bg:#0B0B0A;--fg:#F3F3F0;--line:#2E2E2B}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 12px/1.5 "Geist Mono",ui-monospace,monospace;padding:calc(24px + env(safe-area-inset-top,0px)) var(--pad) 48px}
+a{color:inherit;text-decoration:none}
+.u{text-transform:uppercase;letter-spacing:.06em}
+.g{color:var(--grey)}
+header{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{display:flex;flex-direction:column;gap:10px}
+.card img{width:100%;aspect-ratio:16/10;object-fit:cover;border:1px solid var(--line);display:block}
+.card:hover img{opacity:.85}
+p{margin:0;max-width:44ch}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="u"><span>Eltio concept 01 · architecture practice</span><span class="g">Draft · 2 Nov 2026</span></header>
+<div class="grid">
+  <a class="card" href="a/"><img src="img/shot-a.jpg" alt="Aspect homepage"><span class="u">A · Aspect (recommended)</span><p class="g">Daylight practice. Live grainy 3D house: scroll and the sun crosses it, windows light up at dusk. Projects fly open.</p></a>
+  <a class="card" href="b/"><img src="img/shot-b.jpg" alt="Plinth homepage"><span class="u">B · Plinth</span><p class="g">Heavy-materials practice. Every project is a grainy illustration that stacks itself together, photo underneath.</p></a>
+  <a class="card" href="c/"><img src="img/shot-c.jpg" alt="Cutline homepage"><span class="u">C · Cutline</span><p class="g">Drawing practice. A cut line turns each drawing into the built photo. Drag to compare on project pages.</p></a>
+</div>
+<p class="g" style="margin-top:28px">All three practices are fictional. Every image is an AI concept render (low-res drafts).</p>
+</body>
+</html>

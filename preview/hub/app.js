@@ -49,6 +49,9 @@ var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb"
 
 var G = { token: null, exp: 0, client: null, sheetId: null };
 var D = null; /* tab name -> array of row objects, each with _r (sheet row number) */
+/* preview of a fix before it goes live: open the hub once with ?preview=1; ?preview=0 goes back */
+(function () { var m = /[?&]preview=([01])/.exec(location.search); if (m) try { if (m[1] === "1") localStorage.setItem("hub-preview", "1"); else localStorage.removeItem("hub-preview"); } catch (e) {} })();
+var PREVIEW = (function () { try { return localStorage.getItem("hub-preview") === "1"; } catch (e) { return false; } })();
 var S = { tab: "today", f: "all", i: 0, sheet: null, pick: null, app: "all", log: false, fb: false, open: null, fri: new Date().getDay() === 5, ideaA: "sw", chat: [], busy: false };
 var $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -313,7 +316,7 @@ function promiseCard() {
   if (!p) { var E = rows("items").filter(eligible).slice(0, 5); if (!E.length) return "";
     return sec("Today's promise", st ? "streak " + st : "pick one") + '<div class="card cardpad promise-card"><p class="muted" style="font-size:13px;margin:0">Pick the one job you promise to finish today. Only money and app-launch jobs count.</p><div class="pchips">' + E.map(function (x) { return '<button type="button" class="chip" data-act="promise" data-id="' + esc(x.id) + '" ' + av(x.area) + '><span class="dot"></span>' + esc(x.title) + (x.cash ? " · " + esc(x.cash) : "") + "</button>"; }).join("") + '</div><p class="note">' + weekLine() + "</p></div>"; }
   var k = kept(p), it = item(p.item_id);
-  return sec("Today's promise", st ? "streak " + st + (st > 1 ? " days" : " day") : "") + '<div class="card cardpad promise-card' + (k ? " kept" : "") + '"><div class="r' + (k || !it ? '"' : ' tap" data-act="go" data-go="item:' + esc(p.item_id) + '"') + " " + av(it ? it.area : "sw") + '><span class="pk">' + (k ? ic("check") : "") + '</span><span class="t">' + esc(p.title) + '</span><span class="w">' + (k ? "kept" : "not yet") + "</span>" + (k || !it ? "" : ic("chev")) + "</div>" +
+  return sec("Today's promise", st ? "streak " + st + (st > 1 ? " days" : " day") : "") + '<div class="card cardpad promise-card' + (k ? " kept" : "") + '"><div class="r' + (k || !it ? '"' : ' tap" data-act="go" data-go="item:' + esc(p.item_id) + '"') + " " + av(it ? it.area : "sw") + ">" + (PREVIEW && !k && it ? '<button type="button" class="pk" data-act="done" data-id="' + esc(it.id) + '" aria-label="Mark it done"></button>' : '<span class="pk">' + (k ? ic("check") : "") + "</span>") + '<span class="t">' + esc(p.title) + '</span><span class="w">' + (k ? "kept" : "not yet") + "</span>" + (k || !it ? "" : ic("chev")) + "</div>" +
     '<p class="note">' + weekLine() + (k ? "" : ' · <button type="button" class="linkbtn" data-act="unpromise">change it</button>') + "</p></div>";
 }
 /* after 4pm: what got done, moved, logged and slipped today, from the sheet */
@@ -672,6 +675,8 @@ function bindSwipe() {
 }
 function step(k) { var L = list(); if (!L.length) return; var c = $("card"); if (c) c.classList.add("out"); setTimeout(function () { S.i = (S.i + k + L.length) % L.length; S.keep = true; render(); }, 160); }
 function go(tab) { S.tab = tab; render(); var m = document.querySelector(".main,.center"); if (m) m.scrollTop = 0; }
+/* open one to-do: the Waiting on you card, scrolled into view and lit up, so a tap from the sidebar, Top 3 or the promise visibly lands */
+function openItem(id) { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(id)); go("today"); if (!PREVIEW) return; var c = $("card"); if (c) { c.scrollIntoView({ block: "center" }); c.classList.add("lit"); setTimeout(function () { c.classList.remove("lit"); }, 1200); } }
 function ask(g) {
   g = (g || "").trim(); if (!g) return toast("Type a rough goal first");
   var last = S.chat[S.chat.length - 1], ta = $("ask-in"); if (ta) ta.value = "";
@@ -696,7 +701,7 @@ function goTo(g) {
   if (/^https:\/\//.test(g)) { window.open(g, "_blank", "noopener"); return; }
   if (t === "app") { S.app = v; return go("apps"); }
   if (t === "tab") { if (v === "apps") S.app = null; return go(v); }
-  if (t === "item") { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(v)); return go("today"); }
+  if (t === "item") return openItem(v);
   if (t === "area") { S.f = v; S.i = 0; return go("today"); }
 }
 function reload() { return load().then(function () { S.keep = true; render(); toast("Up to date"); }).catch(function (e) { toast(e.message); }); }
@@ -712,7 +717,7 @@ document.addEventListener("click", function (e) {
   if (d.day) { S.pick = +d.day; S.keep = true; return render(); }
   if (d.ia) { S.ideaA = d.ia; var v = $("idea-in").value; render(); $("idea-in").value = v; return; }
   if (d.copy) return copy(findPrompt(d.copy) || "", b);
-  if (d.goto) { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(d.goto)); return go("today"); }
+  if (d.goto) return openItem(d.goto);
   if (d.chk) { var f = rows("friday")[+d.chk]; setCell("friday", f, "done", f.done === "yes" ? "" : "yes"); S.keep = true; return render(); }
   var a = d.act; if (!a) return;
   if (a === "next") return step(1); if (a === "prev") return step(-1);

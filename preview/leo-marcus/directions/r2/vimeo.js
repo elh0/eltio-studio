@@ -79,8 +79,10 @@
     if (!film.style.height) { film.style.height = (lastH || film.offsetHeight) + 'px'; film.offsetHeight; }
     film.style.transition = 'height .8s cubic-bezier(.16,1,.3,1), width .8s cubic-bezier(.16,1,.3,1)';
     film.style.aspectRatio = 'auto'; film.style.height = h + 'px'; film.style.width = ww + 'px';
-    film.style.marginLeft = film.style.marginRight = ww < W - 1 ? 'auto' : '';
+    film.style.marginLeft = film.style.marginRight = ww < W - 1 && !window.filmLeft ? 'auto' : '';
     lastH = h;
+    /* round 2 (2 Nov, Elliot): the page can line its bar, credits and footer up with the film */
+    if (window.onFit) onFit(film, ww, W);
     /* Helix (30 Oct, Elliot): the bar, controls and credits take the film's width too */
     if (film.id === 'pf') document.documentElement.style.setProperty('--pw', ww + 'px');
     var lab = film.querySelector('.hud.br'); if (lab) lab.textContent = fr.toFixed(2) + ' : 1';

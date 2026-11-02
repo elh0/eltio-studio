@@ -5,8 +5,8 @@
   var ghosted = false; try { ghosted = !!(window.frameElement && window.frameElement.hasAttribute('data-ghost')); } catch (e) {}
   // loaded quietly behind the end of the projects page: hold still at the top (the intro would otherwise glide on by itself)
   if (ghosted) setInterval(function () { dispatchEvent(new Event('pointermove')); }, 700);
-  var DROP = '5';                       // Spoolends, in the list's own numbering
-  var MAP = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4 }; // list number -> project on one-os.html
+  var DROP = '6';                       // Spoolends, in the list's own numbering
+  var MAP = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 }; // list number -> project on one-os.html
   var se = document.querySelector('.x-p[data-i="' + DROP + '"]');
   if (se) {
     se.parentNode.removeChild(se);
@@ -26,12 +26,12 @@
   }
   // 19:48 the simpler phone landing (plx.css .lp) and the right count now Spoolends is off
   var lroot = document.querySelector('.eltio.alt-plx'); if (lroot) lroot.classList.add('lp');
-  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(5) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems';
+  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(6) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems, Aspect';
   if (ghosted) return;
   // 18 Oct: every project gets a link of its own to send people (eltio.studio/#grip). The address follows the
   // project you're in, and a link with a project in it opens straight onto that project. Inside Cargo the page above
   // us keeps its own address in step from our messages.
-  var SL = ['out-and-scout', 'grip', 'lampwerk', 'aglo', 'systems'];
+  var SL = ['out-and-scout', 'grip', 'lampwerk', 'aglo', 'systems', 'aspect'];
   function setRoute(s) {
     try { history.replaceState(history.state, '', location.pathname + location.search + (s ? '#' + s : '')); } catch (e) {}
     if (window.parent !== window) window.parent.postMessage({ eltioRoute: s }, '*');

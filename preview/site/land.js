@@ -26,12 +26,12 @@
   }
   // 19:48 the simpler phone landing (plx.css .lp) and the right count now Spoolends is off
   var lroot = document.querySelector('.eltio.alt-plx'); if (lroot) lroot.classList.add('lp');
-  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(6) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems, Aspect';
+  var cueT = document.querySelector('.x-cue span'); if (cueT) cueT.textContent = '(6) projects, Out & Scout, Grip, Lampwerk, Aglo, Systems, Azimuth';
   if (ghosted) return;
   // 18 Oct: every project gets a link of its own to send people (eltio.studio/#grip). The address follows the
   // project you're in, and a link with a project in it opens straight onto that project. Inside Cargo the page above
   // us keeps its own address in step from our messages.
-  var SL = ['out-and-scout', 'grip', 'lampwerk', 'aglo', 'systems', 'aspect'];
+  var SL = ['out-and-scout', 'grip', 'lampwerk', 'aglo', 'systems', 'azimuth'];
   function setRoute(s) {
     try { history.replaceState(history.state, '', location.pathname + location.search + (s ? '#' + s : '')); } catch (e) {}
     if (window.parent !== window) window.parent.postMessage({ eltioRoute: s }, '*');

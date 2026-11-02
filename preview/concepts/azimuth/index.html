@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Azimuth · architecture and light</title>
+<meta name="description" content="Azimuth is a small architecture practice in London that designs around daylight. A concept by Eltio Studio.">
+<meta property="og:title" content="Azimuth · architecture and light">
+<meta property="og:description" content="We draw the sun first. A concept by Eltio Studio.">
+<meta property="og:image" content="img/f0-s.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%231C1C1A'/%3E%3Cpath d='M8 28A12 12 0 0 1 32 28' fill='none' stroke='%23ECEAE4' stroke-width='2.6'/%3E%3Crect x='6' y='28' width='28' height='3' fill='%23ECEAE4'/%3E%3Ccircle cx='27' cy='19' r='3.2' fill='%23E8A25A'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Azimuth: one sticky live-3D hero, then a quiet stone page. Two fonts, three sizes. */
+:root{
+  --stone:#ECEAE4; --ink:#1C1C1A; --concrete:#8E8A80; --line:#D3D0C7; --warm:#E8A25A;
+  --sans:"Inter Tight",system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --s:13px; --m:clamp(22px,2.6vw,34px); --l:clamp(40px,7vw,104px);
+  --pad:max(20px,env(safe-area-inset-left,0px));
+}
+*{box-sizing:border-box}
+html{background:var(--stone);color:var(--ink);-webkit-text-size-adjust:100%}
+body{margin:0;font:400 var(--s)/1.5 var(--mono)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.lab{text-transform:uppercase;letter-spacing:.06em}
+.q{color:var(--concrete)}
+
+/* header */
+header{position:fixed;inset:0 0 auto;z-index:20;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(18px + env(safe-area-inset-top,0px)) var(--pad) 0;pointer-events:none;color:var(--ink);transition:color .6s}
+.dusk header{color:#F3EFE6}
+.past header{background:var(--stone);padding-bottom:14px}
+header>*{pointer-events:auto}
+.brand{display:flex;gap:10px;align-items:center;font:500 18px/1 var(--sans);letter-spacing:-.01em}
+.brand svg{width:34px;height:34px}
+nav{display:flex;gap:22px}
+nav a:hover{opacity:.6}
+
+/* hero */
+.hero{height:320vh;position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#d9d6cf}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block}
+.fallback{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-copy{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(28px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;gap:24px;color:var(--ink);transition:color .6s}
+.hero-copy h1{font:500 var(--l)/.95 var(--sans);letter-spacing:-.035em;margin:0;max-width:9ch}
+.clock{text-align:right;min-width:150px;font-variant-numeric:tabular-nums}
+.clock b{display:block;font:500 var(--m)/1 var(--sans);letter-spacing:-.02em;margin-bottom:6px}
+.dusk .hero-copy{color:#F3EFE6}
+.hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.8;transition:opacity .5s}
+.scrolled .hint{opacity:0}
+
+/* sections */
+section{padding:clamp(80px,12vw,160px) var(--pad);border-top:1px solid var(--line)}
+.intro{display:grid;grid-template-columns:1fr 2fr;gap:40px}
+.intro-r{display:grid;grid-template-columns:3fr 2fr;gap:40px;align-items:end}
+.detail{margin:0}.detail img{width:100%;aspect-ratio:4/5;object-fit:cover}.detail figcaption{margin-top:10px}
+.intro p{font:500 var(--m)/1.2 var(--sans);letter-spacing:-.02em;margin:0;max-width:24ch}
+.intro p span{color:var(--concrete)}
+.row-head{display:flex;justify-content:space-between;margin-bottom:28px}
+
+.projects{display:flex;flex-direction:column}
+.proj{display:grid;grid-template-columns:2fr 1fr;gap:28px;padding:28px 0;border-top:1px solid var(--line);cursor:pointer;align-items:end}
+.proj:last-child{border-bottom:1px solid var(--line)}
+.proj .ph{overflow:hidden;aspect-ratio:3/2;background:var(--line)}
+.proj img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.7,.1,1)}
+.proj:hover img{transform:scale(1.035)}
+.proj h3{font:500 var(--m)/1.05 var(--sans);letter-spacing:-.02em;margin:0 0 18px}
+.card{display:grid;grid-template-columns:auto 1fr;gap:4px 18px}
+.card dt{color:var(--concrete)}
+.card dd{margin:0;font-variant-numeric:tabular-nums}
+.open{margin-top:22px;display:inline-flex;gap:8px;align-items:center}
+.open i{display:inline-block;width:18px;height:1px;background:currentColor;transition:width .4s}
+.proj:hover .open i{width:34px}
+
+.process{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.process div{border-top:1px solid var(--ink);padding-top:14px}
+.process b{display:block;font:500 18px/1.2 var(--sans);margin:14px 0 8px;letter-spacing:-.01em}
+
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:end}
+.contact h2{font:500 var(--l)/.95 var(--sans);letter-spacing:-.035em;margin:0}
+footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:24px var(--pad) calc(24px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);color:var(--concrete)}
+
+/* reveal */
+.js .rv{opacity:0;transform:translateY(24px);transition:opacity 1s,transform 1s cubic-bezier(.2,.7,.1,1)}
+.js .rv.in{opacity:1;transform:none}
+
+/* project view */
+#view{position:fixed;inset:0;z-index:40;background:var(--stone);overflow-y:auto;visibility:hidden}
+#view.on{visibility:visible}
+#view .top{position:sticky;top:0;display:flex;justify-content:space-between;padding:calc(18px + env(safe-area-inset-top,0px)) var(--pad) 18px;background:var(--stone);z-index:2}
+#view .top button{all:unset;cursor:pointer}
+#view .heroimg{width:100%;aspect-ratio:16/9;object-fit:cover;max-height:78vh;display:block}
+#view .vcap{margin:10px var(--pad) 0;font:400 var(--s)/1.5 var(--mono);max-width:none}
+#view .body{display:grid;grid-template-columns:1fr 2fr;gap:40px;padding:48px var(--pad) 80px}
+#view h2{font:500 var(--l)/.95 var(--sans);letter-spacing:-.035em;margin:0 0 28px}
+#view p{font:500 20px/1.35 var(--sans);letter-spacing:-.01em;max-width:34ch;margin:0 0 18px}
+#view .gal{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 var(--pad) 80px}
+#view .gal figure{margin:0}
+#view .gal img{width:100%;object-fit:cover;aspect-ratio:4/5}
+#view .gal figcaption{margin-top:10px}
+#view .study{display:flex;flex-direction:column;justify-content:space-between;border-top:1px solid var(--ink);padding-top:14px;aspect-ratio:auto}
+#view .study>div{flex:1;display:flex;align-items:center}
+.sp{width:100%;height:auto;color:var(--ink);font:400 10px var(--mono)}
+.sp text{fill:currentColor}
+#view .fade{opacity:0;transform:translateY(16px);transition:opacity .7s .35s,transform .7s .35s}
+#view.on .fade{opacity:1;transform:none}
+.flyer{position:fixed;z-index:50;object-fit:cover;transition:all .75s cubic-bezier(.7,0,.2,1);pointer-events:none}
+
+@media (max-width:760px){
+  .intro-r{grid-template-columns:1fr}
+  #view .gal{grid-template-columns:1fr}
+  nav a:not(:last-child){display:none}
+  .intro,.proj,.contact,#view .body{grid-template-columns:1fr}
+  .process{grid-template-columns:1fr 1fr}
+  .hero-copy{flex-direction:column;align-items:flex-start}
+  .clock{text-align:left}
+}
+@media (prefers-reduced-motion:reduce){.js .rv{opacity:1;transform:none}.flyer{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="brand" href="#top" aria-label="Azimuth home">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 30 A15 15 0 0 1 35 30"/></g><rect x="3" y="30" width="34" height="3.2" fill="currentColor"/><circle id="sun" cx="5" cy="30" r="3.4" fill="#E8A25A"/></svg>
+    Azimuth
+  </a>
+  <nav class="lab"><a href="#work">Work</a><a href="#practice">Practice</a><a href="#contact">Contact</a></nav>
+</header>
+
+<div class="hero" id="top">
+  <div class="stage">
+    <img class="fallback" src="img/f0-s.jpg" alt="Reed House, Suffolk, at dusk">
+    <canvas id="gl" aria-label="A live model of Reed House. Scroll to move the sun across it."></canvas>
+    <div class="hero-copy">
+      <h1>We draw the sun first.</h1>
+      <div class="clock lab"><b id="t">06:30</b><span id="sunline">Sun 2° · east</span><br><span class="q">Reed House · 21 June</span></div>
+    </div>
+  </div>
+</div>
+
+<section id="practice" class="intro">
+  <div class="lab q rv">Practice</div>
+  <div class="intro-r"><p class="rv">Azimuth is a small architecture practice in London. We design houses and small public buildings around the light they get, <span>hour by hour, month by month.</span></p>
+  <figure class="rv detail"><img src="img/g9-s.jpg" alt="Low sun across a limestone wall and an oak window frame" loading="lazy"><figcaption class="lab q">Reed House, 16:40, 21 December · concept render</figcaption></figure></div>
+</section>
+
+<section id="work">
+  <div class="row-head lab"><span>Selected work</span><span class="q">(5)</span></div>
+  <div class="projects" id="list"></div>
+</section>
+
+<section>
+  <div class="row-head lab"><span>How we work</span><span class="q">Four stages</span></div>
+  <div class="process">
+    <div class="rv"><span class="lab q">01</span><b>Site and sun</b>We map the sun across your site for every month before we draw a wall.</div>
+    <div class="rv"><span class="lab q">02</span><b>Design</b>Plans, models and light studies until the rooms are right at the hours you use them.</div>
+    <div class="rv"><span class="lab q">03</span><b>Planning</b>We prepare and run the application, and talk to neighbours early.</div>
+    <div class="rv"><span class="lab q">04</span><b>Build</b>Tender, contractor, site visits every week until handover.</div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <h2 class="rv">Tell us where your site faces.</h2>
+  <div class="rv"><p class="lab q">Studio</p><p>Unit 4, 12 Example Yard<br>London E8</p><p>hello@azimuth.example<br><span class="q">(fictional practice)</span></p></div>
+</section>
+
+<footer class="lab"><span>Fictional practice. Concept by Eltio Studio.</span><span>Images are AI concept renders.</span></footer>
+
+<div id="view" aria-hidden="true">
+  <div class="top lab"><span id="vtitle"></span><button id="close">Close</button></div>
+  <img class="heroimg" id="vimg" alt=""><p class="lab q vcap">Concept render</p>
+  <div class="body fade"><dl class="card" id="vcard"></dl><div><h2 id="vh"></h2><div id="vtext"></div></div></div>
+  <div class="gal fade" id="vgal"></div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script>
+document.documentElement.classList.add('js');
+const P=[
+ {id:'reed',t:'Reed House',img:'f0',g:'g0',place:'Suffolk',year:'2025',use:'House',area:'240 m²',faces:'South, across the pool',sun:'14 h direct, 21 June',a:7,b:21,
+  text:['Three long rooms around a courtyard and a still pool.','The living room faces south and gets low winter sun until three. Bedrooms face east, so mornings start in light.'],study:'Living room, direct sun on 21 June'},
+ {id:'fig',t:'Fig Garden',img:'f1',g:'g1',place:'Hackney, London',year:'2024',use:'Extension',area:'38 m²',faces:'North roof lights',sun:'Even light, all day',a:null,b:null,
+  text:['A kitchen extension to a Victorian terrace.','The sawtooth roof faces north, so the room gets steady daylight without glare, and the fig keeps the garden.'],study:'Kitchen: no direct sun by design, north light all day'},
+ {id:'reading',t:'Market Reading Room',img:'f2',g:'g2',place:'Somerset',year:'2026',use:'Library',area:'410 m²',faces:'Ridge light, east to west',sun:'Sun moves across the tables',a:6,b:20,
+  text:['A reading room on a market square.','One long ridge skylight runs east to west, so a band of sun crosses the tables through the day.'],study:'Reading tables, sun through the ridge on 21 June'},
+ {id:'cliff',t:'Cliff Studio',img:'f3',g:'g3',place:'Cornwall',year:'2023',use:'Studio',area:'22 m²',faces:'North, to the sea',sun:'North light for painting',a:null,b:null,
+  text:['A painter\u2019s studio on a concrete plinth.','One big north window gives the flat, even light painters want, and frames the sea.'],study:'Easel wall: no direct sun by design, north light all day'},
+ {id:'pavilion',t:'Park Pavilion',img:'f5',g:'g5',place:'Glasgow',year:'2026',use:'Community',area:'180 m²',faces:'West, to the evening',sun:'Shadows stripe the floor',a:16,b:21.5,
+  text:['An open shelter for a public park.','Brick piers face west, so on summer evenings their shadows stripe the floor like a sundial.'],study:'Colonnade floor, evening sun on 21 June'},
+];
+/* a small sun-path study for each project: the June arc, sunrise to sunset, with the hours that reach the room drawn heavy */
+function study(p){
+  const W=300,H=170,cx=150,cy=140,r=110,h0=4.75,h1=21.3;
+  const pt=h=>{const a=Math.PI*(1-(h-h0)/(h1-h0));return [cx+r*Math.cos(a),cy-r*Math.sin(a)*0.92]};
+  const arc=(a,b)=>{let d='';for(let h=a;h<=b+0.001;h+=0.1){const [x,y]=pt(Math.min(h,b));d+=(d?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return d};
+  let ticks='';for(let h=6;h<=21;h+=3){const [x,y]=pt(h);ticks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="currentColor"/><text x="${x.toFixed(1)}" y="${(y-9).toFixed(1)}" text-anchor="middle">${String(h).padStart(2,'0')}</text>`}
+  const hot=p.a==null?'':`<path d="${arc(p.a,p.b)}" fill="none" stroke="#E8A25A" stroke-width="6" stroke-linecap="round"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="sp" role="img" aria-label="${p.study}"><path d="${arc(h0,h1)}" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="${p.a==null?'3 4':'0'}"/>${hot}${ticks}<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="currentColor"/><text x="20" y="${cy+18}">E</text><text x="150" y="${cy+18}" text-anchor="middle">S</text><text x="280" y="${cy+18}" text-anchor="end">W</text></svg>`;
+}
+const list=document.getElementById('list');
+list.innerHTML=P.map(p=>`<article class="proj rv" data-id="${p.id}" tabindex="0" role="button" aria-label="Open ${p.t}">
+ <div class="ph"><img src="img/${p.img}-s.jpg" alt="${p.t}, ${p.place}" loading="lazy"></div>
+ <div><h3>${p.t}</h3><dl class="card"><dt>Place</dt><dd>${p.place}</dd><dt>Faces</dt><dd>${p.faces}</dd><dt>Light</dt><dd>${p.sun}</dd><dt>Year</dt><dd>${p.year}</dd></dl><span class="open lab">Open <i></i></span></div>
+</article>`).join('');
+
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -10% 0px'});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* project view: the image flies from the list into the page */
+const view=document.getElementById('view');
+function openP(id,from){
+  const p=P.find(x=>x.id===id),img=document.getElementById('vimg');
+  document.getElementById('vtitle').textContent=p.t;
+  document.getElementById('vh').textContent=p.t;
+  document.getElementById('vtext').innerHTML=p.text.map(s=>`<p>${s}</p>`).join('');
+  document.getElementById('vcard').innerHTML=`<dt>Place</dt><dd>${p.place}</dd><dt>Use</dt><dd>${p.use}</dd><dt>Area</dt><dd>${p.area}</dd><dt>Faces</dt><dd>${p.faces}</dd><dt>Light</dt><dd>${p.sun}</dd><dt>Year</dt><dd>${p.year}</dd>`;
+  document.getElementById('vgal').innerHTML=`<figure><img src="img/${p.g}.jpg" alt="${p.t}, inside" loading="lazy"><figcaption class="lab q">Concept render</figcaption></figure><figure class="study"><div>${study(p)}</div><figcaption><span class="lab">Light study</span><br><span class="q">${p.study}</span></figcaption></figure>`;
+  img.src=`img/${p.img}.jpg`;img.alt=p.t;
+  const r=from.getBoundingClientRect(),fl=document.createElement('img');
+  fl.src=`img/${p.img}-s.jpg`;fl.className='flyer';Object.assign(fl.style,{left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px'});
+  document.body.appendChild(fl);
+  view.scrollTop=0;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const top=document.querySelector('#view .top').offsetHeight,w=innerWidth,h=Math.min(w*9/16,innerHeight*.78);
+    Object.assign(fl.style,{left:'0px',top:top+'px',width:w+'px',height:h+'px'});
+  }));
+  setTimeout(()=>{view.classList.add('on');view.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>fl.remove(),80)},760);
+  history.replaceState(null,'','#'+id);
+}
+function closeP(){view.classList.remove('on');view.setAttribute('aria-hidden','true');document.body.style.overflow='';history.replaceState(null,'',' ')}
+list.addEventListener('click',e=>{const a=e.target.closest('.proj');if(a)openP(a.dataset.id,a.querySelector('.ph'))});
+list.addEventListener('keydown',e=>{if(e.key==='Enter'){const a=e.target.closest('.proj');if(a)openP(a.dataset.id,a.querySelector('.ph'))}});
+document.getElementById('close').onclick=closeP;
+addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
+
+/* live hero: grainy massing model, sun driven by scroll */
+const hero=document.querySelector('.hero'),canvas=document.getElementById('gl'),sunDot=document.getElementById('sun');
+const tEl=document.getElementById('t'),sEl=document.getElementById('sunline');
+let progress=0;
+function readScroll(){
+  const r=hero.getBoundingClientRect(),span=hero.offsetHeight-innerHeight;
+  progress=Math.min(1,Math.max(0,-r.top/span));
+  document.body.classList.toggle('scrolled',progress>0.02);
+  document.body.classList.toggle('dusk',progress>0.86&&r.bottom>80);
+  document.body.classList.toggle('past',r.bottom<=80);
+  const a=Math.PI*(1-progress);sunDot.setAttribute('cx',(20+15*Math.cos(a)).toFixed(2));sunDot.setAttribute('cy',(30-15*Math.sin(a)).toFixed(2));
+  const mins=6*60+30+progress*(14*60+40),hh=Math.floor(mins/60),mm=Math.floor(mins%60);
+  tEl.textContent=`${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+  const elev=Math.round(2+Math.sin(Math.PI*Math.min(progress/0.92,1))*60);
+  sEl.textContent=progress<0.01?'Scroll to move the sun':progress>0.94?'Sun set · windows on':`Sun ${elev}° · ${progress<0.4?'east':progress<0.6?'south':'west'}`;
+}
+addEventListener('scroll',readScroll,{passive:true});readScroll();
+
+(function(){
+  if(!window.THREE)return;
+  let renderer;
+  try{renderer=new THREE.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'})}catch(e){return}
+  document.querySelector('.fallback').style.display='none';
+  const small=innerWidth<760;
+  renderer.setPixelRatio(Math.min(devicePixelRatio,small?1.25:1.5));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(small?44:32,1,0.1,500);
+  const mat=c=>new THREE.MeshLambertMaterial({color:c});
+  const W='#f2efe8',ROOF='#d8d3c8';
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.MeshBasicMaterial({color:'#f1eee7'}));ground.rotation.x=-Math.PI/2;scene.add(ground);
+  const shade=new THREE.Mesh(new THREE.PlaneGeometry(600,600),new THREE.ShadowMaterial({opacity:.42}));shade.rotation.x=-Math.PI/2;shade.position.y=0.01;shade.receiveShadow=true;scene.add(shade);
+  const plinth=new THREE.Mesh(new THREE.BoxGeometry(36,0.6,28),mat('#e9e5dc'));plinth.position.y=0.3;plinth.castShadow=plinth.receiveShadow=true;scene.add(plinth);
+  const pool=new THREE.Mesh(new THREE.BoxGeometry(6,0.06,13),new THREE.MeshLambertMaterial({color:'#7d8790'}));pool.position.set(0,0.62,4);pool.receiveShadow=true;scene.add(pool);
+  const glassM=new THREE.MeshLambertMaterial({color:'#3a3d44',emissive:new THREE.Color('#ffae55'),emissiveIntensity:0});
+  function wing(x,z,w,d,ry){
+    const g=new THREE.Group();
+    const body=new THREE.Mesh(new THREE.BoxGeometry(w,3.4,d),mat(W));body.position.y=1.7;body.castShadow=body.receiveShadow=true;g.add(body);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(w+1.6,0.45,d+1.6),mat(ROOF));roof.position.y=3.62;roof.castShadow=roof.receiveShadow=true;g.add(roof);
+    for(let i=0;i<3;i++){const gl=new THREE.Mesh(new THREE.BoxGeometry(w*0.22,2.8,0.5),glassM);gl.position.set(-w/2+w*(0.2+i*0.3),1.6,d/2+0.2);g.add(gl)}
+    const fin=new THREE.Mesh(new THREE.BoxGeometry(0.5,3.4,1.6),mat(W));fin.position.set(w/2-0.25,1.7,d/2+0.8);fin.castShadow=fin.receiveShadow=true;g.add(fin);
+    g.position.set(x,0.6,z);g.rotation.y=ry;scene.add(g);return g;
+  }
+  wing(0,-9,22,5,0);wing(-11.5,1.5,14,5,Math.PI/2);wing(11.5,1.5,14,5,-Math.PI/2);
+  const wallM=mat('#ebe7df');
+  [[-17,8,0.5,1.4,12],[17,8,0.5,1.4,12]].forEach(([x,z,w,h,d])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallM);m.position.set(x,0.6+h/2,z);m.castShadow=m.receiveShadow=true;scene.add(m)});
+  for(let i=0;i<9;i++){const c=new THREE.Mesh(new THREE.BoxGeometry(0.35,3.4,0.35),mat(W));c.position.set(-8+i*2,2.3,13.6);c.castShadow=true;scene.add(c)}
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(18,0.35,1.2),mat(ROOF));beam.position.set(0,4.15,13.6);beam.castShadow=true;scene.add(beam);
+  const amb=new THREE.HemisphereLight('#ffffff','#d8d2c6',0.62);scene.add(amb);
+  const sun=new THREE.DirectionalLight('#fff4e0',0.75);sun.castShadow=true;
+  sun.shadow.mapSize.set(small?1024:2048,small?1024:2048);
+  Object.assign(sun.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:220});sun.shadow.bias=-0.0006;
+  scene.add(sun);scene.add(sun.target);
+
+  /* grain pass: map light to a four-tone ramp and stipple between tones, like a printed illustration */
+  const rt=new THREE.WebGLRenderTarget(2,2);
+  const C=(h)=>new THREE.Color(h);
+  const DAY=[C('#34363c'),C('#77777a'),C('#b9b4a9'),C('#efece5')],DUSK=[C('#161b26'),C('#2c3850'),C('#56657f'),C('#8593aa')];
+  const post=new THREE.ShaderMaterial({uniforms:{tex:{value:rt.texture},c0:{value:C('#000')},c1:{value:C('#000')},c2:{value:C('#000')},c3:{value:C('#000')},px:{value:1}},
+    vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
+    fragmentShader:`uniform sampler2D tex;uniform vec3 c0,c1,c2,c3;uniform float px;varying vec2 v;
+      float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+      vec3 tone(float i){return i<.5?c0:i<1.5?c1:i<2.5?c2:c3;}
+      void main(){vec3 c=texture2D(tex,v).rgb;float l=clamp(dot(c,vec3(.299,.587,.114)),0.,.999);
+        float f=pow(l,1.15)*3.;float n=h(floor(gl_FragCoord.xy/px));
+        float i=floor(f)+step(n,fract(f));
+        vec3 o=tone(i);
+        float warm=clamp((c.r-c.b-.2)*4.,0.,1.);
+        o=mix(o,vec3(1.,.69,.36)*(.75+.35*step(n,.7)),warm);
+        gl_FragColor=vec4(o,1.);}`,depthTest:false});
+  const pScene=new THREE.Scene(),pCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+  pScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),post));
+
+  function size(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();
+    const pr=renderer.getPixelRatio();rt.setSize(Math.floor(w*pr),Math.floor(h*pr));}
+  addEventListener('resize',size);size();
+
+  const warmL=new THREE.Color('#ffd2a0'),whiteL=new THREE.Color('#ffffff'),sky=new THREE.Color('#f4f1ea');
+  scene.background=sky;
+  let shown=-1;
+  function frame(){
+    requestAnimationFrame(frame);
+    const p=progress;
+    if(Math.abs(p-shown)<0.0005)return;
+    shown+=(p-shown)*0.16;if(Math.abs(p-shown)<0.0006)shown=p;
+    const q=shown,day=Math.min(q/0.9,1);
+    const az=-Math.PI*0.6+Math.PI*1.2*day; const el=Math.max(0.06,Math.sin(Math.PI*day)*1.0);
+    sun.position.set(Math.sin(az)*70*Math.cos(el),Math.sin(el)*70,-Math.cos(az)*70*Math.cos(el)+8);
+    const low=1-Math.sin(Math.PI*day);
+    sun.color.copy(whiteL).lerp(warmL,Math.pow(low,2));
+    const night=THREE.MathUtils.smoothstep(q,0.8,0.97);
+    sun.intensity=0.75*(1-night*0.9);
+    amb.intensity=0.62-night*0.3;
+    ['c0','c1','c2','c3'].forEach((k,i)=>post.uniforms[k].value.copy(DAY[i]).lerp(DUSK[i],night));
+    glassM.emissiveIntensity=THREE.MathUtils.smoothstep(q,0.72,0.9)*1.8;
+    const orbit=-0.6+q*0.95,R=small?120:60;
+    cam.position.set(Math.sin(orbit)*R,(small?30:17)+q*q*12,Math.cos(orbit)*R);cam.lookAt(0,small?-7:-4,small?4:3);
+    renderer.setRenderTarget(rt);renderer.render(scene,cam);renderer.setRenderTarget(null);renderer.render(pScene,pCam);
+  }
+  frame();
+})();
+if(location.hash.length>1){const a=document.querySelector(`.proj[data-id="${location.hash.slice(1)}"]`);if(a)setTimeout(()=>openP(a.dataset.id,a.querySelector('.ph')),300)}
+</script>
+</body>
+</html>

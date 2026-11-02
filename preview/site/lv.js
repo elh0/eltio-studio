@@ -36,7 +36,7 @@
       ['img/sy/diary.webp', 'The diary: confirmed, holds and pencils'],
       ['img/sy/callsheet.webp', 'The call sheet, one link, always the latest'],
       ['img/sy/find.webp', 'Producers: who is free Thursday, send a hold']] },
-    // 2 Nov 2026: Aspect, the architecture concept: the front page as you scroll it, then a project and its light study
+    // 2 Nov 2026: Azimuth, the architecture concept: the front page as you scroll it, then a project and its light study
     { seq: [
       ['video/w/as-site-m', 'Scroll and the sun crosses the house'],
       ['img/as/list.webp', 'The projects, each with its hours of sun'],

@@ -702,13 +702,14 @@ html.plx-ink .mo-cur { visibility: hidden; }
 .eltio .k2-sy { display: grid; justify-items: center; gap: 4cqi; color: #0B0B0A; width: 44cqi; }
 .eltio .k2-sy .sy-wm { width: 100%; }
 
-/* 2 Nov 2026: Azimuth (architecture concept). The sun path mark beside the outlined name, ink on white, one warm sun */
-.eltio .as-wm { display: flex; align-items: flex-end; gap: .34em; color: #1C1C1A; }
-.eltio .as-wm svg { display: block; overflow: visible; }
-.eltio .as-w { height: 1em; width: auto; aspect-ratio: 7261 / 1490; fill: currentColor; }
-.eltio .as-mk { height: 1.22em; width: auto; aspect-ratio: 36 / 21.2; margin-bottom: -.13em; }
-.eltio .as-mk .sr { transform-origin: 20px 30px; transform: rotate(62deg); }
-.eltio .k2-as { display: grid; place-items: center; font-size: 6.2cqi; }
-.eltio.alt-plx .x-fav-as { display: grid; place-items: center; color: #1C1C1A; }
-.eltio.alt-plx .x-fav-as .as-mk { height: 12px; margin: 0; }
+/* 2 Nov 2026: Azimuth (architecture concept). The Cut wordmark: heavy caps cut like a section; the site keeps its warm sun */
+.eltio .as-wm { display: block; color: #1C1C1A; line-height: 0; width: 100%; }
+.eltio .as-wm svg { display: block; fill: currentColor; }
+.eltio .as-w { width: 100%; height: auto; aspect-ratio: 636 / 100; }
+.eltio .as-mk { height: 1em; width: auto; aspect-ratio: 90 / 100; fill: currentColor; }
+.eltio .k2-as { display: grid; place-items: center; }
+.eltio .k2-as .as-wm { width: 62%; }
+.eltio.alt-plx .x-fav-as { display: grid; place-items: center; color: #ECEAE4; background: #1C1C1A; }
+.eltio.alt-plx .x-fav-as .as-mk { height: 11px; margin: 0; }
 .eltio .as-t { display: grid; place-items: center; background: #ECEAE4; }
+.eltio .as-t .as-wm { width: 72%; }

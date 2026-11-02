@@ -226,9 +226,16 @@ function chartCard() {
   var W = 300, H = 120, max = Math.max(pace * 1.12, Math.max.apply(null, E) * 1.05), bw = W / 12 - 6;
   var bars = E.map(function (v, i) { var h = v / max * H, x = i * (W / 12) + 3; return v ? '<rect x="' + x + '" y="' + (H - h) + '" width="' + bw + '" height="' + h + '" rx="2" fill="var(--chart)"/>' : '<rect x="' + x + '" y="' + (H - 2) + '" width="' + bw + '" height="2" rx="1" fill="var(--border2)"/>'; }).join("");
   var py = H - pace / max * H, labels = M.map(function (m, i) { return i % 2 ? "" : '<text x="' + (i * (W / 12) + W / 24) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Geist,sans-serif">' + m + "</text>"; }).join("");
-  return '<div class="card stat"><div class="sh"><div><span class="t">' + money(target) + ' goal</span><span class="muted" style="font-size:12px">from ' + M[0] + '</span></div><div><span class="muted" style="font-size:12px">Earned</span><b>' + money(earned) + '</b></div><div><span class="muted" style="font-size:12px">On pace</span><b>' + money(Math.round(onPace)) + "</b></div></div>" +
-    '<div class="chart"><svg viewBox="0 0 ' + W + " " + (H + 22) + '" role="img" aria-label="Sales by month against the monthly pace"><line x1="0" x2="' + W + '" y1="' + H + '" y2="' + H + '" stroke="var(--border)"/>' + bars + '<line x1="0" x2="' + W + '" y1="' + py + '" y2="' + py + '" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="' + W + '" y="' + (py - 5) + '" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Geist,sans-serif">pace ' + money(pace) + "/mo</text>" + labels + "</svg>" +
+  return '<div class="card stat"><div class="sh"><div><span class="t">' + money(target) + ' goal</span><span class="muted" style="font-size:12px">from ' + M[0] + '</span></div><div><span class="muted" style="font-size:12px">Earned</span><b>' + money(earned) + '</b></div><div><span class="muted" style="font-size:12px">' + (PREVIEW ? "Target by now" : "On pace") + "</span><b>" + money(Math.round(onPace)) + "</b></div></div>" + (PREVIEW ? heading(earned, gone, ys) : "") +
+    '<div class="chart"><svg viewBox="0 0 ' + W + " " + (H + 22) + '" role="img" aria-label="Sales by month against the monthly pace"><line x1="0" x2="' + W + '" y1="' + H + '" y2="' + H + '" stroke="var(--border)"/>' + bars + '<line x1="0" x2="' + W + '" y1="' + py + '" y2="' + py + '" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="' + W + '" y="' + (py - 5) + '" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Geist,sans-serif">' + (PREVIEW ? "" : "pace ") + money(pace) + (PREVIEW ? "/mo needed" : "/mo") + "</text>" + labels + "</svg>" +
     (meta("chart_note") ? '<p class="note" style="padding:4px 4px 0">' + esc(meta("chart_note")) + "</p>" : "") + "</div></div>";
+}
+/* where the year is heading: money in so far plus the monthly average since the tax year began (quiet months count) for the months left */
+function heading(earned, gone, ys) {
+  if (gone < 1 || !earned) return "";
+  var end = new Date(ys); end.setFullYear(ys.getFullYear() + 1); end.setDate(end.getDate() - 1);
+  var rate = earned / gone, proj = earned + rate * Math.max(0, 12 - gone);
+  return '<div class="proj"><span class="muted">Heading for</span><b>' + money(Math.round(proj / 100) * 100) + '</b><span class="muted">by ' + end.getDate() + " " + MON[end.getMonth()] + '</span><span class="faint">At your ' + money(Math.round(rate / 100) * 100) + "/mo average since " + MON[ys.getMonth()] + ", quiet months included. Booked jobs count once paid.</span></div>";
 }
 function studio() {
   return '<div class="tree" style="padding:0 18px">' + ORDER.map(function (a) {

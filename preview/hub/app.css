@@ -350,3 +350,5 @@ a.btn:not(.primary){color:inherit}
 .rows .r .btn{margin-left:auto;flex:none}
 .rows .r .w+.btn{margin-left:8px}
 .sec a.btn{text-decoration:none}
+button.pk{background:none;padding:0;cursor:pointer;color:inherit}button.pk:hover{border-color:var(--dp)}
+.item.lit{box-shadow:0 0 0 2px var(--chart);transition:box-shadow .3s}

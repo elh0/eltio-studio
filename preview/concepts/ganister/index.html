@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Ganister Architects</title>
+<meta name="description" content="Ganister retrofits Sheffield's gritstone terraces, mills and chapels instead of knocking them down. A concept site by Eltio Studio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f2f1ee; --surface:#e4e2dc; --ink:#232624; --muted:#5f6059; --accent:#2f5d4f; --accent-ink:#f2f1ee;
+  --margin:clamp(20px,6vw,96px); --gap:clamp(12px,2vw,32px);
+  --step-small:clamp(0.9375rem,0.9rem + 0.12vw,1.0625rem);
+  --step-body:clamp(1.0625rem,1rem + 0.25vw,1.1875rem);
+  --step-lead:clamp(1.25rem,1.1rem + 0.6vw,1.6rem);
+  --step-head:clamp(2rem,1.3rem + 3.2vw,4rem);
+  --ease:cubic-bezier(.2,.7,.1,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--ground);color:var(--ink);font-family:"STIX Two Text",Georgia,serif;font-size:var(--step-body);line-height:1.5;font-kerning:normal;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;width:100%;height:100%;object-fit:cover}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+::selection{background:var(--accent);color:var(--accent-ink)}
+h1,h2,h3{font-weight:400;letter-spacing:-0.026em;line-height:1.08;text-wrap:balance}
+p{max-width:40ch;text-wrap:pretty}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--gap);padding-inline:var(--margin)}
+
+/* concept bar */
+.concept{background:var(--accent);color:var(--accent-ink);font-size:var(--step-small);padding:10px var(--margin);display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
+.concept a{text-underline-offset:3px}
+
+/* header */
+header.top{display:flex;justify-content:space-between;align-items:baseline;padding:22px var(--margin) 0;font-size:var(--step-small)}
+header.top .name{font-size:var(--step-body);text-decoration:none}
+header.top nav{display:flex;gap:clamp(14px,2vw,28px)}
+header.top nav a{text-decoration:none;color:var(--muted);transition:color .2s}
+header.top nav a:hover{color:var(--ink)}
+
+/* hero: three prints on one line */
+.hero{padding-top:calc(18vh - 60px);align-items:start;row-gap:28px}
+.hero .p{background:var(--surface);overflow:hidden}
+.hero .a{grid-column:1/3;grid-row:1;aspect-ratio:1/1}
+.hero .b{grid-column:4/10;grid-row:1;aspect-ratio:3/4;max-height:calc(100vh - 150px);width:100%}
+.hero .c{grid-column:11/13;grid-row:1;aspect-ratio:4/5;margin-right:calc(var(--margin) * -1);margin-top:38%}
+.hero .words{grid-column:1/4;grid-row:1;margin-top:calc((100vw - 2*var(--margin)) / 12 * 2 + 40px)}
+.hero h1{font-size:clamp(30px,2.8vw,44px)}
+.hero .lede{margin-top:18px;font-size:var(--step-body)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-block;font:inherit;font-size:var(--step-small);padding:12px 18px;text-decoration:none;cursor:pointer;border:0;transition:transform .2s var(--ease),background-color .2s,color .2s}
+.btn.solid{background:var(--ink);color:var(--ground)}
+.btn.solid:hover{background:var(--accent)}
+.btn.soft{background:var(--surface);color:var(--ink)}
+.btn.soft:hover{background:#d8d5cd}
+.btn:active{transform:scale(.97)}
+.cap{font-size:var(--step-small);color:var(--muted);margin-top:8px}
+
+/* intro panorama */
+.intro{margin-top:clamp(120px,16vw,240px)}
+.intro .head{grid-column:2/9}
+.intro h2{font-size:var(--step-head)}
+.intro .pano{margin-top:40px;aspect-ratio:21/9;overflow:hidden;background:var(--surface)}
+.intro .pano img{transform-origin:60% 50%}
+.intro .under{grid-column:8/12;margin-top:28px}
+
+/* work: prints sized by what was kept */
+.work{margin-top:clamp(140px,18vw,260px)}
+.work > h2{grid-column:1/8;font-size:var(--step-head)}
+.work > .note{grid-column:9/13;align-self:end}
+.proj{margin-top:clamp(90px,12vw,180px);align-items:start}
+.frame{background:var(--surface);position:relative;overflow:hidden}
+.frame .print{position:absolute;left:0;bottom:0;width:var(--kept);height:var(--kept);overflow:hidden;transition:width 1.4s var(--ease),height 1.4s var(--ease)}
+.frame .gone{position:absolute;right:14px;top:12px;font-size:var(--step-small);color:var(--muted)}
+.proj h3{font-size:clamp(1.6rem,1.2rem + 1.4vw,2.5rem)}
+.proj .remark{margin-top:14px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;margin-top:22px;font-size:var(--step-small)}
+.facts dt{color:var(--muted)}
+.kept-big{font-size:var(--step-head);line-height:1;letter-spacing:-0.03em;color:var(--accent);margin-top:20px}
+.p1 .frame{grid-column:1/8;aspect-ratio:3/4;max-height:88vh}
+.p1 .txt{grid-column:9/13;margin-top:140px}
+.p1 .side{grid-column:9/12;aspect-ratio:16/10;margin-top:40px;overflow:hidden}
+.p2 .frame{grid-column:5/13;aspect-ratio:16/9;margin-right:calc(var(--margin) * -1)}
+.p2 .txt{grid-column:1/5;grid-row:1;margin-top:60px}
+.p3 .frame{grid-column:2/8;aspect-ratio:3/4}
+.p3 .side{width:75%;aspect-ratio:1/1;overflow:hidden}
+.p3 .txt{margin-top:28px}
+.p3 .stack{grid-column:9/13;margin-top:160px}
+
+/* list */
+.list{margin-top:clamp(140px,18vw,260px);align-items:start}
+.list h2{grid-column:1/7;font-size:var(--step-head);position:sticky;top:40px}
+.list .tablewrap{grid-column:8/13}
+table{width:100%;border-collapse:collapse;font-size:var(--step-small)}
+caption{text-align:left;color:var(--muted);padding-bottom:14px}
+th{font-weight:400;color:var(--muted);text-align:left;padding:10px 12px}
+td{padding:14px 12px;vertical-align:top}
+tbody tr:nth-child(odd){background:var(--surface)}
+td.k,th.k{text-align:right;font-variant-numeric:tabular-nums}
+td.b{font-size:var(--step-body)}
+
+/* about */
+.about{margin-top:clamp(140px,18vw,260px);row-gap:var(--gap);align-items:stretch}
+.about .wide{grid-column:1/9;aspect-ratio:16/9;overflow:hidden;margin-left:calc(var(--margin) * -1)}
+.about .tile{grid-column:9/13;background:var(--accent);color:var(--accent-ink);padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:24px}
+.about .tile svg{width:100%;height:auto;max-height:260px}
+.about .tile p{font-size:var(--step-small)}
+.about .say{grid-column:2/7;margin-top:60px}
+.about .say h2{font-size:var(--step-head)}
+.about .say p{margin-top:20px}
+.about dl{grid-column:8/13;margin-top:60px;display:grid;grid-template-columns:1fr 1fr;gap:28px var(--gap)}
+.about dt{font-size:var(--step-lead);letter-spacing:-0.02em}
+.about dd{font-size:var(--step-small);color:var(--muted);margin-top:4px;max-width:28ch}
+
+/* contact + estimator */
+.contact{margin-top:clamp(140px,18vw,260px);align-items:start}
+.contact .say{grid-column:1/6}
+.contact .say p.big{font-size:clamp(1.5rem,1.1rem + 1.3vw,2.25rem);line-height:1.2;letter-spacing:-0.02em;max-width:22ch}
+.est{grid-column:7/13;background:var(--surface);padding:clamp(22px,3vw,40px)}
+.est h2{font-size:clamp(1.6rem,1.2rem + 1.4vw,2.5rem)}
+.est form{margin-top:22px;display:grid;gap:22px}
+.est fieldset{border:0}
+.est legend{font-size:var(--step-small);color:var(--muted);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{position:relative}
+.chips input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chips span{display:inline-block;padding:10px 14px;background:var(--ground);font-size:var(--step-small);transition:background-color .2s,color .2s,transform .2s var(--ease)}
+.chips input:checked + span{background:var(--ink);color:var(--ground)}
+.chips input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.chips label:active span{transform:scale(.96)}
+.range{display:flex;align-items:center;gap:16px}
+.range input{flex:1;accent-color:var(--accent);height:32px}
+.range output{min-width:7ch;text-align:right;font-variant-numeric:tabular-nums}
+.result{background:var(--ground);padding:20px}
+.result .n{font-size:var(--step-head);line-height:1;letter-spacing:-0.03em;color:var(--accent)}
+.result p{margin-top:10px;font-size:var(--step-small)}
+.est .fine{font-size:var(--step-small);color:var(--muted);margin-top:14px}
+.portrait{grid-column:1/4;aspect-ratio:3/4;margin-top:40px;overflow:hidden}
+.contact .links{grid-column:1/6}
+
+/* footer: the name across the last photograph */
+footer{margin-top:clamp(140px,18vw,240px);position:relative;color:#f2f1ee;overflow:hidden}
+footer .bg{position:absolute;inset:0}
+footer .bg img{filter:brightness(.62)}
+footer .in{position:relative;padding:clamp(80px,12vw,180px) var(--margin) 28px;display:flex;flex-direction:column;gap:clamp(60px,10vw,140px)}
+footer .word{font-size:clamp(3.2rem,12.5vw,13rem);letter-spacing:-0.045em;line-height:.9}
+footer .row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:var(--step-small)}
+footer .row p{max-width:60ch}
+
+/* motion */
+.rise{opacity:0;transform:translateY(24px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rise.in{opacity:1;transform:none}
+.shutter{clip-path:inset(0 0 100% 0);transition:clip-path 1.3s var(--ease)}
+.shutter.in{clip-path:inset(0 0 0 0)}
+@keyframes drift{from{transform:scale(1.02) translateX(0)}to{transform:scale(1.1) translateX(-2%)}}
+.drift{animation:drift 26s ease-in-out infinite alternate}
+.hover-zoom img{transition:transform 1.2s var(--ease)}
+.hover-zoom:hover img{transform:scale(1.04)}
+.no-js .rise{opacity:1;transform:none}.no-js .shutter{clip-path:none}
+@media (prefers-reduced-motion:reduce){
+  .rise{opacity:1;transform:none;transition:none}
+  .shutter{clip-path:none;transition:none}
+  .drift{animation:none}
+  .frame .print{transition:none}
+  html{scroll-behavior:auto}
+}
+
+/* tablet */
+@media (max-width:1000px){
+  .hero .a{grid-column:1/4}.hero .b{grid-column:5/10}.hero .c{grid-column:11/13}
+  .hero .words{grid-column:1/5;margin-top:calc((100vw - 2*var(--margin)) / 12 * 3 + 28px)}
+  .p1 .frame{grid-column:1/8}.p1 .txt{grid-column:8/13;margin-top:60px}.p1 .side{grid-column:8/13}
+  .list h2{grid-column:1/13;position:static}.list .tablewrap{grid-column:1/13;margin-top:36px}
+  .about .wide{grid-column:1/13;margin-right:calc(var(--margin) * -1)}.about .tile{grid-column:1/13}
+  .about .say{grid-column:1/13}.about dl{grid-column:1/13;margin-top:20px}
+  .contact .say{grid-column:1/13}.est{grid-column:1/13;margin-top:40px}.contact .links{grid-column:1/13}
+  .portrait{grid-column:1/6}
+}
+/* phone: its own composition */
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(6,minmax(0,1fr))}
+  header.top nav a:not(.go){display:none}
+  .hero{padding-top:28px}
+  .hero .b{grid-column:1/7;grid-row:1;aspect-ratio:4/3;max-height:none}
+  .hero .a{grid-column:1/3;grid-row:2}
+  .hero .c{grid-column:3/7;grid-row:2;margin-right:calc(var(--margin) * -1);margin-top:0;aspect-ratio:auto;height:100%}
+  .hero .words{grid-column:1/7;grid-row:2;margin-top:0}
+  .hero .a,.hero .c{display:none}
+  .concept span{display:none}
+  .intro .head,.intro .under{grid-column:1/7}
+  .intro .pano{aspect-ratio:4/3}
+  .work > h2,.work > .note{grid-column:1/7}.work > .note{margin-top:20px}
+  .p1 .frame,.p2 .frame,.p3 .frame{grid-column:1/7;grid-row:auto;margin-right:0}
+  .p2 .frame{margin-right:calc(var(--margin) * -1)}
+  .p1 .txt,.p2 .txt,.p3 .txt,.p3 .stack{grid-column:1/7;grid-row:auto;margin-top:26px}
+  .p1 .side{grid-column:3/7;margin-top:26px}.p3 .side{width:60%}
+  .p2 .frame{order:-1}
+  .list h2,.list .tablewrap,.about .wide,.about .tile,.about .say,.about dl,.contact .say,.est,.contact .links{grid-column:1/7}
+  .about dl{grid-template-columns:1fr}
+  .portrait{grid-column:1/5}
+  td,th{padding:12px 8px}
+  .hide-s{display:none}
+}
+</style>
+</head>
+<body class="no-js">
+<script>document.body.classList.remove('no-js')</script>
+
+<div class="concept" role="note">
+  <span>A concept site by Eltio Studio. The practice, projects and figures are made for this concept, and the photographs are AI generated.</span>
+  <a href="mailto:hello@eltio.studio?subject=A%20site%20like%20Ganister">Ask Eltio about a site like this</a>
+</div>
+
+<header class="top">
+  <a class="name" href="#top">Ganister Architects</a>
+  <nav aria-label="Main">
+    <a href="#work">Work</a>
+    <a href="#buildings">Buildings</a>
+    <a href="#practice">Practice</a>
+    <a class="go" href="#contact">Start a project</a>
+  </nav>
+</header>
+
+<main id="top">
+<section class="grid hero" aria-label="Introduction">
+  <figure class="p a rise"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114918_8dc9c619-9213-4216-b4bd-0a570db1bd40.png" alt="Rough gritstone meeting a new oak window reveal" width="1024" height="1024" fetchpriority="high"></figure>
+  <figure class="p b shutter"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114918_56f1c66a-d031-4d0f-9b06-5e4d4d713e49.png" alt="Inside a converted Sheffield mill: cast iron columns, old beams, new lime plaster" width="1152" height="1536" fetchpriority="high"></figure>
+  <figure class="p c rise"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114919_6ed2c4e5-198c-4f49-8282-4050c80c07fd.png" alt="A row of gritstone terraces on a steep street, with new timber windows" width="1536" height="864"></figure>
+  <div class="words">
+    <h1 class="rise">We keep what's standing.</h1>
+    <p class="lede rise">Ganister is a small Sheffield practice. We retrofit gritstone terraces, mills and chapels instead of knocking them down.</p>
+    <div class="actions rise">
+      <a class="btn solid" href="#work">See what we kept</a>
+      <a class="btn soft" href="#contact">Start a project</a>
+    </div>
+  </div>
+</section>
+
+<section class="grid intro" aria-labelledby="intro-h">
+  <div class="head"><h2 id="intro-h" class="rise">Most of Sheffield is already built.</h2></div>
+  <div style="grid-column:1/-1;margin-inline:calc(var(--margin) * -1)">
+    <figure class="pano"><img class="drift" src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114917_f2fa3db6-5e1b-4873-b53d-a4cca0fec12a.png" alt="A stone mill by a river weir, with a new charred timber extension on its gable" width="2016" height="864" loading="lazy"></figure>
+  </div>
+  <div class="under">
+    <p class="rise">Knocking a building down throws away the carbon already spent quarrying its stone and sawing its timber. We start from what is there and add only what the building needs to work for another hundred years.</p>
+    <p class="cap rise">Wardsend Mill, Loxley valley. New gable workshop in charred larch.</p>
+  </div>
+</section>
+
+<section class="grid work" id="work" aria-labelledby="work-h">
+  <h2 id="work-h" class="rise">Printed at the share we kept.</h2>
+  <p class="note rise">Each photograph is printed at the share of the building we kept. The pale ground behind it is the whole building; what shows through is what came out.</p>
+
+  <article class="grid proj p1" style="grid-column:1/-1;padding-inline:0">
+    <div class="frame" style="--kept:86%">
+      <div class="print hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114941_9fc1de55-6beb-42e2-b785-e36f9c67175e.png" alt="Back of a terrace house with a new dark timber kitchen opening onto a walled yard" width="1152" height="1536" loading="lazy"></div>
+      <span class="gone">14% came out</span>
+    </div>
+    <div class="txt">
+      <h3 class="rise">Three houses, Crookes</h3>
+      <p class="remark rise">Three 1890s terraces joined into one family home and two flats. The back walls stayed; the outriggers went.</p>
+      <p class="kept-big rise" aria-label="86 percent kept">86%</p>
+      <dl class="facts rise"><dt>Kept</dt><dd>Fronts, party walls, roofs, stairs</dd><dt>Added</dt><dd>Timber kitchens, wood-fibre insulation, heat pumps</dd><dt>Year</dt><dd>2025</dd></dl>
+    </div>
+    <figure class="side rise hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114919_6ed2c4e5-198c-4f49-8282-4050c80c07fd.png" alt="The street front of the Crookes terraces" width="1536" height="864" loading="lazy"></figure>
+  </article>
+
+  <article class="grid proj p2" style="grid-column:1/-1;padding-inline:0">
+    <div class="frame" style="--kept:72%">
+      <div class="print hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114941_1df92ff5-3779-4fff-9cc3-d38713cc3eee.png" alt="A brick and gritstone courtyard of old cutlery workshops with new steel windows" width="1536" height="864" loading="lazy"></div>
+      <span class="gone">28% came out</span>
+    </div>
+    <div class="txt">
+      <h3 class="rise">Little mester works, Sharrow</h3>
+      <p class="remark rise">A cutlery works of 1870 turned into fourteen small studios. The grinding hull roof had failed, so it is the one part we rebuilt.</p>
+      <p class="kept-big rise" aria-label="72 percent kept">72%</p>
+      <dl class="facts rise"><dt>Kept</dt><dd>Courtyard walls, window openings, setts</dd><dt>Added</dt><dd>New roof, steel windows in the old openings</dd><dt>Year</dt><dd>2024</dd></dl>
+    </div>
+  </article>
+
+  <article class="grid proj p3" style="grid-column:1/-1;padding-inline:0">
+    <div class="frame" style="--kept:91%">
+      <div class="print hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114917_5a184ee5-eef1-4c75-b1df-1bd874f034eb.png" alt="Inside a converted chapel: tall lancet windows and a new birch plywood mezzanine" width="1152" height="1536" loading="lazy"></div>
+      <span class="gone">9% came out</span>
+    </div>
+    <div class="stack">
+      <figure class="side rise hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114940_f29a676b-42cd-45d8-af73-81c1ebc22f08.png" alt="The chapel from the lane, behind a dry stone wall" width="1024" height="1024" loading="lazy"></figure>
+      <div class="txt">
+        <h3 class="rise">Chapel house, Bradfield</h3>
+        <p class="remark rise">A Methodist chapel of 1861, now a house for two. The mezzanine stands free of the old walls and could come out in a day.</p>
+        <p class="kept-big rise" aria-label="91 percent kept">91%</p>
+        <dl class="facts rise"><dt>Kept</dt><dd>Walls, lancets, roof trusses, pews as panelling</dd><dt>Added</dt><dd>Birch mezzanine, lime plaster, wood stove</dd><dt>Year</dt><dd>2026</dd></dl>
+      </div>
+    </div>
+  </article>
+</section>
+
+<section class="grid list" id="buildings" aria-labelledby="list-h">
+  <h2 id="list-h" class="rise">Twelve buildings so far. None knocked down.</h2>
+  <div class="tablewrap rise">
+    <table>
+      <caption>Kept is the share of the original fabric, by weight, still standing at handover.</caption>
+      <thead><tr><th scope="col">Building</th><th scope="col">Place</th><th scope="col" class="hide-s">Year</th><th scope="col" class="k">Kept</th></tr></thead>
+      <tbody>
+        <tr><td class="b">Chapel house</td><td>Bradfield</td><td class="hide-s">2026</td><td class="k">91%</td></tr>
+        <tr><td class="b">Wardsend Mill</td><td>Loxley</td><td class="hide-s">2026</td><td class="k">83%</td></tr>
+        <tr><td class="b">Three houses</td><td>Crookes</td><td class="hide-s">2025</td><td class="k">86%</td></tr>
+        <tr><td class="b">Corner shop and flat</td><td>Walkley</td><td class="hide-s">2025</td><td class="k">88%</td></tr>
+        <tr><td class="b">Little mester works</td><td>Sharrow</td><td class="hide-s">2024</td><td class="k">72%</td></tr>
+        <tr><td class="b">Sunday school hall</td><td>Hillsborough</td><td class="hide-s">2024</td><td class="k">79%</td></tr>
+        <tr><td class="b">Back-to-back pair</td><td>Heeley</td><td class="hide-s">2023</td><td class="k">84%</td></tr>
+        <tr><td class="b">Steel works offices</td><td>Attercliffe</td><td class="hide-s">2023</td><td class="k">69%</td></tr>
+        <tr><td class="b">Lodge house</td><td>Endcliffe</td><td class="hide-s">2022</td><td class="k">93%</td></tr>
+        <tr><td class="b">Stable block</td><td>Dore</td><td class="hide-s">2022</td><td class="k">81%</td></tr>
+        <tr><td class="b">Terrace end</td><td>Nether Edge</td><td class="hide-s">2021</td><td class="k">87%</td></tr>
+        <tr><td class="b">Weir cottage</td><td>Rivelin</td><td class="hide-s">2021</td><td class="k">90%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="grid about" id="practice" aria-labelledby="about-h">
+  <figure class="wide hover-zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114918_be539f28-fcf1-4b12-8e81-387f51cdede3.png" alt="Stanage Edge above Sheffield, with abandoned millstones in the bracken" width="1536" height="864" loading="lazy"></figure>
+  <div class="tile rise">
+    <svg viewBox="0 0 300 220" role="img" aria-label="Map: the studio in Sheffield, eleven miles from Stanage Edge">
+      <path d="M20 170 C70 150 90 120 120 128 S180 160 210 140 S260 90 290 96" fill="none" stroke="#f2f1ee" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M30 60 C80 40 130 52 170 40" fill="none" stroke="#f2f1ee" stroke-opacity=".9" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="226" cy="150" r="9" fill="#f2f1ee"/>
+      <text x="32" y="84" fill="#f2f1ee" font-family="STIX Two Text, serif" font-size="15">Stanage Edge</text>
+      <text x="166" y="182" fill="#f2f1ee" font-family="STIX Two Text, serif" font-size="15">The studio, S3</text>
+    </svg>
+    <p>Ganister is the hard sandstone dug on the edges above the city for furnace linings. Most of the buildings we work on are made of its softer cousin, gritstone.</p>
+  </div>
+  <div class="say">
+    <h2 id="about-h" class="rise">Four people, one city.</h2>
+    <p class="rise">We only take work we can cycle to. It keeps us on site every week, and it means we know which quarry the stone came from before we start.</p>
+  </div>
+  <dl class="rise">
+    <div><dt>Within 15 miles</dt><dd>Every building we take on is in or near Sheffield.</dd></div>
+    <div><dt>Survey first</dt><dd>We measure what can stay before anyone draws what is new.</dd></div>
+    <div><dt>Reclaimed stone</dt><dd>Any stone that does come out goes back into the same building or the next.</dd></div>
+    <div><dt>RIBA chartered</dt><dd>Full service, from first visit to handover and the year after.</dd></div>
+  </dl>
+</section>
+
+<section class="grid contact" id="contact" aria-labelledby="est-h">
+  <div class="say">
+    <p class="big rise">Got an old building and a hunch it shouldn't come down? Tell us about it.</p>
+    <p class="rise" style="margin-top:22px">Send the address and a few phone photos. We reply within a week, and the first visit is free if it's within fifteen miles of the studio in Kelham Island.</p>
+    <div class="actions rise"><a class="btn solid" href="mailto:hello@eltio.studio?subject=Ganister%20concept">Send us the address</a></div>
+  </div>
+  <div class="est rise">
+    <h2 id="est-h">What would keeping it save?</h2>
+    <form id="est" onsubmit="return false">
+      <div class="result" aria-live="polite">
+        <div class="n" id="tonnes">50 t</div>
+        <p id="say">of carbon kept out of the air, against knocking it down and building new. About 50 return flights from London to New York.</p>
+      </div>
+      <fieldset>
+        <legend>Your building</legend>
+        <div class="chips">
+          <label><input type="radio" name="t" value="180" checked><span>Terrace house</span></label>
+          <label><input type="radio" name="t" value="230"><span>Mill or warehouse</span></label>
+          <label><input type="radio" name="t" value="200"><span>Chapel or hall</span></label>
+          <label><input type="radio" name="t" value="210"><span>Workshop</span></label>
+        </div>
+      </fieldset>
+      <div>
+        <div class="range"><label for="area">Floor area</label><input type="range" id="area" min="40" max="3000" step="10" value="120"><output for="area" id="areaOut">120 m²</output></div>
+      </div>
+    </form>
+    <p class="fine">A rough first figure, not a survey: new build at about 600 kg CO₂e per m² including demolition, against 180 to 230 kg for a retrofit like ours.</p>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="bg"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_3KK5spIVe5himiuBkAL0ELU5lss/hf_20261102_114919_6ed2c4e5-198c-4f49-8282-4050c80c07fd.png" alt="" width="1536" height="864" loading="lazy"></div>
+  <div class="in">
+    <p class="word" aria-label="Ganister">Ganister</p>
+    <div class="row">
+      <p>A concept site by Eltio Studio, made to show how a small practice can let its buildings lead. Photographs generated with AI for this concept; no real buildings are shown as Ganister's work.</p>
+      <a href="mailto:hello@eltio.studio">hello@eltio.studio</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // staggered entrances, per section
+  var els = [].slice.call(document.querySelectorAll('.rise,.shutter'));
+  if (!('IntersectionObserver' in window) || reduce) { els.forEach(function(e){e.classList.add('in')}); }
+  else {
+    var io = new IntersectionObserver(function(entries){
+      var i = 0;
+      entries.forEach(function(en){ if(en.isIntersecting){ var el=en.target; setTimeout(function(){el.classList.add('in')}, (i++)*80); io.unobserve(el);} });
+    }, {rootMargin:'0px 0px -8% 0px'});
+    els.forEach(function(e){io.observe(e)});
+  }
+  // signature: each print trims from full size down to the share kept as it enters
+  var frames = [].slice.call(document.querySelectorAll('.frame'));
+  if (!reduce && 'IntersectionObserver' in window) {
+    frames.forEach(function(f){ var p=f.querySelector('.print'); p.style.transition='none'; p.style.width='100%'; p.style.height='100%'; p.offsetWidth; p.style.transition=''; });
+    var fo = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ var p=en.target.querySelector('.print'); setTimeout(function(){p.style.width='';p.style.height='';},350); fo.unobserve(en.target);} });
+    }, {threshold:.45});
+    frames.forEach(function(f){fo.observe(f)});
+  }
+  // gentle scroll drift on the hero prints
+  if (!reduce) {
+    var a=document.querySelector('.hero .a img'), c=document.querySelector('.hero .c img'), b=document.querySelector('.hero .b img');
+    var tick=false;
+    addEventListener('scroll',function(){ if(tick)return; tick=true; requestAnimationFrame(function(){ var y=Math.min(scrollY,900);
+      a.style.transform='translateY('+(y*-0.04)+'px) scale(1.06)'; b.style.transform='scale('+(1.02+y*0.00008)+')'; c.style.transform='translateY('+(y*0.05)+'px) scale(1.08)'; tick=false; }); },{passive:true});
+  }
+  // estimator
+  var form=document.getElementById('est'), area=document.getElementById('area'), out=document.getElementById('areaOut'), t=document.getElementById('tonnes'), say=document.getElementById('say');
+  function calc(){
+    var m2=+area.value, retro=+form.querySelector('input[name=t]:checked').value;
+    var saved=Math.round(m2*(600-retro)/1000);
+    out.textContent=m2.toLocaleString('en-GB')+' m²';
+    t.textContent=saved.toLocaleString('en-GB')+' t';
+    var flights=Math.round(saved/1);
+    say.textContent='of carbon kept out of the air, against knocking it down and building new. About '+flights.toLocaleString('en-GB')+' return flight'+(flights===1?'':'s')+' from London to New York.';
+  }
+  form.addEventListener('input',calc); calc();
+})();
+</script>
+</body>
+</html>

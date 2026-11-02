@@ -49,9 +49,6 @@ var DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MON = ["Jan", "Feb"
 
 var G = { token: null, exp: 0, client: null, sheetId: null };
 var D = null; /* tab name -> array of row objects, each with _r (sheet row number) */
-/* preview of a fix before it goes live: open the hub once with ?preview=1; ?preview=0 goes back */
-(function () { var m = /[?&]preview=([01])/.exec(location.search); if (m) try { if (m[1] === "1") localStorage.setItem("hub-preview", "1"); else localStorage.removeItem("hub-preview"); } catch (e) {} })();
-var PREVIEW = (function () { try { return localStorage.getItem("hub-preview") === "1"; } catch (e) { return false; } })();
 var S = { tab: "today", f: "all", i: 0, sheet: null, pick: null, app: "all", log: false, fb: false, open: null, fri: new Date().getDay() === 5, ideaA: "sw", chat: [], busy: false };
 var $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -226,8 +223,8 @@ function chartCard() {
   var W = 300, H = 120, max = Math.max(pace * 1.12, Math.max.apply(null, E) * 1.05), bw = W / 12 - 6;
   var bars = E.map(function (v, i) { var h = v / max * H, x = i * (W / 12) + 3; return v ? '<rect x="' + x + '" y="' + (H - h) + '" width="' + bw + '" height="' + h + '" rx="2" fill="var(--chart)"/>' : '<rect x="' + x + '" y="' + (H - 2) + '" width="' + bw + '" height="2" rx="1" fill="var(--border2)"/>'; }).join("");
   var py = H - pace / max * H, labels = M.map(function (m, i) { return i % 2 ? "" : '<text x="' + (i * (W / 12) + W / 24) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--faint)" font-family="Geist,sans-serif">' + m + "</text>"; }).join("");
-  return '<div class="card stat"><div class="sh"><div><span class="t">' + money(target) + ' goal</span><span class="muted" style="font-size:12px">from ' + M[0] + '</span></div><div><span class="muted" style="font-size:12px">Earned</span><b>' + money(earned) + '</b></div><div><span class="muted" style="font-size:12px">' + (PREVIEW ? "Target by now" : "On pace") + "</span><b>" + money(Math.round(onPace)) + "</b></div></div>" + (PREVIEW ? heading(earned, gone, ys) : "") +
-    '<div class="chart"><svg viewBox="0 0 ' + W + " " + (H + 22) + '" role="img" aria-label="Sales by month against the monthly pace"><line x1="0" x2="' + W + '" y1="' + H + '" y2="' + H + '" stroke="var(--border)"/>' + bars + '<line x1="0" x2="' + W + '" y1="' + py + '" y2="' + py + '" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="' + W + '" y="' + (py - 5) + '" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Geist,sans-serif">' + (PREVIEW ? "" : "pace ") + money(pace) + (PREVIEW ? "/mo needed" : "/mo") + "</text>" + labels + "</svg>" +
+  return '<div class="card stat"><div class="sh"><div><span class="t">' + money(target) + ' goal</span><span class="muted" style="font-size:12px">from ' + M[0] + '</span></div><div><span class="muted" style="font-size:12px">Earned</span><b>' + money(earned) + '</b></div><div><span class="muted" style="font-size:12px">' + "Target by now" + "</span><b>" + money(Math.round(onPace)) + "</b></div></div>" + heading(earned, gone, ys) +
+    '<div class="chart"><svg viewBox="0 0 ' + W + " " + (H + 22) + '" role="img" aria-label="Sales by month against the monthly pace"><line x1="0" x2="' + W + '" y1="' + H + '" y2="' + H + '" stroke="var(--border)"/>' + bars + '<line x1="0" x2="' + W + '" y1="' + py + '" y2="' + py + '" stroke="var(--muted)" stroke-dasharray="3 4"/><text x="' + W + '" y="' + (py - 5) + '" text-anchor="end" font-size="9" fill="var(--muted)" font-family="Geist,sans-serif">' + money(pace) + "/mo needed" + "</text>" + labels + "</svg>" +
     (meta("chart_note") ? '<p class="note" style="padding:4px 4px 0">' + esc(meta("chart_note")) + "</p>" : "") + "</div></div>";
 }
 /* where the year is heading: money in so far plus the monthly average since the tax year began (quiet months count) for the months left */
@@ -323,7 +320,7 @@ function promiseCard() {
   if (!p) { var E = rows("items").filter(eligible).slice(0, 5); if (!E.length) return "";
     return sec("Today's promise", st ? "streak " + st : "pick one") + '<div class="card cardpad promise-card"><p class="muted" style="font-size:13px;margin:0">Pick the one job you promise to finish today. Only money and app-launch jobs count.</p><div class="pchips">' + E.map(function (x) { return '<button type="button" class="chip" data-act="promise" data-id="' + esc(x.id) + '" ' + av(x.area) + '><span class="dot"></span>' + esc(x.title) + (x.cash ? " · " + esc(x.cash) : "") + "</button>"; }).join("") + '</div><p class="note">' + weekLine() + "</p></div>"; }
   var k = kept(p), it = item(p.item_id);
-  return sec("Today's promise", st ? "streak " + st + (st > 1 ? " days" : " day") : "") + '<div class="card cardpad promise-card' + (k ? " kept" : "") + '"><div class="r' + (k || !it ? '"' : ' tap" data-act="go" data-go="item:' + esc(p.item_id) + '"') + " " + av(it ? it.area : "sw") + ">" + (PREVIEW && !k && it ? '<button type="button" class="pk" data-act="done" data-id="' + esc(it.id) + '" aria-label="Mark it done"></button>' : '<span class="pk">' + (k ? ic("check") : "") + "</span>") + '<span class="t">' + esc(p.title) + '</span><span class="w">' + (k ? "kept" : "not yet") + "</span>" + (k || !it ? "" : ic("chev")) + "</div>" +
+  return sec("Today's promise", st ? "streak " + st + (st > 1 ? " days" : " day") : "") + '<div class="card cardpad promise-card' + (k ? " kept" : "") + '"><div class="r' + (k || !it ? '"' : ' tap" data-act="go" data-go="item:' + esc(p.item_id) + '"') + " " + av(it ? it.area : "sw") + ">" + (!k && it ? '<button type="button" class="pk" data-act="done" data-id="' + esc(it.id) + '" aria-label="Mark it done"></button>' : '<span class="pk">' + (k ? ic("check") : "") + "</span>") + '<span class="t">' + esc(p.title) + '</span><span class="w">' + (k ? "kept" : "not yet") + "</span>" + (k || !it ? "" : ic("chev")) + "</div>" +
     '<p class="note">' + weekLine() + (k ? "" : ' · <button type="button" class="linkbtn" data-act="unpromise">change it</button>') + "</p></div>";
 }
 /* after 4pm: what got done, moved, logged and slipped today, from the sheet */
@@ -683,7 +680,7 @@ function bindSwipe() {
 function step(k) { var L = list(); if (!L.length) return; var c = $("card"); if (c) c.classList.add("out"); setTimeout(function () { S.i = (S.i + k + L.length) % L.length; S.keep = true; render(); }, 160); }
 function go(tab) { S.tab = tab; render(); var m = document.querySelector(".main,.center"); if (m) m.scrollTop = 0; }
 /* open one to-do: the Waiting on you card, scrolled into view and lit up, so a tap from the sidebar, Top 3 or the promise visibly lands */
-function openItem(id) { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(id)); go("today"); if (!PREVIEW) return; var c = $("card"); if (c) { c.scrollIntoView({ block: "center" }); c.classList.add("lit"); setTimeout(function () { c.classList.remove("lit"); }, 1200); } }
+function openItem(id) { S.f = "all"; S.i = Math.max(0, list().map(function (z) { return z.id; }).indexOf(id)); go("today"); var c = $("card"); if (c) { c.scrollIntoView({ block: "center" }); c.classList.add("lit"); setTimeout(function () { c.classList.remove("lit"); }, 1200); } }
 function ask(g) {
   g = (g || "").trim(); if (!g) return toast("Type a rough goal first");
   var last = S.chat[S.chat.length - 1], ta = $("ask-in"); if (ta) ta.value = "";

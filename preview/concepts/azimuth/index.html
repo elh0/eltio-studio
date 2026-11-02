@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" style="background:#E9ECEA">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -11,7 +11,7 @@
 <meta property="og:image" content="img/f0-s.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%231C1C1A%22/%3E%3Cpath%20transform%3D%22translate%2814%2013%29%20scale%28.4%20.38%29%22%20fill%3D%22%23ECEAE4%22%20d%3D%22M43.6%2051.4L0%2051.4L0%20100L26%20100L26%2074L43.6%2074ZM26%2045L26.04%2043.76L26.16%2042.52L26.37%2041.29L26.65%2040.08L27.01%2038.89L27.45%2037.73L27.96%2036.6L28.55%2035.5L29.2%2034.44L29.93%2033.43L30.72%2032.47L31.56%2031.56L32.47%2030.72L33.43%2029.93L34.44%2029.2L35.5%2028.55L36.6%2027.96L37.73%2027.45L38.89%2027.01L40.08%2026.65L41.29%2026.37L42.52%2026.16L43.6%2026.06L43.6%200.05L42.06%200.1L39.13%200.38L36.22%200.86L33.35%201.53L30.54%202.39L27.78%203.43L25.1%204.64L22.5%206.03L20%207.58L17.61%209.3L15.33%2011.17L13.18%2013.18L11.17%2015.33L9.3%2017.61L7.58%2020L6.03%2022.5L4.64%2025.1L3.43%2027.78L2.39%2030.54L1.53%2033.35L0.86%2036.22L0.38%2039.13L0.1%2042.06L0%2045L0%2048.6L26%2048.6ZM90%20100L90%2051.4L46.4%2051.4L46.4%2074L64%2074L64%20100ZM90%2045L89.9%2042.06L89.62%2039.13L89.14%2036.22L88.47%2033.35L87.61%2030.54L86.57%2027.78L85.36%2025.1L83.97%2022.5L82.42%2020L80.7%2017.61L78.83%2015.33L76.82%2013.18L74.67%2011.17L72.39%209.3L70%207.58L67.5%206.03L64.9%204.64L62.22%203.43L59.46%202.39L56.65%201.53L53.78%200.86L50.87%200.38L47.94%200.1L46.4%200.05L46.4%2026.06L47.48%2026.16L48.71%2026.37L49.92%2026.65L51.11%2027.01L52.27%2027.45L53.4%2027.96L54.5%2028.55L55.56%2029.2L56.57%2029.93L57.53%2030.72L58.44%2031.56L59.28%2032.47L60.07%2033.43L60.8%2034.44L61.45%2035.5L62.04%2036.6L62.55%2037.73L62.99%2038.89L63.35%2040.08L63.63%2041.29L63.84%2042.52L63.96%2043.76L64%2045L64%2048.6L90%2048.6Z%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
 <style>
 /* Azimuth: one sticky live-3D hero, then a quiet stone page. Two fonts, three sizes. Identity: the Cut wordmark (2 Nov 2026). */
 :root{
@@ -307,6 +307,76 @@ footer{border-top:0;font:400 var(--t)/1.4 var(--sans);text-transform:none;letter
   #view .more{grid-template-columns:1fr;gap:40px}
   #view .more>*{grid-column:1!important}
 }
+
+/* ---- calm pass 2: grid lines at col 1, 4 and 9; one rhythm; cool morning palette ---- */
+:root{--stone:#E9ECEA;--ink:#262827;--soft:#3F4341;--faint:#9AA19D;--concrete:#9AA19D;--line:#D6DBD8;--warm:#D9955B;--gap:clamp(40px,4.2vw,64px);--sec:clamp(120px,14vw,220px)}
+html{background:var(--stone)}
+section{padding-block:var(--sec)}
+.hl{column-gap:clamp(12px,1.6vw,24px);color:var(--soft)}
+.hl>span{grid-column:auto;justify-self:start!important}
+.hl .a{grid-column:1/9!important}.hl .b{grid-column:4/13!important}.hl .c{grid-column:9/13!important}
+.hl .deg{color:var(--warm);margin-right:.18em}
+.sq{position:absolute;left:calc(-1 * (14px * 3 + 8px + .7em))}.sq i{background:#cfd6d2}.sq i:nth-child(2){background:#bcc6c1}.sq i:nth-child(3){background:var(--warm);opacity:.8}
+.hl .b{position:relative}
+.notes,.wcap{display:grid!important;grid-template-columns:repeat(12,1fr);column-gap:clamp(12px,1.6vw,24px);margin-top:var(--gap)}
+.notes .note:first-child,.wcap .x{grid-column:4/8!important}.notes .note:last-child,.wcap .y{grid-column:9/13!important;justify-self:start!important;text-align:left!important}
+.intro3 .hl,.work3 .hl,.proc3 .hl{margin-bottom:0}
+.intro3 figure{margin:var(--sec) 0 0 calc((100% + clamp(12px,1.6vw,24px)) / 12 * 8);width:calc((100% + clamp(12px,1.6vw,24px)) / 12 * 3 - clamp(12px,1.6vw,24px))}
+.work3 .strip{margin-top:var(--gap);justify-content:flex-start;padding-left:0}
+.work3 .lev{display:none}
+.process{margin-top:var(--gap);grid-template-columns:repeat(4,1fr);column-gap:clamp(12px,1.6vw,24px)}
+.contact3{min-height:0}
+.contact3 .hl .a{font-size:1em;align-self:auto;padding:0;color:#b9c0bc}
+.contact3 .notes .note:first-child{grid-column:4/8!important}
+.contact3 .hl .c{grid-column:4/13!important}
+.note{color:var(--faint)}
+.endmark .em svg{fill:var(--ink)}
+#view{background:var(--stone)}
+#view .info .note{color:var(--faint)}
+#cut .ln{background:var(--warm)}
+@media (max-width:760px){
+  .hl .a,.hl .b,.hl .c{grid-column:1!important}
+  .hl .b,.hl .c{padding-left:14vw}
+  .sq{display:none}
+  .notes,.wcap{grid-template-columns:1fr}
+  .notes .note,.notes .note:first-child,.notes .note:last-child,.wcap>*{grid-column:1!important;padding-left:14vw}
+  .intro3 figure{margin:var(--gap) 0 0 14vw;width:60vw}
+  .process{grid-template-columns:1fr 1fr;row-gap:36px}
+}
+
+/* ---- calm pass 3: lighter headline face, quiet wordmark, no orange, nav marker ---- */
+:root{--disp:"Inter",system-ui,sans-serif;--warm:#7d8480}
+.hl,.hero-copy h1,#view .info h2,#view .vnext b{font-family:var(--disp)!important;font-weight:300!important;letter-spacing:-.015em!important}
+.hl .deg{color:var(--faint)}
+.sq i,.sq i:nth-child(2),.sq i:nth-child(3){background:#c9d0cc;opacity:1}.sq i:nth-child(2){background:#b8c0bb}.sq i:nth-child(3){background:#a6afaa}
+.brand svg{height:13px!important}
+.brand{color:var(--soft)}
+#ld .ph svg{width:min(38vw,440px)}
+.endmark{padding:0 var(--pad) 28px}
+.endmark .em{width:clamp(110px,12vw,170px)}
+#cut .ln{background:#9AA19D}
+/* nav: a short dash marks where you are, links glide you there */
+nav a{position:relative;padding-left:16px;display:block}
+nav a::before{content:"";position:absolute;left:0;top:50%;width:0;height:1px;background:currentColor;transition:width .5s var(--o)}
+nav a.on{color:var(--ink)}nav a.on::before{width:10px}
+.dusk nav a.on{color:#F3EFE6}
+.work3 .strip{height:calc((100vw - 2 * var(--pad) - 40px) / 3.75);max-height:640px;gap:clamp(8px,.9vw,14px)}
+.strip .ar{left:auto;right:0;top:auto;bottom:calc(100% + 12px);width:44px;display:flex;align-items:flex-end;gap:10px;flex-direction:row-reverse}
+.strip .ar svg{width:36px}.strip .ar span{margin:0}
+.notes .note:first-child,.wcap .x{grid-column:1/5!important}
+.intro3 .notes .note:first-child{grid-column:4/8!important}.contact3 .notes .note:first-child{grid-column:4/8!important}
+.endmark .em svg{transform:none!important}
+#view .top{background:var(--stone)}
+@media (max-width:760px){
+  .notes{grid-template-columns:1fr!important}
+  .notes .note,.intro3 .notes .note:first-child,.contact3 .notes .note:first-child{grid-column:1/-1!important;padding-left:14vw}
+  .wcap{display:none!important}
+  .work3 .strip{height:auto;max-height:none;padding-left:var(--pad)}
+  .strip .ar{display:none!important}
+  .hl .a,.hl .b,.hl .c,.contact3 .hl .c{grid-column:1/-1!important}
+}
+@keyframes arr{from{transform:translateY(40%);opacity:0;clip-path:inset(0 0 100% 0)}to{transform:none;opacity:1;clip-path:inset(0 0 0 0)}}
+.hl.arrive>span{animation:arr 1s var(--o) both}.hl.arrive>span:nth-child(2){animation-delay:.1s}.hl.arrive>span:nth-child(3){animation-delay:.2s}
 @media (prefers-reduced-motion:reduce){#ld{display:none}.w>i{transform:none!important}#cut{display:none}.js .rv{opacity:1;transform:none}.flyer{transition:none}}
 </style>
 </head>
@@ -333,13 +403,13 @@ footer{border-top:0;font:400 var(--t)/1.4 var(--sans);text-transform:none;letter
 </div>
 
 <section id="practice" class="intro3">
-  <h2 class="hl rv"><span class="a">Daylight</span><span class="b"><span class="sq" aria-hidden="true"><i></i><i></i><i></i></span>Architecture<sup>London</sup></span><span class="c"><span class="deg">&deg;</span> By the hour</span></h2>
-  <div class="notes rv"><p class="note">A small practice that designs houses and small public buildings around the light they get.</p><p class="note">Every project starts with a sun path, <b>hour by hour, month by month.</b></p></div>
+  <h2 class="hl rv"><span class="a">Daylight</span><span class="b"><span class="sq" aria-hidden="true"><i></i><i></i><i></i></span>Architecture</span><span class="c"><span class="deg">&deg;</span>By the hour</span></h2>
+  <div class="notes rv"><p class="note">A small practice in London. We design houses and small public buildings around the light they get.</p><p class="note">Every project starts with a sun path, <b>hour by hour, month by month.</b></p></div>
   <figure class="rv"><img class="im" src="img/g9-s.jpg" alt="Low sun across a limestone wall and an oak window frame" loading="lazy" decoding="async"><figcaption>Reed House, 16:40, 21 December. Concept render</figcaption></figure>
 </section>
 
 <section id="work" class="work3">
-  <h2 class="hl rv"><span class="a">Selected</span><span class="b">Work <span class="deg">&deg;</span> 23&ndash;26<sup>(5)</sup></span></h2>
+  <h2 class="hl rv"><span class="a">Selected</span><span class="b"><span class="deg">&deg;</span>Work, 2023&ndash;26</span></h2>
   <div class="lev t" aria-hidden="true"><span id="levT"></span></div>
   <div class="strip rv" id="list"></div>
   <div class="lev b" aria-hidden="true"><span id="levB"></span></div>
@@ -347,7 +417,7 @@ footer{border-top:0;font:400 var(--t)/1.4 var(--sans);text-transform:none;letter
 </section>
 
 <section class="proc3">
-  <h2 class="hl rv"><span class="a">How we</span><span class="b">work <span class="deg">&deg;</span> four stages</span></h2>
+  <h2 class="hl rv"><span class="a">How we</span><span class="b"><span class="deg">&deg;</span>work, in four stages</span></h2>
   <div class="process">
     <div class="rv"><span class="lab">01</span><b>Site and sun</b>We map the sun across your site for every month before we draw a wall.</div>
     <div class="rv"><span class="lab">02</span><b>Design</b>Plans, models and light studies until the rooms are right at the hours you use them.</div>
@@ -357,7 +427,7 @@ footer{border-top:0;font:400 var(--t)/1.4 var(--sans);text-transform:none;letter
 </section>
 
 <section id="contact" class="contact3">
-  <h2 class="hl rv"><span class="a">51.55&deg; N</span><span class="b">Tell us where</span><span class="c">your site <span class="deg">&deg;</span> faces.</span></h2>
+  <h2 class="hl rv"><span class="a">51.55&deg; N</span><span class="b">Tell us where</span><span class="c"><span class="deg">&deg;</span>your site faces.</span></h2>
   <div class="notes rv"><p class="note">Unit 4, 12 Example Yard, London E8.<br>hello@azimuth.example</p><p class="note">Fictional practice. A concept by Eltio Studio.</p></div>
 </section>
 
@@ -402,8 +472,8 @@ function study(p){
   const pt=h=>{const a=Math.PI*(1-(h-h0)/(h1-h0));return [cx+r*Math.cos(a),cy-r*Math.sin(a)*0.92]};
   const arc=(a,b)=>{let d='';for(let h=a;h<=b+0.001;h+=0.1){const [x,y]=pt(Math.min(h,b));d+=(d?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return d};
   let ticks='';for(let h=6;h<=21;h+=3){const [x,y]=pt(h);ticks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="currentColor"/><text x="${x.toFixed(1)}" y="${(y-9).toFixed(1)}" text-anchor="middle">${String(h).padStart(2,'0')}</text>`}
-  const hot=p.a==null?'':`<path class="hot" pathLength="1000" d="${arc(p.a,p.b)}" fill="none" stroke="#E8A25A" stroke-width="6" stroke-linecap="round"/>`;
-  const run=p.a==null?'':`<circle class="dot" r="5" fill="#E8A25A" style="offset-path:path('${arc(p.a,p.b)}')"/>`;
+  const hot=p.a==null?'':`<path class="hot" pathLength="1000" d="${arc(p.a,p.b)}" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`;
+  const run=p.a==null?'':`<circle class="dot" r="4.5" fill="currentColor" style="offset-path:path('${arc(p.a,p.b)}')"/>`;
   return `<svg viewBox="0 0 ${W} ${H}" class="sp" role="img" aria-label="${p.study}"><path class="arc" pathLength="1000" d="${arc(h0,h1)}" fill="none" stroke="currentColor" stroke-width="1"/>${hot}${run}${ticks}<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="currentColor"/><text x="20" y="${cy+18}">E</text><text x="150" y="${cy+18}" text-anchor="middle">S</text><text x="280" y="${cy+18}" text-anchor="end">W</text></svg>`;
 }
 const list=document.getElementById('list');
@@ -620,6 +690,21 @@ if(location.hash.length>1){const a=document.querySelector(`.proj[data-id="${loca
 function imOk(im){const d=()=>im.classList.add('ok');(im.decode?im.decode():Promise.resolve()).then(d,d)}
 document.addEventListener('load',e=>{if(e.target.classList&&e.target.classList.contains('im'))imOk(e.target)},true);
 setInterval(()=>document.querySelectorAll('img.im:not(.ok)').forEach(im=>{if(im.complete&&im.naturalWidth)imOk(im)}),400);
+
+/* nav: glide to the section, mark where you are, and let its headline arrive */
+(function(){
+  const links=[...document.querySelectorAll('nav a')],secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const hdr=()=>document.querySelector('header').offsetHeight;
+  links.forEach((a,i)=>a.addEventListener('click',e=>{e.preventDefault();const t=secs[i];if(!t)return;
+    const y=t.getBoundingClientRect().top+scrollY-hdr()+(t.id==='work'?40:0);
+    const hl=t.querySelector('.hl');
+    const land=()=>{if(hl){hl.classList.remove('arrive');void hl.offsetWidth;hl.classList.add('arrive')}};
+    if(window.lenis){lenis.scrollTo(y,{duration:1.6,easing:x=>1-Math.pow(1-x,4),onComplete:land})}
+    else{scrollTo({top:y,behavior:'smooth'});setTimeout(land,700)}
+  }));
+  function spy(){const m=innerHeight*.4;let k=-1;secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<m)k=i});links.forEach((a,i)=>a.classList.toggle('on',i===k))}
+  addEventListener('scroll',spy,{passive:true});spy();
+})();
 </script>
 </body>
 </html>

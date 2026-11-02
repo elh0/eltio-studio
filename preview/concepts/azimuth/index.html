@@ -158,7 +158,7 @@ footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;paddin
 .im.ok{opacity:1;transform:none}
 .proj img.im{transition:opacity .9s var(--o),transform 1.2s var(--o)}
 #view{overflow-x:hidden}
-.proj .ph,.detail,#view .gal figure:first-child{background:var(--line)}
+.proj .ph,.detail img,#view .gal img{background:var(--line)}
 #view .heroimg.ok{animation:drift 14s linear both}@keyframes drift{to{transform:scale(1.04)}}
 .sp .arc{stroke-dasharray:1000;stroke-dashoffset:1000}
 .sp .hot{stroke-dasharray:1000;stroke-dashoffset:1000}
@@ -200,7 +200,7 @@ footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;paddin
 
 <div class="hero" id="top">
   <div class="stage">
-    <img class="fallback" src="img/f0-s.jpg" alt="Reed House, Suffolk, at dusk">
+    <img class="fallback" src="img/f0-s.jpg" alt="Reed House, Suffolk">
     <canvas id="gl" aria-label="A live model of Reed House. Scroll to move the sun across it."></canvas>
     <div class="hero-copy">
       <h1>We draw the sun first.</h1>
@@ -250,7 +250,7 @@ footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;paddin
 <script src="lib/lenis.min.js"></script>
 <script>
 document.documentElement.classList.add('js');
-const CLIP={reed:'img/clips/reed.mp4',fig:'img/clips/fig.mp4',reading:'img/clips/reading.mp4',cliff:'img/clips/cliff.mp4',pavilion:'img/clips/pavilion.mp4'};
+const CLIP={}; /* light clips retired with the glossy images; redo from the new stills if wanted */
 const P=[
  {id:'reed',t:'Reed House',img:'f0',g:'g0',place:'Suffolk',year:'2025',use:'House',area:'240 m²',faces:'South, across the pool',sun:'14 h direct, 21 June',a:7,b:21,
   text:['Three long rooms around a courtyard and a still pool.','The living room faces south and gets low winter sun until three. Bedrooms face east, so mornings start in light.'],study:'Living room, direct sun on 21 June'},

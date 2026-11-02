@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Plinth — architects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Space+Mono&display=swap">
+<style>
+/* Plinth: illustrations do the talking. Heavy expanded caps, mono for everything else. */
+:root{
+  --concrete:#DAD6CE; --slate:#33353C; --mauve:#A8979F; --line:#BFBAB0; --paper:#E6E2DA;
+  --wide:"Archivo",Impact,sans-serif; --mono:"Space Mono",ui-monospace,Menlo,monospace;
+  --pad:max(20px,env(safe-area-inset-left,0px));
+}
+*{box-sizing:border-box}
+html{background:var(--concrete);color:var(--slate);-webkit-text-size-adjust:100%}
+body{margin:0;font:400 13px/1.55 var(--mono)}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.W{font-family:var(--wide);font-stretch:125%;font-weight:700;text-transform:uppercase;letter-spacing:-.01em;line-height:.88}
+.q{color:#7b776f}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:90;opacity:.22;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .2 0 0 0 0 .2 0 0 0 0 .22 0 0 0 1.2 -.35'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+header{display:flex;justify-content:space-between;align-items:center;padding:calc(18px + env(safe-area-inset-top,0px)) var(--pad) 18px;position:sticky;top:0;z-index:30;background:var(--concrete)}
+.logo{display:flex;align-items:center;gap:10px;font-size:20px}
+.logo svg{width:26px;height:26px}
+nav{display:flex;gap:22px;text-transform:uppercase}
+
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:end;padding:20px var(--pad) 60px;min-height:calc(100svh - 70px)}
+.hero h1{font-size:clamp(46px,8.4vw,150px);margin:0}
+.hero p{max-width:34ch;margin:28px 0 0}
+.build{position:relative;aspect-ratio:1/1;width:100%;mix-blend-mode:multiply}
+.build .s{position:absolute;left:0;right:0;background-repeat:no-repeat;background-size:100% auto;transform:translateY(-140%);opacity:0}
+.build.go .s{animation:drop .9s cubic-bezier(.3,1.25,.5,1) forwards}
+@keyframes drop{0%{transform:translateY(-140%);opacity:0}30%{opacity:1}100%{transform:none;opacity:1}}
+.cap{display:flex;justify-content:space-between;text-transform:uppercase;margin-top:8px}
+
+section{padding:clamp(70px,10vw,140px) var(--pad);border-top:1px solid var(--line)}
+.state{font-size:clamp(28px,4.4vw,64px);max-width:16ch;margin:0}
+.head{display:flex;justify-content:space-between;text-transform:uppercase;margin-bottom:30px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tile{background:transparent;box-shadow:inset 0 0 0 1px var(--line);position:relative;cursor:pointer;aspect-ratio:1/1;overflow:hidden}
+.tile img{width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.tile:hover img{transform:translateY(-3%) scale(1.03)}
+.tile .t{position:absolute;left:14px;right:14px;bottom:12px;display:flex;justify-content:space-between;gap:8px;text-transform:uppercase;font-size:11px}
+.tile.wide{grid-column:span 2;aspect-ratio:2/1}
+.tile.wide img{object-fit:contain}
+.tile.txt{display:flex;flex-direction:column;justify-content:space-between;padding:18px;cursor:default;background:var(--slate);color:var(--concrete)}
+.tile.txt b{font-size:clamp(22px,2.4vw,34px)}
+
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
+.steps div{background:var(--paper);padding:20px;min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
+.steps b{font-size:clamp(20px,2vw,28px);display:block}
+.contact h2{font-size:clamp(46px,9vw,160px);margin:0 0 30px}
+footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;padding:22px var(--pad) calc(22px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);text-transform:uppercase}
+
+/* project view */
+#view{position:fixed;inset:0;z-index:60;background:var(--concrete);overflow-y:auto;visibility:hidden;opacity:0;transition:opacity .35s,visibility 0s .35s}
+#view.on{visibility:visible;opacity:1;transition:opacity .35s}
+#view .top{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;padding:calc(18px + env(safe-area-inset-top,0px)) var(--pad) 18px;background:var(--concrete);text-transform:uppercase}
+#view button{all:unset;cursor:pointer}
+#view .v1{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:10px var(--pad) 40px;align-items:end}
+#view h2{font-size:clamp(40px,7vw,120px);margin:0 0 24px}
+#view dl{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;margin:0 0 24px;text-transform:uppercase}
+#view dt{color:#7b776f}#view dd{margin:0}
+#view .ph{padding:0 var(--pad) 80px;opacity:0;transform:translateY(40px);transition:opacity .9s 1.1s,transform .9s 1.1s}
+#view.on .ph{opacity:1;transform:none}
+#view .ph img{width:100%}
+#view .ph p{margin:10px 0 0;text-transform:uppercase}
+@media (max-width:760px){
+  nav a:not(:last-child){display:none}
+  .hero,#view .v1{grid-template-columns:1fr}
+  .hero .build{order:-1}
+  .grid{grid-template-columns:1fr 1fr}
+  .tile.wide{grid-column:span 2}
+  .steps{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.build .s{animation:none!important;transform:none;opacity:1}#view .ph{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo W" href="#">
+    <svg viewBox="0 0 26 26" aria-hidden="true"><rect x="1" y="15" width="24" height="10" fill="currentColor"/><rect x="7" y="3" width="12" height="12" fill="currentColor" opacity=".55"/></svg>Plinth</a>
+  <nav><a href="#work">Work</a><a href="#method">Method</a><a href="#contact">Contact</a></nav>
+</header>
+
+<div class="hero">
+  <div>
+    <h1 class="W">Built heavy.<br>Built to stay.</h1>
+    <p>Plinth is an architecture practice in London. We design in brick, stone, timber and concrete, for buildings that get better as they weather.</p>
+  </div>
+  <div>
+    <div class="build" id="hb" data-img="../img/i0.jpg"></div>
+    <div class="cap"><span>Reed House</span><span class="q">Suffolk · 2025</span></div>
+  </div>
+</div>
+
+<section>
+  <p class="state W">We design buildings for a hundred years.</p>
+</section>
+
+<section id="work">
+  <div class="head"><span>Work</span><span class="q">(5)</span></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section id="method">
+  <div class="head"><span>Method</span><span class="q">Four stages</span></div>
+  <div class="steps">
+    <div><span class="q">01</span><span><b class="W">Ground</b>We start on site: soil, levels, neighbours, what is already there.</span></div>
+    <div><span class="q">02</span><span><b class="W">Mass</b>Card and clay models until the shape sits right. Then drawings.</span></div>
+    <div><span class="q">03</span><span><b class="W">Permit</b>We run planning and building control, and keep you in every meeting.</span></div>
+    <div><span class="q">04</span><span><b class="W">Build</b>We pick the builder with you and are on site every week.</span></div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <h2 class="W">Start on the ground.</h2>
+  <p>hello@plinth.studio (fictional)<br>London E2</p>
+</section>
+
+<footer><span>Fictional practice. Concept by Eltio Studio.</span><span class="q">Illustrations and photos are AI concept renders.</span></footer>
+
+<div id="view" aria-hidden="true">
+  <div class="top"><span id="vt"></span><button id="close">Close</button></div>
+  <div class="v1"><div class="build" id="vb"></div><div><h2 class="W" id="vh"></h2><dl id="vd"></dl><p id="vp"></p></div></div>
+  <div class="ph"><img id="vimg" alt=""><p class="q">Photograph (concept render)</p></div>
+</div>
+
+<script>
+const P=[
+ {id:'reed',t:'Reed House',i:'i0',p:'p0',place:'Suffolk',year:'2025',m:'Limestone, oak',area:'240 m²',text:'A low courtyard house in long limestone walls. The walls hold the day’s heat and give it back at night.'},
+ {id:'fig',t:'Fig Garden',i:'i1',p:'p1',place:'Hackney',year:'2024',m:'Reclaimed brick',area:'38 m²',text:'A kitchen built from bricks taken out of the old back wall, with a sawtooth roof over it.'},
+ {id:'reading',t:'Reading Room',i:'i2',p:'p2',place:'Somerset',year:'2026',m:'Concrete, glulam',area:'410 m²',text:'Thick concrete buttresses carry a timber roof and a long skylight over the tables.'},
+ {id:'cliff',t:'Cliff Studio',i:'i3',p:'p3',place:'Cornwall',year:'2023',m:'Concrete, larch',area:'22 m²',text:'A larch box on a cast concrete plinth, anchored into the rock against the wind.'},
+ {id:'pavilion',t:'Park Pavilion',i:'i4',p:'p5',place:'Glasgow',year:'2026',m:'Brick, concrete',area:'180 m²',text:'Nine brick piers and one thin concrete roof. Open on every side.'},
+];
+/* stacking: cut an illustration into strips that drop in from the top, ground first */
+function build(el,src,n=14,stagger=70){
+  el.innerHTML='';el.classList.remove('go');
+  for(let k=0;k<n;k++){
+    const s=document.createElement('div');s.className='s';
+    const h=100/n;Object.assign(s.style,{top:(k*h)+'%',height:(h+0.25)+'%',backgroundImage:`url(${src})`,backgroundPosition:`0 ${k/(n-1)*100}%`,backgroundSize:`100% ${n*100}%`,animationDelay:((n-1-k)*stagger)+'ms'});
+    el.appendChild(s);
+  }
+  const img=new Image();img.onload=()=>requestAnimationFrame(()=>el.classList.add('go'));img.src=src;
+}
+build(document.getElementById('hb'),'../img/i0.jpg');
+
+const g=document.getElementById('grid');
+g.innerHTML=P.map((p,k)=>`<div class="tile${k===0?' wide':''}" data-id="${p.id}" role="button" tabindex="0" aria-label="Open ${p.t}"><img src="../img/${p.i}.jpg" alt="${p.t} illustration" loading="lazy"${k===0?'':''}><div class="t"><span>${p.t}</span><span class="q">${p.place}</span></div></div>`).join('')
+ +`<div class="tile txt"><span class="q">Index</span><b class="W">Five buildings, four materials.</b></div>`;
+const view=document.getElementById('view');
+function open(id){
+  const p=P.find(x=>x.id===id);
+  document.getElementById('vt').textContent=p.t;
+  document.getElementById('vh').textContent=p.t;
+  document.getElementById('vd').innerHTML=`<dt>Place</dt><dd>${p.place}</dd><dt>Material</dt><dd>${p.m}</dd><dt>Area</dt><dd>${p.area}</dd><dt>Year</dt><dd>${p.year}</dd>`;
+  document.getElementById('vp').textContent=p.text;
+  document.getElementById('vimg').src=`../img/${p.p}.jpg`;
+  view.scrollTop=0;view.classList.add('on');view.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+  build(document.getElementById('vb'),`../img/${p.i}.jpg`,16,55);
+}
+function close(){view.classList.remove('on');view.setAttribute('aria-hidden','true');document.body.style.overflow=''}
+g.addEventListener('click',e=>{const t=e.target.closest('.tile[data-id]');if(t)open(t.dataset.id)});
+g.addEventListener('keydown',e=>{if(e.key==='Enter'){const t=e.target.closest('.tile[data-id]');if(t)open(t.dataset.id)}});
+document.getElementById('close').onclick=close;addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+</script>
+</body>
+</html>

@@ -353,3 +353,8 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 20 Oct: a project's own page fades in once its layout has settled (no cover flash on desktop) */
 .eltio.cg[data-solo] { opacity: 0; transition: opacity .6s ease; }
 .eltio.cg[data-solo].cg-ready { opacity: 1; }
+
+/* 2 Nov 2026: Aspect's wordmark, centred on its tile (white on the black tile) */
+.eltio.cg .cg-as-cov { position: absolute; inset: 0; display: grid; place-items: center; color: #1C1C1A; font-size: 4.2cqi; container-type: size; }
+.eltio.cg .cg-tile .cg-as-cov { font-size: 4.2cqw; }
+.eltio.cg .cg-ink .cg-as-cov, .eltio.cg .cg-ink .cg-as-cov .as-wm { color: #F3F3F0; }

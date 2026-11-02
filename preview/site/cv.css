@@ -35,3 +35,10 @@
 .cv.cv-quick .s { animation-duration: 4s; }
 /* 19 Oct 19:57: with Reduce Motion on, the soft moves still run (they are slow and small), only slower; the sun and the Lampwerk word used to vanish at their resting state */
 @media (prefers-reduced-motion: reduce) { .cv .sd, .cv .tip, .cv .w, .cv .sun, .cv .ag-sky, .cv .s { animation-duration: 24s !important; } }
+
+/* Aspect: the sun walks its path, sunrise to sunset, rests, then fades and comes up again */
+.cv-as .as-wm { font-size: calc(5.6cqi * var(--cvs)); }
+.cv-as .as-mk .sr { animation: cvarc 12s cubic-bezier(.45, 0, .3, 1) infinite; }
+@keyframes cvarc { 0% { transform: rotate(0deg); opacity: 0; } 6% { opacity: 1; } 60% { transform: rotate(180deg); opacity: 1; } 86% { transform: rotate(180deg); opacity: 1; } 94%, 100% { transform: rotate(180deg); opacity: 0; } }
+.cv.cv-quick .sr { animation-duration: 4s; }
+@media (prefers-reduced-motion: reduce) { .cv .sr { animation-duration: 24s !important; } }

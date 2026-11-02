@@ -92,5 +92,5 @@
 .eltio .k-systems { background: #F3F3F0; }
 .eltio .k-systems .k2-sy { position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
 
-.eltio .k-aspect { background: #fff; }
-.eltio .k-aspect .k2-as { position: absolute; inset: 0; }
+.eltio .k-azimuth { background: #fff; }
+.eltio .k-azimuth .k2-as { position: absolute; inset: 0; }

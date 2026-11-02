@@ -445,9 +445,40 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
 .info .back { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 20px); right: max(var(--pad), env(safe-area-inset-right, 0px)); font: 400 var(--small)/1 var(--sans); padding: 6px 0; }
 .info p { line-height: 1.45; }
 @media (min-width: 900px) { .info { display: none; } }
+
+/* 2 Nov, Elliot: the bar, controls and credits always match the film's width on desktop.
+   ?al=c keeps the film centred; the default sits it on the left; ?al=f also slides the footer's
+   Contact line to sit under the film's right edge. Phones keep the film full width. */
+@media (min-width: 900px) {
+  .in .bar, .in .ctl, .in .cr { width: var(--fw, 100%); max-width: 100%; transition: width .8s cubic-bezier(.16,1,.3,1), margin .8s cubic-bezier(.16,1,.3,1); }
+  html.al-c .in .bar, html.al-c .in .ctl, html.al-c .in .cr, html.al-c .in .ttl, html.al-c .in > .pm { margin-left: var(--fx, 0px); }
+  html.al-c .in .ttl, html.al-c .in > .pm { transition: margin .8s cubic-bezier(.16,1,.3,1); }
+  html.al-f .bar2 { transition: grid-template-columns .8s cubic-bezier(.16,1,.3,1), background .5s var(--ease); }
+}
+/* phones: more room round the name and Info, clear of the home bar */
+@media (max-width: 899px) {
+  .bar2 { padding-top: 20px; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); }
+  .bar2 .nm, .infob { padding: 4px 0; }
+}
 </style>
 <script>
 /* the film never pushes the credits off a laptop screen */
+var AL = (location.search.match(/al=(\w)/) || [])[1] || 'l';
+document.documentElement.classList.add('al-' + AL);
+window.filmLeft = AL !== 'c';
+function onFit(film, ww, W) {
+  if (!film.closest('.pane') || innerWidth < 900) return;
+  var r = document.documentElement.style;
+  r.setProperty('--fw', ww + 'px'); r.setProperty('--fx', Math.max(0, (W - ww) / 2) + 'px');
+  if (AL === 'f') {
+    var pane = document.querySelector('.pane'), b = document.getElementById('bar2');
+    var c4 = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--c4')) || 150;
+    var left = pane.getBoundingClientRect().left - parseFloat(getComputedStyle(b).paddingLeft), pad = parseFloat(getComputedStyle(pane).paddingLeft);
+    var c2 = Math.max(300, ww + pad * 2);
+    b.style.gridTemplateColumns = left + 'px ' + c2 + 'px minmax(0, 1fr) ' + c4 + 'px';
+  }
+}
+addEventListener('resize', function () { if (AL === 'f' && innerWidth < 900) document.getElementById('bar2').style.gridTemplateColumns = ''; });
 function fitCap(film) {
   var inn = film.closest('.pane .in'); if (!inn || innerWidth < 900) return 0;
   return Math.max(220, inn.clientHeight - (inn.scrollHeight - film.offsetHeight));

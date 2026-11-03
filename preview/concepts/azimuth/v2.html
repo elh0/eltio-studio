@@ -27,14 +27,22 @@ header nav a{position:relative}
 header nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.7,.1,1)}
 header nav a:hover::after,header nav a.on::after{transform:scaleX(1)}
 /* the day: one house, the light changes as you scroll */
-.day{height:420vh;position:relative}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e}
+.day{position:relative}
+.stage{position:relative;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e}
 .stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;will-change:opacity,transform}
 .stage .cap{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr auto 1fr;align-items:end;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.45)}
 .stage .cap .r{justify-self:end;text-align:right;font-variant-numeric:tabular-nums}
-.arc{width:120px;height:44px;display:block;overflow:visible}
-.arc path{fill:none;stroke:currentColor;stroke-width:1;opacity:.55}
-.arc circle{fill:currentColor}
+.sunw{display:flex;flex-direction:column;align-items:center;gap:6px}
+.arc{width:240px;height:84px;display:block;overflow:visible;touch-action:none;cursor:grab}
+.arc:active{cursor:grabbing}.arc:focus:not(:focus-visible){outline:none}
+.arc .tr{fill:none;stroke:currentColor;stroke-width:1;opacity:.8}
+.arc .hit{fill:none;stroke:transparent;stroke-width:34}
+.arc #sun{fill:currentColor}
+.arc #halo{fill:none;stroke:currentColor;stroke-width:1;opacity:.5;transform-box:fill-box;transform-origin:center;animation:halo 2.4s ease-out infinite}
+@keyframes halo{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.6);opacity:0}}
+.sunw .hint{font-size:11px;opacity:.75;letter-spacing:.02em}
+.sunw.used .hint{opacity:0;transition:opacity .6s}
+.sunw.used #halo{display:none}
 /* practice */
 .intro{min-height:90vh;display:grid;place-items:center;padding:20vh var(--pad)}
 .intro p{font:300 var(--l)/1.3 var(--f);letter-spacing:-.01em;max-width:30ch;margin:0;text-align:center}
@@ -45,7 +53,7 @@ header nav a:hover::after,header nav a.on::after{transform:scaleX(1)}
 .work .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.1,1),transform 1.6s cubic-bezier(.2,.7,.1,1);transform:scale(1.03)}
 .work .pic img.on{opacity:1;transform:none}
 .work .pic .lb{position:absolute;left:var(--pad);bottom:18px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.45)}
-.work .list{padding:calc(50vh - 120px) var(--pad) 50vh}
+.work .list{padding:calc(50vh - 160px) var(--pad) 30vh}
 .work h2{font:400 var(--s)/1 var(--f);color:var(--faint);margin:0 0 40px}
 .row{display:grid;grid-template-columns:42px 1fr auto;gap:14px;padding:16px 0;border-top:1px solid var(--line);cursor:pointer;transition:color .3s}
 .row:last-child{border-bottom:1px solid var(--line)}
@@ -86,7 +94,65 @@ footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;paddin
 #view .next:hover b{color:var(--mid)}
 .fade{opacity:0;transform:translateY(14px);transition:opacity 1s,transform 1s cubic-bezier(.2,.7,.1,1)}
 .fade.in{opacity:1;transform:none}
+/* shared */
+.kick{font:400 var(--s)/1 var(--f);color:var(--faint);margin:0 0 48px}
+.big{font:300 var(--l)/1.25 var(--f);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.k{color:var(--faint);display:block;margin-bottom:18px}
+/* how we work */
+.how{padding:18vh var(--pad) 10vh;border-top:1px solid var(--line)}
+.hw{display:grid;grid-template-columns:repeat(12,1fr);column-gap:24px;align-items:end;margin-bottom:22vh}
+.hw figure{margin:0;grid-column:1/8;overflow:hidden;background:var(--line)}
+.hw figure img{width:100%;aspect-ratio:3/2;object-fit:cover;transform:scale(1.12);transition:transform 2.4s cubic-bezier(.2,.7,.1,1)}
+.hw.in figure img{transform:none}
+.hw .tx{grid-column:9/13;padding-bottom:6px}
+.hw .tx p{max-width:36ch}.hw .tx p.big{margin-bottom:18px;max-width:18ch}
+.hw .num{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);color:var(--faint)}
+.hw .num b{display:block;font:300 44px/1 var(--f);color:var(--ink);margin-bottom:6px;font-variant-numeric:tabular-nums}
+.hw:nth-child(odd of .hw) figure{grid-column:6/13;grid-row:1}.hw:nth-child(odd of .hw) .tx{grid-column:1/5;grid-row:1}
+/* chapters */
+.ch{position:relative;display:block;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e;color:#fff}
+.ch img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 2.6s cubic-bezier(.2,.7,.1,1)}
+.ch.in img{transform:none}.ch:hover img{transform:scale(1.015)}
+.ch .o{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(22px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:end;text-shadow:0 0 22px rgba(0,0,0,.45)}
+.ch .o .big{font-size:clamp(28px,3.4vw,52px)}
+.ch .o .m{opacity:.75}.ch .vp{white-space:nowrap}.ch .vp i{display:inline-block;font-style:normal;transition:transform .4s}.ch:hover .vp i{transform:translateX(6px)}
+/* process */
+.proc{padding:18vh var(--pad);border-top:1px solid var(--line)}
+.proc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.proc li{border-top:1px solid var(--ink);padding-top:16px}
+.proc li svg{width:44px;height:44px;display:block;margin:6px 0 40px;fill:none;stroke:currentColor;stroke-width:1}
+.proc li b{display:block;font:300 22px/1.2 var(--f);margin-bottom:4px}
+.proc li .w{color:var(--faint);display:block;margin-bottom:14px}
+.proc li p{margin:0;max-width:28ch}
+/* film */
+.film{padding:16vh var(--pad) 18vh;border-top:1px solid var(--line)}
+.film .fh{display:grid;grid-template-columns:repeat(12,1fr);column-gap:24px;margin-bottom:56px}
+.film .fh>div{grid-column:1/7}.film .fh p:not(.big){grid-column:9/13;align-self:end;margin:0;max-width:34ch;color:var(--mid)}
+.frame{position:relative;width:100%;max-width:1280px;margin:0 auto;aspect-ratio:3/2;background:#F3F1EC;overflow:hidden}
+.frame canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.frame .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.8s ease}
+.frame .ph.on{opacity:1}
+.frame .tag{position:absolute;left:16px;top:14px;color:var(--mid);transition:opacity .6s,color .6s}
+.frame .steps{position:absolute;left:16px;right:16px;bottom:14px;display:flex;gap:22px;color:var(--faint);transition:color .6s}
+.frame .steps span{transition:color .5s}.frame .steps span.on{color:var(--ink)}
+.frame.lit .steps,.frame.lit .steps span.on,.frame.lit .tag{color:#fff;text-shadow:0 0 14px rgba(0,0,0,.5)}
+.frame .play{position:absolute;right:16px;bottom:10px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 8px;border:1px solid currentColor;border-radius:999px;color:var(--ink);background:rgba(243,241,236,.85);transition:background .3s,color .3s}
+.frame .play:hover{background:var(--ink);color:var(--bg)}
+.frame .play svg{width:12px;height:12px;fill:currentColor}
+.film .cap2{max-width:1280px;margin:12px auto 0;color:var(--faint)}
+/* contact over the night image */
+.contact{position:relative;color:#fff;border-top:0;overflow:hidden;background:#0b0c0e}
+.contact>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.75}
+.contact>div{position:relative;text-shadow:0 0 22px rgba(0,0,0,.5)}
+.contact .q{color:rgba(255,255,255,.65)}
+.contact a.mail{border-bottom:1px solid rgba(255,255,255,.5)}
 @media (max-width:760px){
+  .hw{display:block;margin-bottom:14vh}.hw figure{margin-bottom:22px}
+  .ch .o{grid-template-columns:1fr}.ch .o .n{display:none}
+  .proc ol{grid-template-columns:1fr 1fr;row-gap:44px}
+  .film .fh{display:block}.film .fh p:not(.big){margin-top:18px}
+  .frame .steps{gap:12px;font-size:11px}.frame .tag{font-size:11px}
+  .arc{width:180px;height:63px}
   header{grid-template-columns:1fr auto}header nav{display:none}header .r{display:block}
   .work,#view .split{grid-template-columns:1fr}
   .work .pic{position:relative;height:62vh}
@@ -94,7 +160,7 @@ footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;paddin
   #view .pic{position:relative;height:70vh}
   #view .txt{padding:40px var(--pad) 80px}
   #view .top{padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 0}#view .top button{background:var(--bg);padding:6px 10px;margin-right:-10px}
-  .stage .cap{grid-template-columns:1fr auto}.stage .cap .m{display:none}
+  .stage .cap{grid-template-columns:1fr auto;grid-template-areas:'s s' 'n t';row-gap:18px}.stage .cap>span:first-child{grid-area:n}.stage .cap .sunw{grid-area:s;justify-self:center}.stage .cap>.r{grid-area:t}
 }
 @media (prefers-reduced-motion:reduce){.fade{opacity:1;transform:none}}
 </style>
@@ -102,7 +168,7 @@ footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;paddin
 <body>
 <header>
   <a href="#top">Azimuth</a>
-  <nav><a href="#work">Work</a><a href="#practice">Practice</a><a href="#contact">Contact</a></nav>
+  <nav><a href="#practice">Practice</a><a href="#work">Work</a><a href="#contact">Contact</a></nav>
   <span class="r">London, Copenhagen</span>
 </header>
 
@@ -112,19 +178,49 @@ footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;paddin
     <img src="img/row.jpg" alt="Larch Rowhouses at blue hour, lights on">
     <img src="img/row-night.jpg" alt="Larch Rowhouses at night, light spilling onto the lane">
     <div class="cap"><span>Larch Rowhouses, Aarhus<br><span style="opacity:.6">Concept render</span></span>
-      <svg class="arc m" viewBox="0 0 120 44" aria-hidden="true"><path d="M2 42 Q60 -18 118 42"/><circle id="sun" r="2.6" cx="2" cy="42"/></svg>
+      <div class="sunw"><svg class="arc" id="arc" viewBox="0 0 240 84" role="slider" aria-label="Time of day: drag the sun" tabindex="0"><path class="tr" d="M6 80 Q120 -36 234 80"/><path class="hit" d="M6 80 Q120 -36 234 80"/><circle id="halo" r="6" cx="6" cy="80"/><circle id="sun" r="6" cx="6" cy="80"/></svg><span class="hint">Drag the sun</span></div>
       <span class="r"><span id="hh">06:10</span><br><span id="ph" style="opacity:.6">Sunrise</span></span></div>
   </div>
 </div>
 
-<section class="intro" id="practice"><p class="fade">Azimuth is a small architecture practice in London and Copenhagen. We design housing and small public buildings in timber, brick and thatch, around the light they get <span>hour by hour.</span></p></section>
+<section class="intro" id="practice"><p class="fade big">Azimuth is a small architecture practice in London and Copenhagen. We design housing and small public buildings in timber, brick and thatch, around the light they get <span>hour by hour.</span></p></section>
 
-<section class="work" id="work">
-  <div class="pic" id="wpic"><span class="lb" id="wlb"></span></div>
-  <div class="list" id="list"><h2>Selected work, 2023–26</h2></div>
+<section class="how">
+  <h2 class="kick fade">How we work</h2>
+  <article class="hw fade"><figure><img src="img/marsh.jpg" alt="Wetland Centre, glass gables facing the sunrise" loading="lazy"></figure>
+    <div class="tx"><span class="k">01 Orientation</span><p class="big">We start with a compass, not a floor plan.</p><p>Before we draw a room we map where the sun rises and sets on the site in every season. The Wetland Centre's glass gables face due east, so the hall fills with the first light of the day.</p><p class="num"><b>06:04</b>First sun in the hall, 21 March</p></div></article>
+  <article class="hw fade"><figure><img src="img/brick-d.jpg" alt="Reclaimed brick panels in two bonds" loading="lazy"></figure>
+    <div class="tx"><span class="k">02 Material</span><p class="big">We build with what is already there.</p><p>Salvaged brick, local larch, reed thatch cut on the marsh next door. Materials that come from close by, age well and need no paint.</p><p class="num"><b>71%</b>Of the Brick Flats facade is reused brick</p></div></article>
+  <article class="hw fade"><figure><img src="img/read-d.jpg" alt="Board-marked concrete and a bronze window at night" loading="lazy"></figure>
+    <div class="tx"><span class="k">03 Light</span><p class="big">Light is the brief.</p><p>Every room gets the light its use needs: east for kitchens, north for reading, west for the evening. We test it hour by hour before anything is built.</p><p class="num"><b>8,760</b>Hours of sun modelled for every project</p></div></article>
 </section>
 
-<section class="contact" id="contact"><div class="fade"><p class="big">Tell us where your site faces.</p><p>Unit 4, 12 Example Yard, London E8</p><p>hello@azimuth.example</p><p class="q" style="margin-top:28px">Fictional practice. A concept by Eltio Studio.</p></div></section>
+<section class="chaps" id="work"></section>
+
+<section class="work" id="index">
+  <div class="pic" id="wpic"><span class="lb" id="wlb"></span></div>
+  <div class="list" id="list"><h2>Index, 2023–26</h2></div>
+</section>
+
+<section class="proc">
+  <h2 class="kick fade">From site to keys</h2>
+  <ol>
+    <li class="fade"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="20"/><path d="M22 6 L26 22 L22 38 L18 22 Z"/></svg><b>Site visit</b><span class="w">Day 1</span><p>We stand on your site with a compass at sunrise and walk it until sunset.</p></li>
+    <li class="fade"><svg viewBox="0 0 44 44"><path d="M2 38 Q22 -6 42 38"/><circle cx="31" cy="17" r="3"/><path d="M2 38 H42"/></svg><b>Sun study</b><span class="w">Weeks 1 to 3</span><p>We model the sun on your site for every hour of the year.</p></li>
+    <li class="fade"><svg viewBox="0 0 44 44"><rect x="4" y="8" width="36" height="28"/><path d="M4 22 H22 V36 M22 8 V16"/></svg><b>Design</b><span class="w">Months 1 to 4</span><p>Plans, models and materials, all tested against that light.</p></li>
+    <li class="fade"><svg viewBox="0 0 44 44"><path d="M6 40 V18 L22 4 L38 18 V40 Z"/><rect x="17" y="26" width="10" height="14"/></svg><b>Build</b><span class="w">Months 5 to 18</span><p>We stay on site until the keys are handed over.</p></li>
+  </ol>
+</section>
+
+<section class="film" id="film">
+  <div class="fh"><div><span class="k fade">From drawing to building</span><p class="big fade">Every project starts as a line on paper.</p></div><p class="fade">Press play to watch the Larch Rowhouses go from the first plan to the finished lane.</p></div>
+  <div class="frame fade" id="frame"><canvas id="fc"></canvas><img class="ph" id="fph" src="img/row.jpg" alt="Larch Rowhouses, finished, at blue hour" loading="lazy"><span class="tag" id="ftag">Ground floor plan, 1:100</span>
+    <div class="steps" id="fsteps"><span class="on">01 Drawing</span><span>02 Model</span><span>03 Built</span></div>
+    <button class="play" id="fplay" aria-label="Play"><svg viewBox="0 0 12 12"><path d="M2 1 L11 6 L2 11 Z"/></svg><span>Play</span></button></div>
+  <p class="cap2">Larch Rowhouses, Aarhus. Model and concept render.</p>
+</section>
+
+<section class="contact" id="contact"><img src="img/row-night.jpg" alt="" loading="lazy"><div class="fade"><p class="big">Tell us where your site faces.</p><p>Unit 4, 12 Example Yard, London E8</p><p>hello@azimuth.example</p><p class="q" style="margin-top:28px">Fictional practice. A concept by Eltio Studio.</p></div></section>
 <footer><span>Azimuth</span><span>Images are AI concept renders.</span></footer>
 
 <div id="view" aria-hidden="true">
@@ -156,16 +252,31 @@ function study(p){
   return `<svg viewBox="0 0 ${W} ${H}" class="sp" role="img" aria-label="${p.study}"><path class="arc" pathLength="1000" d="${arc(h0,h1)}" fill="none" stroke="currentColor" stroke-width="1"/>${hot}${run}${ticks}<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="currentColor"/><text x="20" y="${cy+18}">E</text><text x="150" y="${cy+18}" text-anchor="middle">S</text><text x="280" y="${cy+18}" text-anchor="end">W</text></svg>`;
 }
 const nn=x=>String(x).padStart(2,'0');
-/* the day: crossfade sunrise to blue hour to night */
-const day=document.querySelector('.day'),imgs=[...day.querySelectorAll('img')],hh=document.getElementById('hh'),ph=document.getElementById('ph'),sun=document.getElementById('sun');
+/* the day: plays on its own; drag the sun to take over */
+const day=document.querySelector('.day'),imgs=[...day.querySelectorAll('.stage>img')],hh=document.getElementById('hh'),ph=document.getElementById('ph'),sun=document.getElementById('sun'),halo=document.getElementById('halo'),arcEl=document.getElementById('arc'),sunw=document.querySelector('.sunw');
 const T=[[6*60+10,'Sunrise'],[17*60+48,'Blue hour'],[22*60+30,'Night']];
-function dayScroll(){const r=day.getBoundingClientRect(),span=day.offsetHeight-innerHeight,p=Math.min(1,Math.max(0,-r.top/span));
-  const x=p*2;imgs.forEach((im,i)=>{const o=Math.max(0,1-Math.abs(x-i)*1.25);im.style.opacity=i===0&&x<0.01?1:o;im.style.transform=`scale(${1.04-0.04*p})`});
-  const k=Math.min(2,Math.round(x));const q=Math.min(1,Math.max(0,p))*2,i=Math.min(1,Math.floor(q)),m=T[i][0]+(T[i+1][0]-T[i][0])*(q-i);hh.textContent=`${nn(Math.floor(m/60))}:${nn(Math.floor(m%60))}`;ph.textContent=T[k][1];
-  const t=p,cx=2+116*t,cy=42-60*t*(1-t)*2*0.98;sun.setAttribute('cx',cx.toFixed(1));sun.setAttribute('cy',(42-(4*t*(1-t))*30).toFixed(1))}
+function setDay(p){p=Math.min(1,Math.max(0,p));const x=p*2;
+  imgs.forEach((im,i)=>{im.style.opacity=i===0?1:Math.min(1,Math.max(0,1-Math.abs(x-i)*1.25)+(x>i?1:0))});
+  const i=Math.min(1,Math.floor(x)),m=T[i][0]+(T[i+1][0]-T[i][0])*(x-i);hh.textContent=`${nn(Math.floor(m/60))}:${nn(Math.floor(m%60))}`;ph.textContent=T[Math.min(2,Math.round(x))][1];
+  const u=1-p,X=6+228*p,Y=u*u*80+2*u*p*(-36)+p*p*80;[sun,halo].forEach(c=>{c.setAttribute('cx',X.toFixed(1));c.setAttribute('cy',Y.toFixed(1))});arcEl.setAttribute('aria-valuenow',Math.round(p*100))}
+let dp=0,auto=!matchMedia('(prefers-reduced-motion:reduce)').matches,dir=1,hold=0,last=0;
+function tick(t){if(!auto)return;const dt=Math.min(.05,(t-(last||t))/1000);last=t;
+  if(hold>0){hold-=dt}else{dp+=dir*dt/(dir>0?11:4);if(dp>=1){dp=1;dir=-1;hold=2.6}else if(dp<=0){dp=0;dir=1;hold=1.4}}
+  if(day.getBoundingClientRect().bottom>0)setDay(dp);requestAnimationFrame(tick)}
+setDay(0);if(auto)requestAnimationFrame(tick);
+function takeOver(){auto=false;sunw.classList.add('used')}
+function fromPointer(e){const r=arcEl.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*240;dp=(x-6)/228;setDay(dp)}
+arcEl.addEventListener('pointerdown',e=>{takeOver();arcEl.setPointerCapture(e.pointerId);fromPointer(e)});
+arcEl.addEventListener('pointermove',e=>{if(arcEl.hasPointerCapture(e.pointerId))fromPointer(e)});
+arcEl.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){takeOver();dp=Math.min(1,Math.max(0,dp+(e.key==='ArrowRight'?.05:-.05)));setDay(dp);e.preventDefault()}});
+/* header turns white over photographs */
 const hd=document.querySelector('header');
-function hdr(){hd.classList.toggle('lt',day.getBoundingClientRect().bottom>30)}
-addEventListener('scroll',()=>{dayScroll();hdr()},{passive:true});dayScroll();hdr();
+function hdr(){const dark=[...document.querySelectorAll('.stage,.ch,.contact')].some(el=>{const r=el.getBoundingClientRect();return r.top<30&&r.bottom>30});hd.classList.toggle('lt',dark)}
+addEventListener('scroll',hdr,{passive:true});
+/* chapters: one full screen per project */
+document.querySelector('.chaps').innerHTML=P.map((p,i)=>`<a class="ch fade" href="#${p.id}" data-id="${p.id}"><img src="img/${p.img}.jpg" alt="${p.t}, ${p.place}" loading="lazy"><div class="o"><span class="n">${nn(i+1)}</span><div><p class="big">${p.t}</p><span class="m">${p.place}, ${p.year}. ${p.use}. Concept render</span></div><span class="vp">View project <i>&rarr;</i></span></div></a>`).join('');
+document.querySelectorAll('.ch').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();openP(a.dataset.id)}));
+hdr();
 /* work list */
 const list=document.getElementById('list'),wpic=document.getElementById('wpic'),wlb=document.getElementById('wlb');
 list.insertAdjacentHTML('beforeend',P.map((p,i)=>`<div class="row fade" data-id="${p.id}" tabindex="0" role="button"><span class="n">${nn(i+1)}</span><span><b>${p.t}</b><span class="pl">${p.place}</span><span class="go">&rarr;</span></span><span class="y">${p.year}</span></div>`).join(''));
@@ -195,12 +306,84 @@ document.getElementById('close').onclick=closeP;addEventListener('keydown',e=>{i
 view.addEventListener('scroll',()=>{const ims=vpic.querySelectorAll('img');if(ims.length<2)return;const p=view.scrollTop/Math.max(1,view.scrollHeight-innerHeight);const k=Math.min(ims.length-1,Math.floor(p*ims.length*0.999));ims.forEach((im,i)=>im.classList.toggle('on',i===k))},{passive:true});
 /* nav glides and marks where you are */
 const links=[...document.querySelectorAll('header nav a')];
-links.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));scrollTo({top:t.offsetTop,behavior:'smooth'})}));
+links.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));scrollTo({top:t.getBoundingClientRect().top+scrollY,behavior:'smooth'})}));
 addEventListener('scroll',()=>{let k=-1;links.forEach((a,i)=>{const t=document.querySelector(a.getAttribute('href'));if(t.getBoundingClientRect().top<innerHeight*.5)k=i});links.forEach((a,i)=>a.classList.toggle('on',i===k))},{passive:true});
 /* reveal */
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px'});
 document.querySelectorAll('.fade').forEach(el=>io.observe(el));
 if(location.hash.length>1&&P.some(p=>p.id===location.hash.slice(1)))openP(location.hash.slice(1));
+
+/* the film: plan on paper -> camera pulls back -> the model rises out of the paper -> the real photograph */
+(function(){
+const frame=document.getElementById('frame'),cv=document.getElementById('fc'),photo=document.getElementById('fph'),btn=document.getElementById('fplay'),tag=document.getElementById('ftag'),steps=[...document.querySelectorAll('#fsteps span')];
+let F=null,started=false;
+const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2,cl=x=>Math.min(1,Math.max(0,x)),seg=(t,a,b)=>cl((t-a)/(b-a));
+function build(){
+  const T3=THREE,W=1,H=1.555,A=2.154,D=1.8,N=5,PAPER=0xF3F1EC,INK=0x262624;
+  const r=new T3.WebGLRenderer({canvas:cv,antialias:true});r.setPixelRatio(Math.min(2,devicePixelRatio||1));r.setClearColor(PAPER,1);
+  const sc=new T3.Scene(),cam=new T3.PerspectiveCamera(18,1.5,.1,200);
+  sc.add(new T3.HemisphereLight(0xffffff,0xd9d4ca,.95));const sunL=new T3.DirectionalLight(0xffffff,.55);sunL.position.set(-4,7,5);sc.add(sunL);
+  const grid=new T3.GridHelper(16,64,0xdcd8cf,0xe7e3db);grid.position.y=-.002;sc.add(grid);
+  const model=new T3.Group();sc.add(model);
+  const faceM=new T3.MeshLambertMaterial({color:0xf8f6f1,transparent:true,opacity:0,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1});
+  const edgeM=new T3.LineBasicMaterial({color:INK,transparent:true,opacity:0});
+  const winM=new T3.MeshBasicMaterial({color:0xf8f6f1,transparent:true,opacity:0});
+  const winEdgeM=new T3.LineBasicMaterial({color:INK,transparent:true,opacity:0});
+  const glow=new T3.Color(0xEDC27E),paperC=new T3.Color(0xf8f6f1);
+  const sh=new T3.Shape();sh.moveTo(0,0);sh.lineTo(W,0);sh.lineTo(W,H);sh.lineTo(W/2,A);sh.lineTo(0,H);sh.lineTo(0,0);
+  const g0=new T3.ExtrudeGeometry(sh,{depth:D,bevelEnabled:false});g0.translate(0,0,-D);
+  const holes=[[.30,.62,1.30,1.70],[.30,.68,.73,1.13],[.21,.51,.14,.52],[.60,.82,0,.52]];
+  for(let i=0;i<N;i++){const x0=-N/2+i;
+    const m=new T3.Mesh(g0,faceM);m.position.x=x0;model.add(m);
+    const e=new T3.LineSegments(new T3.EdgesGeometry(g0,1),edgeM);e.position.x=x0;model.add(e);
+    holes.forEach(([a,b,c,d],k)=>{const pg=new T3.PlaneGeometry(b-a,d-c);pg.translate(x0+(a+b)/2,(c+d)/2,.004);
+      const pm=new T3.Mesh(pg,k===3?faceM:winM);model.add(pm);model.add(new T3.LineSegments(new T3.EdgesGeometry(pg),winEdgeM))})}
+  /* the plan, drawn on the paper */
+  const P2=[];const L=(x1,z1,x2,z2)=>P2.push(x1,0,z1,x2,0,z2);
+  for(let i=0;i<N;i++){const x=-N/2+i;
+    L(x,0,x+W,0);L(x+W,0,x+W,-D);L(x+W,-D,x,-D);L(x,-D,x,0);
+    L(x+.02,-.04,x+.98,-.04);
+    L(x+.21,.03,x+.51,.03);L(x+.21,-.07,x+.51,-.07);
+    const cx=x+.60,R=.22;L(cx,0,cx,-R);for(let a=0;a<12;a++){const a1=a/12*Math.PI/2,a2=(a+1)/12*Math.PI/2;L(cx+R*Math.sin(a1),-R*Math.cos(a1),cx+R*Math.sin(a2),-R*Math.cos(a2))}
+    L(x+.08,-.62,x+.08,-1.24);L(x+.40,-.62,x+.40,-1.24);for(let k=0;k<=10;k++){const z=-.62-k*.062;L(x+.08,z,x+.40,z)}
+    L(x,-1.36,x+.42,-1.36);L(x+.6,-1.36,x+W,-1.36);
+    L(x+.66,-.7,x+.92,-.7);L(x+.92,-.7,x+.92,-1.1);L(x+.92,-1.1,x+.66,-1.1);L(x+.66,-1.1,x+.66,-.7);
+  }
+  /* north arrow */
+  L(2.35,-1.45,2.35,-1.05);L(2.35,-1.05,2.29,-1.17);L(2.35,-1.05,2.41,-1.17);
+  const pg=new T3.BufferGeometry();pg.setAttribute('position',new T3.Float32BufferAttribute(P2,3));
+  const planM=new T3.LineBasicMaterial({color:INK,transparent:true,opacity:1});const plan=new T3.LineSegments(pg,planM);plan.position.y=.003;sc.add(plan);
+  const nv=P2.length/3;
+  const tg=new T3.Vector3(),dist=(3.504/2)/Math.tan(9*Math.PI/180);
+  function size(){const w=frame.clientWidth,h=frame.clientHeight;if(!w)return;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+  function at(t){ /* t in seconds, 0..11 */
+    plan.geometry.setDrawRange(0,Math.floor(nv*ease(seg(t,.2,2.6))/2)*2);
+    const k=ease(seg(t,2.6,6.4)),th=Math.PI/2*(1-k);
+    tg.set(0,1.016*k,-.9*(1-k));cam.up.set(0,Math.cos(th),-Math.sin(th));
+    const sw=Math.sin(Math.PI*k)*Math.min(1,k*3);cam.position.set(tg.x+dist*.42*sw,tg.y+dist*Math.sin(th),tg.z+dist*Math.cos(th));cam.lookAt(tg);
+    const rise=ease(seg(t,3.0,6.2));model.scale.y=Math.max(.0005,rise);
+    edgeM.opacity=seg(t,2.8,3.4);faceM.opacity=ease(seg(t,3.4,5.4));winEdgeM.opacity=seg(t,4.6,5.6)*.9;
+    planM.opacity=1-.75*seg(t,3,5);grid.material.opacity=1;
+    const g=seg(t,6.4,7.8);winM.opacity=seg(t,4.6,5.6);winM.color.copy(paperC).lerp(glow,g);
+    r.render(sc,cam);
+    photo.classList.toggle('on',t>=8.2);frame.classList.toggle('lit',t>=8.4);
+    const st=t<2.7?0:t<8.2?1:2;steps.forEach((s,i)=>s.classList.toggle('on',i===st));
+    tag.textContent=t<2.7?'Ground floor plan, 1:100':t<8.2?'Model, 1:100':'Built, 2025. Concept render';
+  }
+  size();addEventListener('resize',()=>{size();at(F.t)});
+  return {at,t:2.6};
+}
+let raf=0,t0=0;window.__film=t=>{load();F.t=t;F.at(t)};
+function play(){if(!F)return;cancelAnimationFrame(raf);photo.classList.remove('on');frame.classList.remove('lit');
+  const from=F.t>=10.5||F.t<=2.6?0:F.t;t0=performance.now()-from*1000;btn.querySelector('span').textContent='Playing';
+  const step=n=>{F.t=Math.min(11,(n-t0)/1000);F.at(F.t);if(F.t<11)raf=requestAnimationFrame(step);else btn.querySelector('span').textContent='Replay'};raf=requestAnimationFrame(step)}
+btn.addEventListener('click',()=>{if(!F)return load(play);play()});
+function load(cb){if(F)return cb&&cb();if(window.THREE){F=build();F.at(F.t);return cb&&cb()}
+  const sc=document.createElement('script');sc.src='lib/three.min.js';sc.onload=()=>{try{F=build();F.at(F.t)}catch(e){frame.classList.add('nogl');photo.classList.add('on');return}cb&&cb()};document.head.appendChild(sc)}
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){load();o.disconnect()}}),{rootMargin:'800px 0px'}).observe(frame);
+new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.6&&!started&&!reduce){started=true;load(play)}}),{threshold:[.6]}).observe(frame);
+})();
 </script>
 </body>
 </html>

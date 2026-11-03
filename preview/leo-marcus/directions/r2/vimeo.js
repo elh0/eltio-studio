@@ -9,6 +9,7 @@
     sdk = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = 'https://player.vimeo.com/api/player.js'; s.onload = function () { ok(window.Vimeo); }; s.onerror = no; document.head.appendChild(s); });
     return sdk;
   }
+  api().catch(function () {}); /* load Vimeo's player script straight away, not on the first play */
   /* real lengths up front, from Vimeo's public oEmbed */
   WORK.forEach(function (x) {
     fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + x.v))
@@ -107,9 +108,30 @@
     Promise.all([p.getVideoWidth(), p.getVideoHeight()]).then(function (a) { if (a[0] && a[1]) { x.vr = a[0] / a[1]; x.vrTrue = 1; fit(film, rec.ifr, x.vr, x); } });
     p.getDuration().then(function (d) { if (d) x.d = clock(d); });
   }
+  /* 3 Nov, Elliot: films took a moment to show. Split rebuilds its film box for every film, which
+     used to boot a fresh Vimeo player each time. Now one player lives in a layer that follows
+     whichever film box is showing, and each new film loads into it, so a switch is just a video
+     load, and once the sound is on it stays on. */
+  var host = null, one = null;
+  function follow(film) {
+    if (!host) {
+      host = document.createElement('div'); host.className = 'vmhost'; document.body.appendChild(host);
+      (function sync() {
+        var f = host._f, box = f && f.isConnected && f.closest('.in, #sheetIn, .sheet');
+        if (f && f.isConnected) {
+          var r = f.getBoundingClientRect(), c = box ? box.getBoundingClientRect() : { top: -1e4, bottom: 1e4, left: -1e4, right: 1e4 };
+          var t = Math.max(0, c.top - r.top), b = Math.max(0, r.bottom - c.bottom), l = Math.max(0, c.left - r.left), rr = Math.max(0, r.right - c.right);
+          host.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;clip-path:inset(' + t + 'px ' + rr + 'px ' + b + 'px ' + l + 'px);opacity:' + getComputedStyle(f).opacity;
+        } else host.style.cssText = 'visibility:hidden';
+        requestAnimationFrame(sync);
+      })();
+    }
+    host._f = film; return host;
+  }
   function start(film) {
     var x = item(); if (!x || !x.v) return;
-    var cur0 = players.get(film);
+    var cur0 = players.get(film) || one;
+    if (cur0 === one && one) { players.set(film, one); follow(film); }
     if (cur0 && cur0.v === x.v) { if (x.vr) fit(film, cur0.ifr, x.vr, x); if (cur0.p) go(cur0); return; }
     if (cur0 && cur0.p) {
       /* same picture, next film: load it into the player already there */
@@ -123,23 +145,22 @@
     ifr.className = 'vm';
     ifr.allow = 'autoplay; fullscreen; picture-in-picture';
     ifr.src = 'https://player.vimeo.com/video/' + x.v + '?controls=0&autoplay=1&playsinline=1&dnt=1&title=0&byline=0&portrait=0';
-    film.appendChild(ifr);
+    follow(film).appendChild(ifr);
     fit(film, ifr, x.vr || 16 / 9, x);
-    var rec = { v: x.v, ifr: ifr, p: null, muted: false };
+    var rec = one = { v: x.v, ifr: ifr, p: null, muted: false };
     players.set(film, rec);
     api().then(function (V) {
       var p = rec.p = new V.Player(ifr);
       meta(rec, film, x);
       p.on('playing', function () { ifr.classList.add('on'); });
       p.on('timeupdate', function (e) {
-        if (players.get(film) !== rec) return;
         window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000;
       });
       if (!film.classList.contains('on')) p.pause();
       else go(rec);
     }).catch(function () {});
   }
-  function stop(film) { var r = players.get(film); if (r && r.p) r.p.pause(); }
+  function stop(film) { var r = players.get(film); if (r && r.p && (!host || host._f === film)) r.p.pause(); }
   new MutationObserver(function (ms) {
     ms.forEach(function (m) {
       var f = m.target;
@@ -166,7 +187,7 @@
   document.addEventListener('click', unmute, true);
   addEventListener('resize', function () { document.querySelectorAll('.film').forEach(function (f) { var r = players.get(f); if (r) { f.style.height = ''; fit(f, r.ifr, item() && item().vr || 16 / 9, item()); } }); });
   var st = document.createElement('style');
-  st.textContent = '.film{position:relative;overflow:hidden}.film iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .6s ease}.film iframe.vm.on{opacity:1}#pf>img,.in .film>img{visibility:hidden}'
+  st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .4s ease}.vmhost iframe.vm.on{opacity:1}'
     + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '.hero>.ttl{justify-self:center;width:min(100%,var(--pw,100%));transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '@media(max-width:899px){.hero>.ttl{width:min(100%,calc(var(--pw,100%) + 8vw))}}';

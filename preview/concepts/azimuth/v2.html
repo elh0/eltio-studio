@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Azimuth · architecture and light</title>
+<meta name="description" content="Azimuth is a small architecture practice in London that designs around daylight. A concept by Eltio Studio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap">
+<style>
+/* Azimuth v2 (3 Nov 2026): the house is the feature. Pawson-quiet full-bleed light, KGDVS split index. One face, two sizes. */
+:root{--bg:#EFEEEA;--ink:#1D1D1B;--mid:#5E5E59;--faint:#9A9992;--line:#DCDAD4;--f:"Inter",system-ui,sans-serif;--s:13px;--l:clamp(22px,2vw,30px);--pad:max(20px,env(safe-area-inset-left,0px))}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--ink)}
+body{margin:0;font:400 var(--s)/1.45 var(--f);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{all:unset;cursor:pointer}
+.q{color:var(--faint)}
+/* header: three small words, nothing else */
+header{position:fixed;inset:0 0 auto;z-index:30;display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;padding:calc(16px + env(safe-area-inset-top,0px)) var(--pad) 0;color:var(--ink);transition:color .4s}
+header.lt{color:#fff;text-shadow:0 0 18px rgba(0,0,0,.35)}
+header .r{justify-self:end}
+header nav{display:flex;gap:22px}
+header nav a{position:relative}
+header nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.7,.1,1)}
+header nav a:hover::after,header nav a.on::after{transform:scaleX(1)}
+/* the day: one house, the light changes as you scroll */
+.day{height:420vh;position:relative}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e}
+.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;will-change:opacity,transform}
+.stage .cap{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr auto 1fr;align-items:end;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.45)}
+.stage .cap .r{justify-self:end;text-align:right;font-variant-numeric:tabular-nums}
+.arc{width:120px;height:44px;display:block;overflow:visible}
+.arc path{fill:none;stroke:currentColor;stroke-width:1;opacity:.55}
+.arc circle{fill:currentColor}
+/* practice */
+.intro{min-height:90vh;display:grid;place-items:center;padding:20vh var(--pad)}
+.intro p{font:300 var(--l)/1.3 var(--f);letter-spacing:-.01em;max-width:30ch;margin:0;text-align:center}
+.intro p span{color:var(--faint)}
+/* work: KGDVS split, image left, quiet list right */
+.work{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.work .pic{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--line)}
+.work .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .8s cubic-bezier(.2,.7,.1,1),transform 1.6s cubic-bezier(.2,.7,.1,1);transform:scale(1.03)}
+.work .pic img.on{opacity:1;transform:none}
+.work .pic .lb{position:absolute;left:var(--pad);bottom:18px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.45)}
+.work .list{padding:calc(50vh - 120px) var(--pad) 50vh}
+.work h2{font:400 var(--s)/1 var(--f);color:var(--faint);margin:0 0 40px}
+.row{display:grid;grid-template-columns:42px 1fr auto;gap:14px;padding:16px 0;border-top:1px solid var(--line);cursor:pointer;transition:color .3s}
+.row:last-child{border-bottom:1px solid var(--line)}
+.row .n,.row .y{color:var(--faint);font-variant-numeric:tabular-nums}
+.row b{font-weight:400}
+.row .pl{color:var(--faint);margin-left:10px}
+.list:hover .row{color:var(--faint)}.list:hover .row b{color:var(--faint)}
+.list .row:hover,.list .row:hover b{color:var(--ink)}
+.row .go{opacity:0;transform:translateX(-6px);transition:.4s;display:inline-block;margin-left:8px}
+.row:hover .go{opacity:1;transform:none}
+/* contact */
+.contact{min-height:80vh;display:grid;place-items:center;padding:20vh var(--pad);text-align:center;border-top:1px solid var(--line)}
+.contact p{margin:0 0 6px}
+.contact .big{font:300 var(--l)/1.3 var(--f);letter-spacing:-.01em;margin-bottom:28px}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px var(--pad) calc(18px + env(safe-area-inset-bottom,0px));color:var(--faint)}
+/* project view: KGDVS split */
+#view{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto;visibility:hidden;opacity:0;transition:opacity .6s,visibility 0s .6s}
+#view.on{visibility:visible;opacity:1;transition:opacity .6s}
+#view .top{position:fixed;top:0;right:0;z-index:3;padding:calc(16px + env(safe-area-inset-top,0px)) var(--pad) 0}
+#view .split{display:grid;grid-template-columns:1fr 1fr}
+#view .pic{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e}
+#view .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .9s}
+#view .pic img.on{opacity:1}
+#view .pic .lb{position:absolute;left:var(--pad);bottom:18px;color:#fff;text-shadow:0 0 18px rgba(0,0,0,.45)}
+#view .txt{padding:28vh var(--pad) 18vh;max-width:620px}
+#view h2{font:300 var(--l)/1.15 var(--f);letter-spacing:-.01em;margin:0 0 8px}
+#view .lead{color:var(--faint);margin:0 0 56px}
+#view .body p{font:300 18px/1.45 var(--f);margin:0 0 16px;max-width:34ch}
+#view dl{display:grid;grid-template-columns:96px 1fr;gap:6px 14px;margin:56px 0}
+#view dt{color:var(--faint)}#view dd{margin:0}
+#view figure{margin:72px 0 0}
+#view figure img{width:100%;aspect-ratio:3/2;object-fit:cover}
+#view figcaption{margin-top:10px;color:var(--faint)}
+#view .sp{width:100%;max-width:420px;height:auto;color:var(--ink);font:400 10px var(--f)}
+#view .sp text{fill:currentColor}
+#view .next{display:block;margin-top:120px;padding-top:16px;border-top:1px solid var(--line)}
+#view .next b{display:block;font:300 var(--l)/1.15 var(--f);margin-top:6px}
+#view .next:hover b{color:var(--mid)}
+.fade{opacity:0;transform:translateY(14px);transition:opacity 1s,transform 1s cubic-bezier(.2,.7,.1,1)}
+.fade.in{opacity:1;transform:none}
+@media (max-width:760px){
+  header{grid-template-columns:1fr auto}header nav{display:none}header .r{display:block}
+  .work,#view .split{grid-template-columns:1fr}
+  .work .pic{position:relative;height:62vh}
+  .work .list{padding:40px var(--pad) 80px}
+  #view .pic{position:relative;height:70vh}
+  #view .txt{padding:40px var(--pad) 80px}
+  #view .top{padding:calc(10px + env(safe-area-inset-top,0px)) var(--pad) 0}#view .top button{background:var(--bg);padding:6px 10px;margin-right:-10px}
+  .stage .cap{grid-template-columns:1fr auto}.stage .cap .m{display:none}
+}
+@media (prefers-reduced-motion:reduce){.fade{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header>
+  <a href="#top">Azimuth</a>
+  <nav><a href="#work">Work</a><a href="#practice">Practice</a><a href="#contact">Contact</a></nav>
+  <span class="r">London, Copenhagen</span>
+</header>
+
+<div class="day" id="top">
+  <div class="stage">
+    <img src="img/row-rise.jpg" alt="Larch Rowhouses at sunrise, low sun across the gables" style="opacity:1" fetchpriority="high">
+    <img src="img/row.jpg" alt="Larch Rowhouses at blue hour, lights on">
+    <img src="img/row-night.jpg" alt="Larch Rowhouses at night, light spilling onto the lane">
+    <div class="cap"><span>Larch Rowhouses, Aarhus<br><span style="opacity:.6">Concept render</span></span>
+      <svg class="arc m" viewBox="0 0 120 44" aria-hidden="true"><path d="M2 42 Q60 -18 118 42"/><circle id="sun" r="2.6" cx="2" cy="42"/></svg>
+      <span class="r"><span id="hh">06:10</span><br><span id="ph" style="opacity:.6">Sunrise</span></span></div>
+  </div>
+</div>
+
+<section class="intro" id="practice"><p class="fade">Azimuth is a small architecture practice in London and Copenhagen. We design housing and small public buildings in timber, brick and thatch, around the light they get <span>hour by hour.</span></p></section>
+
+<section class="work" id="work">
+  <div class="pic" id="wpic"><span class="lb" id="wlb"></span></div>
+  <div class="list" id="list"><h2>Selected work, 2023–26</h2></div>
+</section>
+
+<section class="contact" id="contact"><div class="fade"><p class="big">Tell us where your site faces.</p><p>Unit 4, 12 Example Yard, London E8</p><p>hello@azimuth.example</p><p class="q" style="margin-top:28px">Fictional practice. A concept by Eltio Studio.</p></div></section>
+<footer><span>Azimuth</span><span>Images are AI concept renders.</span></footer>
+
+<div id="view" aria-hidden="true">
+  <div class="top"><button id="close">Close</button></div>
+  <div class="split"><div class="pic" id="vpic"><span class="lb">Concept render</span></div><div class="txt" id="vtxt"></div></div>
+</div>
+
+<script>
+const P=[
+ {id:'row',t:'Larch Rowhouses',img:'row',place:'Aarhus',year:'2025',use:'Housing, five houses',area:'5 × 142 m²',faces:'South gables, north garden',sun:'Sun on all three floors',a:6,b:20,
+  text:['Five tall houses in a car-free lane.','Each gable faces south, so the low winter sun reaches all three floors. Larch cladding, sedum roofs, nothing painted.'],study:'Living floor, direct sun on 21 June'},
+ {id:'bath',t:'Harbour Bath',img:'bath',place:'Copenhagen',year:'2025',use:'Sauna and bathing deck',area:'160 m²',faces:'West, along the harbour',sun:'Evening sun on the water',a:15,b:21.5,
+  text:['A sauna and bathing deck on piers in the harbour.','The long window faces west, so the sauna looks straight at the evening sun on the water and the deck stays warm until late.'],study:'Sauna window, evening sun on 21 June'},
+ {id:'brick',t:'Reclaimed Brick Flats',img:'brick',place:'Copenhagen NV',year:'2026',use:'Housing, 34 flats',area:'3,100 m²',faces:'East, to the street',sun:'Morning sun in every kitchen',a:4.75,b:12,
+  text:['Thirty-four flats built from salvaged brick.','The facade is made in panels of brick from demolished buildings nearby. Every kitchen faces east, so the day starts in sun, and the deep loggias shade the flats at noon.'],study:'Kitchens, morning sun on 21 June'},
+ {id:'marsh',t:'Wetland Centre',img:'marsh',place:'Wadden Sea coast',year:'2026',use:'Visitor centre',area:'620 m²',faces:'East, to the sunrise',sun:'Low sun through the glass gables',a:4.75,b:10,
+  text:['A visitor centre on the salt marsh, roof and walls in thatch.','The glass gables face east over the water, so the first light of the day comes straight through the hall.'],study:'Hall, sunrise through the gables on 21 June'},
+ {id:'read',t:'Town Reading Room',img:'read',place:'Svendborg',year:'2024',use:'Library',area:'410 m²',faces:'North, to the square',sun:'Even north light for reading',a:null,b:null,
+  text:['A reading room on the town square.','The whole front is glass facing north, so the tables get steady light without glare, and at night the room lights up the square.'],study:'Reading tables: no direct sun by design, north light all day'},
+];
+const LIGHT={row:[['row-rise','Sunrise'],['row','Blue hour'],['row-night','Night']]};
+function study(p){
+  const W=300,H=170,cx=150,cy=140,r=110,h0=4.75,h1=21.3;
+  const pt=h=>{const a=Math.PI*(1-(h-h0)/(h1-h0));return [cx+r*Math.cos(a),cy-r*Math.sin(a)*0.92]};
+  const arc=(a,b)=>{let d='';for(let h=a;h<=b+0.001;h+=0.1){const [x,y]=pt(Math.min(h,b));d+=(d?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return d};
+  let ticks='';for(let h=6;h<=21;h+=3){const [x,y]=pt(h);ticks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="currentColor"/><text x="${x.toFixed(1)}" y="${(y-9).toFixed(1)}" text-anchor="middle">${String(h).padStart(2,'0')}</text>`}
+  const hot=p.a==null?'':`<path class="hot" pathLength="1000" d="${arc(p.a,p.b)}" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`;
+  const run=p.a==null?'':`<circle class="dot" r="4.5" fill="currentColor" style="offset-path:path('${arc(p.a,p.b)}')"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="sp" role="img" aria-label="${p.study}"><path class="arc" pathLength="1000" d="${arc(h0,h1)}" fill="none" stroke="currentColor" stroke-width="1"/>${hot}${run}${ticks}<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="currentColor"/><text x="20" y="${cy+18}">E</text><text x="150" y="${cy+18}" text-anchor="middle">S</text><text x="280" y="${cy+18}" text-anchor="end">W</text></svg>`;
+}
+const nn=x=>String(x).padStart(2,'0');
+/* the day: crossfade sunrise to blue hour to night */
+const day=document.querySelector('.day'),imgs=[...day.querySelectorAll('img')],hh=document.getElementById('hh'),ph=document.getElementById('ph'),sun=document.getElementById('sun');
+const T=[[6*60+10,'Sunrise'],[17*60+48,'Blue hour'],[22*60+30,'Night']];
+function dayScroll(){const r=day.getBoundingClientRect(),span=day.offsetHeight-innerHeight,p=Math.min(1,Math.max(0,-r.top/span));
+  const x=p*2;imgs.forEach((im,i)=>{const o=Math.max(0,1-Math.abs(x-i)*1.25);im.style.opacity=i===0&&x<0.01?1:o;im.style.transform=`scale(${1.04-0.04*p})`});
+  const k=Math.min(2,Math.round(x));const q=Math.min(1,Math.max(0,p))*2,i=Math.min(1,Math.floor(q)),m=T[i][0]+(T[i+1][0]-T[i][0])*(q-i);hh.textContent=`${nn(Math.floor(m/60))}:${nn(Math.floor(m%60))}`;ph.textContent=T[k][1];
+  const t=p,cx=2+116*t,cy=42-60*t*(1-t)*2*0.98;sun.setAttribute('cx',cx.toFixed(1));sun.setAttribute('cy',(42-(4*t*(1-t))*30).toFixed(1))}
+const hd=document.querySelector('header');
+function hdr(){hd.classList.toggle('lt',day.getBoundingClientRect().bottom>30)}
+addEventListener('scroll',()=>{dayScroll();hdr()},{passive:true});dayScroll();hdr();
+/* work list */
+const list=document.getElementById('list'),wpic=document.getElementById('wpic'),wlb=document.getElementById('wlb');
+list.insertAdjacentHTML('beforeend',P.map((p,i)=>`<div class="row fade" data-id="${p.id}" tabindex="0" role="button"><span class="n">${nn(i+1)}</span><span><b>${p.t}</b><span class="pl">${p.place}</span><span class="go">&rarr;</span></span><span class="y">${p.year}</span></div>`).join(''));
+wpic.insertAdjacentHTML('afterbegin',P.map(p=>`<img src="img/${p.img}.jpg" alt="${p.t}" data-id="${p.id}" loading="lazy">`).join(''));
+function show(id){wpic.querySelectorAll('img').forEach(im=>im.classList.toggle('on',im.dataset.id===id));const p=P.find(x=>x.id===id);wlb.textContent=`${p.t}, ${p.place}. Concept render`}
+show('row');
+list.addEventListener('mouseover',e=>{const r=e.target.closest('.row');if(r)show(r.dataset.id)});
+list.addEventListener('click',e=>{const r=e.target.closest('.row');if(r)openP(r.dataset.id)});
+list.addEventListener('keydown',e=>{const r=e.target.closest('.row');if(r&&e.key==='Enter')openP(r.dataset.id)});
+/* project view */
+const view=document.getElementById('view'),vpic=document.getElementById('vpic'),vtxt=document.getElementById('vtxt');
+function openP(id){const p=P.find(x=>x.id===id),i=P.indexOf(p),n=P[(i+1)%P.length];
+  const L=LIGHT[id]||[[p.img,'Elevation']];
+  vpic.querySelectorAll('img').forEach(x=>x.remove());
+  vpic.insertAdjacentHTML('afterbegin',L.map((l,k)=>`<img src="img/${l[0]}.jpg" alt="${p.t}, ${l[1]}" class="${k?'':'on'}">`).join(''));
+  vtxt.innerHTML=`<h2>${p.t}</h2><p class="lead">${p.place}, ${p.year}. ${nn(i+1)} / ${nn(P.length)}</p>
+   <div class="body">${p.text.map(s=>`<p>${s}</p>`).join('')}</div>
+   <dl><dt>Use</dt><dd>${p.use}</dd><dt>Area</dt><dd>${p.area}</dd><dt>Faces</dt><dd>${p.faces}</dd><dt>Light</dt><dd>${p.sun}</dd></dl>
+   <figure>${study(p)}<figcaption>Light study. ${p.study}</figcaption></figure>
+   <figure class="det"><img src="img/${p.img}-d.jpg" alt="${p.t}, material detail" loading="lazy"><figcaption>Detail. Concept render</figcaption></figure>
+   <a class="next" href="#${n.id}" data-id="${n.id}"><span class="q">Next</span><b>${n.t}</b></a>`;
+  vtxt.querySelector('.next').onclick=e=>{e.preventDefault();openP(n.id)};
+  view.scrollTop=0;view.classList.add('on');view.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';history.replaceState(null,'','#'+id)}
+function closeP(){view.classList.remove('on');view.setAttribute('aria-hidden','true');document.body.style.overflow='';history.replaceState(null,'',' ')}
+document.getElementById('close').onclick=closeP;addEventListener('keydown',e=>{if(e.key==='Escape')closeP()});
+/* in the project view, the light moves as you read */
+view.addEventListener('scroll',()=>{const ims=vpic.querySelectorAll('img');if(ims.length<2)return;const p=view.scrollTop/Math.max(1,view.scrollHeight-innerHeight);const k=Math.min(ims.length-1,Math.floor(p*ims.length*0.999));ims.forEach((im,i)=>im.classList.toggle('on',i===k))},{passive:true});
+/* nav glides and marks where you are */
+const links=[...document.querySelectorAll('header nav a')];
+links.forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));scrollTo({top:t.offsetTop,behavior:'smooth'})}));
+addEventListener('scroll',()=>{let k=-1;links.forEach((a,i)=>{const t=document.querySelector(a.getAttribute('href'));if(t.getBoundingClientRect().top<innerHeight*.5)k=i});links.forEach((a,i)=>a.classList.toggle('on',i===k))},{passive:true});
+/* reveal */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.fade').forEach(el=>io.observe(el));
+if(location.hash.length>1&&P.some(p=>p.id===location.hash.slice(1)))openP(location.hash.slice(1));
+</script>
+</body>
+</html>

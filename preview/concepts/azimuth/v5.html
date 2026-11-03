@@ -1,0 +1,566 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Azimuth · architecture and light</title>
+<meta name="description" content="Azimuth is a small architecture practice in London and Copenhagen that designs around daylight. A concept by Eltio Studio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Azimuth v5 (3 Nov 2026): calm pass on v4. v4: the whole page is one drawing set. v3: the landing page is a drawing sheet. Five plots in plan, a moving sun, CAD manners. */
+:root{--bg:#F3F1EC;--ink:#151514;--mid:#5E5E59;--faint:#8E8D86;--line:#D9D6CF;--f:"Inter",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--s:13px;--l:clamp(22px,2vw,30px);--pad:max(20px,env(safe-area-inset-left,0px))}
+*{box-sizing:border-box}
+html{background:var(--bg);color:var(--ink)}
+body{margin:0;font:400 var(--s)/1.45 var(--f);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}img{display:block;max-width:100%}button{all:unset;cursor:pointer}
+.q{color:var(--faint)}.mono{font-family:var(--mono);font-size:11px;letter-spacing:.02em}
+#gl{position:absolute;top:0;left:0;width:100%;height:100vh;height:100svh;display:block;z-index:0}
+
+@media (max-width:760px){#gl{position:fixed;height:100vh;height:100lvh}}
+/* the sheet */
+.sheet{position:relative;z-index:1;height:100vh;height:100svh;overflow:hidden;cursor:default}
+.sheet.pick{cursor:pointer}
+.top{position:absolute;left:var(--pad);right:var(--pad);top:calc(30px + env(safe-area-inset-top,0px));display:flex;justify-content:space-between;align-items:flex-start;z-index:3;pointer-events:none}
+.top>*{pointer-events:auto}
+.wm{font:600 44px/.9 var(--f);letter-spacing:-.05em}.wm small{display:block;font:400 12px/1.45 var(--f);letter-spacing:0;color:var(--mid);margin-top:14px}
+.views{display:flex;border:1px solid var(--ink);background:var(--bg)}
+.views button{padding:6px 12px;font:400 11px var(--mono);letter-spacing:.06em}
+.views button+button{border-left:1px solid var(--ink)}
+.views button.on{background:var(--ink);color:var(--bg)}
+.hintr{margin-top:8px;text-align:right;color:var(--faint)}
+.ld{position:absolute;z-index:3;transform:translate(-50%,0);text-align:center;white-space:nowrap;cursor:pointer;transition:opacity .4s}
+.ld b{display:block;font:300 22px/1.1 var(--f);letter-spacing:-.01em;margin:6px 0 2px}
+.ld .pl{color:var(--faint);text-transform:uppercase;letter-spacing:.06em;font-size:10px}
+.ld .n{display:inline-grid;place-items:center;width:20px;height:20px;border:1px solid var(--ink);border-radius:50%;font:400 9px var(--mono);background:var(--bg);transition:background .25s,color .25s}
+.ld.on .n{background:var(--ink);color:var(--bg)}
+.ld b i{font-style:normal;display:inline-block;opacity:0;transform:translateX(-4px);transition:.3s}.ld.on b i{opacity:1;transform:none}
+.dim{position:absolute;z-index:3;font:400 10px var(--mono);color:var(--ink);background:var(--bg);padding:0 4px;transform:translate(-50%,-50%);pointer-events:none;opacity:0;transition:opacity .25s}
+.dim.on{opacity:1}
+.foot{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(24px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:1fr auto 1fr;align-items:end;z-index:3;font-size:11px}
+nav{display:flex;gap:26px;text-transform:uppercase;letter-spacing:.05em}
+nav a{position:relative}nav a::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:left;transition:transform .4s}nav a:hover::after{transform:scaleX(1)}
+.tb{justify-self:end;display:grid;grid-template-columns:auto auto;border:1px solid var(--ink);background:var(--bg);font:400 11px/1.3 var(--f)}
+.tb>span{padding:6px 10px;border-right:1px solid var(--ink);border-bottom:1px solid var(--ink);min-width:92px}.tb>span:nth-child(2n){border-right:0}.tb>span:nth-last-child(-n+2){border-bottom:0}
+.tb i{font-style:normal;color:var(--faint);display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.tb input{display:block;width:120px;margin:5px 0 1px;accent-color:var(--ink);height:14px}
+.left{display:flex;flex-direction:column;gap:12px}
+.sb{font:400 10px var(--mono)}.sb i{display:flex;margin-bottom:4px}.sb i u{width:28px;height:5px;border:1px solid var(--ink)}.sb i u:nth-child(odd){background:var(--ink)}
+#cmd{font:400 11px var(--mono);color:var(--mid);min-height:16px;white-space:nowrap}
+#cmd::after{content:"_";animation:blink 1s steps(1) infinite}@keyframes blink{50%{opacity:0}}
+/* CAD crosshair */
+#xh{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity .2s}
+#xh.on{opacity:1}
+#xh .h,#xh .v{position:absolute;background:rgba(21,21,20,.28)}#xh .h{left:0;right:0;height:1px}#xh .v{top:0;bottom:0;width:1px}
+#xh .c{position:absolute;width:13px;height:13px;border:1px solid var(--ink);transform:translate(-50%,-50%)}
+#xh .t{position:absolute;font:400 10px var(--mono);color:var(--ink);background:var(--bg);padding:1px 4px;white-space:nowrap}
+/* v4: everything below the sheet is the same drawing set */
+.after{position:relative;z-index:4;background-color:var(--bg);background-image:linear-gradient(#E6E3DB 1px,transparent 1px),linear-gradient(90deg,#E6E3DB 1px,transparent 1px),linear-gradient(#DCD8CF 1px,transparent 1px),linear-gradient(90deg,#DCD8CF 1px,transparent 1px);background-size:24px 24px,24px 24px,120px 120px,120px 120px}
+.sh{position:relative;padding:18vh var(--pad) 14vh;border-top:1px solid var(--ink)}
+.sh::before,.sh::after{content:"";position:absolute;top:-7px;width:13px;height:13px;background:linear-gradient(var(--ink),var(--ink)) center/1px 100% no-repeat,linear-gradient(var(--ink),var(--ink)) center/100% 1px no-repeat}
+.sh::before{left:calc(var(--pad) - 6px)}.sh::after{right:calc(var(--pad) - 6px)}
+.tag{position:absolute;top:-1px;left:var(--pad);background:var(--ink);color:var(--bg);font:400 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:6px 10px}
+.fade{clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1)}.fade.in{clip-path:inset(-30px)}
+.k{color:var(--faint);display:block;margin-bottom:16px;font:400 11px var(--mono);letter-spacing:.04em;text-transform:uppercase}
+.big{font:300 var(--l)/1.25 var(--f);letter-spacing:-.01em;margin:0;text-wrap:balance}
+/* 02 practice */
+.intro-g{display:grid;grid-template-columns:1.1fr 1fr;gap:6vw;align-items:center;max-width:1300px;margin:0 auto}
+.intro .big{font-size:clamp(26px,2.6vw,40px);max-width:24ch}.intro .big span{color:var(--faint)}
+.intro dl{display:grid;grid-template-columns:auto auto;justify-content:start;gap:6px 24px;margin:44px 0 0;color:var(--mid)}.intro dt{color:var(--faint);text-transform:uppercase}.intro dd{margin:0}
+.rose{margin:0}.rose svg{width:100%;max-width:520px;display:block;margin:0 auto;overflow:visible;color:var(--ink)}
+.rose text{font:400 9px var(--mono);fill:currentColor}.rose .g{stroke:#BDB8AD;fill:none}.rose .p{fill:none;stroke:currentColor;stroke-dasharray:1 1;stroke-dashoffset:1}
+.rose .p.e{stroke:var(--mid)}.rose .p.w{stroke:var(--faint)}.rose .p.s{stroke-width:2}
+.rose figcaption{text-align:center;color:var(--faint);margin-top:14px}.rose figcaption b{font-weight:400;color:var(--ink)}
+/* plates: a photograph that arrives as a drawing, then develops */
+.plate{position:relative;aspect-ratio:16/9;max-width:100%;border:1px dashed #8D8A82;background:transparent}
+.plate canvas{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;clip-path:inset(0 0 100% 0)}
+.plate.plotted canvas{clip-path:inset(0);transition:clip-path 1.4s cubic-bezier(.6,0,.3,1)}
+.plate .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;clip-path:inset(100% 0 0 0);filter:saturate(.86) contrast(.97)}
+.plate .pl{position:absolute;left:-12px;right:-12px;height:1px;background:var(--ink);top:100%;opacity:0;pointer-events:none}
+.plate .pl b{position:absolute;right:12px;bottom:4px;font:400 10px var(--mono);background:var(--bg);padding:1px 5px;white-space:nowrap}
+.plate.dev .pl{opacity:1}.plate.done{border-style:solid;border-color:var(--ink)}.plate.done .pl{opacity:0;transition:opacity .4s}
+.plate .gp{position:absolute;width:9px;height:9px;border:1px solid var(--ink);background:var(--bg);transform:translate(-50%,-50%);z-index:2}
+.plate .gp:nth-of-type(1){left:0;top:0}.plate .gp:nth-of-type(2){left:100%;top:0}.plate .gp:nth-of-type(3){left:0;top:100%}.plate .gp:nth-of-type(4){left:100%;top:100%}
+.plate .pd{position:absolute;left:0;right:0;top:-22px;height:1px;background:var(--ink);font:400 10px var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.plate .pd::before,.plate .pd::after{content:"";position:absolute;top:-4px;width:1px;height:9px;background:var(--ink)}.plate .pd::after{right:0}
+.plate .pd span{position:absolute;left:50%;transform:translate(-50%,-50%);background:var(--bg);padding:0 6px;white-space:nowrap}
+.how{padding-top:20vh}
+.hw{margin:0 auto 20vh;max-width:1240px}.hw:last-child{margin-bottom:4vh}
+.hw .plate{margin:0 0 36px}
+.hw .tx{display:grid;grid-template-columns:repeat(12,1fr);column-gap:24px}
+.hw .tx .k{grid-column:1/3}.hw .tx .big{grid-column:3/8}.hw .tx .bd{grid-column:8/11;margin:0;max-width:36ch;color:var(--mid)}
+.hw .tx .num{grid-column:11/13;margin:0;text-align:right;color:var(--faint);font-size:11px}.hw .tx .num b{display:block;font:300 40px/1 var(--f);color:var(--ink);margin-bottom:6px;font-variant-numeric:tabular-nums;min-height:40px}
+/* 04 register */
+.regh{display:flex;justify-content:space-between;align-items:end;gap:20px;max-width:1300px;margin:0 auto 40px}
+.reg table{width:100%;max-width:1300px;margin:0 auto;border-collapse:collapse;font-size:13px;background:var(--bg)}
+.reg th{font:400 10px var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 12px;border:1px solid var(--ink);border-width:1px 0}
+.reg td{padding:16px 12px;border-bottom:1px solid var(--line);vertical-align:baseline}
+.reg td:first-child{font:400 11px var(--mono);width:64px}.reg td.t{font:300 22px/1.2 var(--f);letter-spacing:-.01em}.reg td.m{font:400 11px var(--mono);color:var(--mid);text-transform:uppercase}
+.reg tr.r{cursor:pointer;transition:background .2s}.reg tr.r:hover{background:#ECE9E2}.reg tr.r:hover td.t{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.reg .st{display:inline-block;border:1px solid currentColor;padding:2px 6px;font-size:10px}
+#thumb{position:fixed;left:0;top:0;width:260px;aspect-ratio:3/2;border:1px solid var(--ink);background:var(--bg);pointer-events:none;z-index:8;opacity:0;transition:opacity .2s;overflow:hidden}
+#thumb.on{opacity:1}#thumb canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+/* 05 process: a dimension line that draws itself */
+.proc .big{max-width:1300px;margin:0 auto 12vh}
+.dl{position:relative;max-width:1300px;margin:0 auto}
+.dline{position:absolute;left:0;top:0;width:100%;height:20px;overflow:visible}.dline line{stroke:var(--ink);stroke-width:1;stroke-dasharray:1 1;stroke-dashoffset:1;vector-effect:non-scaling-stroke}
+.dl ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.dl li{position:relative;padding:44px 24px 0 0;opacity:.12;transition:opacity .6s}.dl li.on{opacity:1}
+.dl .tk{position:absolute;left:0;top:3px;width:1px;height:15px;background:var(--ink)}.dl li:first-child .tk{width:9px;height:9px;border-radius:50%;left:-4px;top:6px}
+.dl .dm{position:absolute;left:-50%;width:100%;text-align:center;top:-14px;font:400 10px var(--mono);font-style:normal;color:var(--mid)}
+.dl li .w{display:block;font:400 10px var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+.dl li svg{width:44px;height:44px;display:block;margin:22px 0 26px;fill:none;stroke:currentColor;stroke-width:1}.dl li svg *{stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset 1.4s cubic-bezier(.6,0,.3,1)}.dl li.on svg *{stroke-dashoffset:0}
+.dl li b{display:block;font:300 22px/1.2 var(--f);margin-bottom:8px}.dl li p{margin:0;max-width:28ch;color:var(--mid)}
+/* 06 contact: the night drawing, only the windows in colour */
+.contact{position:relative;min-height:100vh;min-height:100svh;padding:0;display:block;background:#1D1E21;color:#F3F1EC;overflow:hidden;border-top:1px solid var(--ink)}
+.contact .plate{position:absolute;inset:0;aspect-ratio:auto;border:0}
+.contact .plate canvas.w{opacity:0;transition:opacity .2s}
+.ccard{position:absolute;left:var(--pad);bottom:calc(84px + env(safe-area-inset-bottom,0px));max-width:560px;background:var(--bg);color:var(--ink);border:1px solid var(--ink);padding:44px 22px 0;z-index:2}
+.ccard .tag{left:-1px;top:-1px}.ccard .big{margin:0 0 26px;font-size:clamp(26px,2.4vw,36px)}
+.ctb{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ink);margin:0 -22px}
+.ctb span{padding:8px 12px;border-right:1px solid var(--ink);font-size:12px}.ctb span:nth-child(2){border-right:0}.ctb span:nth-child(3){grid-column:1/3;border-top:1px solid var(--ink);border-right:0;color:var(--mid)}
+.ctb i{font-style:normal;display:block;font:400 9px var(--mono);color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px var(--pad) calc(18px + env(safe-area-inset-bottom,0px));color:var(--faint);background:var(--bg);position:relative;z-index:4;font:400 11px var(--mono);text-transform:uppercase;border-top:1px solid var(--ink)}
+/* the title block follows you down the set */
+#chrome{position:fixed;left:var(--pad);right:var(--pad);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:5;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;pointer-events:none;opacity:0;transform:translateY(12px);transition:opacity .35s,transform .35s}
+body.set #chrome{opacity:1;transform:none}
+#cmd2{font:400 11px var(--mono);color:var(--ink);background:var(--bg);padding:3px 6px;justify-self:start;white-space:nowrap;border:1px solid var(--line)}
+#cmd2::after{content:"_";animation:blink 1s steps(1) infinite}
+.prog{display:flex;gap:4px;pointer-events:auto}.prog a{width:30px;height:6px;border:1px solid var(--ink);background:var(--bg)}.prog a.on{background:var(--ink)}
+.tb2{pointer-events:auto}.tb2 b{font-weight:400}
+body.dark #cmd2{border-color:#55565a}
+.fb .plate{position:absolute;inset:0;aspect-ratio:auto;border:0}.fb .plate .gp,.fb .plate .pd{display:none}
+
+/* the photograph the elevation turns into */
+#photo{position:fixed;inset:0;z-index:5;background:#0b0c0e;opacity:0;visibility:hidden;transition:opacity 1s ease,visibility 0s 1s}
+#photo.on{opacity:1;visibility:visible;transition:opacity 1s ease}
+#photo img{width:100%;height:100%;object-fit:cover;transform:scale(1.04);transition:transform 2.4s cubic-bezier(.2,.7,.1,1)}
+#photo.on img{transform:none}
+/* project view: full-bleed, one image at a time */
+#view{position:fixed;inset:0;z-index:6;background:var(--bg);overflow-y:auto;overscroll-behavior:contain;visibility:hidden;opacity:0;transition:opacity .5s,visibility 0s .5s}
+#view.on{visibility:visible;opacity:1;transition:opacity .5s}
+#view .bar{position:fixed;top:0;left:0;right:0;z-index:3;display:flex;justify-content:space-between;padding:calc(16px + env(safe-area-inset-top,0px)) var(--pad) 0;color:#fff;text-shadow:0 0 14px rgba(0,0,0,.4);pointer-events:none;font:400 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;transition:color .3s}
+#view .bar>*{pointer-events:auto}#view.paper .bar{color:var(--ink);text-shadow:none}
+#view .bar button{border:1px solid currentColor;padding:5px 10px}
+.fb{position:relative;height:100vh;height:100svh;overflow:hidden;background:#0b0c0e}
+.fb img{width:100%;height:100%;object-fit:cover}
+.fb .cap{position:absolute;left:var(--pad);right:var(--pad);bottom:calc(22px + env(safe-area-inset-bottom,0px));color:#fff;text-shadow:0 0 20px rgba(0,0,0,.45);display:flex;justify-content:space-between;align-items:end;gap:16px}
+.fb .cap .big{font-size:clamp(30px,3.6vw,56px)}
+.fb .cap .m{opacity:.75;font:400 11px var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.info{display:grid;grid-template-columns:repeat(12,1fr);column-gap:24px;padding:16vh var(--pad);max-width:1400px;margin:0 auto}
+.info .lead{grid-column:1/6}.info .body{grid-column:7/11}.info .body p{font:300 18px/1.5 var(--f);margin:0 0 16px;max-width:36ch}
+.info dl{grid-column:7/11;display:grid;grid-template-columns:96px 1fr;gap:6px 14px;margin:40px 0 0;font-size:12px}.info dt{color:var(--faint);font:400 11px var(--mono);text-transform:uppercase}.info dd{margin:0}
+.studyb{display:grid;grid-template-columns:repeat(12,1fr);column-gap:24px;padding:14vh var(--pad);max-width:1400px;margin:0 auto}
+.studyb .k{grid-column:1/4}.studyb .sv{grid-column:4/10}.studyb .sp{width:100%;max-width:560px;height:auto;color:var(--ink);font:400 10px var(--mono)}.studyb .sp text{fill:currentColor}
+.studyb figcaption{grid-column:4/10;margin-top:10px;color:var(--faint)}
+.nextp{display:block;padding:16vh var(--pad) 18vh;text-align:center;border-top:1px solid var(--line)}
+.nextp b{display:block;font:300 clamp(28px,3.4vw,52px)/1.1 var(--f);margin-top:10px}.nextp:hover b{color:var(--mid)}
+/* phone */
+@media (max-width:760px){
+  .sheet{height:auto}
+  .wm{font-size:34px}.views{display:none}.hintr{display:none}
+  .foot{position:absolute;grid-template-columns:1fr;gap:18px}
+  nav{justify-content:space-between;gap:0}
+  .tb{justify-self:stretch}.tb>span{min-width:0}.tb input{width:100%}
+  #cmd{display:none}
+  .info,.studyb{display:block;padding:12vh var(--pad)}.info .body{margin-top:24px}
+  .fb .cap{flex-direction:column;align-items:flex-start}
+  .intro-g{grid-template-columns:1fr;gap:8vh}
+  .hw .tx{display:block}.hw .tx .big{margin-bottom:14px}.hw .tx .num{text-align:left;margin-top:20px}
+  .plate .pd span{font-size:9px}
+  .regh{display:block}.regh .q{margin-top:10px}
+  .reg .hm{display:none}.reg td.t{font-size:18px}
+  .dline{display:none}
+  .dl ol{grid-template-columns:1fr;gap:9vh}
+  .dl li{padding:20px 0 0}
+  .dl .dm{left:auto;right:0;top:0;width:auto}
+  footer{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .ccard{right:var(--pad);bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  #chrome{grid-template-columns:1fr auto;bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+  #cmd2{max-width:52vw;overflow:hidden;text-overflow:ellipsis;font-size:10px}.prog{display:none}
+  .tb2{grid-template-columns:auto auto}.tb2>span{min-width:0;padding:4px 8px}.tb2>span:nth-child(2),.tb2>span:nth-child(4){display:none}.tb2>span:nth-child(1){border-bottom:0;border-right:1px solid var(--ink)}.tb2>span:nth-child(3){border-right:0}
+}
+@media (prefers-reduced-motion:reduce){.fade{clip-path:none}}
+
+/* v5 calm pass: the drawn look stays on the images only; no CAD dressing below the sheet */
+.after{background-image:none}
+.sh{border-top:1px solid var(--line);padding-top:16vh}.sh::before,.sh::after{display:none}
+.tag{position:static;display:block;background:none;color:var(--faint);padding:0;margin:0 auto 10vh;max-width:1300px;font:400 11px var(--mono);letter-spacing:.06em}
+.how .tag{max-width:1240px}
+.plate,.plate.done{border:0}.plate .gp,.plate .pd,.plate .pl{display:none}
+.plate.plotted canvas{transition:clip-path 1.6s cubic-bezier(.65,0,.25,1)}
+#chrome,#thumb{display:none!important}
+.rose svg{max-width:440px}.rose text[style]{display:none}.rose .g{stroke:#D4D0C7}.rose .bear{opacity:.35}.rose figcaption{display:none}
+.intro dl{margin-top:36px}
+.reg td{padding:20px 12px}.reg th{border-top:0;border-bottom:1px solid var(--line)}.reg .st{border:0;padding:0;color:var(--faint)}.reg tr.r:hover{background:transparent}.reg tr.r:hover td.t{text-decoration:none;color:var(--mid)}
+.reg td.t{transition:color .25s}.reg td:first-child{color:var(--faint)}
+.dline,.dl .dm,.dl .tk{display:none}
+.dl ol{gap:24px}.dl li{padding:20px 0 0;border-top:1px solid var(--ink);opacity:1;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.7,0,.2,1)}.dl li.on{clip-path:inset(-20px)}
+.dl li:nth-child(2){transition-delay:.12s}.dl li:nth-child(3){transition-delay:.24s}.dl li:nth-child(4){transition-delay:.36s}
+.ccard{background:none;border:0;color:#F3F1EC;padding:0;bottom:calc(64px + env(safe-area-inset-bottom,0px));text-shadow:0 0 24px rgba(0,0,0,.45)}
+.ccard .tag{display:none}.ccard .big{margin-bottom:22px}
+.ctb{display:block;border:0;margin:0}.ctb span{display:block;border:0!important;padding:0;margin:0 0 4px;font-size:13px;color:#F3F1EC!important}.ctb span:nth-child(3){margin-top:22px;opacity:.6;font-size:11px}.ctb i{display:none}
+footer{border-top:1px solid var(--line);font:400 11px var(--f);text-transform:none}
+@media (max-width:760px){.dl ol{grid-template-columns:1fr;gap:9vh}.dl li{padding:20px 0 0}}
+.contact::after{content:"";position:absolute;inset:auto 0 0 0;height:55%;background:linear-gradient(transparent,rgba(18,19,21,.88));pointer-events:none;z-index:1}
+.ccard{left:max(var(--pad),calc((100vw - 1300px)/2))}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="xh"><div class="h"></div><div class="v"></div><div class="c"></div><div class="t"></div></div>
+
+<section class="sheet" id="sheet" aria-label="Selected work, site plan">
+  <div class="top">
+    <div class="wm">AZIMUTH<small>Architecture around the light a building gets.<br>London and Copenhagen.</small></div>
+    <div><div class="views" role="group" aria-label="View"><button class="on" data-v="plan">PLAN</button><button data-v="axo">AXO</button></div><div class="hintr mono">Select a plot to enter</div></div>
+  </div>
+  <div id="labels"></div>
+  <div class="foot">
+    <div class="left"><div id="cmd" aria-live="polite"></div><div class="sb"><i><u></u><u></u><u></u><u></u></i>0 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 20 m</div></div>
+    <nav><a href="#practice">Practice</a><a href="#light">Light</a><a href="#register">Register</a><a href="#process">Process</a><a href="#contact">Contact</a></nav>
+    <div class="tb"><span><i>Sheet</i>01 Selected work</span><span><i>Scale</i>1:500</span><span><i>Sun, 21 June</i><b id="sunt" style="font-weight:400">15:20</b><input id="sunr" type="range" min="0" max="1000" value="640" aria-label="Time of day"></span><span><i>North</i>&uarr;</span></div>
+  </div>
+</section>
+
+<div class="after" id="set">
+<section class="sh intro" id="practice" data-sheet="02" data-name="Practice" data-scale="1:1">
+  <span class="tag">02 &middot; Practice</span>
+  <div class="intro-g">
+    <div class="intro-t">
+      <p class="big fade">Azimuth is a small practice in London and Copenhagen. We design housing and small public buildings in timber, brick and thatch, around the light they get <span>hour by hour.</span></p>
+      <dl class="mono fade"><dt>Copenhagen</dt><dd>55.7&deg; N</dd><dt>21 June</dt><dd>17 h 34 of daylight</dd><dt>21 December</dt><dd>7 h 01</dd></dl>
+    </div>
+    <figure class="rose" aria-label="Sun path over Copenhagen through the year"><svg id="rose" viewBox="0 0 360 360"></svg><figcaption class="mono">Sun path, 55.7&deg; N. <b>Summer</b>, equinox and winter.</figcaption></figure>
+  </div>
+</section>
+<section class="sh how" id="light" data-sheet="03" data-name="Light" data-scale="1:200">
+  <span class="tag">03 &middot; How we work</span>
+  <article class="hw" data-sun="06:04">
+    <div class="plate" data-id="03.1" data-dim="Wetland Centre &middot; east elevation"><img class="ph" data-src="img/marsh.jpg" alt="Wetland Centre, glass gables facing the sunrise"></div>
+    <div class="tx"><span class="k fade">01 Orientation</span><p class="big fade">We start with a compass, not a floor plan.</p><p class="bd fade">Before we draw a room we map where the sun rises and sets on the site in every season. The Wetland Centre's glass gables face due east, so the hall fills with the first light of the day.</p><p class="num fade"><b data-type>06:04</b>First sun in the hall, 21 March</p></div></article>
+  <article class="hw" data-sun="09:30">
+    <div class="plate" data-id="03.2" data-dim="Brick Flats &middot; facade detail &middot; 1:5"><img class="ph" data-src="img/brick-d.jpg" alt="Reclaimed brick panels in two bonds"></div>
+    <div class="tx"><span class="k fade">02 Material</span><p class="big fade">We build with what is already there.</p><p class="bd fade">Salvaged brick, local larch, reed thatch cut on the marsh next door. Materials that come from close by, age well and need no paint.</p><p class="num fade"><b data-type>71%</b>Of the Brick Flats facade is reused brick</p></div></article>
+  <article class="hw" data-sun="21:40">
+    <div class="plate" data-id="03.3" data-dim="Reading Room &middot; window detail &middot; 1:10"><img class="ph" data-src="img/read-d.jpg" alt="Board-marked concrete and a bronze window at night"></div>
+    <div class="tx"><span class="k fade">03 Light</span><p class="big fade">Light is the brief.</p><p class="bd fade">Every room gets the light its use needs: east for kitchens, north for reading, west for the evening. We test it hour by hour before anything is built.</p><p class="num fade"><b data-type>8,760</b>Hours of sun modelled for every project</p></div></article>
+</section>
+<section class="sh reg" id="register" data-sheet="04" data-name="Register" data-scale="NTS">
+  <span class="tag">04 &middot; Drawing register</span>
+  <div class="regh"><p class="big fade">Five projects, one idea.</p><p class="mono q fade">Select a row to open the drawing.</p></div>
+  <table class="fade"><thead><tr><th>No.</th><th>Title</th><th class="hm">Location</th><th class="hm">Use</th><th class="hm">Faces</th><th>Year</th><th class="hm">Status</th></tr></thead><tbody id="regb"></tbody></table>
+  <div id="thumb" aria-hidden="true"></div>
+</section>
+<section class="sh proc" id="process" data-sheet="05" data-name="Process" data-scale="1:1 yr">
+  <span class="tag">05 &middot; Process</span>
+  <p class="big fade">From site to keys.</p>
+  <div class="dl" id="dl">
+    <svg class="dline" preserveAspectRatio="none" viewBox="0 0 1000 20"><line pathLength="1" x1="0" y1="10" x2="1000" y2="10"/></svg>
+    <ol>
+      <li><i class="tk"></i><span class="w">Day 1</span><svg viewBox="0 0 44 44"><circle pathLength="1" cx="22" cy="22" r="20"/><path pathLength="1" d="M22 6 L26 22 L22 38 L18 22 Z"/></svg><b>Site visit</b><p>We stand on your site with a compass at sunrise and walk it until sunset.</p></li>
+      <li><i class="tk"></i><em class="dm">3 wk</em><span class="w">Weeks 1&ndash;3</span><svg viewBox="0 0 44 44"><path pathLength="1" d="M2 38 Q22 -6 42 38"/><circle pathLength="1" cx="31" cy="17" r="3"/><path pathLength="1" d="M2 38 H42"/></svg><b>Sun study</b><p>We model the sun on your site for every hour of the year.</p></li>
+      <li><i class="tk"></i><em class="dm">4 mo</em><span class="w">Months 1&ndash;4</span><svg viewBox="0 0 44 44"><rect pathLength="1" x="4" y="8" width="36" height="28"/><path pathLength="1" d="M4 22 H22 V36 M22 8 V16"/></svg><b>Design</b><p>Plans, models and materials, all tested against that light.</p></li>
+      <li><i class="tk"></i><em class="dm">14 mo</em><span class="w">Months 5&ndash;18</span><svg viewBox="0 0 44 44"><path pathLength="1" d="M6 40 V18 L22 4 L38 18 V40 Z"/><rect pathLength="1" x="17" y="26" width="10" height="14"/></svg><b>Build</b><p>We stay on site until the keys are handed over.</p></li>
+    </ol>
+  </div>
+</section>
+<section class="contact" id="contact" data-sheet="06" data-name="Contact" data-scale="1:100" data-sun="22:30">
+  <div class="plate night" data-id="06" data-glow="1" data-keep="1"><img class="ph" data-src="img/row-night.jpg" alt=""></div>
+  <div class="ccard"><span class="tag">06 &middot; Contact</span><p class="big">Tell us where your site faces.</p>
+    <div class="ctb"><span><i>Studio</i>Unit 4, 12 Example Yard, London E8</span><span><i>Write</i>hello@azimuth.example</span><span><i>Drawn by</i>Fictional practice. A concept by Eltio Studio.</span></div></div>
+</section>
+<footer><span>Azimuth</span><span>Images are AI concept renders.</span></footer>
+</div>
+<div id="chrome" aria-hidden="true"><div id="cmd2"></div><div class="prog" id="prog"></div><div class="tb tb2"><span><i>Sheet</i><b id="c_sh">02 Practice</b></span><span><i>Scale</i><b id="c_sc">1:1</b></span><span><i>Sun, 21 June</i><b id="c_sun">06:04</b></span><span><i>North</i>&uarr;</span></div></div>
+
+
+<div id="photo"><img id="phimg" alt=""></div>
+<div id="view" aria-hidden="true"><div class="bar"><span id="vcount"></span><button id="close">Close</button></div><div id="vbody"></div></div>
+
+<script src="lib/three.min.js"></script>
+<script>
+const P=[
+ {id:'row',t:'Larch Rowhouses',img:'row',place:'Aarhus',year:'2025',use:'Housing, five houses',area:'5 × 142 m²',faces:'South gables, north garden',sun:'Sun on all three floors',a:6,b:20,
+  text:['Five tall houses in a car-free lane.','Each gable faces south, so the low winter sun reaches all three floors. Larch cladding, sedum roofs, nothing painted.'],study:'Living floor, direct sun on 21 June'},
+ {id:'bath',t:'Harbour Bath',img:'bath',place:'Copenhagen',year:'2025',use:'Sauna and bathing deck',area:'160 m²',faces:'West, along the harbour',sun:'Evening sun on the water',a:15,b:21.5,
+  text:['A sauna and bathing deck on piers in the harbour.','The long window faces west, so the sauna looks straight at the evening sun on the water and the deck stays warm until late.'],study:'Sauna window, evening sun on 21 June'},
+ {id:'brick',t:'Reclaimed Brick Flats',img:'brick',place:'Copenhagen NV',year:'2026',use:'Housing, 34 flats',area:'3,100 m²',faces:'East, to the street',sun:'Morning sun in every kitchen',a:4.75,b:12,
+  text:['Thirty-four flats built from salvaged brick.','The facade is made in panels of brick from demolished buildings nearby. Every kitchen faces east, so the day starts in sun, and the deep loggias shade the flats at noon.'],study:'Kitchens, morning sun on 21 June'},
+ {id:'marsh',t:'Wetland Centre',img:'marsh',place:'Wadden Sea coast',year:'2026',use:'Visitor centre',area:'620 m²',faces:'East, to the sunrise',sun:'Low sun through the glass gables',a:4.75,b:10,
+  text:['A visitor centre on the salt marsh, roof and walls in thatch.','The glass gables face east over the water, so the first light of the day comes straight through the hall.'],study:'Hall, sunrise through the gables on 21 June'},
+ {id:'read',t:'Town Reading Room',img:'read',place:'Svendborg',year:'2024',use:'Library',area:'410 m²',faces:'North, to the square',sun:'Even north light for reading',a:null,b:null,
+  text:['A reading room on the town square.','The whole front is glass facing north, so the tables get steady light without glare, and at night the room lights up the square.'],study:'Reading tables: no direct sun by design, north light all day'},
+];
+
+const LIGHT={row:[['row-rise','Sunrise'],['row-night','Night']]};
+const HGT={row:1.95,bath:1.15,brick:3,marsh:1.35,read:2.6};
+function study(p){
+  const W=300,H=170,cx=150,cy=140,r=110,h0=4.75,h1=21.3;
+  const pt=h=>{const a=Math.PI*(1-(h-h0)/(h1-h0));return [cx+r*Math.cos(a),cy-r*Math.sin(a)*0.92]};
+  const arc=(a,b)=>{let d='';for(let h=a;h<=b+0.001;h+=0.1){const [x,y]=pt(Math.min(h,b));d+=(d?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}return d};
+  let ticks='';for(let h=6;h<=21;h+=3){const [x,y]=pt(h);ticks+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="currentColor"/><text x="${x.toFixed(1)}" y="${(y-9).toFixed(1)}" text-anchor="middle">${String(h).padStart(2,'0')}</text>`}
+  const hot=p.a==null?'':`<path class="hot" pathLength="1000" d="${arc(p.a,p.b)}" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>`;
+  const run=p.a==null?'':`<circle class="dot" r="4.5" fill="currentColor" style="offset-path:path('${arc(p.a,p.b)}')"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" class="sp" role="img" aria-label="${p.study}"><path class="arc" pathLength="1000" d="${arc(h0,h1)}" fill="none" stroke="currentColor" stroke-width="1"/>${hot}${run}${ticks}<line x1="20" y1="${cy}" x2="280" y2="${cy}" stroke="currentColor"/><text x="20" y="${cy+18}">E</text><text x="150" y="${cy+18}" text-anchor="middle">S</text><text x="280" y="${cy+18}" text-anchor="end">W</text></svg>`;
+}
+
+const nn=x=>String(x).padStart(2,'0');
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+const sheet=document.getElementById('sheet'),labels=document.getElementById('labels'),cmdEl=document.getElementById('cmd'),xh=document.getElementById('xh');
+/* command line: it types what you do, like a CAD prompt */
+let cmdT=0;function cmd(s){clearInterval(cmdT);let i=0;const full='> '+s;cmdEl.textContent='';cmdT=setInterval(()=>{cmdEl.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(cmdT)},18)}
+/* sun: 0..1 across 21 June, lingering at noon */
+const SUN0=4*60+43,SUN1=21*60+22;const hm=m=>`${nn(Math.floor(m/60))}:${nn(Math.floor(m%60))}`;
+let D=.64,sunAuto=!reduce,sunDir=1;
+const sunr=document.getElementById('sunr'),sunt=document.getElementById('sunt');
+function setSunUI(){sunr.value=Math.round(D*1000);sunt.textContent=hm(SUN0+(SUN1-SUN0)*D)}
+sunr.addEventListener('input',()=>{sunAuto=false;D=sunr.value/1000;setSunUI();dirty=true});
+sunr.addEventListener('change',()=>cmd('SUN '+sunt.textContent+(Math.abs(D-.5)<.06?'  (noon: read the shadow)':'')));
+let dirty=true,G=null;
+(function(){
+const T=THREE;let r;
+try{r=new T.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true})}catch(e){document.getElementById('gl').remove();return}
+const PL=6.6,N=P.length;
+let W,H,MOB,C=[],fx,fy,k,y0,GAP,pr;
+const sc=new T.Scene();const cam=new T.OrthographicCamera(-1,1,1,-1,.1,300);
+sc.add(new T.HemisphereLight(0xffffff,0xd8d2c6,.62));
+const sun=new T.DirectionalLight(0xffffff,.72);sun.castShadow=true;sun.shadow.bias=-.0004;sc.add(sun);sc.add(sun.target);
+const shadowCatch=new T.Mesh(new T.PlaneGeometry(400,400),new T.ShadowMaterial({opacity:.5}));shadowCatch.rotation.x=-Math.PI/2;shadowCatch.receiveShadow=true;sc.add(shadowCatch);
+const grid=new T.GridHelper(400,800,0xdcd8cf,0xe7e3db);grid.material.transparent=true;grid.position.y=-.01;sc.add(grid);
+/* each building has its own set of materials so it can fade on its own */
+function mats(){const po={polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1,transparent:true};
+  return {paper:new T.MeshLambertMaterial({color:0xF8F6F1,...po}),warm:new T.MeshLambertMaterial({color:0xF8F6F1,...po}),ink:new T.LineBasicMaterial({color:0x2a2a28,transparent:true}),
+    hatch:new T.LineBasicMaterial({color:0xb9b4aa,transparent:true}),dash:new T.LineDashedMaterial({color:0x8d8a82,dashSize:.16,gapSize:.11,transparent:true}),dimL:new T.LineBasicMaterial({color:0x151514,transparent:true,opacity:0})}}
+function add(g,M,geo,mat,x,y,z,ry){const m=new T.Mesh(geo,M[mat]);m.position.set(x,y,z);m.rotation.y=ry||0;m.castShadow=m.receiveShadow=true;g.add(m);const e=new T.LineSegments(new T.EdgesGeometry(geo,20),M.ink);e.position.copy(m.position);e.rotation.y=ry||0;g.add(e);return m}
+function lines(g,P2,mat){const b=new T.BufferGeometry();b.setAttribute('position',new T.Float32BufferAttribute(P2,3));const l=new T.LineSegments(b,mat);if(mat.isLineDashedMaterial)l.computeLineDistances();g.add(l);return l}
+function gable(w,h,a,d){const s=new T.Shape();s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(w/2,h);s.lineTo(0,a);s.lineTo(-w/2,h);s.lineTo(-w/2,0);const g=new T.ExtrudeGeometry(s,{depth:d,bevelEnabled:false});g.translate(0,0,-d/2);return g}
+function tree(g,M,x,z){add(g,M,new T.SphereGeometry(.34,12,10),'paper',x,.55,z);add(g,M,new T.CylinderGeometry(.035,.035,.3,6),'paper',x,.15,z)}
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const BUILD={
+ row:(g,M)=>{for(let i=0;i<5;i++)add(g,M,gable(.9,1.4,1.95,1.6),'warm',-1.84+i*.92,0,0);lines(g,[-2.6,.01,1.4,2.6,.01,1.4,-2.6,.01,1.7,2.6,.01,1.7],M.ink);tree(g,M,-2.4,-1.9);tree(g,M,2.3,-2)},
+ bath:(g,M)=>{const Q=[];for(let i=0;i<=34;i++){const x=-3.1+i*6.2/34;Q.push(x,.01,-.6,Math.min(3.1,x+.7),.01,2.9)}lines(g,Q,M.hatch);lines(g,[-3.1,.01,-.6,3.1,.01,-.6],M.ink);add(g,M,new T.BoxGeometry(4.2,.12,1.5),'paper',0,.42,.9);add(g,M,new T.BoxGeometry(3.2,.7,1.1),'warm',-.3,.83,.9);for(let i=0;i<6;i++){add(g,M,new T.CylinderGeometry(.05,.05,.4,8),'paper',-1.9+i*.76,.2,1.5);add(g,M,new T.CylinderGeometry(.05,.05,.4,8),'paper',-1.9+i*.76,.2,.3)}add(g,M,new T.BoxGeometry(.6,.06,1.2),'paper',0,.03,-1.3);tree(g,M,-2.3,-2.4)},
+ brick:(g,M)=>{add(g,M,new T.BoxGeometry(4.6,3.0,2.2),'warm',0,1.5,-.3);for(const x of [-1.5,-.5,.5,1.5])lines(g,[x-.3,3.01,.3,x+.3,3.01,.3],M.ink);lines(g,[-3,.01,1.6,3,.01,1.6],M.ink);tree(g,M,-2.4,2.4);tree(g,M,2.4,2.4)},
+ marsh:(g,M)=>{for(let i=0;i<5;i++)add(g,M,gable(1.1,.25,1.35,3.0),'warm',-2.24+i*1.12,0,-.4);const Q=[];for(let j=0;j<16;j++){const x=-3+rnd()*6,z=1.4+rnd()*1.5;Q.push(x,.01,z,x+.25,.01,z)}lines(g,Q,M.hatch);add(g,M,new T.BoxGeometry(.35,.05,2.2),'paper',0,.03,2.3)},
+ read:(g,M)=>{add(g,M,new T.BoxGeometry(2.2,2.6,2.2),'warm',0,1.3,-.4);const Q=[];for(let i=-3;i<=3.01;i+=.5)Q.push(i,.01,1.2,i,.01,3);for(let z=1.2;z<=3.01;z+=.5)Q.push(-3,.01,z,3,.01,z);lines(g,Q,M.hatch);tree(g,M,-2.4,-2.4);tree(g,M,2.4,-2.4)}
+};
+const groups=P.map(p=>{const g=new T.Group(),M=mats();BUILD[p.id](g,M);
+  const h=PL/2;lines(g,[-h,.005,-h,h,.005,-h,h,.005,-h,h,.005,h,h,.005,h,-h,.005,h,-h,.005,h,-h,.005,-h],M.dash);
+  /* CAD dimension lines and grips, shown on hover */
+  const d=h+.55,t=.18,DL=[-h,.01,-d,h,.01,-d,-h,.01,-d-t,-h,.01,-d+t,h,.01,-d-t,h,.01,-d+t,-h,.01,-h,-h,.01,-d-.1,h,.01,-h,h,.01,-d-.1,
+    -d,.01,-h,-d,.01,h,-d-t,.01,-h,-d+t,.01,-h,-d-t,.01,h,-d+t,.01,h,-h,.01,-h,-d-.1,.01,-h,-h,.01,h,-d-.1,.01,h];
+  for(const [cx,cz] of [[-h,-h],[h,-h],[h,h],[-h,h]]){const s=.14;DL.push(cx-s,.01,cz-s,cx+s,.01,cz-s,cx+s,.01,cz-s,cx+s,.01,cz+s,cx+s,.01,cz+s,cx-s,.01,cz+s,cx-s,.01,cz+s,cx-s,.01,cz-s)}
+  lines(g,DL,M.dimL);sc.add(g);return {g,M,op:1,hov:0}});
+/* the wordmark as a gobo: it only casts a shadow, so at noon the ground reads AZIMUTH */
+const WMS=[{"o":[[102.0,100.0],[188.0,100.0],[188.0,76.0],[138.0,76.0],[161.65,51.4],[125.65,51.4],[102.0,76.0]],"h":[]},{"o":[[188.0,24.0],[188.0,0.0],[102.0,0.0],[102.0,24.0],[152.0,24.0],[128.35,48.6],[164.35,48.6]],"h":[]},{"o":[[200.0,0.0],[200.0,48.6],[226.0,48.6],[226.0,0.0]],"h":[]},{"o":[[200.0,100.0],[226.0,100.0],[226.0,51.4],[200.0,51.4]],"h":[]},{"o":[[264.0,0.0],[238.0,0.0],[238.0,48.6],[286.6,48.6],[286.6,35.78]],"h":[]},{"o":[[238.0,100.0],[264.0,100.0],[264.0,51.4],[238.0,51.4]],"h":[]},{"o":[[286.6,83.9],[286.6,51.4],[264.93,51.4]],"h":[]},{"o":[[289.4,35.78],[289.4,48.6],[338.0,48.6],[338.0,0.0],[312.0,0.0]],"h":[]},{"o":[[289.4,83.9],[311.07,51.4],[289.4,51.4]],"h":[]},{"o":[[312.0,100.0],[338.0,100.0],[338.0,51.4],[312.0,51.4]],"h":[]},{"o":[[26.04,43.76],[26.16,42.52],[26.37,41.29],[26.65,40.08],[27.01,38.89],[27.45,37.73],[27.96,36.6],[28.55,35.5],[29.2,34.44],[29.93,33.43],[30.72,32.47],[31.56,31.56],[32.47,30.72],[33.43,29.93],[34.44,29.2],[35.5,28.55],[36.6,27.96],[37.73,27.45],[38.89,27.01],[40.08,26.65],[41.29,26.37],[42.52,26.16],[43.6,26.06],[43.6,0.05],[42.06,0.1],[39.13,0.38],[36.22,0.86],[33.35,1.53],[30.54,2.39],[27.78,3.43],[25.1,4.64],[22.5,6.03],[20.0,7.58],[17.61,9.3],[15.33,11.17],[13.18,13.18],[11.17,15.33],[9.3,17.61],[7.58,20.0],[6.03,22.5],[4.64,25.1],[3.43,27.78],[2.39,30.54],[1.53,33.35],[0.86,36.22],[0.38,39.13],[0.1,42.06],[0.0,45.0],[0.0,48.6],[26.0,48.6],[26.0,45.0]],"h":[]},{"o":[[0.0,100.0],[26.0,100.0],[26.0,74.0],[43.6,74.0],[43.6,51.4],[0.0,51.4]],"h":[]},{"o":[[89.9,42.06],[89.62,39.13],[89.14,36.22],[88.47,33.35],[87.61,30.54],[86.57,27.78],[85.36,25.1],[83.97,22.5],[82.42,20.0],[80.7,17.61],[78.83,15.33],[76.82,13.18],[74.67,11.17],[72.39,9.3],[70.0,7.58],[67.5,6.03],[64.9,4.64],[62.22,3.43],[59.46,2.39],[56.65,1.53],[53.78,0.86],[50.87,0.38],[47.94,0.1],[46.4,0.05],[46.4,26.06],[47.48,26.16],[48.71,26.37],[49.92,26.65],[51.11,27.01],[52.27,27.45],[53.4,27.96],[54.5,28.55],[55.56,29.2],[56.57,29.93],[57.53,30.72],[58.44,31.56],[59.28,32.47],[60.07,33.43],[60.8,34.44],[61.45,35.5],[62.04,36.6],[62.55,37.73],[62.99,38.89],[63.35,40.08],[63.63,41.29],[63.84,42.52],[63.96,43.76],[64.0,45.0],[64.0,48.6],[90.0,48.6],[90.0,45.0]],"h":[]},{"o":[[46.4,74.0],[64.0,74.0],[64.0,100.0],[90.0,100.0],[90.0,51.4],[46.4,51.4]],"h":[]},{"o":[[352.39,69.46],[353.43,72.22],[354.64,74.9],[356.03,77.5],[357.58,80.0],[359.3,82.39],[361.17,84.67],[363.18,86.82],[365.33,88.83],[367.61,90.7],[370.0,92.42],[372.5,93.97],[375.1,95.36],[377.78,96.57],[380.54,97.61],[383.35,98.47],[386.22,99.14],[389.13,99.62],[392.06,99.9],[393.6,99.95],[393.6,73.94],[392.52,73.84],[391.29,73.63],[390.08,73.35],[388.89,72.99],[387.73,72.55],[386.6,72.04],[385.5,71.45],[384.44,70.8],[383.43,70.07],[382.47,69.28],[381.56,68.44],[380.72,67.53],[379.93,66.57],[379.2,65.56],[378.55,64.5],[377.96,63.4],[377.45,62.27],[377.01,61.11],[376.65,59.92],[376.37,58.71],[376.16,57.48],[376.04,56.24],[376.0,55.0],[376.0,51.4],[350.0,51.4],[350.0,55.0],[350.1,57.94],[350.38,60.87],[350.86,63.78],[351.53,66.65]],"h":[]},{"o":[[376.0,0.0],[350.0,0.0],[350.0,48.6],[376.0,48.6]],"h":[]},{"o":[[412.22,96.57],[414.9,95.36],[417.5,93.97],[420.0,92.42],[422.39,90.7],[424.67,88.83],[426.82,86.82],[428.83,84.67],[430.7,82.39],[432.42,80.0],[433.97,77.5],[435.36,74.9],[436.57,72.22],[437.61,69.46],[438.47,66.65],[439.14,63.78],[439.62,60.87],[439.9,57.94],[440.0,55.0],[440.0,51.4],[414.0,51.4],[414.0,55.0],[413.96,56.24],[413.84,57.48],[413.63,58.71],[413.35,59.92],[412.99,61.11],[412.55,62.27],[412.04,63.4],[411.45,64.5],[410.8,65.56],[410.07,66.57],[409.28,67.53],[408.44,68.44],[407.53,69.28],[406.57,70.07],[405.56,70.8],[404.5,71.45],[403.4,72.04],[402.27,72.55],[401.11,72.99],[399.92,73.35],[398.71,73.63],[397.48,73.84],[396.4,73.94],[396.4,99.95],[397.94,99.9],[400.87,99.62],[403.78,99.14],[406.65,98.47],[409.46,97.61]],"h":[]},{"o":[[440.0,0.0],[414.0,0.0],[414.0,48.6],[440.0,48.6]],"h":[]},{"o":[[493.6,51.4],[482.0,51.4],[482.0,100.0],[493.6,100.0]],"h":[]},{"o":[[493.6,0.0],[452.0,0.0],[452.0,24.0],[482.0,24.0],[482.0,48.6],[493.6,48.6]],"h":[]},{"o":[[496.4,48.6],[508.0,48.6],[508.0,24.0],[538.0,24.0],[538.0,0.0],[496.4,0.0]],"h":[]},{"o":[[496.4,100.0],[508.0,100.0],[508.0,51.4],[496.4,51.4]],"h":[]},{"o":[[610.0,100.0],[636.0,100.0],[636.0,51.4],[550.0,51.4],[550.0,100.0],[576.0,100.0],[576.0,62.0],[610.0,62.0]],"h":[]},{"o":[[636.0,0.0],[610.0,0.0],[610.0,38.0],[576.0,38.0],[576.0,0.0],[550.0,0.0],[550.0,48.6],[636.0,48.6]],"h":[]}];
+
+const goboM=new T.MeshBasicMaterial({colorWrite:false,depthWrite:false,side:T.DoubleSide}),gobo=new T.Group();
+WMS.forEach(q=>{const s=new T.Shape(q.o.map(p=>new T.Vector2(p[0],p[1])));q.h.forEach(hh=>s.holes.push(new T.Path(hh.map(p=>new T.Vector2(p[0],p[1])))));const m=new T.Mesh(new T.ShapeGeometry(s),goboM);m.castShadow=true;gobo.add(m)});
+sc.add(gobo);
+/* grain pass from the first version: four tones, stippled between them */
+const rt=new T.WebGLRenderTarget(2,2);const Cc=x=>new T.Color(x);
+const post=new T.ShaderMaterial({uniforms:{tex:{value:rt.texture},c0:{value:Cc('#2e3034')},c1:{value:Cc('#77777a')},c2:{value:Cc('#bdb8ad')},c3:{value:Cc('#f3f1ec')},px:{value:1}},vertexShader:'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}',
+fragmentShader:`uniform sampler2D tex;uniform vec3 c0,c1,c2,c3;uniform float px;varying vec2 v;float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}vec3 tone(float i){return i<.5?c0:i<1.5?c1:i<2.5?c2:c3;}
+void main(){vec3 c=texture2D(tex,v).rgb;float l=clamp(dot(c,vec3(.299,.587,.114)),0.,.999);float f=pow(l,1.15)*3.;float n=h(floor(gl_FragCoord.xy/px));float i=floor(f)+step(n,fract(f));vec3 o=tone(i);float w=clamp((c.r-c.b-.15)*4.,0.,1.);o=mix(o,vec3(.93,.72,.45)*(.8+.3*step(n,.7)),w);gl_FragColor=vec4(o,1.);}`,depthTest:false});
+const pS=new T.Scene(),pC=new T.OrthographicCamera(-1,1,1,-1,0,1);pS.add(new T.Mesh(new T.PlaneGeometry(2,2),post));
+r.setClearColor(0xFFFFFF);r.shadowMap.enabled=true;r.shadowMap.type=T.PCFSoftShadowMap;
+/* camera: elevation angle th, yaw, target, half-width */
+const V={th:Math.PI/2,yaw:0,tx:0,ty:0,tz:0,fx:10};let view='plan',mode='sheet',sel=-1;
+function place(){const {th,yaw}=V;cam.left=-V.fx;cam.right=V.fx;cam.top=V.fx*H/W;cam.bottom=-V.fx*H/W;cam.updateProjectionMatrix();
+  const dx=Math.sin(yaw)*Math.cos(th),dy=Math.sin(th),dz=Math.cos(yaw)*Math.cos(th);
+  cam.position.set(V.tx+dx*80,V.ty+dy*80,V.tz+dz*80);cam.up.set(-Math.sin(yaw)*Math.sin(th),Math.cos(th),-Math.cos(yaw)*Math.sin(th));cam.lookAt(V.tx,V.ty,V.tz)}
+function homeView(){/* where the camera rests for the sheet, given scroll on a phone */
+  if(MOB){const zc=(scrollY+H/2-y0)/k-PL/2;return {th:Math.PI/2,yaw:0,tx:0,ty:0,tz:zc,fx}}
+  if(view==='axo')return {th:.62,yaw:-.62,tx:0,ty:0,tz:0,fx:fx*.92};
+  return {th:Math.PI/2,yaw:0,tx:0,ty:0,tz:1.0,fx}}
+function layout(){W=innerWidth;H=innerHeight;MOB=W<=760;pr=Math.min(devicePixelRatio||1,2);
+  r.setPixelRatio(pr);r.setSize(W,H,false);rt.setSize(Math.floor(W*pr),Math.floor(H*pr));post.uniforms.px.value=pr;
+  GAP=MOB?2.9:1.1;C=P.map((_,i)=>MOB?[0,i*(PL+GAP)]:[(i-(N-1)/2)*(PL+GAP),0]);
+  const span=N*PL+(N-1)*GAP;
+  if(MOB){fx=PL/2+.9;k=W/(2*fx);y0=170;sheet.style.height=Math.round(y0+N*(PL+GAP)*k+250)+'px'}else{fx=Math.max(span/2+1.6,(PL/2+6.2)*W/H);sheet.style.height=''}
+  groups.forEach((o,i)=>o.g.position.set(C[i][0],0,C[i][1]));
+  const SB=MOB?(N*(PL+GAP))/2+4:span/2+4;Object.assign(sun.shadow.camera,{left:-SB,right:SB,top:SB,bottom:-SB,near:1,far:200});sun.shadow.camera.updateProjectionMatrix();
+  const ms=MOB?2048:4096;if(sun.shadow.mapSize.x!==ms){sun.shadow.mapSize.set(ms,ms);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
+  const sc2=MOB?0:.026;gobo.scale.set(sc2||1e-4,sc2||1e-4,sc2||1e-4);gobo.rotation.x=Math.PI/2;gobo.position.set(-318*.026,2.4,6.4);gobo.visible=!MOB;
+  if(mode==='sheet')Object.assign(V,homeView());
+  buildLabels();dirty=true}
+/* labels and dimension text live in the page, placed from the 3D */
+let L=[],DM=[];
+function buildLabels(){labels.innerHTML='';L=P.map((p,i)=>{const a=document.createElement('a');a.className='ld';a.href='#'+p.id;a.innerHTML=`<span class="n">${nn(i+1)}</span><b>${p.t} <i>&rarr;</i></b><span class="pl">${p.place}, ${p.year}</span>`;
+  a.addEventListener('mouseenter',()=>hover(i));a.addEventListener('mouseleave',()=>hover(-1));a.addEventListener('click',e=>{e.preventDefault();openP(i)});labels.appendChild(a);return a});
+  DM=P.map(()=>{const a=document.createElement('span'),b=document.createElement('span');a.className=b.className='dim';a.textContent=b.textContent='26.4 m';labels.append(a,b);return [a,b]})}
+const v3=new T.Vector3();
+function toScreen(x,y,z){v3.set(x,y,z).project(cam);return [(v3.x+1)/2*W,(1-v3.y)/2*H]}
+function placeLabels(){const off=MOB?0:0;L.forEach((a,i)=>{let x,y;
+  if(MOB){x=W/2;y=y0+(C[i][1]+PL)*k+14}else{[x,y]=toScreen(C[i][0],0,C[i][1]+PL/2);y+=14}
+  a.style.left=x+'px';a.style.top=y+'px';
+  const h=PL/2,[ax,ay]=toScreen(C[i][0],0,C[i][1]-h-.55),[bx,by]=toScreen(C[i][0]-h-.55,0,C[i][1]);
+  const sy=MOB?scrollY:0;DM[i][0].style.left=ax+'px';DM[i][0].style.top=(ay+sy)+'px';DM[i][1].style.left=bx+'px';DM[i][1].style.top=(by+sy)+'px'})}
+/* hover: warm the building, show its dimensions and grips */
+let hov=-1;const WARM=new T.Color(0xF3D7A6),PAPER=new T.Color(0xF8F6F1);
+function hover(i){if(mode!=='sheet'||i===hov)return;hov=i;L.forEach((a,j)=>a.classList.toggle('on',j===i));DM.forEach((d,j)=>d.forEach(e=>e.classList.toggle('on',j===i)));
+  sheet.classList.toggle('pick',i>=0);if(i>=0)cmd(`SELECT ${nn(i+1)} ${P[i].t.toUpperCase()}`);dirty=true}
+const ray=new T.Raycaster(),ndc=new T.Vector2(),ground=new T.Plane(new T.Vector3(0,1,0),0),hit=new T.Vector3();
+function pick(cx,cy){if(!MOB)cy+=scrollY;ndc.set(cx/W*2-1,-(cy/H)*2+1);ray.setFromCamera(ndc,cam);if(!ray.ray.intersectPlane(ground,hit))return -1;
+  for(let i=0;i<N;i++)if(Math.abs(hit.x-C[i][0])<PL/2&&Math.abs(hit.z-C[i][1])<PL/2)return i;return -1}
+sheet.addEventListener('pointermove',e=>{if(mode!=='sheet'||e.pointerType==='touch')return;const i=pick(e.clientX,e.clientY);if(!e.target.closest('.ld'))hover(i);
+  xh.classList.add('on');xh.querySelector('.h').style.top=e.clientY+'px';xh.querySelector('.v').style.left=e.clientX+'px';const c=xh.querySelector('.c');c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';
+  const t=xh.querySelector('.t');t.textContent=`X ${(hit.x*4).toFixed(2)}  Y ${(-hit.z*4).toFixed(2)} m`;const tw2=t.offsetWidth||130;t.style.left=(e.clientX+12+tw2>W-8?e.clientX-12-tw2:e.clientX+12)+'px';t.style.top=(e.clientY+10)+'px'});
+sheet.addEventListener('pointerleave',()=>{xh.classList.remove('on');hover(-1)});
+sheet.addEventListener('click',e=>{if(mode!=='sheet'||e.target.closest('a,button,input'))return;const i=pick(e.clientX,e.clientY);if(i>=0)openP(i)});
+document.querySelectorAll('.views button').forEach(b=>b.addEventListener('click',()=>{if(mode!=='sheet')return;view=b.dataset.v;document.querySelectorAll('.views button').forEach(x=>x.classList.toggle('on',x===b));cmd('VIEW '+view.toUpperCase());tween(homeView(),reduce?1:1100)}));
+/* tweens */
+let tw=null;const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+function tween(to,ms,step,done){const from={...V},t0=performance.now();tw=()=>{const u=Math.min(1,(performance.now()-t0)/ms),e=ease(u);for(const key in to)V[key]=from[key]+(to[key]-from[key])*e;step&&step(e);dirty=true;if(u>=1){tw=null;done&&done()}}}
+function fadeOthers(i,a){groups.forEach((o,j)=>{const op=j===i?1:a;o.op=op;const M=o.M;for(const m of Object.values(M))if(m!==M.dimL)m.opacity=op*(m===M.hatch?1:1);o.g.traverse(c=>{if(c.isMesh)c.castShadow=op>.5})})}
+/* open a project: plan tilts to elevation, then the photograph */
+window.openP=function(i,instant){if(mode!=='sheet'&&!instant)return;hover(-1);if(!MOB&&scrollY)scrollTo(0,0);sel=i;mode='opening';xh.classList.remove('on');document.body.style.overflow='hidden';
+  const p=P[i],hB=HGT[p.id];cmd(`OPEN ${nn(i+1)}  >  VIEW ELEVATION`);L.forEach(a=>a.style.opacity=0);
+  const to={th:0,yaw:0,tx:C[i][0],ty:hB*.5,tz:C[i][1],fx:MOB?3.6:4.4*Math.max(1,W/H/1.6)};
+  const go=()=>{document.getElementById('phimg').src=`img/${p.img}.jpg`;document.getElementById('photo').classList.add('on');cmd('RENDER');setTimeout(()=>{showView(i);mode='view'},reduce?0:950)};
+  if(instant||reduce){Object.assign(V,to);fadeOthers(i,0);go();return}
+  tween(to,1700,e=>fadeOthers(i,1-Math.min(1,e*2.2)),go)};
+window.closeP=function(){if(mode!=='view')return;mode='closing';hideView();const ph=document.getElementById('photo');
+  setTimeout(()=>{ph.classList.remove('on');cmd('VIEW '+(MOB?'PLAN':view.toUpperCase()));
+    tween(homeView(),reduce?1:1500,e=>fadeOthers(sel,Math.min(1,e*1.6)),()=>{mode='sheet';L.forEach(a=>a.style.opacity='');document.body.style.overflow='';fadeOthers(-1,1)})},reduce?0:350)};
+window.syncSel=function(i){sel=i;Object.assign(V,{th:0,yaw:0,tx:C[i][0],ty:HGT[P[i].id]*.5,tz:C[i][1]});fadeOthers(i,0);dirty=true};
+G={pick};
+/* sun position */
+function setSun(){const az=-Math.PI*.6+Math.PI*1.2*D,el=Math.max(.08,Math.sin(Math.PI*D)*1.05),cx=MOB?0:0,cz=MOB?V.tz:0;
+  sun.position.set(cx+Math.sin(az)*40*Math.cos(el),Math.sin(el)*40,cz-Math.cos(az)*40*Math.cos(el));sun.target.position.set(cx,0,cz);
+  gobo.visible=!MOB&&Math.abs(D-.5)<.075&&mode==='sheet'&&view==='plan'}
+addEventListener('resize',layout);layout();setSunUI();
+let last=0,lastScroll=-1;
+function frame(t){requestAnimationFrame(frame);
+  if(sunAuto&&mode==='sheet'){const sp=Math.abs(D-.5)<.08?.006:.022;D+=sunDir*sp*Math.min(.05,(t-(last||t))/1000);if(D>.86){D=.86;sunDir=-1}if(D<.14){D=.14;sunDir=1}if(t-(frame.u||0)>200){setSunUI();frame.u=t}dirty=true}
+  last=t;
+  if(tw)tw();
+  if(MOB&&mode==='sheet'&&scrollY!==lastScroll){lastScroll=scrollY;Object.assign(V,homeView());dirty=true}
+  const vis=mode!=='sheet'||sheet.getBoundingClientRect().bottom>0;
+  if(!dirty||!vis)return;if(!tw&&t-(frame.r||0)<33)return;frame.r=t;dirty=false;
+  groups.forEach((o,i)=>{o.M.warm.color.copy(PAPER).lerp(WARM,(i===hov||(i===sel&&mode!=='sheet'))?1:0);o.M.dimL.opacity=i===hov?1:0});
+  grid.material.opacity=Math.min(1,Math.max(0,(Math.sin(V.th)-.25)*2));place();setSun();
+  r.setRenderTarget(rt);r.render(sc,cam);r.setRenderTarget(null);r.render(pS,pC);
+  if(mode==='sheet')placeLabels()}
+requestAnimationFrame(frame);
+})();
+/* project view: the photograph first, then the words, then more photographs, one at a time */
+const view=document.getElementById('view'),vbody=document.getElementById('vbody');
+function fb(src,alt,cap,id){return `<figure class="fb" style="margin:0">${id?`<div class="plate" data-id="${id}"${/night/.test(src)?' data-glow="1"':''}><img class="ph" data-src="img/${src}.jpg" alt="${alt}"></div>`:`<img src="img/${src}.jpg" alt="${alt}" loading="lazy">`}${cap?`<div class="cap">${cap}</div>`:''}</figure>`}
+function showView(i){const p=P[i],n=P[(i+1)%P.length];
+  document.getElementById('vcount').textContent=`${nn(i+1)} / ${nn(P.length)}  ${p.t}`;
+  const extra=(LIGHT[p.id]||[]).map((l,j)=>fb(l[0],`${p.t}, ${l[1]}`,`<span class="m">${l[1]}. Concept render</span>`,`01.${nn(i+1)}.${j+3}`)).join('');
+  vbody.innerHTML=fb(p.img,p.t,`<div><p class="big">${p.t}</p><span class="m">${p.place}, ${p.year}. ${p.use}</span></div><span class="m">Concept render</span>`)+
+   `<div class="info"><div class="lead"><span class="k">${nn(i+1)} ${p.use}</span><p class="big">${p.text[0]}</p></div><div class="body"><p>${p.text[1]}</p></div><dl><dt>Area</dt><dd>${p.area}</dd><dt>Faces</dt><dd>${p.faces}</dd><dt>Light</dt><dd>${p.sun}</dd></dl></div>`+
+   fb(p.img+'-d',`${p.t}, material detail`,`<span class="m">Detail. Concept render</span>`,`01.${nn(i+1)}.2`)+extra+
+   `<figure class="studyb" style="margin:0"><span class="k">Sun study</span><div class="sv">${study(p)}</div><figcaption>${p.study}</figcaption></figure>`+
+   `<a class="nextp" href="#${n.id}" id="nextp"><span class="k" style="margin:0">Next project</span><b>${n.t} &rarr;</b></a>`;
+  document.getElementById('nextp').onclick=e=>{e.preventDefault();const j=(i+1)%P.length;view.scrollTo({top:0});window.syncSel&&syncSel(j);showView(j)};
+  for(let k=plates.length-1;k>=0;k--)if(!plates[k].el.isConnected)plates.splice(k,1);initPlates(vbody);dirtyS=true;view.scrollTop=0;view.classList.add('on');view.classList.remove('paper');view.setAttribute('aria-hidden','false');history.replaceState(null,'','#'+p.id)}
+function hideView(){view.classList.remove('on');view.setAttribute('aria-hidden','true');history.replaceState(null,'',' ')}
+view.addEventListener('scroll',()=>view.classList.toggle('paper',![...vbody.querySelectorAll('.fb')].some(f=>{const r=f.getBoundingClientRect();return r.top<=34&&r.bottom>=34})),{passive:true});
+document.getElementById('close').onclick=()=>window.closeP&&closeP();
+addEventListener('keydown',e=>{if(e.key==='Escape'&&window.closeP)closeP()});
+/* nav glides */
+document.querySelectorAll('nav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));scrollTo({top:t.getBoundingClientRect().top+scrollY,behavior:reduce?'auto':'smooth'})}));
+/* ---------- the drawing set below the sheet ---------- */
+const cl=x=>x<0?0:x>1?1:x;
+/* the same four-tone stipple as the sheet's shader, done once per image on a 2D canvas */
+const TONES=[[46,48,52],[119,119,122],[189,184,173],[243,241,236]];
+function stip(img,w,h,o={}){const lift=o.lift||[.9,.2];
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});
+  const s=Math.max(w/img.naturalWidth,h/img.naturalHeight),dw=img.naturalWidth*s,dh=img.naturalHeight*s;x.drawImage(img,(w-dw)/2,(h-dh)/2,dw,dh);
+  const d=x.getImageData(0,0,w,h),a=d.data;let wc=null,wd=null,wa=null;
+  if(o.glow){wc=document.createElement('canvas');wc.width=w;wc.height=h;wc.className='w';wd=wc.getContext('2d').createImageData(w,h);wa=wd.data}
+  for(let i=0;i<a.length;i+=4){const r=a[i],g=a[i+1],b=a[i+2];let l=(.299*r+.587*g+.114*b)/255*lift[0]+lift[1];if(l>.999)l=.999;
+    const f=Math.pow(l,1.15)*3,n=Math.random();let t=Math.floor(f)+(n<f%1?1:0);if(t>3)t=3;const T=TONES[t];a[i]=T[0];a[i+1]=T[1];a[i+2]=T[2];
+    if(wa){let m=((r-b)/255-.22)*4;if(m>0){if(m>1)m=1;const k=n<.7?1.08:.82;wa[i]=Math.min(255,237*k);wa[i+1]=184*k;wa[i+2]=115*k;wa[i+3]=255*m}}}
+  x.putImageData(d,0,0);if(wc)wc.getContext('2d').putImageData(wd,0,0);return {c,wc}}
+/* plates: plotted as a drawing when they arrive, developed into the photograph as you scroll */
+const plates=[];let dirtyS=true;
+function initPlates(root){root.querySelectorAll('.plate:not([data-ok])').forEach(el=>{el.dataset.ok=1;const img=el.querySelector('.ph');
+  if(!el.closest('.fb')&&!el.closest('.contact'))el.insertAdjacentHTML('beforeend','<i class="gp"></i><i class="gp"></i><i class="gp"></i><i class="gp"></i>'+(el.dataset.dim?`<div class="pd"><span>${el.dataset.dim}</span></div>`:''));
+  el.insertAdjacentHTML('beforeend','<div class="pl"><b></b></div>');
+  const q={el,img,pl:el.querySelector('.pl'),lab:el.querySelector('.pl b'),p:-1,keep:!!el.dataset.keep,glow:!!el.dataset.glow,ready:false,w:0,h:0};
+  q.build=()=>{const r=el.getBoundingClientRect(),w=Math.max(2,Math.round(r.width)),h=Math.max(2,Math.round(r.height));if(Math.abs(w-q.w)<40&&Math.abs(h-q.h)<40&&q.ready)return;
+    const sc=Math.min(1,1600/w),o=stip(img,Math.round(w*sc),Math.round(h*sc),{glow:q.glow,lift:q.keep?[1.05,.2]:[.9,.2]});
+    el.querySelectorAll('canvas').forEach(c=>c.remove());el.insertBefore(o.c,img);if(o.wc){el.insertBefore(o.wc,img);q.wc=o.wc}q.w=w;q.h=h;q.ready=true;q.p=-1;dirtyS=true};
+  img.addEventListener('load',q.build);if(img.complete&&img.naturalWidth)q.build();else if(img.dataset.src)plateIO.observe(el);
+  plates.push(q)})}
+const plateIO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const im=e.target.querySelector('.ph');if(im.dataset.src){im.src=im.dataset.src;im.removeAttribute('data-src')}plateIO.unobserve(e.target)}}),{rootMargin:'1200px 0px'});
+/* command line and title block that follow you down */
+const cmd2El=document.getElementById('cmd2'),cSh=document.getElementById('c_sh'),cSc=document.getElementById('c_sc'),cSun=document.getElementById('c_sun');
+let cmd2T=0;function cmd2(s){clearInterval(cmd2T);let i=0;const full='> '+s;cmd2El.textContent='';cmd2T=setInterval(()=>{cmd2El.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(cmd2T)},16)}
+function setCmd2(s){clearInterval(cmd2T);cmd2El.textContent='> '+s}
+const secs=[...document.querySelectorAll('.after [data-sheet]')],prog=document.getElementById('prog');
+prog.innerHTML=`<a href="#sheet" title="01 Selected work"></a>`+secs.map(s=>`<a href="#${s.id}" title="${s.dataset.sheet} ${s.dataset.name}"></a>`).join('');
+prog.querySelectorAll('a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(a.getAttribute('href'));scrollTo({top:t===sheet?0:t.getBoundingClientRect().top+scrollY,behavior:reduce?'auto':'smooth'})}));
+let curSec=null,curSun='';
+function setSun2(t){if(t&&t!==curSun){curSun=t;cSun.textContent=t}}
+/* 02: sun path over Copenhagen, drawn as you scroll, the sun walks it */
+const rose=document.getElementById('rose'),LAT=55.7*Math.PI/180,RC=180,RR=150;
+function sunPos(decl,hd){const d=decl*Math.PI/180,H=hd*Math.PI/180,alt=Math.asin(Math.sin(LAT)*Math.sin(d)+Math.cos(LAT)*Math.cos(d)*Math.cos(H)),az=Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(LAT)-Math.tan(d)*Math.cos(LAT))+Math.PI;return [alt,az]}
+const rxy=(alt,az)=>{const r=RR*(1-alt/(Math.PI/2));return [RC+r*Math.sin(az),RC-r*Math.cos(az)]};
+function sPath(decl){const pts=[];for(let h=-180;h<=180;h+=1){const [al,az]=sunPos(decl,h);if(al>=0)pts.push([...rxy(al,az),h,al,az])}return pts}
+const SUM=sPath(23.44),EQ=sPath(0),WIN=sPath(-23.44);
+const clock=h=>hm(((12+h/15+1.17)*60+1440)%1440);
+{let s='';[1,2/3,1/3].forEach(f=>s+=`<circle class="g" cx="${RC}" cy="${RC}" r="${RR*f}"/>`);
+ for(let a=0;a<360;a+=10){const t=a*Math.PI/180,r1=RR,r2=RR+(a%30?5:10);s+=`<line class="g" x1="${RC+r1*Math.sin(t)}" y1="${RC-r1*Math.cos(t)}" x2="${RC+r2*Math.sin(t)}" y2="${RC-r2*Math.cos(t)}"/>`;
+   if(a%90===0)s+=`<text x="${RC+(RR+22)*Math.sin(t)}" y="${RC-(RR+22)*Math.cos(t)+3}" text-anchor="middle">${'NESW'[a/90]}</text>`;else if(a%30===0)s+=`<text x="${RC+(RR+20)*Math.sin(t)}" y="${RC-(RR+20)*Math.cos(t)+3}" text-anchor="middle" style="fill:#8E8D86">${a}</text>`}
+ s+=`<line class="g" x1="${RC-RR}" y1="${RC}" x2="${RC+RR}" y2="${RC}"/><line class="g" x1="${RC}" y1="${RC-RR}" x2="${RC}" y2="${RC+RR}"/>`;
+ s+=`<text x="${RC+4}" y="${RC-RR/3*2+12}" style="fill:#8E8D86">60&deg;</text><text x="${RC+4}" y="${RC-RR/3+12}" style="fill:#8E8D86">30&deg;</text>`;
+ const d=pts=>pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('');
+ s+=`<path class="p w" pathLength="1" d="${d(WIN)}"/><path class="p e" pathLength="1" d="${d(EQ)}"/><path class="p s" pathLength="1" d="${d(SUM)}"/>`;
+ SUM.forEach(p=>{const ck=(12+p[2]/15+1.17);if(Math.abs(ck-Math.round(ck))<.034&&Math.round(ck)%3===0)s+=`<circle cx="${p[0]}" cy="${p[1]}" r="2" fill="currentColor"/><text x="${p[0]+6}" y="${p[1]-5}">${nn(Math.round(ck)%24)}</text>`});
+ s+=`<line id="rb" class="bear" x1="${RC}" y1="${RC}" x2="${RC}" y2="${RC}" stroke="currentColor" stroke-dasharray="3 3"/><g id="rs"><circle r="11" fill="none" stroke="currentColor"/><circle r="5" fill="currentColor"/></g><text id="rl" x="0" y="0" style="font-size:10px"></text>`;
+ rose.innerHTML=s}
+const rb=document.getElementById('rb'),rs=document.getElementById('rs'),rl=document.getElementById('rl'),rps=[...rose.querySelectorAll('.p')];
+function roseUpd(vh){const r=rose.getBoundingClientRect();if(r.bottom<0||r.top>vh)return;const p=reduce?1:cl((vh-r.top)/(r.height+vh*.35));
+  rps.forEach((e,i)=>e.style.strokeDashoffset=1-cl(p*2.2-i*.25));
+  const t=cl((p-.3)/.62),q=SUM[Math.round(t*(SUM.length-1))];rs.setAttribute('transform',`translate(${q[0]},${q[1]})`);rb.setAttribute('x2',q[0]);rb.setAttribute('y2',q[1]);
+  const az=Math.round(q[4]*180/Math.PI),al=Math.round(q[3]*180/Math.PI);rl.setAttribute('x',q[0]+16);rl.setAttribute('y',q[1]+4);rl.textContent=`AZ ${az}° ALT ${al}°`;
+  if(curSec&&curSec.id==='practice'){setSun2(clock(q[2]));if(p>.3&&p<.95)setCmd2(`AZIMUTH ${nn(az)}° · ALTITUDE ${al}° · ${clock(q[2])}`)}}
+/* 04: drawing register */
+const regb=document.getElementById('regb'),thumb=document.getElementById('thumb'),TH={};
+regb.innerHTML=P.map((p,i)=>`<tr class="r" data-i="${i}" tabindex="0"><td>A-${nn(i+1)}0</td><td class="t">${p.t}</td><td class="hm m">${p.place}</td><td class="hm">${p.use}</td><td class="hm m">${p.faces}</td><td class="m">${p.year}</td><td class="hm"><span class="st m">${+p.year<=2025?'Built':'On site'}</span></td></tr>`).join('');
+function thumbFor(i){if(TH[i])return TH[i];const im=new Image();TH[i]=document.createElement('div');im.onload=()=>{const o=stip(im,260,173,{glow:false});TH[i].appendChild(o.c);if(o.wc){o.wc.style.cssText='position:absolute;inset:0;width:100%;height:100%';TH[i].appendChild(o.wc)}};im.src=`img/${P[i].img}-s.jpg`;return TH[i]}
+regb.querySelectorAll('tr').forEach(tr=>{const i=+tr.dataset.i;
+  tr.addEventListener('mouseenter',e=>{if(matchMedia('(hover:none)').matches)return;thumb.innerHTML='';thumb.appendChild(thumbFor(i));thumb.classList.add('on');setCmd2(`SELECT ${tr.cells[0].textContent} ${P[i].t.toUpperCase()}`)});
+  tr.addEventListener('mouseleave',()=>thumb.classList.remove('on'));
+  tr.addEventListener('mousemove',e=>{const x=Math.min(e.clientX+28,innerWidth-276),y=Math.max(8,Math.min(e.clientY-86,innerHeight-190));thumb.style.transform=`translate(${x}px,${y}px)`});
+  const go=()=>{thumb.classList.remove('on');cmd2(`OPEN ${tr.cells[0].textContent}  >  SHEET 01`);if(!scrollY){openP(i);return}scrollTo({top:0,behavior:reduce?'auto':'smooth'});const t0=performance.now();(function w(){if(scrollY<2||performance.now()-t0>1600){scrollTo(0,0);setTimeout(()=>openP(i),120)}else requestAnimationFrame(w)})()};
+  tr.addEventListener('click',go);tr.addEventListener('keydown',e=>{if(e.key==='Enter')go()})});
+/* 05: the dimension line */
+const dl=document.getElementById('dl'),dline=dl.querySelector('.dline line'),lis=[...dl.querySelectorAll('li')];
+function procUpd(vh){const r=dl.getBoundingClientRect();if(r.bottom<-100||r.top>vh)return;
+  if(innerWidth<=760){lis.forEach(li=>{if(li.getBoundingClientRect().top<vh*.82)li.classList.add('on')});return}
+  const p=reduce?1:(r.top<vh*.8?1:0);if(p)lis.forEach(li=>li.classList.add('on'));
+  if(curSec&&curSec.id==='process'&&p>0&&p<1)setCmd2(`DIM ${['DAY 1','WEEK 3','MONTH 4','MONTH 18'][Math.min(3,Math.floor(p*4))]} · ${Math.round(p*100)}%`)}
+/* one loop for everything that follows scroll */
+addEventListener('scroll',()=>dirtyS=true,{passive:true});view.addEventListener('scroll',()=>dirtyS=true,{passive:true});
+let rzT=0;addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>{plates.forEach(q=>q.ready&&q.el.isConnected&&q.build());dirtyS=true},250)});
+function upd(){requestAnimationFrame(upd);if(!dirtyS)return;dirtyS=false;const vh=innerHeight,inView=view.classList.contains('on');
+  for(const q of plates){if(!q.el.isConnected||!q.ready)continue;const r=q.el.getBoundingClientRect();if(r.bottom<-60||r.top>vh+60)continue;
+    if(!q.el.classList.contains('plotted')&&r.top<vh*.94){q.el.classList.add('plotted');if(!inView&&!q.keep)cmd2(`PLOT ${q.el.dataset.id||''}`)}
+    if(q.keep){if(q.wc){const p=reduce?1:cl((vh*.75-r.top)/(vh*.6));q.wc.style.opacity=p;if(p>0&&p<1&&curSec&&curSec.id==='contact')setCmd2(`SUN 22:30 · LIGHTS ON ${Math.round(p*5)}/5`)}continue}
+    let p=reduce?1:cl((vh*.56-r.top)/Math.max(Math.min(r.height,vh),vh*.45));if(!q.el.classList.contains('plotted'))p=0;p=Math.round(p*200)/200;
+    if(p!==q.p){q.p=p;q.img.style.clipPath=`inset(${((1-p)*100).toFixed(2)}% 0 0 0)`;q.pl.style.top=((1-p)*100).toFixed(2)+'%';q.el.classList.toggle('dev',p>0&&p<1);q.el.classList.toggle('done',p>=1);
+      if(p>0&&p<1){const s=`DEVELOP ${q.el.dataset.id||''} · ${Math.round(p*100)}%`;q.lab.textContent=s;if(!inView)setCmd2(s)}}}
+  roseUpd(vh);procUpd(vh);
+  const on=!inView&&sheet.getBoundingClientRect().bottom<vh*.35;document.body.classList.toggle('set',on);
+  let cur=null;for(const s of secs)if(s.getBoundingClientRect().top<vh*.5)cur=s;
+  if(cur!==curSec){curSec=cur;if(cur){cSh.textContent=`${cur.dataset.sheet} ${cur.dataset.name}`;cSc.textContent=cur.dataset.scale||'';cmd2(`SHEET ${cur.dataset.sheet} · ${cur.dataset.name.toUpperCase()}`);if(cur.dataset.sun)setSun2(cur.dataset.sun)}
+    prog.querySelectorAll('a').forEach((a,i)=>a.classList.toggle('on',cur?i<=secs.indexOf(cur)+1:i===0))}
+  if(cur&&cur.id==='light'){let t='';cur.querySelectorAll('.hw').forEach(a=>{if(a.getBoundingClientRect().top<vh*.6)t=a.dataset.sun});setSun2(t||'06:04')}}
+initPlates(document);requestAnimationFrame(upd);
+/* reveal: cut in, never fade; numbers type themselves */
+function typeIn(el){const full=el.textContent;el.textContent='';let i=0;const t=setInterval(()=>{el.textContent=full.slice(0,++i);if(i>=full.length)clearInterval(t)},70)}
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');e.target.querySelectorAll('[data-type]').forEach(typeIn);io.unobserve(e.target)}}),{rootMargin:'0px 0px -10% 0px'});
+document.querySelectorAll('.fade').forEach(el=>{if(reduce)el.classList.add('in');else io.observe(el)});
+
+setTimeout(()=>cmd('SUN '+document.getElementById('sunt').textContent+'  ·  SELECT A PLOT'),600);
+{const id=location.hash.slice(1),i=P.findIndex(p=>p.id===id);if(i>=0&&window.openP)setTimeout(()=>openP(i,true),300)}
+</script>
+</body>
+</html>

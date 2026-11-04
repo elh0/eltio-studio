@@ -136,8 +136,10 @@ a:hover { opacity: .5; }
   <a href="#" class="nm" id="home">Helical Sound</a>
   <button type="button" class="infob" id="infob">Info</button>
   <p class="bio">A London-based music and sound studio creating bespoke music and sound design for fashion and advertising.</p>
-  <div class="ct"><span class="q2">Contact</span><span>Leo Marcus</span><a class="em" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a></div>
-  <div class="ig"><a href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a><a class="cred" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+  <div class="seg" id="seg">
+    <div class="sg-a"><button type="button" class="lk" id="ctb" aria-expanded="false">Contact</button><a class="lk" href="https://instagram.com/helicalsound" target="_blank" rel="noopener">Instagram</a></div>
+    <div class="sg-b" aria-hidden="true"><button type="button" class="sx" id="ctx" aria-label="Close contact"><svg width="11" height="11" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="2" fill="none"/></svg></button><span>Leo Marcus</span><a class="lk" href="mailto:hello@helical-sound.com">hello@helical-sound.com</a><a class="lk" href="https://eltio.studio" target="_blank" rel="noopener">Site by Eltio Studio</a></div>
+  </div>
 </header>
 
 <div class="scroll" id="scroll">
@@ -184,7 +186,7 @@ function creds(x) {
 }
 function panel() {
   if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
-  return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' + (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
+  return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' + ('<button type="button" data-k="close" class="x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>') + '</div>' +
     '<div class="pm">' + w.p + '</div>' +
     '<div class="film"><img alt="" src="' + still(w) + '"></div><div class="bar"><i></i></div>' +
     '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
@@ -216,7 +218,7 @@ function ctl(e) {
   if (!k) { if (e.target.closest('.film')) setPlay(!playing); return; }
   var a = k.getAttribute('data-k');
   if (a === 'play') setPlay(!playing); if (a === 'next') step(1); if (a === 'prev') step(-1);
-  if (a === 'close') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+  if (a === 'close') closeFilm();
 }
 document.getElementById('pane').addEventListener('click', ctl);
 document.getElementById('sheetIn').addEventListener('click', ctl);
@@ -225,7 +227,17 @@ document.getElementById('tg').addEventListener('click', function (e) { var b = e
 document.getElementById('home').onclick = function (e) { e.preventDefault(); document.getElementById('sheet').classList.remove('open'); document.getElementById('scroll').scrollTo({ top: 0, behavior: 'smooth' }); };
 function fit() { var h = document.getElementById('bar2').offsetHeight + 'px'; document.documentElement.style.setProperty('--bot', h); }
 addEventListener('resize', fit); document.fonts && document.fonts.ready.then(fit);
-build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById('pane').innerHTML = panel();
+/* 4 Nov, Leo: nothing plays until a name is clicked, so the first play is a real click (with
+   sound) and the list has the full width; the X closes the player back to the list */
+function closeFilm() {
+  setPlay(false); w = null; pos = 0;
+  document.getElementById('sheet').classList.remove('open');
+  document.getElementById('pane').innerHTML = panel(); document.getElementById('sheetIn').innerHTML = panel();
+  document.documentElement.classList.add('closed');
+  build();
+}
+document.documentElement.classList.add('closed');
+build(); fit(); document.getElementById('pane').innerHTML = panel();
 </script>
 <script>
 /* detail pass (30 Oct): tab title follows the film, progress under the playing name,
@@ -243,12 +255,12 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); step(1); }
     else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     else if (e.key === ' ' && w) { e.preventDefault(); setPlay(!playing); }
-    else if (e.key === 'Escape') { setPlay(false); document.getElementById('sheet').classList.remove('open'); }
+    else if (e.key === 'Escape' && w) closeFilm();
   });
   var sh = document.getElementById('sheet'), y0 = null;
   sh.addEventListener('touchstart', function (e) { y0 = e.touches[0].clientY; }, { passive: true });
   sh.addEventListener('touchend', function (e) {
-    if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) { setPlay(false); sh.classList.remove('open'); }
+    if (y0 !== null && e.changedTouches[0].clientY - y0 > 70) closeFilm();
     y0 = null;
   });
 })();
@@ -375,7 +387,7 @@ build(); fit(); if (!phone()) load(WORK[0], false); else document.getElementById
     if (!w) return '<p class="empty" style="margin:0">Choose a client to play the film.</p>';
     var i = list.indexOf(w), n = i < 0 ? '' : n2(i + 1);
     return '<div class="ttl"><span><b style="font-weight:500">' + w.c + '</b></span>' +
-      (phone() ? '<button type="button" data-k="close" class="x" aria-label="Close"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>' : '') + '</div>' +
+      ('<button type="button" data-k="close" class="x" aria-label="Close"><svg width="16" height="16" viewBox="0 0 22 22" aria-hidden="true"><path d="M3 3l16 16M19 3L3 19" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>') + '</div>' +
       '<div class="pm">' + w.p + '</div>' +
       '<div class="fw"><div class="film"><img alt="" src="' + still(w) + '"></div></div><div class="bar"><i></i></div>' +
       '<div class="ctl"><button type="button" data-k="prev">Prev</button><button type="button" data-k="play">Play</button><span class="tm">00:00 / ' + w.d + '</span><button type="button" data-k="next">Next</button></div>' +
@@ -492,6 +504,78 @@ function fitCap(film) {
   function show(on) { info.classList.toggle('open', on); info.setAttribute('aria-hidden', !on); }
   document.getElementById('infob').onclick = function () { show(true); };
   document.getElementById('infox').onclick = function () { show(false); };
+})();
+</script>
+<style>
+/* 4 Nov call with Leo. The footer is three columns: name, bio, and a quiet Contact / Instagram
+   cell that goes full red on hover; Contact swaps that cell in place for Leo's details, with a
+   small x back. The bio cell runs to the player's right edge so the rules still line up. */
+.bar2 .seg { display: none; }
+@media (min-width: 900px) {
+  :root { --c4: clamp(210px, 16vw, 260px); }
+  .bar2 .bio { grid-column: 2 / 4; }
+  .bar2 .seg { display: block; grid-column: 4; position: relative; }
+}
+.seg .lk { display: block; opacity: .45; transition: opacity .25s var(--ease); text-align: left; padding: 0; font: inherit; color: inherit; }
+.seg .lk:hover, .seg .lk:focus-visible { opacity: 1; }
+.seg .lk + .lk, .seg .sg-b > * + * { margin-top: 2px; }
+.seg .sg-b > span { display: block; }
+.seg .sg-a, .seg .sg-b { transition: opacity .2s linear; }
+.seg .sg-b { position: absolute; inset: 18px 22px auto; opacity: 0; visibility: hidden; }
+.seg.on .sg-a { opacity: 0; visibility: hidden; }
+.seg.on .sg-b { opacity: 1; visibility: visible; }
+.seg .sx { position: absolute; top: 2px; right: 0; width: 22px; height: 22px; margin: -6px -6px 0 0; display: grid; place-items: center; opacity: .45; transition: opacity .25s var(--ease); }
+.seg .sx:hover { opacity: 1; }
+/* no film open: the list takes the whole width, no player column */
+@media (min-width: 900px) {
+  html.closed .grid > div:first-child { grid-column: 1 / -1; padding-right: 0; }
+  html.closed .pane { display: none; }
+  .in .ttl { width: var(--fw, 100%); max-width: 100%; }
+  .ttl .x { opacity: .6; transition: opacity .25s var(--ease); }
+  .ttl .x:hover { opacity: 1; }
+}
+.names .c { overflow-wrap: break-word; }
+</style>
+<script>
+(function () {
+  /* the footer's Contact swap */
+  var seg = document.getElementById('seg'), ctb = document.getElementById('ctb');
+  function ct(on) { seg.classList.toggle('on', on); ctb.setAttribute('aria-expanded', on); seg.querySelector('.sg-b').setAttribute('aria-hidden', !on); }
+  ctb.onclick = function () { ct(true); };
+  document.getElementById('ctx').onclick = function () { ct(false); };
+
+  /* a link per film (#emporio-armani-ss26-campaign) so one film can be sent on Slack or WhatsApp */
+  function slug(x) { return (x.c + ' ' + x.p).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/&/g, ' ').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function setHash(x) { try { history.replaceState(null, '', location.pathname + location.search + (x ? '#' + slug(x) : '')); } catch (e) {} }
+  var base = document.title, _load = load, _close = closeFilm;
+  load = function (x, a) {
+    var was = document.documentElement.classList.contains('closed');
+    document.documentElement.classList.remove('closed');
+    _load(x, a); setHash(x);
+    if (!a && window.vmFit) requestAnimationFrame(function () { vmFit(root().querySelector('.film')); });
+  };
+  closeFilm = function () { _close(); setHash(null); document.title = base; };
+  function fromHash() {
+    var h = decodeURIComponent(location.hash.slice(1)); if (!h) return;
+    var x = WORK.filter(function (y) { return slug(y) === h; })[0];
+    if (x && x !== w) load(x, false);
+  }
+  addEventListener('hashchange', fromHash);
+  fromHash();
+
+  /* going from phone width back to desktop (or the other way): redraw the player for the side
+     that is showing, so it takes that side's width, and carry on playing if it was */
+  var wasPhone = phone();
+  addEventListener('resize', function () {
+    var now = phone(); if (now === wasPhone) return; wasPhone = now;
+    document.getElementById('sheet').classList.toggle('open', now && !!w);
+    if (!w) return;
+    var p = playing, at = pos;
+    ['pane', 'sheetIn'].forEach(function (id) { var r = document.getElementById(id); r.innerHTML = panel(); var im = r.querySelector('.film img'); if (im) im.classList.add('ok'); });
+    pos = at; setPlay(p);
+    if (!p && window.vmFit) requestAnimationFrame(function () { vmFit(root().querySelector('.film')); });
+    var b = root().querySelector('.bar i'); if (b) b.style.width = Math.min(100, at / secs(w.d) * 100) + '%';
+  });
 })();
 </script>
 </body>

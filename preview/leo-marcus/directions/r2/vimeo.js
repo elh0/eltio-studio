@@ -186,6 +186,8 @@
   document.addEventListener('touchend', unmute, true);
   document.addEventListener('click', unmute, true);
   addEventListener('resize', function () { document.querySelectorAll('.film').forEach(function (f) { var r = players.get(f); if (r) { f.style.height = ''; fit(f, r.ifr, item() && item().vr || 16 / 9, item()); } }); });
+  /* 4 Nov: a page can size a film box to its film without playing it */
+  window.vmFit = function (film) { var x = item(); if (film && x && film.isConnected && film.offsetParent) fit(film, (players.get(film) || {}).ifr, x.vr || 16 / 9, x); };
   var st = document.createElement('style');
   st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .4s ease}.vmhost iframe.vm.on{opacity:1}'
     + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'

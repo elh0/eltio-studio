@@ -497,7 +497,9 @@ function onFit(film, ww, W) {
 addEventListener('resize', function () { if (AL === 'f' && innerWidth < 900) document.getElementById('bar2').style.gridTemplateColumns = ''; });
 function fitCap(film) {
   var inn = film.closest('.pane .in'); if (!inn || innerWidth < 900) return 0;
-  return Math.max(220, inn.clientHeight - (inn.scrollHeight - film.offsetHeight));
+  /* the room the column can grow to, not the height it has now, so a bigger window gives a bigger film */
+  var mh = parseFloat(getComputedStyle(inn).maxHeight) || inn.clientHeight;
+  return Math.max(220, mh - (inn.scrollHeight - film.offsetHeight));
 }
 (function () {
   var info = document.getElementById('info');

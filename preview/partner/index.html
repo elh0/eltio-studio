@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partner builds</title><meta name="description" content="Eltio Studio builds for design agencies, under the agency's name.">
+<link rel="icon" href="../site/eye.svg">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0B0B0A;--paper:#F3F3F0;--grey:#8A8A83;--line:#2E2E2B;--ease:cubic-bezier(.2,.7,.1,1)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--ink);color:var(--paper);font:400 15px/1.45 "Geist Mono",ui-monospace,Menlo,monospace;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--paper);text-decoration:underline;text-decoration-color:var(--grey);text-underline-offset:.2em;transition:text-decoration-color .2s}
+a:hover{text-decoration-color:var(--paper)}
+:focus-visible{outline:1px solid var(--paper);outline-offset:3px}
+p,h1,h2,ul,ol{margin:0;font:inherit}
+ul,ol{list-style:none;padding:0}
+.g{color:var(--grey)}.c{text-transform:uppercase}
+.page{max-width:1180px;margin:0 auto;padding:20px clamp(16px,4vw,40px) 40px}
+.top{display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.top img{width:22px;height:auto;filter:invert(1)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:0 clamp(16px,3vw,40px)}
+.row{padding:22px 0;border-bottom:1px solid var(--line)}
+.lead p{font-size:15px}
+.lead .say{max-width:52ch}
+/* diagram */
+.dia{padding:28px 0;border-bottom:1px solid var(--line)}
+.dia svg{width:100%;height:auto;display:block;overflow:visible}
+.dia text{font:400 13px "Geist Mono",monospace;fill:var(--paper);text-transform:uppercase}
+.dia text.g{fill:var(--grey);text-transform:none}
+.dia .box{fill:none;stroke:var(--paper);stroke-width:1}
+.dia .box.us{fill:var(--paper)}
+.dia text.inv{fill:var(--ink)}
+.dia .ln{stroke:var(--paper);stroke-width:1;fill:none;stroke-dasharray:420;stroke-dashoffset:420;transition:stroke-dashoffset 1.2s var(--ease)}
+.dia .no{stroke:var(--grey);stroke-width:1;fill:none;stroke-dasharray:4 6;opacity:0;transition:opacity .6s .9s}
+.dia .x{stroke:var(--paper);stroke-width:1.5;opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(.2);transition:opacity .3s 1.5s,transform .4s var(--ease) 1.5s}
+.dia.in .ln{stroke-dashoffset:0}.dia.in .ln.d2{transition-delay:.5s}
+.dia.in .no{opacity:1;animation:march 1.4s linear infinite 1.6s}.dia.in .x{opacity:1;transform:scale(1)}
+@keyframes march{to{stroke-dashoffset:-20}}
+.dia .mob{display:none}
+.list li{display:grid;grid-template-columns:3em minmax(0,1fr);padding:8px 0}
+.list li+li{border-top:1px solid var(--line)}
+.rules li{padding:8px 0}.rules li+li{border-top:1px solid var(--line)}
+.rules li::before{content:"\2192  ";color:var(--grey)}
+.proof{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.proof a{display:block;text-decoration:none;border:1px solid var(--line);padding:12px;min-height:96px;transition:border-color .2s,transform .2s var(--ease)}
+.proof a:hover{border-color:var(--paper);transform:translateY(-2px)}
+.proof a span{display:block;color:var(--grey);margin-top:6px}
+.cta{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.btn{display:inline-block;background:var(--paper);color:var(--ink);text-decoration:none;padding:12px 18px;text-transform:uppercase;transition:transform .2s var(--ease),opacity .2s}
+.btn:hover{transform:translateY(-2px);opacity:.9}.btn:active{transform:none}
+.foot{display:flex;justify-content:space-between;padding-top:14px;color:var(--grey)}
+.rv{opacity:0;translate:0 18px;transition:opacity .7s var(--ease),translate .7s var(--ease)}.rv.in{opacity:1;translate:0 0}
+@media (max-width:760px){
+ .grid{grid-template-columns:minmax(0,1fr)}.grid>:first-child{margin-bottom:10px}
+ .proof{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .dia .desk{display:none}.dia .mob{display:block}
+}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;translate:none;transition:none}.dia .ln{stroke-dashoffset:0;transition:none}.dia .no,.dia .x{opacity:1;transform:none;transition:none;animation:none}}
+@media print{.rv{opacity:1;translate:none}.dia .ln{stroke-dashoffset:0}.dia .no,.dia .x{opacity:1;transform:none}}
+</style></head><body><div class="page">
+
+<header class="top"><span class="c">Eltio Studio &mdash; partner builds</span><img src="../site/eye.svg" alt="Eltio Studio"></header>
+
+<section class="grid row lead rv"><p class="c">Your design.<br>Our build.<br>Your name on it.</p>
+<p class="say">We build, animate and ship the work your studio designs. Websites, iPhone apps and motion, delivered under your name. Your client never hears from us.</p></section>
+
+<section class="dia rv" aria-label="Diagram: your studio designs and owns the client; Eltio builds and hands back to you; Eltio never contacts your client">
+<svg class="desk" viewBox="0 0 1100 220" role="img" aria-hidden="true">
+ <rect class="box" x="1" y="40" width="250" height="80"/><text x="20" y="74">Your studio</text><text class="g" x="20" y="98">designs, owns the client</text>
+ <rect class="box us" x="425" y="40" width="250" height="80"/><text class="inv" x="444" y="74">Eltio</text><text class="inv" x="444" y="98" style="text-transform:none">builds, animates, ships</text>
+ <rect class="box" x="849" y="40" width="250" height="80"/><text x="868" y="74">Your client</text><text class="g" x="868" y="98">sees your name only</text>
+ <path class="ln" d="M251 64 H425"/><text class="g" x="268" y="56">designs + brief</text>
+ <path class="ln d2" d="M425 100 H251"/><text class="g" x="268" y="118">build, back to you</text>
+ <path class="ln d2" d="M138 120 V180 H974 V120"/><text class="g" x="440" y="200">you deliver it, under your name</text>
+ <path class="no" d="M675 80 H849"/><g class="x"><path d="M752 70 L772 90 M772 70 L752 90"/></g><text class="g" x="700" y="56">never</text>
+</svg>
+<svg class="mob" viewBox="0 0 340 420" role="img" aria-hidden="true">
+ <rect class="box" x="1" y="1" width="338" height="70"/><text x="16" y="32">Your studio</text><text class="g" x="16" y="54">designs, owns the client</text>
+ <path class="ln" d="M110 71 V175"/><text class="g" x="120" y="120">designs + brief</text>
+ <path class="ln d2" d="M230 175 V71"/><text class="g" x="240" y="140">build back</text>
+ <rect class="box us" x="1" y="175" width="338" height="70"/><text class="inv" x="16" y="206">Eltio</text><text class="inv" x="16" y="228" style="text-transform:none">builds, animates, ships</text>
+ <path class="no" d="M170 245 V349"/><g class="x"><path d="M160 287 L180 307 M180 287 L160 307"/></g><text class="g" x="190" y="302">never</text>
+ <rect class="box" x="1" y="349" width="338" height="70"/><text x="16" y="380">Your client</text><text class="g" x="16" y="402">sees your name only</text>
+</svg>
+</section>
+
+<section class="grid row rv"><h2 class="c">What we build</h2><ol class="list">
+<li><span class="g">01</span><span>Websites. Cargo or our own code, with an editor your client can run.</span></li>
+<li><span class="g">02</span><span>iPhone apps. SwiftUI, through to the App Store.</span></li>
+<li><span class="g">03</span><span>Motion. Launch films, product loops and the animation on the site.</span></li>
+<li><span class="g">04</span><span>Shops. Product pages, drops and countdowns.</span></li>
+</ol></section>
+
+<section class="grid row rv"><h2 class="c">How it works</h2><ol class="list">
+<li><span class="g">01</span><span>You send the designs: Figma, PDFs or a sketch on a call.</span></li>
+<li><span class="g">02</span><span>We send back a fixed price and a date.</span></li>
+<li><span class="g">03</span><span>We build on a private preview link. You show it to your client, as yours.</span></li>
+<li><span class="g">04</span><span>We ship it and hand everything over to you: code, logins, files.</span></li>
+</ol></section>
+
+<section class="grid row rv"><h2 class="c">The rules</h2><ul class="rules">
+<li>We never contact, pitch or show your clients.</li>
+<li>If one of your clients finds us, we send them back to you.</li>
+<li>No Eltio credit anywhere, unless you ask for one.</li>
+<li>Your client&rsquo;s work never goes in our portfolio.</li>
+<li>Happy to sign your NDA before we see anything.</li>
+</ul></section>
+
+<section class="grid row rv"><h2 class="c">Price</h2><p>From &pound;2,500 a build. Fixed price, half to start, half on hand-over.</p></section>
+
+<section class="grid row rv"><h2 class="c">Our own work</h2><div class="proof">
+<a href="../site/case/aglo.html">App in six weeks<span>Aglo, brief to App Store</span></a>
+<a href="../site/case/apps.html">Two apps for film sets<span>Lampwerk, Out &amp; Scout</span></a>
+<a href="../concepts/ganister/">Architecture site<span>Studio concept</span></a>
+<a href="../concepts/second-pitch/">Brand and shop<span>Studio concept</span></a>
+</div></section>
+
+<section class="row cta rv"><p>Send us one brief. We&rsquo;ll come back with a price and a date.</p><a class="btn" href="mailto:hello@eltio.studio?subject=Partner%20build">hello@eltio.studio</a></section>
+
+<footer class="foot"><span>&copy;2026 eltio studio</span><span>(1)</span></footer>
+</div>
+<script>
+(function(){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{rootMargin:'0px 0px -6% 0px'});
+document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});})();
+</script>
+</body></html>

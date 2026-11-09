@@ -133,11 +133,14 @@
      film has already been started once, quietly, and paused. So the films people are likely to
      open next (the next and previous film, the first film, a name the mouse rests on) are warmed
      up in hidden players stacked in the same layer, and opening one just swaps it in. */
+  /* 9 Nov, Elliot: the hidden players felt buggy (one showed through and ran ahead). Off for now:
+     one player only, with a thin loading line while Vimeo buffers. Turn back on with WARM = true. */
+  var WARM = false;
   var phone = innerWidth < 900, POOL = phone ? 3 : 8, LANES = phone ? 1 : 2;
   var pool = [], queue = [], busy = 0, tick = 0;
   function mine(rec) { return rec === one; }
   function hook(rec) {
-    rec.p.on('playing', function () { if (mine(rec)) rec.ifr.classList.add('on'); });
+    rec.p.on('playing', function () { if (mine(rec)) { rec.ifr.classList.add('on'); if (host) host.classList.remove('ld'); } });
     rec.p.on('timeupdate', function (e) { if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000; });
   }
   function has(v) { return (one && one.v === v) || pool.some(function (r) { return r.v === v; }); }
@@ -173,6 +176,7 @@
     }
   }
   function want(xs, front) {
+    if (!WARM) return;
     xs.forEach(function (x) {
       if (!x || !x.v) return;
       pool.forEach(function (r) { if (r.v === x.v) r.t = ++tick; });
@@ -199,6 +203,7 @@
     var cur0 = players.get(film) || one;
     if (cur0 === one && one) { players.set(film, one); follow(film); }
     if (cur0 && cur0.v === x.v) { if (x.vr) fit(film, cur0.ifr, x.vr, x); if (cur0.p) go(cur0); return; }
+    if (host) host.classList.add('ld'); else follow(film).classList.add('ld');
     var hot = pool.filter(function (r) { return r.v === x.v && r.p; })[0];
     if (hot) { swap(film, hot, x); return; }
     if (cur0 && cur0.p) {
@@ -224,7 +229,7 @@
       else go(rec);
     }).catch(function () {});
   }
-  function stop(film) { var r = players.get(film); if (r && r.p && (!host || host._f === film)) r.p.pause(); }
+  function stop(film) { var r = players.get(film); if (host && host._f === film) host.classList.remove('ld'); if (r && r.p && (!host || host._f === film)) r.p.pause(); }
   new MutationObserver(function (ms) {
     ms.forEach(function (m) {
       var f = m.target;
@@ -254,6 +259,7 @@
   window.vmFit = function (film) { var x = item(); if (film && x && film.isConnected && film.offsetParent) fit(film, (players.get(film) || {}).ifr, x.vr || 16 / 9, x); };
   var st = document.createElement('style');
   st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .15s ease}.vmhost iframe.vm.on{opacity:1}'
+    + '.vmhost.ld::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:30%;background:var(--fg,#e0001b);animation:vmld 1.1s cubic-bezier(.6,0,.4,1) infinite}@keyframes vmld{from{transform:translateX(-100%)}to{transform:translateX(340%)}}'
     + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '.hero>.ttl{justify-self:center;width:min(100%,var(--pw,100%));transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '@media(max-width:899px){.hero>.ttl{width:min(100%,calc(var(--pw,100%) + 8vw))}}';

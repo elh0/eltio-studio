@@ -1,5 +1,7 @@
 /* Cargo data: the films come from Leo's Work set (see helical.js), not a fixed list */
 var WORK = (window.HS && HS.films) || [];
+/* Cargo titles the tab after the page it opened on; start from the site name so film titles read "Film · Site" */
+try { if (HS.cargo) { var _st = window.store ? window.store.getState().site : (window.__PRELOADED_STATE__ || {}).site; if (_st && _st.website_title) document.title = _st.website_title; } } catch (e) {}
 (function () {
   var known = { comp: 'Composition', sd: 'Sound design', mix: 'Mix' };
   WORK.forEach(function (x) { x.t.forEach(function (k) { if (!TAGS[k]) { TAGS[k] = k.replace(/-/g, ' ').replace(/^./, function (c) { return c.toUpperCase(); }); TAG_ORDER.push(k); } }); });

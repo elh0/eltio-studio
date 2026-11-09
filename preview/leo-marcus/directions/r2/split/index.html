@@ -580,5 +580,41 @@ function fitCap(film) {
   });
 })();
 </script>
+<style>
+/* 9 Nov, Elliot: the credits were cut off at the bottom of the film column. The list's fade above
+   the footer ran across the whole page, so it also faded the film's last credit lines. On desktop
+   with a film open the fade now covers the names column only, and the film column scrolls. */
+@media (min-width: 900px) {
+  html:not(.closed) .scroll {
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)), linear-gradient(#000, #000);
+    mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)), linear-gradient(#000, #000);
+    -webkit-mask-size: var(--c1w, 100%) 100%, calc(100% - var(--c1w, 100%)) 100%; mask-size: var(--c1w, 100%) 100%, calc(100% - var(--c1w, 100%)) 100%;
+    -webkit-mask-position: 0 0, var(--c1w, 100%) 0; mask-position: 0 0, var(--c1w, 100%) 0;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  }
+  .pane .in { padding-bottom: 34px; }
+}
+</style>
+<script>
+(function () {
+  var de = document.documentElement;
+  function c1() {
+    var p = document.querySelector('.pane'), sc = document.querySelector('.scroll');
+    if (p && sc && p.offsetParent) de.style.setProperty('--c1w', (p.getBoundingClientRect().left - sc.getBoundingClientRect().left) + 'px');
+  }
+  addEventListener('resize', c1);
+  new MutationObserver(function () { requestAnimationFrame(c1); }).observe(de, { attributes: true, attributeFilter: ['class'] });
+  c1();
+  /* warm a film up while the pointer rests on its name, or a finger lands on it, so it opens playing */
+  var t = 0;
+  function at(e) { var b = e.target.closest && e.target.closest('.names button[data-i]'); return b && list[+b.getAttribute('data-i')]; }
+  document.addEventListener('pointerover', function (e) {
+    var x = at(e); clearTimeout(t); if (!x || !window.vmWarm) return;
+    t = setTimeout(function () { vmWarm(x); }, e.pointerType === 'mouse' ? 140 : 0);
+  });
+  /* and the first film, once the page has settled, on a laptop */
+  if (innerWidth >= 900) setTimeout(function () { if (window.vmWarm && !w && list[0]) vmWarm(list[0]); }, 1500);
+})();
+</script>
 </body>
 </html>

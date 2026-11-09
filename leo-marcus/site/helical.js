@@ -72,7 +72,10 @@
     var set = all.filter(function (p) { return p.page_type === 'set' && /^work$/i.test(String(p.title).trim()); })[0] || all.filter(function (p) { return p.page_type === 'set'; })[0];
     if (!set) throw new Error('no Work set');
     var idx = []; for (var i = 0; i < 400; i++) idx.push(i);
-    var films = get(id + '/filter/?indexBySet=' + encodeURIComponent(JSON.stringify([{ set_id: String(set.id), index: idx }])));
+    /* Cargo's set filter can come back short, so also read the film tags and merge (every film has at least one tag) */
+    var films = Promise.all([get(id + '/filter/?indexBySet=' + encodeURIComponent(JSON.stringify([{ set_id: String(set.id), index: idx }])))]
+      .concat(['composition', 'sound-design', 'mix'].map(function (t) { return get(id + '/tag/' + t); }))
+      .map(function (q) { return q.catch(function () { return []; }); }));
     var inf = get(id + '/url/info').catch(function () { return null; });
     return Promise.all([films, inf]).then(function (a) {
       var seen = {}, pages = walk(a[0], []).filter(function (p) {

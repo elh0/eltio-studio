@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Helical Sound (Cargo test)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Geist+Mono:wght@400&display=swap">
+<script src="fixtures.js"></script>
+<script>
+/* stands in for Cargo: a site id, and the API answers built from the round 2 films */
+window.HS_TEST = 1;
+window.__PRELOADED_STATE__ = { site: { id: 1 } };
+var _f = window.fetch;
+window.fetch = function (u, o) {
+  var m = String(u).match(/cargo\.site\/_api\/v1-p\/pages\/1\/(.*)$/);
+  if (!m) return _f(u, o);
+  var r = /^scaffolding/.test(m[1]) ? HS_FIXTURES.scaffolding : /^filter/.test(m[1]) ? HS_FIXTURES.pages : /^url\/info/.test(m[1]) ? HS_FIXTURES.info : null;
+  return Promise.resolve(new Response(JSON.stringify(r), { status: r ? 200 : 404 }));
+};
+</script>
+</head>
+<body>
+<div class="cargo-page">Cargo's own page (hidden once the site draws)</div>
+<script src="../helical.js"></script>
+</body>
+</html>

@@ -63,8 +63,12 @@
     });
   }
   var id;
-  wait(siteId, 8000).then(function (v) { id = v; return get(id + '/scaffolding'); }).then(function (sc) {
-    var all = walk(sc, []);
+  /* the Work set: by its address (url/work); scaffolding is a fallback, it can miss new sets */
+  wait(siteId, 8000).then(function (v) {
+    id = v;
+    return get(id + '/url/work').then(function (w) { var s = walk(w, []).filter(function (p) { return p.page_type === 'set'; }); if (!s.length) throw 0; return s; })
+      .catch(function () { return get(id + '/scaffolding').then(function (sc) { return walk(sc, []); }); });
+  }).then(function (all) {
     var set = all.filter(function (p) { return p.page_type === 'set' && /^work$/i.test(String(p.title).trim()); })[0] || all.filter(function (p) { return p.page_type === 'set'; })[0];
     if (!set) throw new Error('no Work set');
     var idx = []; for (var i = 0; i < 400; i++) idx.push(i);

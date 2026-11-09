@@ -101,7 +101,7 @@
      the tap. On Helix the same player is kept from film to film, so once the sound is on it stays on. */
   function go(rec) {
     var f = rec.ifr.parentNode;
-    rec.p.play().then(function () { setTimeout(around, 1200); return rec.p.getMuted(); }).then(function (m) { rec.muted = !!m; f && f.classList.toggle('mute', !!m); }).catch(function () { rec.muted = true; f && f.classList.add('mute'); rec.p.setMuted(true); rec.p.play(); });
+    rec.p.play().then(function () { setTimeout(around, 300); return rec.p.getMuted(); }).then(function (m) { rec.muted = !!m; f && f.classList.toggle('mute', !!m); }).catch(function () { rec.muted = true; f && f.classList.add('mute'); rec.p.setMuted(true); rec.p.play(); });
   }
   function meta(rec, film, x) {
     var p = rec.p;
@@ -133,38 +133,62 @@
      film has already been started once, quietly, and paused. So the films people are likely to
      open next (the next and previous film, the first film, a name the mouse rests on) are warmed
      up in hidden players stacked in the same layer, and opening one just swaps it in. */
-  var pool = [], POOL = innerWidth < 900 ? 2 : 3;
+  var phone = innerWidth < 900, POOL = phone ? 3 : 8, LANES = phone ? 1 : 2;
+  var pool = [], queue = [], busy = 0, tick = 0;
   function mine(rec) { return rec === one; }
   function hook(rec) {
     rec.p.on('playing', function () { if (mine(rec)) rec.ifr.classList.add('on'); });
     rec.p.on('timeupdate', function (e) { if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000; });
   }
-  function warm(x) {
-    if (!x || !x.v || (one && one.v === x.v) || pool.some(function (r) { return r.v === x.v; })) return;
-    while (pool.length >= POOL) { var old = pool.shift(); if (!mine(old)) old.ifr.remove(); }
+  function has(v) { return (one && one.v === v) || pool.some(function (r) { return r.v === v; }); }
+  function evict() {
+    while (pool.length >= POOL) {
+      var o = pool.filter(function (r) { return !mine(r); }).sort(function (p1, p2) { return p1.t - p2.t; })[0];
+      if (!o) return; pool.splice(pool.indexOf(o), 1); o.ifr.remove();
+    }
+  }
+  function warm(x, done) {
+    evict();
     var ifr = document.createElement('iframe');
     ifr.className = 'vm'; ifr.allow = 'autoplay; fullscreen; picture-in-picture';
     ifr.src = 'https://player.vimeo.com/video/' + x.v + '?controls=0&autoplay=0&muted=1&playsinline=1&dnt=1&title=0&byline=0&portrait=0';
     ifr.style.width = '640px'; ifr.style.height = '360px';
     follow(null).appendChild(ifr);
-    var rec = { v: x.v, ifr: ifr, p: null, muted: true, warm: false };
+    var rec = { v: x.v, ifr: ifr, p: null, muted: true, warm: false, t: ++tick };
     pool.push(rec);
+    var fin = function () { if (done) { var d = done; done = null; d(); } };
+    setTimeout(fin, 6000);
     api().then(function (V) {
       var p = rec.p = new V.Player(ifr); hook(rec);
-      var once = function () { p.off('playing', once); rec.warm = true; if (!mine(rec)) { p.pause(); p.setCurrentTime(0); } };
+      var once = function () { p.off('playing', once); rec.warm = true; if (!mine(rec)) { p.pause(); p.setCurrentTime(0); } fin(); };
       p.on('playing', once);
-      p.setMuted(true); p.play().catch(function () {});
-    }).catch(function () {});
+      p.setMuted(true); p.play().catch(fin);
+    }).catch(fin);
   }
-  window.vmWarm = function (x) { warm(x); };
+  /* films wait in a queue and warm one or two at a time; asking again moves a film to the front */
+  function pump() {
+    while (busy < LANES && queue.length) {
+      var x = queue.shift(); if (!x || !x.v || has(x.v)) continue;
+      busy++; warm(x, function () { busy--; pump(); });
+    }
+  }
+  function want(xs, front) {
+    xs.forEach(function (x) {
+      if (!x || !x.v) return;
+      pool.forEach(function (r) { if (r.v === x.v) r.t = ++tick; });
+      var i = queue.indexOf(x); if (i > -1) queue.splice(i, 1);
+      if (!has(x.v)) front ? queue.unshift(x) : queue.push(x);
+    });
+    pump();
+  }
+  window.vmWarm = function (x, later) { want([].concat(x), !later); };
   function around() {
     var l = typeof list !== 'undefined' && list && list.length ? list : WORK, x = item(), i = l.indexOf(x);
     if (i < 0) return;
-    warm(l[(i + 1) % l.length]);
-    if (POOL > 2) warm(l[(i - 1 + l.length) % l.length]);
+    want([l[(i - 1 + l.length) % l.length], l[(i + 1) % l.length]], true);
   }
   function swap(film, rec, x) {
-    if (one && one !== rec) { one.ifr.classList.remove('on'); if (one.p) { one.p.pause(); one.p.setMuted(true); one.p.setCurrentTime(0); } pool.push(one); while (pool.length > POOL) { var o = pool.shift(); if (o !== rec) o.ifr.remove(); } }
+    if (one && one !== rec) { one.ifr.classList.remove('on'); if (one.p) { one.p.pause(); one.p.setMuted(true); one.p.setCurrentTime(0); } one.t = ++tick; pool.push(one); }
     pool = pool.filter(function (r) { return r !== rec; });
     one = rec; players.set(film, rec); follow(film);
     fit(film, rec.ifr, x.vr || 16 / 9, x);
@@ -229,7 +253,7 @@
   /* 4 Nov: a page can size a film box to its film without playing it */
   window.vmFit = function (film) { var x = item(); if (film && x && film.isConnected && film.offsetParent) fit(film, (players.get(film) || {}).ifr, x.vr || 16 / 9, x); };
   var st = document.createElement('style');
-  st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .4s ease}.vmhost iframe.vm.on{opacity:1}'
+  st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .15s ease}.vmhost iframe.vm.on{opacity:1}'
     + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '.hero>.ttl{justify-self:center;width:min(100%,var(--pw,100%));transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '@media(max-width:899px){.hero>.ttl{width:min(100%,calc(var(--pw,100%) + 8vw))}}';

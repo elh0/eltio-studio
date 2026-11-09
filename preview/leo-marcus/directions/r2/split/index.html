@@ -612,8 +612,8 @@ function fitCap(film) {
     var x = at(e); clearTimeout(t); if (!x || !window.vmWarm) return;
     t = setTimeout(function () { vmWarm(x); }, e.pointerType === 'mouse' ? 140 : 0);
   });
-  /* and the first film, once the page has settled, on a laptop */
-  if (innerWidth >= 900) setTimeout(function () { if (window.vmWarm && !w && list[0]) vmWarm(list[0]); }, 1500);
+  /* and the first films down the list once the page has settled (eight on a laptop, one on a phone) */
+  setTimeout(function () { if (window.vmWarm && list.length) vmWarm(list.slice(0, innerWidth >= 900 ? 8 : 1), true); }, 600);
 })();
 </script>
 </body>

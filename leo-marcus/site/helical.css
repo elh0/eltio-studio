@@ -323,6 +323,21 @@ a:hover { opacity: .5; }
 }
 .names .c { overflow-wrap: break-word; }
 
+
+/* 9 Nov, Elliot: the credits were cut off at the bottom of the film column. The list's fade above
+   the footer ran across the whole page, so it also faded the film's last credit lines. On desktop
+   with a film open the fade now covers the names column only, and the film column scrolls. */
+@media (min-width: 900px) {
+  html:not(.closed) .scroll {
+    -webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)), linear-gradient(#000, #000);
+    mask-image: linear-gradient(180deg, #000 calc(100% - 140px), transparent calc(100% - 8px)), linear-gradient(#000, #000);
+    -webkit-mask-size: var(--c1w, 100%) 100%, calc(100% - var(--c1w, 100%)) 100%; mask-size: var(--c1w, 100%) 100%, calc(100% - var(--c1w, 100%)) 100%;
+    -webkit-mask-position: 0 0, var(--c1w, 100%) 0; mask-position: 0 0, var(--c1w, 100%) 0;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  }
+  .pane .in { padding-bottom: 34px; }
+}
+
 .ways{display:none!important}html.white{--paper:#fff;--bg:#fff}
 /* Cargo wrapper: hide Cargo's own page while the Helical Sound site is drawn over it */
 html.hs-on body > :not(#hs):not(.vmhost) { display: none !important; }

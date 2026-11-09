@@ -166,7 +166,7 @@ setWay(); document.documentElement.classList.add('white');
      the tap. On Helix the same player is kept from film to film, so once the sound is on it stays on. */
   function go(rec) {
     var f = rec.ifr.parentNode;
-    rec.p.play().then(function () { return rec.p.getMuted(); }).then(function (m) { rec.muted = !!m; f && f.classList.toggle('mute', !!m); }).catch(function () { rec.muted = true; f && f.classList.add('mute'); rec.p.setMuted(true); rec.p.play(); });
+    rec.p.play().then(function () { setTimeout(around, 1200); return rec.p.getMuted(); }).then(function (m) { rec.muted = !!m; f && f.classList.toggle('mute', !!m); }).catch(function () { rec.muted = true; f && f.classList.add('mute'); rec.p.setMuted(true); rec.p.play(); });
   }
   function meta(rec, film, x) {
     var p = rec.p;
@@ -187,17 +187,61 @@ setWay(); document.documentElement.classList.add('white');
           var r = f.getBoundingClientRect(), c = box ? box.getBoundingClientRect() : { top: -1e4, bottom: 1e4, left: -1e4, right: 1e4 };
           var t = Math.max(0, c.top - r.top), b = Math.max(0, r.bottom - c.bottom), l = Math.max(0, c.left - r.left), rr = Math.max(0, r.right - c.right);
           host.style.cssText = 'left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;clip-path:inset(' + t + 'px ' + rr + 'px ' + b + 'px ' + l + 'px);opacity:' + getComputedStyle(f).opacity;
-        } else host.style.cssText = 'visibility:hidden';
+        } else host.style.cssText = 'left:0;top:0;width:640px;height:360px;opacity:0';
         requestAnimationFrame(sync);
       })();
     }
-    host._f = film; return host;
+    if (film) host._f = film; return host;
+  }
+  /* 9 Nov, Elliot: films sat on the cover for a few seconds before playing. Vimeo takes about
+     3 seconds to buffer a film once it's asked to play, but well under a tenth of a second if the
+     film has already been started once, quietly, and paused. So the films people are likely to
+     open next (the next and previous film, the first film, a name the mouse rests on) are warmed
+     up in hidden players stacked in the same layer, and opening one just swaps it in. */
+  var pool = [], POOL = innerWidth < 900 ? 2 : 3;
+  function mine(rec) { return rec === one; }
+  function hook(rec) {
+    rec.p.on('playing', function () { if (mine(rec)) rec.ifr.classList.add('on'); });
+    rec.p.on('timeupdate', function (e) { if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000; });
+  }
+  function warm(x) {
+    if (!x || !x.v || (one && one.v === x.v) || pool.some(function (r) { return r.v === x.v; })) return;
+    while (pool.length >= POOL) { var old = pool.shift(); if (!mine(old)) old.ifr.remove(); }
+    var ifr = document.createElement('iframe');
+    ifr.className = 'vm'; ifr.allow = 'autoplay; fullscreen; picture-in-picture';
+    ifr.src = 'https://player.vimeo.com/video/' + x.v + '?controls=0&autoplay=0&muted=1&playsinline=1&dnt=1&title=0&byline=0&portrait=0';
+    ifr.style.width = '640px'; ifr.style.height = '360px';
+    follow(null).appendChild(ifr);
+    var rec = { v: x.v, ifr: ifr, p: null, muted: true, warm: false };
+    pool.push(rec);
+    api().then(function (V) {
+      var p = rec.p = new V.Player(ifr); hook(rec);
+      var once = function () { p.off('playing', once); rec.warm = true; if (!mine(rec)) { p.pause(); p.setCurrentTime(0); } };
+      p.on('playing', once);
+      p.setMuted(true); p.play().catch(function () {});
+    }).catch(function () {});
+  }
+  window.vmWarm = function (x) { warm(x); };
+  function around() {
+    var l = typeof list !== 'undefined' && list && list.length ? list : WORK, x = item(), i = l.indexOf(x);
+    if (i < 0) return;
+    warm(l[(i + 1) % l.length]);
+    if (POOL > 2) warm(l[(i - 1 + l.length) % l.length]);
+  }
+  function swap(film, rec, x) {
+    if (one && one !== rec) { one.ifr.classList.remove('on'); if (one.p) { one.p.pause(); one.p.setMuted(true); one.p.setCurrentTime(0); } pool.push(one); while (pool.length > POOL) { var o = pool.shift(); if (o !== rec) o.ifr.remove(); } }
+    pool = pool.filter(function (r) { return r !== rec; });
+    one = rec; players.set(film, rec); follow(film);
+    fit(film, rec.ifr, x.vr || 16 / 9, x);
+    if (rec.p) { meta(rec, film, x); if (film.classList.contains('on')) { rec.p.setVolume(1); rec.p.setMuted(false); go(rec); } }
   }
   function start(film) {
     var x = item(); if (!x || !x.v) return;
     var cur0 = players.get(film) || one;
     if (cur0 === one && one) { players.set(film, one); follow(film); }
     if (cur0 && cur0.v === x.v) { if (x.vr) fit(film, cur0.ifr, x.vr, x); if (cur0.p) go(cur0); return; }
+    var hot = pool.filter(function (r) { return r.v === x.v && r.p; })[0];
+    if (hot) { swap(film, hot, x); return; }
     if (cur0 && cur0.p) {
       /* same picture, next film: load it into the player already there */
       cur0.v = x.v; cur0.ifr.classList.remove('on');
@@ -216,11 +260,7 @@ setWay(); document.documentElement.classList.add('white');
     players.set(film, rec);
     api().then(function (V) {
       var p = rec.p = new V.Player(ifr);
-      meta(rec, film, x);
-      p.on('playing', function () { ifr.classList.add('on'); });
-      p.on('timeupdate', function (e) {
-        window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000;
-      });
+      meta(rec, film, x); hook(rec);
       if (!film.classList.contains('on')) p.pause();
       else go(rec);
     }).catch(function () {});
@@ -587,4 +627,26 @@ function fitCap(film) {
     if (!p && window.vmFit) requestAnimationFrame(function () { vmFit(root().querySelector('.film')); });
     var b = root().querySelector('.bar i'); if (b) b.style.width = Math.min(100, at / secs(w.d) * 100) + '%';
   });
+})();
+
+;
+
+(function () {
+  var de = document.documentElement;
+  function c1() {
+    var p = document.querySelector('.pane'), sc = document.querySelector('.scroll');
+    if (p && sc && p.offsetParent) de.style.setProperty('--c1w', (p.getBoundingClientRect().left - sc.getBoundingClientRect().left) + 'px');
+  }
+  addEventListener('resize', c1);
+  new MutationObserver(function () { requestAnimationFrame(c1); }).observe(de, { attributes: true, attributeFilter: ['class'] });
+  c1();
+  /* warm a film up while the pointer rests on its name, or a finger lands on it, so it opens playing */
+  var t = 0;
+  function at(e) { var b = e.target.closest && e.target.closest('.names button[data-i]'); return b && list[+b.getAttribute('data-i')]; }
+  document.addEventListener('pointerover', function (e) {
+    var x = at(e); clearTimeout(t); if (!x || !window.vmWarm) return;
+    t = setTimeout(function () { vmWarm(x); }, e.pointerType === 'mouse' ? 140 : 0);
+  });
+  /* and the first film, once the page has settled, on a laptop */
+  if (innerWidth >= 900) setTimeout(function () { if (window.vmWarm && !w && list[0]) vmWarm(list[0]); }, 1500);
 })();

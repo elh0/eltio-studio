@@ -34,14 +34,15 @@ open(os.path.join(HERE, 'helical-body.html'), 'w').write(body + '\n')
 shared = open(os.path.join(DIR, 'shared.js')).read()
 shared = re.sub(r'var WORK = \[.*?\];\n', '', shared, flags=re.S)
 inline = re.findall(r'<script>(.*?)</script>', src, re.S)
-# the page's last script: film links become Cargo page addresses
-last = inline[-1]
+# the page's link script: film links become Cargo page addresses
+li = [i for i, t in enumerate(inline) if 'function slug(x) {' in t][0]
+last = inline[li]
 last = rep(last, "function slug(x) {", "function slug(x) { if (x.purl) return x.purl;")
 last = rep(last, "function setHash(x) { try { history.replaceState(null, '', location.pathname + location.search + (x ? '#' + slug(x) : '')); } catch (e) {} }",
   "function setHash(x) { try { if (HS.cargo) history.replaceState(history.state, '', '/' + (x ? slug(x) : '')); else history.replaceState(null, '', location.pathname + location.search + (x ? '#' + slug(x) : '')); } catch (e) {} }")
 last = rep(last, "var h = decodeURIComponent(location.hash.slice(1)); if (!h) return;",
   "var h = decodeURIComponent(location.hash.slice(1) || (HS.cargo ? location.pathname.replace(/^\\/+|\\/+$/g, '') : '')); if (!h) return;")
-inline[-1] = last
+inline[li] = last
 # always centred, as Leo picked
 inline = [s.replace("var AL = (location.search.match(/al=(\\w)/) || [])[1] || 'l';", "var AL = 'c';") for s in inline]
 assert any("var AL = 'c';" in s for s in inline)

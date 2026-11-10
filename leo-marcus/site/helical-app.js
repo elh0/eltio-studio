@@ -204,9 +204,29 @@ setWay(); document.documentElement.classList.add('white');
   var phone = innerWidth < 900, POOL = phone ? 3 : 8, LANES = phone ? 1 : 2;
   var pool = [], queue = [], busy = 0, tick = 0;
   function mine(rec) { return rec === one; }
+  /* 10 Nov: play stats. When the page loads Umami (Leo's own free account), each film open that
+     starts playing counts as a Play, and 25/50/75/100% watched count once per film until another film is opened. A ?for=name
+     on the link Leo sends a producer rides along, so he can see what they watched. */
+  var forTag = (function () {
+    var m = location.search.match(/[?&]for=([^&#]+)/), f = m ? decodeURIComponent(m[1]) : '';
+    try { if (f) sessionStorage.setItem('hs-for', f); else f = sessionStorage.getItem('hs-for') || ''; } catch (e) {}
+    return f;
+  })();
+  var seen = {}, lastV = null;
+  function track(name, v) {
+    var u = window.umami; if (!u || !u.track) return;
+    if (v !== lastV) { seen = {}; lastV = v; }
+    if (seen[name]) return; seen[name] = 1;
+    var x = WORK.filter(function (f) { return f.v == v; })[0], d = { film: x ? x.c + (x.p ? ' · ' + x.p : '') : String(v) };
+    if (forTag) d.for = forTag;
+    try { u.track(name, d); } catch (e) {}
+  }
   function hook(rec) {
-    rec.p.on('playing', function () { if (mine(rec)) { rec.ifr.classList.add('on'); if (host) host.classList.remove('ld'); } });
-    rec.p.on('timeupdate', function (e) { if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000; });
+    rec.p.on('playing', function () { if (mine(rec)) { rec.ifr.classList.add('on'); if (host) host.classList.remove('ld'); track('Play', rec.v); } });
+    rec.p.on('timeupdate', function (e) {
+      if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000;
+      [25, 50, 75, 100].forEach(function (k) { if (e.percent * 100 >= (k === 100 ? 97 : k)) track('Watched ' + k + '%', rec.v); });
+    });
   }
   function has(v) { return (one && one.v === v) || pool.some(function (r) { return r.v === v; }); }
   function evict() {

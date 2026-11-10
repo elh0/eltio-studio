@@ -338,6 +338,27 @@ a:hover { opacity: .5; }
   .pane .in { padding-bottom: 34px; }
 }
 
+
+/* 10 Nov, Leo's two asks, as options to pick from (?lk=1..3, ?th=1..2, ?pick shows a switcher).
+   Links: 1 darker at rest, 2 dark at rest and light on hover, 3 an arrow in front.
+   Loading: 1 plain until the film plays (the still comes back if the film hasn't started after
+   6 seconds, e.g. autoplay blocked), 2 the still stays and cuts straight to the film, no fade. */
+html.lk-1 .seg .lk { opacity: .75; }
+html.lk-1 .seg .lk:hover, html.lk-1 .seg .lk:focus-visible { opacity: 1; }
+html.lk-2 .seg .lk { opacity: 1; }
+html.lk-2 .seg .lk:hover, html.lk-2 .seg .lk:focus-visible { opacity: .45; }
+html.lk-3 .seg .sg-a .lk::before { content: "\2192\00a0"; }
+html.th-1 .in .film { background: transparent; }
+html.th-1 .in .film img { visibility: hidden; }
+html.th-1.th-late .in .film img { visibility: visible; }
+html.th-1 .vmhost iframe.vm, html.th-2 .vmhost iframe.vm { transition-property: width, height, left, top !important; }
+html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
+.opk { position: fixed; z-index: 60; bottom: calc(env(safe-area-inset-bottom, 0px) + 116px); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; justify-content: center; max-width: calc(100vw - 24px); padding: 8px 14px; border-radius: 999px; background: var(--fg); color: var(--bg); font: 500 12px/1.3 var(--sans); box-shadow: 0 6px 24px rgba(0,0,0,.18); }
+.opk b { font-weight: 600; opacity: .7; }
+.opk span { display: inline-flex; gap: 4px; align-items: center; }
+.opk button { font: inherit; color: inherit; background: none; border: 1px solid transparent; border-radius: 999px; padding: 3px 9px; cursor: pointer; opacity: .75; }
+.opk button.on { border-color: currentColor; opacity: 1; }
+
 .ways{display:none!important}html.white{--paper:#fff;--bg:#fff}
 /* Cargo wrapper: hide Cargo's own page while the Helical Sound site is drawn over it */
 html.hs-on body > :not(#hs):not(.vmhost) { display: none !important; }

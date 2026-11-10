@@ -680,3 +680,30 @@ function fitCap(film) {
   /* and the first films down the list once the page has settled (eight on a laptop, one on a phone) */
   setTimeout(function () { if (window.vmWarm && list.length) vmWarm(list.slice(0, innerWidth >= 900 ? 8 : 1), true); }, 600);
 })();
+
+;
+
+(function () {
+  var de = document.documentElement, q = location.search;
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '0', th: (q.match(/th=(\d)/) || [])[1] || '0' };
+  function apply() {
+    ['1', '2', '3'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
+    if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
+  }
+  apply();
+  /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
+  var since = 0, last = null;
+  setInterval(function () {
+    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector('.vmhost iframe.vm.on');
+    if (!f || live || f !== last) { since = performance.now(); last = f; de.classList.remove('th-late'); return; }
+    if (performance.now() - since > 6000) de.classList.add('th-late');
+  }, 250);
+  if (!/[?&]pick/.test(q)) return;
+  var opts = { lk: ['Now', 'Darker', 'Flip hover', 'Arrow'], th: ['Now', 'Plain', 'Still, no fade'] };
+  var bar = document.createElement('div'); bar.className = 'opk';
+  bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';
+  function mark() { [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.toggle('on', st[b.dataset.g] === b.dataset.v); }); }
+  bar.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st[b.dataset.g] = b.dataset.v; apply(); mark(); });
+  mark(); document.body.appendChild(bar);
+})();

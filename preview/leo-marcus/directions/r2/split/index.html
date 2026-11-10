@@ -616,5 +616,52 @@ function fitCap(film) {
   setTimeout(function () { if (window.vmWarm && list.length) vmWarm(list.slice(0, innerWidth >= 900 ? 8 : 1), true); }, 600);
 })();
 </script>
+<style>
+/* 10 Nov, Leo's two asks, as options to pick from (?lk=1..3, ?th=1..2, ?pick shows a switcher).
+   Links: 1 darker at rest, 2 dark at rest and light on hover, 3 an arrow in front.
+   Loading: 1 plain until the film plays (the still comes back if the film hasn't started after
+   6 seconds, e.g. autoplay blocked), 2 the still stays and cuts straight to the film, no fade. */
+html.lk-1 .seg .lk { opacity: .75; }
+html.lk-1 .seg .lk:hover, html.lk-1 .seg .lk:focus-visible { opacity: 1; }
+html.lk-2 .seg .lk { opacity: 1; }
+html.lk-2 .seg .lk:hover, html.lk-2 .seg .lk:focus-visible { opacity: .45; }
+html.lk-3 .seg .sg-a .lk::before { content: "\2192\00a0"; }
+html.th-1 .in .film { background: transparent; }
+html.th-1 .in .film img { visibility: hidden; }
+html.th-1.th-late .in .film img { visibility: visible; }
+html.th-1 .vmhost iframe.vm, html.th-2 .vmhost iframe.vm { transition-property: width, height, left, top !important; }
+html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
+.opk { position: fixed; z-index: 60; bottom: calc(env(safe-area-inset-bottom, 0px) + 116px); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; justify-content: center; max-width: calc(100vw - 24px); padding: 8px 14px; border-radius: 999px; background: var(--fg); color: var(--bg); font: 500 12px/1.3 var(--sans); box-shadow: 0 6px 24px rgba(0,0,0,.18); }
+.opk b { font-weight: 600; opacity: .7; }
+.opk span { display: inline-flex; gap: 4px; align-items: center; }
+.opk button { font: inherit; color: inherit; background: none; border: 1px solid transparent; border-radius: 999px; padding: 3px 9px; cursor: pointer; opacity: .75; }
+.opk button.on { border-color: currentColor; opacity: 1; }
+</style>
+<script>
+(function () {
+  var de = document.documentElement, q = location.search;
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '0', th: (q.match(/th=(\d)/) || [])[1] || '0' };
+  function apply() {
+    ['1', '2', '3'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
+    if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
+  }
+  apply();
+  /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
+  var since = 0, last = null;
+  setInterval(function () {
+    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector('.vmhost iframe.vm.on');
+    if (!f || live || f !== last) { since = performance.now(); last = f; de.classList.remove('th-late'); return; }
+    if (performance.now() - since > 6000) de.classList.add('th-late');
+  }, 250);
+  if (!/[?&]pick/.test(q)) return;
+  var opts = { lk: ['Now', 'Darker', 'Flip hover', 'Arrow'], th: ['Now', 'Plain', 'Still, no fade'] };
+  var bar = document.createElement('div'); bar.className = 'opk';
+  bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';
+  function mark() { [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.toggle('on', st[b.dataset.g] === b.dataset.v); }); }
+  bar.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st[b.dataset.g] = b.dataset.v; apply(); mark(); });
+  mark(); document.body.appendChild(bar);
+})();
+</script>
 </body>
 </html>

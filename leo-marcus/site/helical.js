@@ -9,6 +9,10 @@
   var framed = false; try { framed = window.self !== window.top; } catch (e) { framed = true; }
   if ((framed && !window.HS_TEST) || /[?&]cargo\b/.test(location.search)) return;
   var me = document.currentScript && document.currentScript.src;
+  /* 10 Nov: free play stats. Add data-umami="<website id>" to the script tag in Cargo and every
+     film play, how far people watch (25/50/75/100%) and any ?for= tag on the link go to Umami. */
+  var UM = document.currentScript && document.currentScript.getAttribute('data-umami');
+  if (UM) { var us = document.createElement('script'); us.defer = true; us.src = 'https://cloud.umami.is/script.js'; us.setAttribute('data-website-id', UM); document.head.appendChild(us); }
   var BASE = me ? me.replace(/[^\/]*(\?.*)?$/, '') : 'https://elh0.github.io/eltio-studio/leo-marcus/site/';
   var API = window.HS_API || 'https://cargo.site/_api/v1-p/pages/';
   var root = document.documentElement; root.classList.add('hs-on');

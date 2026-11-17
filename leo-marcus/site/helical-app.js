@@ -409,7 +409,7 @@ var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0
 var phone = function () { return innerWidth < 900; };
 function build() {
   document.getElementById('tg').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
-    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + ' ' + count(k) + '</button>';
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '</button>';
   }).join('');
   list = tag === 'all' ? WORK.slice() : WORK.filter(function (x) { return x.t.indexOf(tag) > -1; });
   document.getElementById('names').innerHTML = list.map(function (x, i) {
@@ -705,9 +705,9 @@ function fitCap(film) {
 
 (function () {
   var de = document.documentElement, q = location.search;
-  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '0', th: (q.match(/th=(\d)/) || [])[1] || '0' };
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1' };
   function apply() {
-    ['1', '2', '3'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
+    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
     if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
   }
   apply();
@@ -719,7 +719,7 @@ function fitCap(film) {
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Now', 'Darker', 'Flip hover', 'Arrow'], th: ['Now', 'Plain', 'Still, no fade'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
     + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';

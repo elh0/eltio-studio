@@ -169,7 +169,7 @@ var tag = 'all', list = WORK.slice(), w = null, playing = false, t0 = 0, pos = 0
 var phone = function () { return innerWidth < 900; };
 function build() {
   document.getElementById('tg').innerHTML = ['all'].concat(TAG_ORDER).map(function (k) {
-    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + ' ' + count(k) + '</button>';
+    return '<button type="button" data-tag="' + k + '" aria-pressed="' + (k === tag) + '">' + (k === 'all' ? 'All' : TAGS[k]) + '</button>';
   }).join('');
   list = tag === 'all' ? WORK.slice() : WORK.filter(function (x) { return x.t.indexOf(tag) > -1; });
   document.getElementById('names').innerHTML = list.map(function (x, i) {
@@ -625,7 +625,13 @@ html.lk-1 .seg .lk { opacity: .75; }
 html.lk-1 .seg .lk:hover, html.lk-1 .seg .lk:focus-visible { opacity: 1; }
 html.lk-2 .seg .lk { opacity: 1; }
 html.lk-2 .seg .lk:hover, html.lk-2 .seg .lk:focus-visible { opacity: .45; }
-html.lk-3 .seg .sg-a .lk::before { content: "\2192\00a0"; }
+/* 17 Nov, Leo's pick (11 Nov email): the arrow, drawn broader and centred on the line rather than
+   the font's thin, low arrow, with the flipped hover. This is now the default (lk=4). */
+html.lk-3 .seg .sg-a .lk::before, html.lk-4 .seg .sg-a .lk::before { content: ""; display: inline-block; width: .9em; height: .62em; margin-right: .38em; vertical-align: .06em; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 6h15M10.5 1.2 15.5 6l-5 4.8' fill='none' stroke='%23000' stroke-width='1.9'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 6h15M10.5 1.2 15.5 6l-5 4.8' fill='none' stroke='%23000' stroke-width='1.9'/%3E%3C/svg%3E") center / contain no-repeat; }
+html.lk-4 .seg .lk { opacity: 1; }
+html.lk-4 .seg .lk:hover, html.lk-4 .seg .lk:focus-visible { opacity: .45; }
+/* the footer's right-hand rule sat 1px right of the player column's rule (Leo, 11 Nov) */
+@media (min-width: 900px) { .bar2 .seg { margin-left: -1px; } }
 html.th-1 .in .film { background: transparent; }
 html.th-1 .in .film img { visibility: hidden; }
 html.th-1.th-late .in .film img { visibility: visible; }
@@ -640,9 +646,9 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
 <script>
 (function () {
   var de = document.documentElement, q = location.search;
-  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '0', th: (q.match(/th=(\d)/) || [])[1] || '0' };
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1' };
   function apply() {
-    ['1', '2', '3'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
+    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
     if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
   }
   apply();
@@ -654,7 +660,7 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Now', 'Darker', 'Flip hover', 'Arrow'], th: ['Now', 'Plain', 'Still, no fade'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
     + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';

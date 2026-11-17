@@ -347,7 +347,13 @@ html.lk-1 .seg .lk { opacity: .75; }
 html.lk-1 .seg .lk:hover, html.lk-1 .seg .lk:focus-visible { opacity: 1; }
 html.lk-2 .seg .lk { opacity: 1; }
 html.lk-2 .seg .lk:hover, html.lk-2 .seg .lk:focus-visible { opacity: .45; }
-html.lk-3 .seg .sg-a .lk::before { content: "\2192\00a0"; }
+/* 17 Nov, Leo's pick (11 Nov email): the arrow, drawn broader and centred on the line rather than
+   the font's thin, low arrow, with the flipped hover. This is now the default (lk=4). */
+html.lk-3 .seg .sg-a .lk::before, html.lk-4 .seg .sg-a .lk::before { content: ""; display: inline-block; width: .9em; height: .62em; margin-right: .38em; vertical-align: .06em; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 6h15M10.5 1.2 15.5 6l-5 4.8' fill='none' stroke='%23000' stroke-width='1.9'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 12'%3E%3Cpath d='M0 6h15M10.5 1.2 15.5 6l-5 4.8' fill='none' stroke='%23000' stroke-width='1.9'/%3E%3C/svg%3E") center / contain no-repeat; }
+html.lk-4 .seg .lk { opacity: 1; }
+html.lk-4 .seg .lk:hover, html.lk-4 .seg .lk:focus-visible { opacity: .45; }
+/* the footer's right-hand rule sat 1px right of the player column's rule (Leo, 11 Nov) */
+@media (min-width: 900px) { .bar2 .seg { margin-left: -1px; } }
 html.th-1 .in .film { background: transparent; }
 html.th-1 .in .film img { visibility: hidden; }
 html.th-1.th-late .in .film img { visibility: visible; }

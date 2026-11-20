@@ -13,6 +13,10 @@
      film play, how far people watch (25/50/75/100%) and any ?for= tag on the link go to Umami. */
   var UM = document.currentScript && document.currentScript.getAttribute('data-umami');
   if (UM) { var us = document.createElement('script'); us.defer = true; us.src = 'https://cloud.umami.is/script.js'; us.setAttribute('data-website-id', UM); document.head.appendChild(us); }
+  /* 20 Nov: Leo's films are on Bunny Stream. A film page can hold Bunny's HLS playlist link (or any
+     .m3u8 / .mp4 file link); Bunny's play or embed links work too when data-bunny="<pull zone host>"
+     is on the script tag. */
+  var BUNNY = document.currentScript && document.currentScript.getAttribute('data-bunny');
   var BASE = me ? me.replace(/[^\/]*(\?.*)?$/, '') : 'https://elh0.github.io/eltio-studio/leo-marcus/site/';
   var API = window.HS_API || 'https://cargo.site/_api/v1-p/pages/';
   var root = document.documentElement; root.classList.add('hs-on');
@@ -41,14 +45,24 @@
     return t.split('\n').map(function (s) { return s.replace(/ /g, ' ').trim(); }).filter(Boolean);
   }
   function label(ls, re) { for (var i = 0; i < ls.length; i++) { var m = ls[i].match(re); if (m) return m[1].trim(); } return ''; }
-  var LAB = /^(director|directed by|creative direction|agency|helical sound|vimeo|link)\s*[:\-–]/i;
+  var LAB = /^(director|directed by|creative direction|agency|helical sound|vimeo|bunny|video|link)\s*[:\-–]/i;
+  var FILE = /https?:\/\/[^\s"'<>]+?\.(?:m3u8|mp4)(?:\?[^\s"'<>]*)?/i, BDEL = /mediadelivery\.net\/(?:embed|play)\/\d+\/([0-9a-f-]{36})/i;
+  function direct(html) {
+    var u = (html.match(FILE) || [])[0], m = html.match(BDEL);
+    if (!u && m && BUNNY) u = 'https://' + BUNNY.replace(/^https?:\/\/|\/+$/g, '') + '/' + m[1] + '/playlist.m3u8';
+    return u ? u.replace(/&amp;/g, '&') : '';
+  }
   function film(p) {
     var html = p.content || '', ls = lines(html);
-    var v = (html.match(/vimeo\.com\/(?:video\/)?(\d+)/) || [])[1]; if (!v) return null;
-    var proj = ''; for (var i = 0; i < ls.length; i++) { if (!/^https?:|vimeo\.com/i.test(ls[i]) && !LAB.test(ls[i])) { proj = ls[i]; break; } }
+    var u = direct(html), v = (html.match(/vimeo\.com\/(?:video\/)?(\d+)/) || [])[1];
+    if (!u && !v) return null;
+    if (u) v = (u.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i) || [u])[0];
+    var proj = ''; for (var i = 0; i < ls.length; i++) { if (!/^https?:|vimeo\.com|b-cdn\.net|mediadelivery\.net/i.test(ls[i]) && !LAB.test(ls[i])) { proj = ls[i]; break; } }
     var t = (p.tags || []).map(function (g) { var n = String(g.tag || g.name || g).trim(); return TAGKEY[n.toLowerCase()] || n.toLowerCase().replace(/[^a-z0-9]+/g, '-'); });
     var th = p.thumbnail && !p.thumbnail.is_placeholder && p.thumbnail.hash ? 'https://freight.cargo.site/w/1600/i/' + p.thumbnail.hash + '/' + p.thumbnail.name : '';
-    return { c: p.title, p: proj, v: v, t: t, purl: p.purl, th: th, d: '00:30',
+    /* no Cargo thumbnail: Bunny's own cover frame sits next to the playlist */
+    if (!th && u && /b-cdn\.net\//i.test(u)) th = u.replace(/\/[^\/]*$/, '/thumbnail.jpg');
+    return { c: p.title, p: proj, v: v, u: u, t: t, purl: p.purl, th: th, d: '00:30',
       dir: label(ls, /^(?:director|directed by)\s*[:\-–]\s*(.+)/i), ag: label(ls, /^(?:creative direction|agency)\s*[:\-–]\s*(.+)/i),
       hs: label(ls, /^helical sound\s*[:\-–]\s*(.+)/i) };
   }

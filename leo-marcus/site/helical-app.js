@@ -77,6 +77,7 @@ setWay(); document.documentElement.classList.add('white');
   api().catch(function () {}); /* load Vimeo's player script straight away, not on the first play */
   /* real lengths up front, from Vimeo's public oEmbed */
   WORK.forEach(function (x) {
+    if (x.u || !/^\d+$/.test(String(x.v))) { if (x.th && !x.fr) bars(x, x.th); return; }
     fetch('https://vimeo.com/api/oembed.json?url=' + encodeURIComponent('https://vimeo.com/' + x.v))
       .then(function (r) { return r.json(); })
       .then(function (j) {
@@ -263,7 +264,7 @@ setWay(); document.documentElement.classList.add('white');
   function want(xs, front) {
     if (!WARM) return;
     xs.forEach(function (x) {
-      if (!x || !x.v) return;
+      if (!x || !x.v || x.u) return;
       pool.forEach(function (r) { if (r.v === x.v) r.t = ++tick; });
       var i = queue.indexOf(x); if (i > -1) queue.splice(i, 1);
       if (!has(x.v)) front ? queue.unshift(x) : queue.push(x);
@@ -283,9 +284,72 @@ setWay(); document.documentElement.classList.add('white');
     fit(film, rec.ifr, x.vr || 16 / 9, x);
     if (rec.p) { meta(rec, film, x); if (film.classList.contains('on')) { rec.p.setVolume(1); rec.p.setMuted(false); go(rec); } }
   }
+  /* 20 Nov: Leo moved his films to Bunny Stream. A film page with a direct link (Bunny's HLS
+     playlist, or any .m3u8 or .mp4 file, Vimeo's own file links included) plays in a plain video
+     element: no player to boot, so it starts as soon as the first bytes arrive. Safari plays HLS
+     itself; other browsers get hls.js. Vimeo page links still play as before. */
+  var hlsP = null;
+  function hlsLib() {
+    if (hlsP) return hlsP;
+    hlsP = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'; s.onload = function () { ok(window.Hls); }; s.onerror = no; document.head.appendChild(s); });
+    return hlsP;
+  }
+  if (WORK.some(function (x) { return x.u && /\.m3u8/i.test(x.u); }) && !document.createElement('video').canPlayType('application/vnd.apple.mpegurl')) hlsLib().catch(function () {});
+  /* the few calls the page makes to Vimeo's player, answered by a video element */
+  function NP(el) { this.el = el; this.h = null; this.w = []; }
+  NP.prototype = {
+    load: function (u) {
+      var el = this.el, me = this;
+      if (me.h) { me.h.destroy(); me.h = null; }
+      el.removeAttribute('src'); el.load();
+      if (/\.m3u8(\?|$)/i.test(u) && !el.canPlayType('application/vnd.apple.mpegurl')) {
+        return hlsLib().then(function (H) {
+          if (H && H.isSupported()) { me.h = new H({ capLevelToPlayerSize: true }); me.h.loadSource(u); me.h.attachMedia(el); } else el.src = u;
+        });
+      }
+      el.src = u; return Promise.resolve();
+    },
+    ready: function () { var el = this.el; return el.readyState >= 1 ? Promise.resolve() : new Promise(function (ok) { el.addEventListener('loadedmetadata', ok, { once: true }); }); },
+    play: function () { return this.el.play() || Promise.resolve(); },
+    pause: function () { this.el.pause(); return Promise.resolve(); },
+    getMuted: function () { return Promise.resolve(this.el.muted); },
+    setMuted: function (m) { this.el.muted = !!m; return Promise.resolve(); },
+    setVolume: function (v) { this.el.volume = v; return Promise.resolve(); },
+    setCurrentTime: function (t) { try { this.el.currentTime = t; } catch (e) {} return Promise.resolve(); },
+    getVideoWidth: function () { var el = this.el; return this.ready().then(function () { return el.videoWidth; }); },
+    getVideoHeight: function () { var el = this.el; return this.ready().then(function () { return el.videoHeight; }); },
+    getDuration: function () { var el = this.el; return this.ready().then(function () { return isFinite(el.duration) ? el.duration : 0; }); },
+    on: function (ev, fn) {
+      var el = this.el, f = ev === 'timeupdate' ? function () { fn({ seconds: el.currentTime, percent: el.duration ? el.currentTime / el.duration : 0 }); } : function () { fn({}); };
+      this.w.push([ev, fn, f]); el.addEventListener(ev, f);
+    },
+    off: function (ev, fn) { var el = this.el; this.w = this.w.filter(function (r) { if (r[0] === ev && r[1] === fn) { el.removeEventListener(ev, r[2]); return false; } return true; }); }
+  };
+  function startN(film, x) {
+    var cur0 = players.get(film) || one;
+    if (cur0 && !cur0.n) { cur0.ifr.remove(); players.delete(film); if (one === cur0) one = null; cur0 = null; }
+    if (cur0) { players.set(film, cur0); follow(film); }
+    if (cur0 && cur0.v === x.v) { if (x.vr) fit(film, cur0.ifr, x.vr, x); go(cur0); return; }
+    if (host) host.classList.add('ld'); else follow(film).classList.add('ld');
+    if (cur0) {
+      cur0.v = x.v; cur0.ifr.classList.remove('on');
+      fit(film, cur0.ifr, x.vr || 16 / 9, x);
+      cur0.p.load(x.u).then(function () { if (cur0.v !== x.v) return; meta(cur0, film, x); if (film.classList.contains('on')) go(cur0); });
+      return;
+    }
+    var el = document.createElement('video');
+    el.className = 'vm'; el.playsInline = true; el.setAttribute('playsinline', ''); el.setAttribute('webkit-playsinline', ''); el.preload = 'auto';
+    follow(film).appendChild(el);
+    fit(film, el, x.vr || 16 / 9, x);
+    var rec = one = { v: x.v, ifr: el, p: new NP(el), muted: false, n: 1 };
+    players.set(film, rec); hook(rec);
+    rec.p.load(x.u).then(function () { if (rec.v !== x.v) return; meta(rec, film, x); if (film.classList.contains('on')) go(rec); else rec.p.pause(); });
+  }
   function start(film) {
     var x = item(); if (!x || !x.v) return;
+    if (x.u) return startN(film, x);
     var cur0 = players.get(film) || one;
+    if (cur0 && cur0.n) { cur0.ifr.remove(); players.delete(film); if (one === cur0) one = null; cur0 = null; }
     if (cur0 === one && one) { players.set(film, one); follow(film); }
     if (cur0 && cur0.v === x.v) { if (x.vr) fit(film, cur0.ifr, x.vr, x); if (cur0.p) go(cur0); return; }
     if (host) host.classList.add('ld'); else follow(film).classList.add('ld');
@@ -343,7 +407,7 @@ setWay(); document.documentElement.classList.add('white');
   /* 4 Nov: a page can size a film box to its film without playing it */
   window.vmFit = function (film) { var x = item(); if (film && x && film.isConnected && film.offsetParent) fit(film, (players.get(film) || {}).ifr, x.vr || 16 / 9, x); };
   var st = document.createElement('style');
-  st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost iframe.vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .15s ease}.vmhost iframe.vm.on{opacity:1}'
+  st.textContent = '.film{position:relative;overflow:hidden}.vmhost{position:fixed;overflow:hidden;pointer-events:none;z-index:31}.vmhost .vm{position:absolute;border:0;pointer-events:none;opacity:0;transition:opacity .15s ease}.vmhost video.vm{object-fit:cover;background:transparent}.vmhost .vm.on{opacity:1}'
     + '.vmhost.ld::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:30%;background:var(--fg,#e0001b);animation:vmld 1.1s cubic-bezier(.6,0,.4,1) infinite}@keyframes vmld{from{transform:translateX(-100%)}to{transform:translateX(340%)}}'
     + '#pf~.pt,#pf~.bar,#pf~.ctl,#pf~.cr,.player>.bar,.player>.ctl{width:var(--pw,100%);max-width:100%;margin-inline:auto;transition:width .8s cubic-bezier(.16,1,.3,1)}'
     + '.hero>.ttl{justify-self:center;width:min(100%,var(--pw,100%));transition:width .8s cubic-bezier(.16,1,.3,1)}'
@@ -714,7 +778,7 @@ function fitCap(film) {
   /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
   var since = 0, last = null;
   setInterval(function () {
-    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector('.vmhost iframe.vm.on');
+    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector(".vmhost .vm.on");
     if (!f || live || f !== last) { since = performance.now(); last = f; de.classList.remove('th-late'); return; }
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);

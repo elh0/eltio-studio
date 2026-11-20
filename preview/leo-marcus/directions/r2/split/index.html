@@ -635,7 +635,7 @@ html.lk-4 .seg .lk:hover, html.lk-4 .seg .lk:focus-visible { opacity: .45; }
 html.th-1 .in .film { background: transparent; }
 html.th-1 .in .film img { visibility: hidden; }
 html.th-1.th-late .in .film img { visibility: visible; }
-html.th-1 .vmhost iframe.vm, html.th-2 .vmhost iframe.vm { transition-property: width, height, left, top !important; }
+html.th-1 .vmhost .vm, html.th-2 .vmhost .vm { transition-property: width, height, left, top !important; }
 html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
 .opk { position: fixed; z-index: 60; bottom: calc(env(safe-area-inset-bottom, 0px) + 116px); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; justify-content: center; max-width: calc(100vw - 24px); padding: 8px 14px; border-radius: 999px; background: var(--fg); color: var(--bg); font: 500 12px/1.3 var(--sans); box-shadow: 0 6px 24px rgba(0,0,0,.18); }
 .opk b { font-weight: 600; opacity: .7; }
@@ -655,7 +655,7 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
   /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
   var since = 0, last = null;
   setInterval(function () {
-    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector('.vmhost iframe.vm.on');
+    var f = document.querySelector('#pane .film.on, #sheetIn .film.on'), live = document.querySelector(".vmhost .vm.on");
     if (!f || live || f !== last) { since = performance.now(); last = f; de.classList.remove('th-late'); return; }
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);

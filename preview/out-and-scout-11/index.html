@@ -60,6 +60,8 @@ header nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-13px;
 .scr{position:relative;width:100%;height:100%;overflow:hidden;border-radius:4.4%/9.6%;background:var(--paper);outline:1px solid var(--line)}
 .scr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform-origin:50% 50%;transition:opacity .5s var(--e),transform 1.4s var(--e)}
 .scr img.on{opacity:1}
+.scr video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.scr video.on{opacity:1}
 .ring{position:absolute;z-index:4;border:1.5px solid var(--sun);opacity:0;transition:opacity .4s,left 1s var(--e),top 1s var(--e),width 1s var(--e),height 1s var(--e);pointer-events:none}
 .ring.on{opacity:1}
 
@@ -79,15 +81,42 @@ header nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-13px;
 .kit .in{display:contents}
 .kit .fade{animation:fin .45s var(--e)}
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-/* the features: a plain list, one per row */
+/* the features, like the app's onboarding: one quiet screen each, lots of room, go back & forth */
+html{scroll-snap-type:y proximity}
 .feat{display:grid;border-top:1px solid var(--ink)}
-.f{display:grid;gap:18px;padding-block:28px 36px;border-bottom:1px solid var(--line)}
-.f .kit{display:grid;gap:8px;align-content:start}
-.f .n{font:400 clamp(56px,15vw,120px)/.82 var(--num);letter-spacing:-.06em;color:var(--sun);padding-bottom:8px;border-bottom:1.5px solid var(--sun);width:max-content;min-width:1.4em}
-.f h2{margin:6px 0 0;font:400 clamp(26px,6vw,48px)/1.04 var(--num);letter-spacing:-.035em;text-wrap:balance}
-.f p{margin:0;color:var(--grey);max-width:46ch;font-size:13px}
+.f{min-height:calc(100svh - 96px - env(safe-area-inset-top,0px));display:grid;align-content:center;justify-items:center;gap:clamp(20px,3.6vh,36px);padding-block:clamp(32px,6vh,64px);scroll-snap-align:center;text-align:center;border-bottom:1px solid var(--line)}
+.f .kit{display:grid;gap:12px;justify-items:center;max-width:58ch}
+.f h2{margin:0;font:400 clamp(30px,3.6vw,50px)/1.04 var(--num);letter-spacing:-.04em;text-wrap:balance}
+.f p{margin:0;color:var(--grey);font-size:13px;max-width:46ch;text-wrap:pretty;border:0;padding:0}
+.f .phone{width:min(100%,980px,calc((100svh - 400px) * 2.168));min-width:min(100%,320px)}
 .f .scr img{opacity:1;transform:none}
-@media (min-width:900px){.f{grid-template-columns:340px minmax(0,1fr);gap:56px;align-items:center;padding-block:48px}.f p{font-size:14px}}
+@media (min-width:900px){.f p{font-size:14px}}
+
+/* hotspots: hover on a mouse, tap on a phone */
+.hsl{position:absolute;inset:1.1%;z-index:5;pointer-events:none}
+.hs{all:unset;position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;display:grid;place-items:center;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+.hs i{width:14px;height:14px;border-radius:50%;background:var(--sun);box-shadow:0 0 0 4px rgba(226,83,31,.22);transition:transform .25s var(--e)}
+.hs i::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:1.5px solid var(--sun);animation:pulse 2.4s var(--e) infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.6);opacity:0}}
+.hs .tip{position:absolute;left:24px;top:24px;width:max-content;max-width:min(240px,60vw);display:grid;gap:4px;text-align:left;background:var(--paper);color:var(--ink);border:1px solid var(--ink);padding:10px 12px;font:400 12px/1.45 var(--mono);opacity:0;transform:translateY(4px);transition:opacity .2s,transform .25s var(--e);pointer-events:none;box-shadow:0 14px 30px -18px rgba(21,21,19,.45);z-index:2}
+.hs .tip b{font-weight:500;color:var(--sun);text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.hs .tip.r{left:auto;right:24px}.hs .tip.u{top:auto;bottom:24px}
+.hs:hover i,.hs:focus-visible i,.hs[aria-expanded="true"] i{transform:scale(1.25)}
+.hs:hover .tip,.hs:focus-visible .tip,.hs[aria-expanded="true"] .tip{opacity:1;transform:none}
+.hs:focus-visible{outline:none}.hs:focus-visible i{outline:2px solid var(--ink);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.f .hint{color:var(--grey)}
+
+/* the rail: where you are, back & forth */
+.rail{position:fixed;left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));transform:translate(-50%,12px);z-index:16;display:flex;align-items:center;gap:2px;background:var(--paper);border:1px solid var(--ink);padding:4px;opacity:0;pointer-events:none;transition:opacity .3s,transform .4s var(--e)}
+.rail.on{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.rail button{all:unset;cursor:pointer;height:32px;min-width:32px;display:grid;place-items:center;font:400 11px var(--mono);letter-spacing:.06em;color:var(--grey);padding:0 6px}
+.rail button[aria-current="true"]{color:var(--paper);background:var(--ink)}
+.rail button:focus-visible{outline:1px solid var(--sun);outline-offset:2px}
+.rail .ar{color:var(--ink);font-size:14px}
+.rail .ct{display:none;color:var(--ink);font:400 11px var(--mono);letter-spacing:.08em;padding:0 8px}
+@media (max-width:620px){.rail .d{display:none}.rail .ct{display:block}.f{min-height:82svh}}
+@media (min-width:900px){.rail{left:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:auto;top:50%;transform:translate(12px,-50%);flex-direction:column}.rail.on{transform:translate(0,-50%)}.rail .ar{transform:rotate(90deg)}}
 
 /* after */
 .sec{border-top:1px solid var(--ink);padding-block:56px;display:grid;gap:28px}
@@ -110,6 +139,62 @@ header nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-13px;
 @media (max-width:520px){.strip .row > span:last-child{display:none}}
 footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:24px 32px;border-top:1px solid var(--ink)}
 footer nav{display:flex;gap:18px}
+
+/* hero: one real still from our own recce, framed like the app's big photo */
+.hero{display:grid;gap:12px;margin-top:8px}
+.hero .fr{position:relative;aspect-ratio:1458/787;max-width:100%;overflow:hidden;background:var(--tint)}
+.hero .fr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);transition:transform 2.4s var(--e)}
+.hero.in .fr img{transform:none}
+.hero .hud{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(10px,2vw,22px);color:#fff;pointer-events:none}
+.hero .hud .t{display:flex;justify-content:space-between;align-items:baseline;gap:12px;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.hero .hud .id{font:400 clamp(28px,5vw,64px)/.9 var(--num);letter-spacing:-.05em;color:#fff}
+.hero .hud .cap{align-self:flex-start;background:rgba(241,238,231,.94);color:var(--ink);border:1px solid var(--sun);padding:6px 10px;font:400 clamp(10px,1.1vw,12px)/1.45 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.hero .hud .cap span{color:var(--sun)}
+.hero .gd{position:absolute;left:0;right:0;border-top:1px solid rgba(255,255,255,.35)}
+.hero .meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* 04: the same page, Simple on the left, Detailed on the right; drag the line */
+.f.doc .wipe{position:relative;width:min(100%,600px,calc((100svh - 400px) * .936));min-width:min(100%,320px);text-align:left;justify-self:center;margin-top:30px;container-type:inline-size;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:ew-resize}
+.wipe .pg{--u:calc(100cqw / 440);position:relative;background:#FBFAF6;box-shadow:0 1px 0 var(--line),0 24px 50px -28px rgba(21,21,19,.35);aspect-ratio:440/470;overflow:hidden;padding:calc(var(--u)*22) calc(var(--u)*22) 0;font-size:calc(var(--u)*9.5);line-height:1.35;color:var(--ink)}
+.wipe .pg.det{position:absolute;inset:0;clip-path:inset(0 0 0 var(--x,50%))}
+.pg .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(var(--u)*8);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.pg .hd b{font:400 calc(var(--u)*12) var(--num);letter-spacing:-.02em;text-transform:none;color:var(--ink)}
+.pg .tt{display:flex;align-items:flex-end;gap:calc(var(--u)*12);margin-top:calc(var(--u)*12);padding-bottom:calc(var(--u)*6);border-bottom:calc(var(--u)*1.2) solid var(--sun)}
+.pg .tt .nn{font:400 calc(var(--u)*54)/.8 var(--num);letter-spacing:-.06em;color:var(--sun)}
+.pg .tt .nm{display:grid;gap:calc(var(--u)*2);padding-bottom:calc(var(--u)*2)}
+.pg .tt .nm b{font:500 calc(var(--u)*19)/1 var(--num);letter-spacing:-.03em}
+.pg .k{font-size:calc(var(--u)*7.5);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.pg .band{height:calc(var(--u)*58);display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*8);align-items:center;border-bottom:calc(var(--u)*.8) solid var(--line)}
+.pg .band div{display:grid;gap:calc(var(--u)*2)}
+.pg .band .v{font-variant-numeric:tabular-nums;font-size:calc(var(--u)*11)}
+.pg .band .v.o{color:var(--sun)}
+.pg .rows{display:grid}
+.pg .rw{display:grid;grid-template-columns:calc(var(--u)*26) calc(var(--u)*84) minmax(0,1fr) calc(var(--u)*58) calc(var(--u)*86);gap:calc(var(--u)*10);align-items:center;height:calc(var(--u)*76);border-bottom:calc(var(--u)*.8) solid var(--line)}
+.pg .rw .id{color:var(--sun);font-size:calc(var(--u)*11)}
+.pg .rw .ph{aspect-ratio:4/3;background:var(--tint) center/cover}
+.pg .rw .ds{display:grid;gap:calc(var(--u)*3);min-width:0}
+.pg .rw .ds b{font-weight:400;font-size:calc(var(--u)*10)}
+.pg .rw svg{width:100%;height:auto;display:block}
+.pg .rw .bl{display:grid;gap:calc(var(--u)*3);justify-items:start}
+.pg .rw .bl .tm{font-variant-numeric:tabular-nums;font-size:calc(var(--u)*10.5)}
+.pg .chip{border:calc(var(--u)*.8) solid var(--sun);color:var(--sun);padding:calc(var(--u)*1) calc(var(--u)*4);font-size:calc(var(--u)*7.5);letter-spacing:.06em;text-transform:uppercase}
+.pg .fade{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*46);background:linear-gradient(rgba(251,250,246,0),#FBFAF6 85%)}
+.wipe .tag{position:absolute;top:-28px;font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s}
+.wipe .tag.l{left:0}.wipe .tag.r{right:0}
+.wipe .tag.on{color:var(--ink)}
+.wipe .bar{position:absolute;top:-8px;bottom:-8px;left:var(--x,50%);width:0;border-left:1.5px solid var(--sun);z-index:3}
+.wipe .knob{position:absolute;top:50%;left:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--sun);color:#fff;display:grid;place-items:center;font:500 14px var(--mono);box-shadow:0 6px 18px -6px rgba(226,83,31,.6);cursor:ew-resize}
+.wipe .knob:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.f.doc .hint{justify-self:center}
+
+/* motion: things settle as they arrive; everything is visible at rest */
+.js .f .kit{transform:translateY(14px);opacity:.001;transition:transform .9s var(--e),opacity .7s}
+.js .f.in .kit{transform:none;opacity:1}
+.js .f .phone{transform:translateY(28px) scale(.965);transition:transform 1.1s var(--e)}
+.js .f.in .phone{transform:none}
+.js .f .scr img{transform:scale(1.04);transition:transform 1.6s var(--e) .1s}
+.js .f.in .scr img{transform:none}
+@media (prefers-reduced-motion:reduce){.js .f .phone,.js .f .scr img,.js .f .kit{transform:none;opacity:1}.hs i::after{animation:none}.hero .fr img{transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -131,6 +216,17 @@ footer nav{display:flex;gap:18px}
       <p><b>We wanted to make recceing a little easier.</b> So we built the things we kept wishing we had on a recce.</p>
       <div class="btns"><a class="btn" href="#get">Get it free</a><a class="btn ghost" href="#how">How it works ↓</a></div>
     </div>
+    <figure class="hero" id="hero" style="margin:0">
+      <div class="fr">
+        <img src="img/hero-69A.webp" alt="A wide, empty car park on the Royal Docks with the old mills on the skyline, from our own recce" decoding="async">
+        <i class="gd" style="top:33.3%"></i><i class="gd" style="top:66.6%"></i>
+        <div class="hud">
+          <div class="t"><span class="id">69A</span><span class="lab" style="color:#fff">28mm · 1.85</span></div>
+          <span class="cap"><span id="hcap">¾ backlit</span> · Wide<br>Car park &amp; the mills</span>
+        </div>
+      </div>
+      <figcaption class="meta lab"><span>From our own recce · Royal Docks · 67 shots, one morning, one PDF</span><span id="hgold">Golden today —</span></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -169,26 +265,108 @@ footer nav{display:flex;gap:18px}
 </footer>
 </main>
 
+<nav class="rail" id="rail" aria-label="Features"><button class="ar" data-go="-1" aria-label="Previous feature">‹</button><span class="ct" id="railct">01 / 06</span><button class="d" data-to="0" aria-label="Feature 01">01</button><button class="d" data-to="1" aria-label="Feature 02">02</button><button class="d" data-to="2" aria-label="Feature 03">03</button><button class="d" data-to="3" aria-label="Feature 04">04</button><button class="d" data-to="4" aria-label="Feature 05">05</button><button class="d" data-to="5" aria-label="Feature 06">06</button><button class="ar" data-go="1" aria-label="Next feature">›</button></nav>
+
 <div class="strip wrap lab" aria-label="The sun in London now">
   <div class="row max"><span id="sun">SUN — · GOLDEN —</span><span>London · now</span></div>
 </div>
 
 <script>
 /* the walk-through. f = focus on the real screen: centre x, y (0 to 1) and zoom; r = ring round the detail that matters */
+function VSRC(n){return (typeof VID!=="undefined"&&VID[n])||"vid/"+n+".mp4";}
+function HS(h){if(!h)return"";return '<div class="hsl">'+h.map(function(d,j){return '<button type="button" class="hs" style="left:'+d[0]+'%;top:'+d[1]+'%" aria-expanded="false"><i></i><span class="tip'+(d[0]>60?' r':'')+(d[1]>60?' u':'')+'"><b>'+d[2]+'</b>'+d[3]+'</span><span class="sr">'+d[2]+'</span></button>';}).join("")+'</div>';}
 function SRC(n){return (typeof IMG!=="undefined"&&IMG[n])||"img/"+n+".webp";}
 var S=[
- {k:"Captions & scenes",img:"os11-shots",n:"01",h:"Captions & scenes, done for you.",p:"Auto captions & scene change detection, so the app keeps up as you walk round a recce."},
- {k:"Blur faces",img:"os11-viewer-blur",n:"02",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
- {k:"Best light",img:"os11-shot-card",n:"03",h:"A suggestion for the best light.",p:"Picked the way working cinematographers would. We love the backlight."},
- {k:"Summary",img:"os11-export",n:"04",h:"Detailed or simple, you choose.",p:"Our summary document is made to be detailed or simple, whatever the job needs."},
- {k:"Send photos",img:"os11-selects",n:"05",h:"Just send the photos.",p:"You can now easily send photos like you're used to."},
- {k:"iPhone only",img:"os11-viewfinder",n:"06",h:"iPhone only, on purpose.",p:"We wanted to make sure we had the best camera, & that you can choose your exposure when recceing, just like the iPhone camera."}
+ {hs:[[27.5,78,"Auto caption","Every still gets a caption & a light read the second you shoot."],[50,23,"New scene","Walk somewhere new & it starts the next scene for you."],[91,52,"Just shoot","Numbering & notes are done as you go."]],k:"Captions & scenes",vid:"vf",img:"os11-shots",n:"01",h:"Captions & scenes, done for you.",p:"Auto captions & scene change detection, so the app keeps up as you walk round a recce."},
+ {hs:[[45,42,"Found on the phone","Faces are found & softened on the phone. Nothing is uploaded."],[79,94.5,"One tap","Turn blur on or off for each shot. The original stays as it was."],[97.6,50,"Swipe","Go through the whole recce, full screen."]],k:"Blur faces",vid:"blur",img:"os11-viewer-blur",n:"02",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
+ {hs:[[47,23,"Best light","The window when the light is best for this frame."],[51,57,"Sun & facing","Where you're pointing & where the sun will be."],[69,20,"Light read","Backlit, ¾ back, side or front, read from the sun."]],k:"Best light",vid:"card",img:"os11-shot-card",n:"03",h:"A suggestion for the best light.",p:"Picked the way working cinematographers would. We love the backlight."},
+ {k:"Summary",doc:1,img:"os11-export",n:"04",h:"Detailed or simple, you choose.",p:"Our summary document is made to be detailed or simple, whatever the job needs."},
+ {hs:[[15.6,63,"Pick","Tap the stills you want. The light read goes with each one."],[76,34,"Blur faces","Soften faces before they leave your phone."],[90,34,"Send","Messages, WhatsApp, AirDrop or mail, like any photo."]],k:"Send photos",vid:"sel",img:"os11-selects",n:"05",h:"Just send the photos.",p:"You can now easily send photos like you're used to."},
+ {hs:[[91,7,"Lens","Set your lens so the frame matches the shoot."],[19,92,"Frame lines","2.39, 1.85, 16:9 or 4:3 over the live camera."],[66,92,"Exposure","Choose your exposure, just like the iPhone camera."]],k:"iPhone only",img:"os11-viewfinder",n:"06",h:"iPhone only, on purpose.",p:"We wanted to make sure we had the best camera, & that you can choose your exposure when recceing, just like the iPhone camera."}
 ];
 var feat=document.getElementById("feat");
 feat.innerHTML=S.map(function(s,i){
-  return '<article class="f"><div class="kit"><span class="n">'+s.n+'</span><span class="lab"><b>'+s.k+'</b></span><h2>'+s.h+'</h2><p>'+s.p+'</p></div>'+
-    '<div class="phone"><i class="isl"></i><div class="scr"><img src="'+SRC(s.img)+'" alt="Out &amp; Scout '+s.k+' screen" loading="'+(i<2?"eager":"lazy")+'" decoding="async"></div></div></article>';
-}).join("");
+  return '<article class="f" id="f'+s.n+'" data-i="'+i+'"><div class="kit"><span class="lab"><span class="o">'+s.n+'</span> / 06 · <b>'+s.k+'</b></span><h2>'+s.h+'</h2><p>'+s.p+'</p></div>'+
+    (s.doc?DOC():'<div class="phone"><i class="isl"></i>'+HS(s.hs)+'<div class="scr"><img src="'+SRC(s.img)+'" alt="Out &amp; Scout '+s.k+' screen" loading="'+(i<2?"eager":"lazy")+'" decoding="async">'+(s.vid?'<video muted loop playsinline preload="none" aria-hidden="true" data-src="'+VSRC(s.vid)+'"></video>':'')+'</div></div>')+'</article>';
+}).join("").replace('<article class="f" id="f04"','<article class="f doc" id="f04"');
+document.documentElement.classList.add("js");
+
+/* 04: the summary page, Simple and Detailed, from our 18 Nov recce. Sun maths done for the Royal Docks that day. */
+function DOC(){
+  var D={"rise": "07:23", "set": "16:07", "golden": ["15:13", "16:07"], "shots": [{"n": "1A", "lens": 35, "t": "09:17", "bearing": 301, "cap": "Wide, lamppost against cloud", "now": "F", "bestAz": 233, "bestEl": 3.3, "best": ["15:26", "15:44"], "bestL": "¾B"}, {"n": "3A", "lens": 200, "t": "09:21", "bearing": 107, "cap": "Long lens, plane overhead", "now": "¾B", "bestAz": 154, "bestEl": 15.4, "best": ["10:43", "11:33"], "bestL": "¾B"}, {"n": "5A", "lens": 200, "t": "09:31", "bearing": 302, "cap": "Full, by the old mill", "now": "F", "bestAz": 233, "bestEl": 2.9, "best": ["15:31", "15:44"], "bestL": "¾B"}, {"n": "47A", "lens": 100, "t": "12:06", "bearing": 118, "cap": "Close, concrete wall & rails", "now": "¾B", "bestAz": 165, "bestEl": 18.0, "best": ["11:27", "12:17"], "bestL": "¾B"}, {"n": "54A", "lens": 50, "t": "12:19", "bearing": 161, "cap": "Mid, manhole & lamp head", "now": "B", "bestAz": 210, "bestEl": 14.3, "best": ["14:35", "15:25"], "bestL": "¾B"}]},L={"B":"Backlit","¾B":"¾ back","S":"Side","¾F":"¾ front","F":"Front"};
+  function plot(b,lens,az){var R=Math.PI/180,c=30,r=25,f=2*Math.atan(18/lens)/R/2;
+    function pt(a,rr){return (c+rr*Math.sin(a*R)).toFixed(1)+" "+(c-rr*Math.cos(a*R)).toFixed(1);}
+    return '<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="25" fill="none" stroke="#151513" stroke-width=".7"/><circle cx="30" cy="30" r="12.5" fill="none" stroke="#CFCBC2" stroke-width=".6"/>'+
+      '<path d="M30 30 L'+pt(b-f,25)+' A25 25 0 0 1 '+pt(b+f,25)+' Z" fill="#151513" fill-opacity=".1" stroke="#151513" stroke-width=".6"/>'+
+      '<line x1="30" y1="30" x2="'+pt(az,25).split(" ")[0]+'" y2="'+pt(az,25).split(" ")[1]+'" stroke="#E2531F" stroke-width=".8"/><circle cx="'+pt(az,25).split(" ")[0]+'" cy="'+pt(az,25).split(" ")[1]+'" r="2.8" fill="#E2531F"/>'+
+      '<text x="30" y="3.6" font-size="4.6" text-anchor="middle" fill="#8A877F" font-family="Geist Mono,monospace">N</text></svg>';}
+  function page(det){
+    var rows=D.shots.map(function(x){return '<div class="rw"><span class="id">'+x.n+'</span><span class="ph" style="background-image:url('+SRC("sum-"+x.n)+')"></span>'+
+      '<span class="ds"><b>'+x.cap+'</b><span class="k">'+x.lens+'mm · '+x.t+(det?' · '+x.bearing+'°':'')+'</span></span>'+
+      (det?'<span>'+plot(x.bearing,x.lens,x.bestAz)+'</span><span class="bl"><span class="k">Best light</span><span class="tm">'+x.best[0]+'–'+x.best[1]+'</span><span class="chip">'+L[x.bestL]+' · '+x.bestEl.toFixed(0)+'° up</span></span>':'<span></span><span></span>')+'</div>';}).join("");
+    var band=det?'<div><span class="k">Sunrise</span><span class="v">'+D.rise+'</span></div><div><span class="k">Golden</span><span class="v o">'+D.golden[0]+'–'+D.golden[1]+'</span></div><div><span class="k">Sunset</span><span class="v">'+D.set+'</span></div><div><span class="k">Sky</span><span class="v">Cloud · 9°</span></div>'
+      :'<div><span class="k">Shots</span><span class="v">5</span></div><div><span class="k">From</span><span class="v">09:17</span></div><div><span class="k">To</span><span class="v">12:19</span></div><div></div>';
+    return '<div class="pg'+(det?' det':'')+'"'+(det?'':' aria-hidden="false"')+'><div class="hd"><b>Out &amp; Sc&middot;out</b><span>Run recce · '+(det?'Detailed':'Simple')+'</span></div>'+
+      '<div class="tt"><span class="nn">01</span><span class="nm"><b>Docks</b><span class="k">18 Nov 2026 · Royal Docks'+(det?' · 51.5055N 0.0300E':'')+'</span></span></div>'+
+      '<div class="band">'+band+'</div><div class="rows">'+rows+'</div><div class="fade"></div></div>';}
+  return '<div class="wipe" id="wipe" style="--x:50%"><span class="tag l">Simple</span><span class="tag r on">Detailed</span>'+page(false)+page(true)+
+    '<div class="bar"><span class="knob" role="slider" tabindex="0" aria-label="Drag to compare the Simple and Detailed summary" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">‹›</span></div></div>';
+}
+(function(){
+  var w=document.getElementById("wipe");if(!w)return;var k=w.querySelector(".knob"),tl=w.querySelector(".tag.l"),tr=w.querySelector(".tag.r"),x=50,drag=false,touched=false;
+  function set(v){x=Math.max(0,Math.min(100,v));w.style.setProperty("--x",x+"%");k.setAttribute("aria-valuenow",Math.round(x));tl.classList.toggle("on",x>55);tr.classList.toggle("on",x<45);}
+  function at(e){var r=w.getBoundingClientRect();set((e.clientX-r.left)/r.width*100);}
+  w.addEventListener("pointerdown",function(e){drag=true;touched=true;at(e);});
+  window.addEventListener("pointermove",function(e){if(drag)at(e);});
+  window.addEventListener("pointerup",function(){drag=false;});
+  k.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"){set(x-5);e.preventDefault();}if(e.key==="ArrowRight"){set(x+5);e.preventDefault();}touched=true;});
+  /* one gentle sweep the first time it comes into view, so it reads as draggable */
+  if("IntersectionObserver" in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){
+    var io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting||touched)return;io.disconnect();
+      var t0=performance.now();(function step(t){if(touched)return;var p=Math.min(1,(t-t0)/2200);set(50+Math.sin(p*Math.PI*2)*28*(1-p*.3)*(p<1?1:0));if(p<1)requestAnimationFrame(step);else set(50);})(t0);});},{threshold:.6});
+    io.observe(w);}
+})();
+
+/* app loops: load and play only while on screen; the still stays underneath until the first frame is ready */
+(function(){
+  var vs=[].slice.call(document.querySelectorAll(".scr video"));if(!vs.length)return;
+  var calm=matchMedia("(prefers-reduced-motion:reduce)").matches;if(calm)return;
+  function go(v){if(!v.src){v.src=v.dataset.src;v.addEventListener("playing",function(){v.classList.add("on");},{once:true});}var p=v.play();if(p&&p.catch)p.catch(function(){});}
+  if(!("IntersectionObserver" in window)){vs.forEach(go);return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting)go(en.target);else en.target.pause();});},{threshold:.35});
+  vs.forEach(function(v){io.observe(v);});
+})();
+
+/* hotspots: hover shows on a mouse; tap toggles on a phone; one open at a time */
+(function(){
+  document.addEventListener("click",function(e){var h=e.target.closest(".hs");document.querySelectorAll('.hs[aria-expanded="true"]').forEach(function(o){if(o!==h)o.setAttribute("aria-expanded","false");});
+    if(h){h.setAttribute("aria-expanded",h.getAttribute("aria-expanded")==="true"?"false":"true");}});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape")document.querySelectorAll('.hs[aria-expanded="true"]').forEach(function(o){o.setAttribute("aria-expanded","false");});});
+})();
+
+/* the rail: which feature you're on, and back & forth */
+(function(){
+  var fs=[].slice.call(document.querySelectorAll(".f")),rail=document.getElementById("rail"),ct=document.getElementById("railct"),cur=0,vis={};
+  if(!fs.length||!rail)return;
+  function mark(i){cur=i;rail.querySelectorAll(".d").forEach(function(b,j){b.setAttribute("aria-current",j===i?"true":"false");});ct.textContent=("0"+(i+1)).slice(-2)+" / 06";}
+  function to(i){i=Math.max(0,Math.min(fs.length-1,i));fs[i].scrollIntoView({behavior:matchMedia("(prefers-reduced-motion:reduce)").matches?"auto":"smooth",block:"center"});}
+  rail.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;if(b.dataset.to)to(+b.dataset.to);else to(cur+(+b.dataset.go));});
+  document.addEventListener("keydown",function(e){if(!rail.classList.contains("on")||/input|textarea/i.test(e.target.tagName)||e.target.closest(".knob"))return;
+    if(e.key==="j"){to(cur+1);}if(e.key==="k"){to(cur-1);}});
+  if(!("IntersectionObserver" in window)){rail.classList.add("on");mark(0);return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){vis[en.target.dataset.i]=en.isIntersecting?en.intersectionRatio:0;});
+    var best=-1,bv=0;Object.keys(vis).forEach(function(k){if(vis[k]>bv){bv=vis[k];best=+k;}});
+    if(best>=0){mark(best);rail.classList.add("on");}else rail.classList.remove("on");},{threshold:[0,.25,.5,.75,1]});
+  fs.forEach(function(f){io.observe(f);});mark(0);
+})();
+
+/* things settle as they arrive */
+(function(){
+  var els=[].slice.call(document.querySelectorAll(".f,#hero"));
+  if(!("IntersectionObserver" in window)){els.forEach(function(e){e.classList.add("in");});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target);}});},{rootMargin:"0px 0px -12% 0px"});
+  els.forEach(function(e){io.observe(e);});
+})();
 
 /* the sun in London right now, the same maths the app uses (NOAA) */
 (function(){
@@ -207,6 +385,7 @@ feat.innerHTML=S.map(function(s,i){
     var now=new Date(),s=sun(now),day=new Date(now);day.setUTCHours(12,0,0,0);
     /* evening golden hour: sun between 6° and -4° on the way down */
     var a=null,b=null;for(var m=12*60;m<23*60;m+=2){var t=new Date(day.getTime()+(m-720)*6e4),e=sun(t).el;if(a===null&&e<6)a=t;if(b===null&&e<-4){b=t;break;}}
+    var hg=document.getElementById("hgold");if(hg)hg.innerHTML='Golden today <span class="o">'+(a?hm(a):"—")+'–'+(b?hm(b):"—")+'</span>';
     document.getElementById("sun").innerHTML='<span>SUN <b>'+Math.round(s.az)+'°</b> · <b>'+s.el.toFixed(1)+'°</b></span><span>GOLDEN <span class="o">'+(a?hm(a):"—")+'–'+(b?hm(b):"—")+'</span></span>';
   }
   paint();setInterval(paint,60000);

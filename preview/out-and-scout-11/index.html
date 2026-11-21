@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Out &amp; Scout</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A viewfinder for the recce. Shoot, and the light, caption and scene are written for you. Send the stills and the shot list before you leave.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#F1EEE7">
+<link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the app's paper. A top line like the app's tabs, one landscape phone that stays put while a recce plays through, the app's own kit under it (big orange number, rule, label), the live sun strip at the foot. */
+:root{
+  --paper:#F1EEE7; --ink:#151513; --grey:#8A877F; --line:#CFCBC2; --sun:#E2531F; --tint:#E9E4DA;
+  --num:"Geist","Helvetica Neue",Arial,sans-serif; --mono:"Geist Mono",ui-monospace,Menlo,monospace;
+  --e:cubic-bezier(.2,.7,0,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.55 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.lab{font:400 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);font-variant-numeric:tabular-nums}
+.lab b{font-weight:400;color:var(--ink)}
+.o{color:var(--sun)}
+.sd{display:inline-block;width:.2em;height:.2em;border-radius:50%;background:var(--sun);margin:0 .22em;transform:translateY(-.55em)}
+:focus-visible{outline:1px solid var(--sun);outline-offset:3px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+.max{max-width:1240px;margin-inline:auto}
+
+/* top line, like the app's tabs */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper)}
+header .row{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-block:16px 12px;border-bottom:1px solid var(--ink)}
+header .wm{font:400 18px var(--num);letter-spacing:-.02em;white-space:nowrap}
+header nav{display:flex;gap:18px}
+header nav a{position:relative}
+header nav a.on{color:var(--ink)}
+header nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-13px;height:2px;background:var(--sun)}
+@media (max-width:520px){header nav .hide{display:none}}
+
+/* open */
+.open{display:grid;gap:28px;padding-block:48px 24px}
+.open h1{font:400 clamp(44px,8.4vw,118px)/.96 var(--num);letter-spacing:-.05em;margin:0;text-wrap:balance}
+.open .sub{display:grid;gap:18px;grid-template-columns:1fr;align-items:end}
+.open p{margin:0;max-width:44ch;color:var(--grey)}
+.open p b{font-weight:400;color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:48px;padding:0 22px;background:var(--sun);color:#fff;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;border:0;width:max-content}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+@media (min-width:900px){.open .sub{grid-template-columns:1fr auto}}
+
+/* the phone, landscape, drawn as a quiet outline */
+.phone{position:relative;width:100%;aspect-ratio:2556/1179;max-width:100%;padding:1.1%;border:1px solid var(--ink);border-radius:5.2%/11.5%;background:var(--paper)}
+.phone .isl{position:absolute;left:1.9%;top:50%;width:1.4%;height:24%;transform:translateY(-50%);border-radius:99px;background:var(--ink);z-index:3}
+.scr{position:relative;width:100%;height:100%;overflow:hidden;border-radius:4.4%/9.6%;background:var(--paper);outline:1px solid var(--line)}
+.scr img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform-origin:50% 50%;transition:opacity .5s var(--e),transform 1.4s var(--e)}
+.scr img.on{opacity:1}
+.ring{position:absolute;z-index:4;border:1.5px solid var(--sun);opacity:0;transition:opacity .4s,left 1s var(--e),top 1s var(--e),width 1s var(--e),height 1s var(--e);pointer-events:none}
+.ring.on{opacity:1}
+
+/* the walk-through: one phone stays put, the day plays */
+.show{position:relative;border-top:1px solid var(--ink)}
+.stage{position:sticky;top:calc(env(safe-area-inset-top,0px) + 52px);height:calc(100svh - 52px - env(safe-area-inset-top,0px));display:grid;grid-template-rows:auto auto auto;gap:22px;padding-block:16px 20px;align-content:start}
+.tabs{display:flex;gap:16px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--ink);padding-bottom:10px}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{all:unset;cursor:pointer;flex:none;position:relative;font:400 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.tabs button[aria-current="true"]{color:var(--ink)}
+.tabs button[aria-current="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:2px;background:var(--sun)}
+.tabs button:focus-visible{outline:1px solid var(--sun);outline-offset:3px}
+.kit{display:grid;grid-template-columns:1fr;gap:10px;align-content:start;align-self:start}
+.kit .n{font:400 clamp(64px,17vw,150px)/.82 var(--num);letter-spacing:-.06em;color:var(--sun);padding-bottom:10px;border-bottom:1.5px solid var(--sun);width:max-content;min-width:1.4em}
+.kit h2{margin:0;font:400 clamp(24px,5.6vw,52px)/1.02 var(--num);letter-spacing:-.035em;text-wrap:balance}
+.kit p{margin:0;color:var(--grey);max-width:52ch;font-size:13px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.kit .in{display:contents}
+.kit .fade{animation:fin .45s var(--e)}
+@keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.steps .s{height:90svh}
+.steps .s:first-child{height:75svh}
+@media (min-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto 1fr;gap:28px 48px;align-items:center}
+  .tabs{grid-column:1 / -1}
+  .phone{grid-column:1;grid-row:2}
+  .kit{grid-column:2;grid-row:2;grid-template-columns:1fr;align-self:center}
+  .kit p{font-size:14px}
+}
+
+/* after */
+.sec{border-top:1px solid var(--ink);padding-block:56px;display:grid;gap:28px}
+.sec h2{margin:0;font:400 clamp(36px,6.4vw,84px)/1 var(--num);letter-spacing:-.045em;text-wrap:balance}
+.facts{display:grid;gap:0;border-top:1px solid var(--line)}
+.facts div{display:grid;grid-template-columns:minmax(0,9em) minmax(0,1fr);gap:16px;padding-block:14px;border-bottom:1px solid var(--line)}
+.facts div span:last-child{color:var(--ink)}
+@media (min-width:900px){.facts{grid-template-columns:1fr 1fr;column-gap:48px}}
+.tiers{display:grid;gap:0;border-top:1px solid var(--ink)}
+.tier{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 20px;align-items:baseline;padding-block:20px;border-bottom:1px solid var(--line)}
+.tier .p{grid-row:span 3;font:400 clamp(44px,9vw,84px)/.9 var(--num);letter-spacing:-.05em;min-width:2.6em}
+.tier .p.o{color:var(--sun)}
+.tier s{color:var(--grey)}
+@media (min-width:900px){.tiers{grid-template-columns:1fr 1fr;column-gap:48px}}
+
+/* the live sun strip, like the app's foot */
+.strip{position:sticky;bottom:0;z-index:15;background:var(--paper)}
+.strip .row{display:flex;justify-content:space-between;gap:12px;padding-block:10px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--ink)}
+.strip .row > span:first-child{display:flex;gap:16px;flex-wrap:wrap}
+@media (max-width:520px){.strip .row > span:last-child{display:none}}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:24px 32px;border-top:1px solid var(--ink)}
+footer nav{display:flex;gap:18px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="row max">
+    <a class="wm" href="#top">Out &amp; Sc<span class="sd"></span>out</a>
+    <nav class="lab"><a href="#how" class="hide">How</a><a href="#price" class="hide">Price</a><a href="#get" class="on">Get it</a></nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="open wrap">
+  <div class="max" style="display:grid;gap:28px">
+    <span class="lab">iPhone · for DPs and directors on the recce</span>
+    <h1>Scout it once.<br>Know the shoot day.</h1>
+    <div class="sub">
+      <p>A viewfinder for the recce. <b>You press the shutter.</b> The light, a caption and the scene are written for you, and the shot list is ready before you've left.</p>
+      <div class="btns"><a class="btn" href="#get">Get it free</a><a class="btn ghost" href="#how">How it works ↓</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="show wrap" id="how" aria-label="How Out &amp; Scout works">
+  <div class="stage max">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Steps"></div>
+    <div class="phone" aria-hidden="true"><i class="isl"></i><div class="scr" id="scr"><i class="ring" id="ring"></i></div></div>
+    <div class="kit" aria-live="polite" id="kit"></div>
+  </div>
+  <div class="steps" id="steps"></div>
+</section>
+
+<section class="sec wrap">
+  <div class="max" style="display:grid;gap:28px">
+    <span class="lab">Built for a long day out</span>
+    <h2>Nothing leaves your phone.</h2>
+    <div class="facts lab">
+      <div><span>Account</span><span>None. No sign-in, no tracking.</span></div>
+      <div><span>Your stills</span><span>Stay on your phone until you send them.</span></div>
+      <div><span>Faces</span><span>Found and blurred on the phone.</span></div>
+      <div><span>Big days</span><span>Two hundred shots export in one go.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec wrap" id="price">
+  <div class="max" style="display:grid;gap:28px" id="get">
+    <span class="lab">Pay once · no subscription</span>
+    <h2>Every feature is free.</h2>
+    <div class="tiers lab">
+      <div class="tier"><span class="p">£0</span><b>Free</b><span>Every feature, on one project.</span><span>PDFs carry a small credit line.</span></div>
+      <div class="tier"><span class="p o">£19.99</span><b>Pro · once</b><span>Unlimited projects, clean PDFs.</span><span>Yours for good.</span></div>
+    </div>
+    <div class="btns"><a class="btn" href="https://apps.apple.com/app/id6823591366">Download on the App Store</a></div>
+  </div>
+</section>
+
+<footer class="wrap lab">
+  <span>© 2026 Eltio Studio Ltd</span>
+  <nav><a href="support/">Help</a><a href="privacy/">Privacy</a><span>hello@eltio.studio</span></nav>
+</footer>
+</main>
+
+<div class="strip wrap lab" aria-label="The sun in London now">
+  <div class="row max"><span id="sun">SUN — · GOLDEN —</span><span>London · now</span></div>
+</div>
+
+<script>
+/* the walk-through. f = focus on the real screen: centre x, y (0 to 1) and zoom; r = ring round the detail that matters */
+var S=[
+ {k:"Shoot",img:"os11-viewfinder",n:"01",h:"Just press the shutter.",p:"The light read, a caption of what's in frame and the scene are written as you shoot. No notebook.",f:[.35,.6,1.3],r:[.06,.86,.37,.95]},
+ {k:"Selects",img:"os11-selects",n:"02",h:"Stills sent before you leave.",p:"The client wants frames now. Tap to pick, send full-size JPEGs by AirDrop, WhatsApp or Mail.",f:[.5,.5,1.15],r:[.68,.3,.97,.37]},
+ {k:"Blur faces",img:"os11-viewer-blur",n:"03",h:"Blur the crew.",p:"Faces are found and softened on the phone before anything goes out. Missed one? Tap Fix.",f:[.46,.42,1.3],r:[.62,.94,.98,1]},
+ {k:"Shots",img:"os11-shots",n:"04",h:"The shot list writes itself.",p:"Every shot on the day's sun arc, numbered by scene, with its time and light.",f:[.6,.45,1.2],r:[.14,.07,.98,.24]},
+ {k:"Best light",img:"os11-shot-card",n:"05",h:"Know when the light is best.",p:"Each shot gets its best window and how the sun falls: three-quarter backlit, from the left.",f:[.62,.4,1.3],r:[.55,.11,.92,.3]},
+ {k:"The PDF",img:"os11-export",n:"06",h:"The shot list, from the car.",p:"An A4 PDF with frames, sun, notes and best times. Tap any word on the page to change it. The producer has it before you're home.",f:[.45,.5,1.2],r:[.37,.06,.75,.88]},
+ {k:"Next light",img:"os11-projects",n:"07",h:"The next good light, waiting.",p:"Open the app and it tells you which shot's light comes round next, and when.",f:[.7,.4,1.3],r:[.85,.24,.985,.3]}
+];
+var scr=document.getElementById("scr"),ring=document.getElementById("ring"),kit=document.getElementById("kit"),tabs=document.getElementById("tabs"),steps=document.getElementById("steps");
+var imgs=S.map(function(s,i){var im=new Image();im.src="img/"+s.img+".webp";im.alt="";im.decoding="async";if(i>1)im.loading="lazy";scr.insertBefore(im,ring);return im;});
+S.forEach(function(s,i){
+  var b=document.createElement("button");b.type="button";b.textContent=s.k;b.setAttribute("role","tab");b.onclick=function(){go(i)};tabs.appendChild(b);
+  var d=document.createElement("div");d.className="s";steps.appendChild(d);
+});
+var cur=-1,t1;
+var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function focus(i,on){
+  var s=S[i],im=imgs[i],z=on?s.f[2]:1,x=s.f[0],y=s.f[1];
+  /* keep the zoomed picture inside the screen */
+  var tx=on?Math.max(-(z-1)/2,Math.min((z-1)/2,(.5-x)*z)):0,ty=on?Math.max(-(z-1)/2,Math.min((z-1)/2,(.5-y)*z)):0;
+  im.style.transform="translate("+(tx*100)+"%,"+(ty*100)+"%) scale("+z+")";
+  if(on){ /* the ring follows the zoom */
+    var r=s.r,map=function(px,py){return [((px-.5)*z+.5+tx)*100,((py-.5)*z+.5+ty)*100];},a=map(r[0],r[1]),b=map(r[2],r[3]);
+    ring.style.left=a[0]+"%";ring.style.top=a[1]+"%";ring.style.width=(b[0]-a[0])+"%";ring.style.height=(b[1]-a[1])+"%";
+  }
+  ring.classList.toggle("on",false);
+}
+function show(i){
+  if(i===cur)return;cur=i;clearTimeout(t1);
+  imgs.forEach(function(im,j){im.classList.toggle("on",j===i);if(j!==i)im.style.transform="";});
+  focus(i,false);
+  var s=S[i];
+  kit.innerHTML='<span class="n fade">'+s.n+'</span><h2 class="fade">'+s.h+'</h2><p class="fade">'+s.p+'</p>';
+  tabs.querySelectorAll("button").forEach(function(b,j){b.setAttribute("aria-current",j===i?"true":"false")});
+  var on=tabs.children[i];tabs.scrollTo({left:on.offsetLeft-tabs.clientWidth/2+on.clientWidth/2,behavior:"smooth"});
+  if(!reduce)t1=setTimeout(function(){focus(i,true)},900);else focus(i,true);
+}
+function go(j){var s=steps.children[j];scrollTo({top:s.getBoundingClientRect().top+scrollY+4,behavior:"smooth"});}
+function onScroll(){var k=0,h=innerHeight;for(var i=0;i<steps.children.length;i++){if(steps.children[i].getBoundingClientRect().top<h*.55)k=i;}show(k);}
+addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);
+scr.parentNode.onclick=function(){var c=cur;focus(c,false);clearTimeout(t1);t1=setTimeout(function(){focus(c,true)},700);};
+onScroll();
+
+/* the sun in London right now, the same maths the app uses (NOAA) */
+(function(){
+  var LAT=51.5072,LON=-0.1276,R=Math.PI/180;
+  function sun(d){
+    var jd=d/864e5+2440587.5,n=jd-2451545,L=(280.46+.9856474*n)%360,g=(357.528+.9856003*n)%360;
+    var lam=(L+1.915*Math.sin(g*R)+.02*Math.sin(2*g*R))*R,eps=(23.439-4e-7*n)*R;
+    var ra=Math.atan2(Math.cos(eps)*Math.sin(lam),Math.cos(lam)),dec=Math.asin(Math.sin(eps)*Math.sin(lam));
+    var gmst=(280.46061837+360.98564736629*n)%360,ha=((gmst+LON)*R-ra);
+    var el=Math.asin(Math.sin(LAT*R)*Math.sin(dec)+Math.cos(LAT*R)*Math.cos(dec)*Math.cos(ha));
+    var az=Math.atan2(-Math.sin(ha),Math.tan(dec)*Math.cos(LAT*R)-Math.sin(LAT*R)*Math.cos(ha));
+    return {el:el/R,az:(az/R+360)%360};
+  }
+  function hm(d){try{return new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"}).format(d)}catch(e){return d.toTimeString().slice(0,5)}}
+  function paint(){
+    var now=new Date(),s=sun(now),day=new Date(now);day.setUTCHours(12,0,0,0);
+    /* evening golden hour: sun between 6° and -4° on the way down */
+    var a=null,b=null;for(var m=12*60;m<23*60;m+=2){var t=new Date(day.getTime()+(m-720)*6e4),e=sun(t).el;if(a===null&&e<6)a=t;if(b===null&&e<-4){b=t;break;}}
+    document.getElementById("sun").innerHTML='<span>SUN <b>'+Math.round(s.az)+'°</b> · <b>'+s.el.toFixed(1)+'°</b></span><span>GOLDEN <span class="o">'+(a?hm(a):"—")+'–'+(b?hm(b):"—")+'</span></span>';
+  }
+  paint();setInterval(paint,60000);
+})();
+</script>
+</body>
+</html>

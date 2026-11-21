@@ -2,11 +2,11 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Out &amp; Scout</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="A viewfinder for the recce. Shoot, and the light, caption and scene are written for you. Send the stills and the shot list before you leave.">
-<meta name="robots" content="noindex">
 <meta name="theme-color" content="#F1EEE7">
 <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,15 +79,15 @@ header nav a.on::after{content:"";position:absolute;left:0;right:0;bottom:-13px;
 .kit .in{display:contents}
 .kit .fade{animation:fin .45s var(--e)}
 @keyframes fin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.steps .s{height:90svh}
-.steps .s:first-child{height:75svh}
-@media (min-width:900px){
-  .stage{grid-template-columns:minmax(0,1fr) 360px;grid-template-rows:auto 1fr;gap:28px 48px;align-items:center}
-  .tabs{grid-column:1 / -1}
-  .phone{grid-column:1;grid-row:2}
-  .kit{grid-column:2;grid-row:2;grid-template-columns:1fr;align-self:center}
-  .kit p{font-size:14px}
-}
+/* the features: a plain list, one per row */
+.feat{display:grid;border-top:1px solid var(--ink)}
+.f{display:grid;gap:18px;padding-block:28px 36px;border-bottom:1px solid var(--line)}
+.f .kit{display:grid;gap:8px;align-content:start}
+.f .n{font:400 clamp(56px,15vw,120px)/.82 var(--num);letter-spacing:-.06em;color:var(--sun);padding-bottom:8px;border-bottom:1.5px solid var(--sun);width:max-content;min-width:1.4em}
+.f h2{margin:6px 0 0;font:400 clamp(26px,6vw,48px)/1.04 var(--num);letter-spacing:-.035em;text-wrap:balance}
+.f p{margin:0;color:var(--grey);max-width:46ch;font-size:13px}
+.f .scr img{opacity:1;transform:none}
+@media (min-width:900px){.f{grid-template-columns:340px minmax(0,1fr);gap:56px;align-items:center;padding-block:48px}.f p{font-size:14px}}
 
 /* after */
 .sec{border-top:1px solid var(--ink);padding-block:56px;display:grid;gap:28px}
@@ -128,19 +128,14 @@ footer nav{display:flex;gap:18px}
     <span class="lab">iPhone · for DPs and directors on the recce</span>
     <h1>Scout it once.<br>Know the shoot day.</h1>
     <div class="sub">
-      <p>A viewfinder for the recce. <b>You press the shutter.</b> The light, a caption and the scene are written for you, and the shot list is ready before you've left.</p>
+      <p><b>We wanted to make recceing a little easier.</b> So we built the things we kept wishing we had on a recce.</p>
       <div class="btns"><a class="btn" href="#get">Get it free</a><a class="btn ghost" href="#how">How it works ↓</a></div>
     </div>
   </div>
 </section>
 
-<section class="show wrap" id="how" aria-label="How Out &amp; Scout works">
-  <div class="stage max">
-    <div class="tabs" id="tabs" role="tablist" aria-label="Steps"></div>
-    <div class="phone" aria-hidden="true"><i class="isl"></i><div class="scr" id="scr"><i class="ring" id="ring"></i></div></div>
-    <div class="kit" aria-live="polite" id="kit"></div>
-  </div>
-  <div class="steps" id="steps"></div>
+<section class="wrap" id="how" aria-label="How Out &amp; Scout works">
+  <div class="max feat" id="feat"></div>
 </section>
 
 <section class="sec wrap">
@@ -180,49 +175,20 @@ footer nav{display:flex;gap:18px}
 
 <script>
 /* the walk-through. f = focus on the real screen: centre x, y (0 to 1) and zoom; r = ring round the detail that matters */
+function SRC(n){return (typeof IMG!=="undefined"&&IMG[n])||"img/"+n+".webp";}
 var S=[
- {k:"Shoot",img:"os11-viewfinder",n:"01",h:"Just press the shutter.",p:"The light read, a caption of what's in frame and the scene are written as you shoot. No notebook.",f:[.35,.6,1.3],r:[.06,.86,.37,.95]},
- {k:"Selects",img:"os11-selects",n:"02",h:"Stills sent before you leave.",p:"The client wants frames now. Tap to pick, send full-size JPEGs by AirDrop, WhatsApp or Mail.",f:[.5,.5,1.15],r:[.68,.3,.97,.37]},
- {k:"Blur faces",img:"os11-viewer-blur",n:"03",h:"Blur the crew.",p:"Faces are found and softened on the phone before anything goes out. Missed one? Tap Fix.",f:[.46,.42,1.3],r:[.62,.94,.98,1]},
- {k:"Shots",img:"os11-shots",n:"04",h:"The shot list writes itself.",p:"Every shot on the day's sun arc, numbered by scene, with its time and light.",f:[.6,.45,1.2],r:[.14,.07,.98,.24]},
- {k:"Best light",img:"os11-shot-card",n:"05",h:"Know when the light is best.",p:"Each shot gets its best window and how the sun falls: three-quarter backlit, from the left.",f:[.62,.4,1.3],r:[.55,.11,.92,.3]},
- {k:"The PDF",img:"os11-export",n:"06",h:"The shot list, from the car.",p:"An A4 PDF with frames, sun, notes and best times. Tap any word on the page to change it. The producer has it before you're home.",f:[.45,.5,1.2],r:[.37,.06,.75,.88]},
- {k:"Next light",img:"os11-projects",n:"07",h:"The next good light, waiting.",p:"Open the app and it tells you which shot's light comes round next, and when.",f:[.7,.4,1.3],r:[.85,.24,.985,.3]}
+ {k:"Captions & scenes",img:"os11-shots",n:"01",h:"Captions & scenes, done for you.",p:"Auto captions & scene change detection, so the app keeps up as you walk round a recce."},
+ {k:"Blur faces",img:"os11-viewer-blur",n:"02",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
+ {k:"Best light",img:"os11-shot-card",n:"03",h:"A suggestion for the best light.",p:"Picked the way working cinematographers would. We love the backlight."},
+ {k:"Summary",img:"os11-export",n:"04",h:"Detailed or simple, you choose.",p:"Our summary document is made to be detailed or simple, whatever the job needs."},
+ {k:"Send photos",img:"os11-selects",n:"05",h:"Just send the photos.",p:"You can now easily send photos like you're used to."},
+ {k:"iPhone only",img:"os11-viewfinder",n:"06",h:"iPhone only, on purpose.",p:"We wanted to make sure we had the best camera, & that you can choose your exposure when recceing, just like the iPhone camera."}
 ];
-var scr=document.getElementById("scr"),ring=document.getElementById("ring"),kit=document.getElementById("kit"),tabs=document.getElementById("tabs"),steps=document.getElementById("steps");
-var imgs=S.map(function(s,i){var im=new Image();im.src="img/"+s.img+".webp";im.alt="";im.decoding="async";if(i>1)im.loading="lazy";scr.insertBefore(im,ring);return im;});
-S.forEach(function(s,i){
-  var b=document.createElement("button");b.type="button";b.textContent=s.k;b.setAttribute("role","tab");b.onclick=function(){go(i)};tabs.appendChild(b);
-  var d=document.createElement("div");d.className="s";steps.appendChild(d);
-});
-var cur=-1,t1;
-var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function focus(i,on){
-  var s=S[i],im=imgs[i],z=on?s.f[2]:1,x=s.f[0],y=s.f[1];
-  /* keep the zoomed picture inside the screen */
-  var tx=on?Math.max(-(z-1)/2,Math.min((z-1)/2,(.5-x)*z)):0,ty=on?Math.max(-(z-1)/2,Math.min((z-1)/2,(.5-y)*z)):0;
-  im.style.transform="translate("+(tx*100)+"%,"+(ty*100)+"%) scale("+z+")";
-  if(on){ /* the ring follows the zoom */
-    var r=s.r,map=function(px,py){return [((px-.5)*z+.5+tx)*100,((py-.5)*z+.5+ty)*100];},a=map(r[0],r[1]),b=map(r[2],r[3]);
-    ring.style.left=a[0]+"%";ring.style.top=a[1]+"%";ring.style.width=(b[0]-a[0])+"%";ring.style.height=(b[1]-a[1])+"%";
-  }
-  ring.classList.toggle("on",false);
-}
-function show(i){
-  if(i===cur)return;cur=i;clearTimeout(t1);
-  imgs.forEach(function(im,j){im.classList.toggle("on",j===i);if(j!==i)im.style.transform="";});
-  focus(i,false);
-  var s=S[i];
-  kit.innerHTML='<span class="n fade">'+s.n+'</span><h2 class="fade">'+s.h+'</h2><p class="fade">'+s.p+'</p>';
-  tabs.querySelectorAll("button").forEach(function(b,j){b.setAttribute("aria-current",j===i?"true":"false")});
-  var on=tabs.children[i];tabs.scrollTo({left:on.offsetLeft-tabs.clientWidth/2+on.clientWidth/2,behavior:"smooth"});
-  if(!reduce)t1=setTimeout(function(){focus(i,true)},900);else focus(i,true);
-}
-function go(j){var s=steps.children[j];scrollTo({top:s.getBoundingClientRect().top+scrollY+4,behavior:"smooth"});}
-function onScroll(){var k=0,h=innerHeight;for(var i=0;i<steps.children.length;i++){if(steps.children[i].getBoundingClientRect().top<h*.55)k=i;}show(k);}
-addEventListener("scroll",onScroll,{passive:true});addEventListener("resize",onScroll);
-scr.parentNode.onclick=function(){var c=cur;focus(c,false);clearTimeout(t1);t1=setTimeout(function(){focus(c,true)},700);};
-onScroll();
+var feat=document.getElementById("feat");
+feat.innerHTML=S.map(function(s,i){
+  return '<article class="f"><div class="kit"><span class="n">'+s.n+'</span><span class="lab"><b>'+s.k+'</b></span><h2>'+s.h+'</h2><p>'+s.p+'</p></div>'+
+    '<div class="phone"><i class="isl"></i><div class="scr"><img src="'+SRC(s.img)+'" alt="Out &amp; Scout '+s.k+' screen" loading="'+(i<2?"eager":"lazy")+'" decoding="async"></div></div></article>';
+}).join("");
 
 /* the sun in London right now, the same maths the app uses (NOAA) */
 (function(){

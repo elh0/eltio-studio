@@ -22,7 +22,7 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.55 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 14px/1.55 var(--mono);-webkit-font-smoothing:antialiased;overflow-x:clip}
 a{color:inherit;text-decoration:none}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .lab{font:400 11px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);font-variant-numeric:tabular-nums}
@@ -102,7 +102,9 @@ html{scroll-snap-type:y proximity}
 .hs .tip b{font-weight:500;color:var(--sun);text-transform:uppercase;letter-spacing:.08em;font-size:11px}
 .hs .tip.r{left:auto;right:24px}.hs .tip.u{top:auto;bottom:24px}
 .hs:hover i,.hs:focus-visible i,.hs[aria-expanded="true"] i{transform:scale(1.25)}
-.hs:hover .tip,.hs:focus-visible .tip,.hs[aria-expanded="true"] .tip{opacity:1;transform:none}
+.hs .tip{display:none}
+.hs:hover .tip,.hs:focus-visible .tip,.hs[aria-expanded="true"] .tip{display:grid;opacity:1;transform:none;animation:tipin .25s var(--e)}
+@keyframes tipin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .hs:focus-visible{outline:none}.hs:focus-visible i{outline:2px solid var(--ink);outline-offset:3px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .f .hint{color:var(--grey)}
@@ -115,7 +117,7 @@ html{scroll-snap-type:y proximity}
 .rail button:focus-visible{outline:1px solid var(--sun);outline-offset:2px}
 .rail .ar{color:var(--ink);font-size:14px}
 .rail .ct{display:none;color:var(--ink);font:400 11px var(--mono);letter-spacing:.08em;padding:0 8px}
-@media (max-width:620px){.rail .d{display:none}.rail .ct{display:block}.f{min-height:82svh}}
+@media (max-width:620px){.rail .d{display:none}.rail .ct{display:block}.f{min-height:72svh}}
 @media (min-width:900px){.rail{left:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:auto;top:50%;transform:translate(12px,-50%);flex-direction:column}.rail.on{transform:translate(0,-50%)}.rail .ar{transform:rotate(90deg)}}
 
 /* after */
@@ -195,6 +197,42 @@ footer nav{display:flex;gap:18px}
 .js .f .scr img{transform:scale(1.04);transition:transform 1.6s var(--e) .1s}
 .js .f.in .scr img{transform:none}
 @media (prefers-reduced-motion:reduce){.js .f .phone,.js .f .scr img,.js .f .kit{transform:none;opacity:1}.hs i::after{animation:none}.hero .fr img{transform:none}}
+
+/* sleek pass: fewer lines, no drawn outlines, softer surfaces */
+header .row{border-bottom:0;padding-block:18px}
+header nav a.on::after{display:none}
+.feat,.f,.sec,footer,.strip .row{border:0}
+.f{border-bottom:0}
+.phone{border:0;padding:0;background:none;border-radius:0}
+.phone .isl{display:none}
+.scr{border-radius:clamp(10px,2.2vw,26px);outline:0;box-shadow:0 0 0 1px rgba(21,21,19,.06),0 50px 90px -50px rgba(21,21,19,.45),0 18px 36px -24px rgba(21,21,19,.18)}
+.hsl{inset:0}
+.hs i{width:10px;height:10px;box-shadow:0 0 0 3px rgba(241,238,231,.85)}
+.hs i::after{width:10px;height:10px;margin:-5px 0 0 -5px;border-width:1px;animation-duration:3s}
+.hs .tip{background:var(--ink);color:var(--paper);border:0;border-radius:12px;padding:10px 14px;box-shadow:0 18px 40px -20px rgba(21,21,19,.6)}
+.hs .tip b{color:var(--paper);opacity:.6}
+.rail{border:0;background:rgba(241,238,231,.78);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-radius:99px;padding:8px 10px;gap:6px;box-shadow:0 0 0 1px rgba(21,21,19,.06)}
+.rail .d{font-size:0;min-width:0;width:6px;height:6px;padding:0;border-radius:99px;background:var(--line);transition:background .3s,height .3s,width .3s}
+.rail .d[aria-current="true"]{background:var(--sun);color:transparent}
+.rail .d::before{content:"";position:absolute;inset:-10px}
+.rail .d{position:relative}
+.rail .ar{height:24px;min-width:24px;color:var(--grey)}
+.rail .ar:hover{color:var(--ink)}
+@media (min-width:900px){.rail{padding:12px 8px}.rail .d[aria-current="true"]{height:22px}.rail .ar{display:none}}
+@media (max-width:899px){.rail .d{display:block}.rail .ct{display:none}.rail .d[aria-current="true"]{width:22px}}
+.btn{border-radius:99px;height:46px}
+.hero .gd{display:none}
+.hero .fr{border-radius:clamp(10px,1.6vw,20px)}
+.hero .hud .cap{background:none;border:0;color:#fff;padding:0;text-shadow:0 1px 10px rgba(0,0,0,.4)}
+.hero .hud .cap span{color:#fff;opacity:.75}
+.hero .hud .id{font-size:clamp(22px,3vw,40px)}
+.strip{background:rgba(241,238,231,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.strip .row{padding-block:9px calc(9px + env(safe-area-inset-bottom,0px));font-size:10.5px}
+.facts,.tiers{border-top:0}
+.facts div,.tier{border-bottom-color:rgba(207,203,194,.6)}
+.wipe .knob{width:36px;height:36px;margin:-18px 0 0 -18px;font-size:12px}
+.wipe .pg{border-radius:4px}
+.f h2{letter-spacing:-.045em}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
 </head>
@@ -274,11 +312,11 @@ footer nav{display:flex;gap:18px}
 <script>
 /* the walk-through. f = focus on the real screen: centre x, y (0 to 1) and zoom; r = ring round the detail that matters */
 function VSRC(n){return (typeof VID!=="undefined"&&VID[n])||"vid/"+n+".mp4";}
-function HS(h){if(!h)return"";return '<div class="hsl">'+h.map(function(d,j){return '<button type="button" class="hs" style="left:'+d[0]+'%;top:'+d[1]+'%" aria-expanded="false"><i></i><span class="tip'+(d[0]>60?' r':'')+(d[1]>60?' u':'')+'"><b>'+d[2]+'</b>'+d[3]+'</span><span class="sr">'+d[2]+'</span></button>';}).join("")+'</div>';}
+function HS(h){if(!h)return"";return '<div class="hsl">'+h.map(function(d,j){return '<button type="button" class="hs" style="left:'+d[0]+'%;top:'+d[1]+'%" aria-expanded="false"><i></i><span class="tip'+(d[0]>45?' r':'')+(d[1]>60?' u':'')+'"><b>'+d[2]+'</b>'+d[3]+'</span><span class="sr">'+d[2]+'</span></button>';}).join("")+'</div>';}
 function SRC(n){return (typeof IMG!=="undefined"&&IMG[n])||"img/"+n+".webp";}
 var S=[
  {hs:[[27.5,78,"Auto caption","Every still gets a caption & a light read the second you shoot."],[50,23,"New scene","Walk somewhere new & it starts the next scene for you."],[91,52,"Just shoot","Numbering & notes are done as you go."]],k:"Captions & scenes",vid:"vf",img:"os11-shots",n:"01",h:"Captions & scenes, done for you.",p:"Auto captions & scene change detection, so the app keeps up as you walk round a recce."},
- {hs:[[45,42,"Found on the phone","Faces are found & softened on the phone. Nothing is uploaded."],[79,94.5,"One tap","Turn blur on or off for each shot. The original stays as it was."],[97.6,50,"Swipe","Go through the whole recce, full screen."]],k:"Blur faces",vid:"blur",img:"os11-viewer-blur",n:"02",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
+ {hs:[[45,42,"Found on the phone","Faces are found & softened on the phone. Nothing is uploaded."],[92,94.5,"One tap","Turn blur on or off for each shot. The original stays as it was."],[97.6,50,"Swipe","Go through the whole recce, full screen."]],k:"Blur faces",vid:"blur",img:"os11-viewer-blur",n:"02",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
  {hs:[[47,23,"Best light","The window when the light is best for this frame."],[51,57,"Sun & facing","Where you're pointing & where the sun will be."],[69,20,"Light read","Backlit, ¾ back, side or front, read from the sun."]],k:"Best light",vid:"card",img:"os11-shot-card",n:"03",h:"A suggestion for the best light.",p:"Picked the way working cinematographers would. We love the backlight."},
  {k:"Summary",doc:1,img:"os11-export",n:"04",h:"Detailed or simple, you choose.",p:"Our summary document is made to be detailed or simple, whatever the job needs."},
  {hs:[[15.6,63,"Pick","Tap the stills you want. The light read goes with each one."],[76,34,"Blur faces","Soften faces before they leave your phone."],[90,34,"Send","Messages, WhatsApp, AirDrop or mail, like any photo."]],k:"Send photos",vid:"sel",img:"os11-selects",n:"05",h:"Just send the photos.",p:"You can now easily send photos like you're used to."},

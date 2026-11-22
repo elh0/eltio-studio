@@ -97,6 +97,16 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .head h2{font-size:clamp(36px,5.4vw,72px);line-height:1.02;letter-spacing:-.05em}
 .head p{margin:18px auto 0;max-width:40ch;color:#55534d;font-size:clamp(17px,1.6vw,21px)}
 .head .lab{display:block;margin-bottom:16px}
+.band{background:#0e0e0e;color:#F1EEE7;margin-top:clamp(90px,15vh,170px);padding:clamp(70px,11vh,130px) 22px}
+.band .lab{color:#8A877F}
+.split{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(36px,6vw,96px);align-items:center}
+.split.rev{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.split.rev .sx{order:2}.split.rev .sp{order:1}
+.split h2{font-size:clamp(36px,5vw,68px);line-height:1.02;letter-spacing:-.05em;margin-top:14px}
+.split p{margin-top:20px;max-width:34ch;font-size:clamp(17px,1.5vw,20px);color:#55534d}.band .split p{color:#b9b5ac}
+.band .sp img{display:block;width:100%;border-radius:22px;-webkit-mask:linear-gradient(90deg,transparent 0,#000 16%,#000 94%,transparent);mask:linear-gradient(90deg,transparent 0,#000 16%,#000 94%,transparent)}
+.pair.one{grid-template-columns:minmax(0,330px)}
+@media (max-width:820px){.split,.split.rev{grid-template-columns:1fr;text-align:left}.split.rev .sx{order:1}.split.rev .sp{order:2}.band .sp img{max-width:460px;margin:0 auto}.pair.one{grid-template-columns:minmax(0,280px)}}
+
 
 /* Simple or Detailed */
 .doc{display:grid;justify-items:center;text-align:center}
@@ -235,6 +245,8 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .end{text-align:center;padding-block:clamp(110px,18vh,200px) clamp(90px,14vh,140px)}
 .end h2{font-size:clamp(48px,8.5vw,112px);line-height:1;letter-spacing:-.055em}
 .end .cta{margin-top:34px;display:flex;justify-content:center}
+.end .soon b{color:var(--sun);font-weight:600}.end .soon{margin:22px auto 0;max-width:30em;color:var(--grey);font-size:16px}.su{margin:22px auto 0;max-width:460px}.su-row{display:flex;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:5px 5px 5px 18px}.su input[type=email]{flex:1;min-width:0;border:0;background:none;font:400 16px var(--num);color:var(--ink);outline:none}.su .pill{flex:none;border:0;cursor:pointer}.su .pill:disabled{opacity:.6}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}.su-done{min-height:1.4em;margin-top:10px;font:400 12px var(--mono);letter-spacing:.04em;color:var(--grey)}.su.sent .su-row{border-color:var(--sun)}@media(max-width:420px){.su .pill{padding:0 14px;font-size:14px}}
+
 .end .shot.last{margin:clamp(48px,8vh,84px) auto 0;transform:none}
 footer{border-top:1px solid rgba(21,21,19,.1);padding-block:22px calc(26px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--grey)}
 footer nav{display:flex;gap:18px}
@@ -246,7 +258,7 @@ footer nav{display:flex;gap:18px}
 </style>
 </head>
 <body>
-<header class="nav wrap"><div class="row max"><a class="wm" href="#top">Out &amp; Sc<span class="sd"></span>out</a><nav><a href="#how" class="hide">How it works</a><a href="#price" class="hide">Price</a><a class="pill sm" href="https://apps.apple.com/app/id6823591366">Download</a></nav></div></header>
+<header class="nav wrap"><div class="row max"><a class="wm" href="#top">Out &amp; Sc<span class="sd"></span>out</a><nav><a href="#how" class="hide">How it works</a><a href="#price" class="hide">Price</a><a class="pill sm" href="#get">Coming soon</a></nav></div></header>
 
 <main id="top">
 <section class="open wrap">
@@ -254,7 +266,7 @@ footer nav{display:flex;gap:18px}
     <div class="name">Out &amp; Scout</div>
     <h1>Scout it once.<br>Know the shoot day.</h1>
     <p>We wanted to make recceing a little easier.</p>
-    <div class="cta"><a class="pill" href="https://apps.apple.com/app/id6823591366">Download free</a><a class="link" href="#how">See how it works ›</a></div>
+    <div class="cta"><a class="pill" href="#get">Get early access</a><a class="link" href="#how">See how it works ›</a></div>
     <div class="stage0" id="stage0">
       <div class="shot"><img src="img/mk-hero.webp" alt="Hands holding an iPhone on its side, running the Out &amp; Scout camera" fetchpriority="high"></div>
       <div class="note lab">iPhone · for DPs &amp; directors on the recce</div>
@@ -276,20 +288,17 @@ footer nav{display:flex;gap:18px}
   </div>
 </section>
 
-<section class="sec wrap" id="upright">
-  <div class="max">
-    <div class="head rv"><span class="lab">Upright too</span><h2>Shoot day,<br>on your lock screen.</h2></div>
-    <div class="pair up rv">
-      <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps lock" style="background-image:url(img/lock-53A.webp)">
-        <div class="sb lt"><b>EE</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div>
-        <div class="lk"><span class="dt">Friday 20 November</span><span class="tm">07:12</span>
-          <div class="wg"><div><span>Sunrise</span><b>07:26</b></div><div><span>Golden <i></i></span><b>15:11</b></div></div></div>
-        <div class="la"><div class="lh"><span>Out &amp; Scout · Shoot day</span><span>Run recce</span></div><b class="big">15 shots</b>
-          <div class="lr"><span>First</span><span>1A · 09:17 · Front</span></div><div class="lr o"><span>Best light</span><span>54A · 14:35–15:25</span></div><div class="lr"><span>Sunset</span><span>16:05</span></div>
-          <span class="go">Open shot list PDF</span></div>
-        <div class="lb"><i></i><i></i></div><i class="hb"></i>
-      </div></div><figcaption class="lab">Shoot day</figcaption></figure>
-      <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps sel">
+<section class="band" id="shootday">
+  <div class="max split">
+    <div class="sx rv"><span class="lab">Shoot day</span><h2>The day,<br>on your lock screen.</h2><p>On the morning of a shoot, Out &amp; Scout puts the day on your lock screen. First shot, best light, sunset, &amp; the shot list PDF one tap away.</p></div>
+    <div class="sp rv"><img src="img/mk-lock-coffee.webp" alt="A hand holding an iPhone next to an espresso, the lock screen showing the Out &amp; Scout shoot day card: 11 shots, first shot, best light & sunset" loading="lazy"></div>
+  </div>
+</section>
+
+<section class="sec wrap" id="selects">
+  <div class="max split rev">
+    <div class="sx rv"><span class="lab">Selects · upright too</span><h2>Pick your<br>favourites.</h2><p>Tick the stills you like, blur faces if you need to, &amp; send just those.</p></div>
+    <div class="sp rv"><div class="pair up one"><figure class="pp on"><div class="pph"><i class="di"></i><div class="ps sel">
         <div class="sb"><b>15:21</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div>
         <div class="tb"><span>Camera</span><span>Shots</span><span class="on">Selects</span><span>Export</span></div>
         <div class="cr">Run recce / <b>All scenes ▾</b></div>
@@ -304,8 +313,7 @@ footer nav{display:flex;gap:18px}
         </div>
         <div class="bf"><span>Blur faces</span><i class="tg"></i></div>
         <span class="go">Send 4 stills</span><i class="hb dk"></i>
-      </div></div><figcaption class="lab">Selects</figcaption></figure>
-    </div>
+      </div></div><figcaption class="lab">Selects</figcaption></figure></div></div>
   </div>
 </section>
 
@@ -336,12 +344,13 @@ footer nav{display:flex;gap:18px}
 </section>
 
 <section class="end wrap" id="get">
-  <div class="max rv"><h2>Scout it once.</h2><div class="cta"><a class="pill sun" href="https://apps.apple.com/app/id6823591366">Download on the App Store</a></div>
+  <div class="max rv"><h2>Scout it once.</h2><p class="soon">Coming soon to the App Store. Join the early list and we'll email you on launch day, while Pro is <b>£9.99</b> instead of £19.99 for the first two weeks.</p><form class="su" data-signup data-app="outandscout" data-list="launch" data-done="You're on the early list. We'll email you on launch day." novalidate><div class="su-row"><label class="sr" for="su-em">Your email</label><input id="su-em" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required><input class="sr" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="pill sun" type="submit">Join the early list</button></div><p class="su-done" role="status" aria-live="polite"></p></form>
     <div class="shot last"><img src="img/mk-close.webp" alt="Close up of Out &amp; Scout on iPhone: shot 2A, best light 15:18 to 15:52, ¾ backlit" loading="lazy"></div></div>
 </section>
 
 <footer class="wrap"><div class="max" style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;width:100%"><span>© 2026 Eltio Studio Ltd</span><nav><a href="support/">Help</a><a href="privacy/">Privacy</a><span>hello@eltio.studio</span></nav></div></footer>
 </main>
+<script src="signup.js" defer></script>
 
 <script>
 /* the walk-through */

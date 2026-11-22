@@ -60,12 +60,12 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .open .note{margin-top:22px}
 
 /* the iPhone, drawn: a landscape phone with a thin metal edge and the island on the left */
-.iph{position:relative;aspect-ratio:2.09/1;border-radius:clamp(20px,4.6vw,56px);background:#1b1b1a;padding:1.6%;
-  box-shadow:inset 0 0 0 1.5px #5d5b56,inset 0 0 0 3px #111,0 0 0 1px #a7a49d,0 60px 90px -56px rgba(21,21,19,.6),0 24px 40px -30px rgba(21,21,19,.35)}
-.iph::before{content:"";position:absolute;top:-2px;left:22%;width:7%;height:3px;border-radius:2px;background:#9d9a93}
-.iph::after{content:"";position:absolute;top:-2px;left:31.5%;width:7%;height:3px;border-radius:2px;background:#9d9a93}
-.iph .isl{position:absolute;left:3%;top:50%;width:1.6%;height:19%;transform:translateY(-50%);border-radius:99px;background:#000;z-index:3}
-.iph .scr{position:relative;width:100%;height:100%;overflow:hidden;border-radius:clamp(14px,3.6vw,44px);background:var(--paper)}
+.iph{position:relative;aspect-ratio:146.6/70.6;border-radius:8.1%/16.9%;background:#151514;padding:1.876%;
+  box-shadow:inset 0 0 0 1.5px #77746d,inset 0 0 0 3px #1d1d1b,0 0 0 .5px #8d8a83,0 60px 90px -56px rgba(21,21,19,.6),0 24px 40px -30px rgba(21,21,19,.35)}
+.iph::before{content:"";position:absolute;top:-1.5px;left:27%;width:11%;height:2px;border-radius:2px 2px 0 0;background:#8d8a83}
+.iph::after{content:"";position:absolute;bottom:-1.5px;left:13%;width:23%;height:2px;border-radius:0 0 2px 2px;background:linear-gradient(90deg,#8d8a83 0 18%,transparent 18% 30%,#8d8a83 30% 62%,transparent 62% 68%,#8d8a83 68%)}
+.iph .isl{position:absolute;left:3.05%;top:50%;width:3.3%;height:25.5%;transform:translateY(-50%);border-radius:99px;background:#050505;z-index:3}
+.iph .scr{position:relative;width:100%;height:100%;overflow:hidden;border-radius:6.45%/14%;background:var(--paper)}
 .iph .scr img,.iph .scr video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .iph .scr video{opacity:0;transition:opacity .45s}
 .iph .scr video.on{opacity:1}
@@ -132,11 +132,13 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .pair{display:grid;grid-template-columns:repeat(2,minmax(0,360px));gap:clamp(28px,5vw,72px);justify-content:center}
 .pp{margin:0;display:grid;gap:16px;justify-items:center;transition:opacity .5s,transform .7s var(--e)}
 .pp .lab{color:var(--ink)}
-.pph{position:relative;width:100%;aspect-ratio:1179/2556;border-radius:14%/6.5%;background:#1b1b1a;padding:3.2%;
-  box-shadow:inset 0 0 0 1.5px #5d5b56,inset 0 0 0 3px #111,0 0 0 1px #a7a49d,0 50px 80px -50px rgba(21,21,19,.55),0 20px 34px -26px rgba(21,21,19,.3)}
-.pph .di{position:absolute;top:4.6%;left:50%;width:30%;height:3.4%;transform:translateX(-50%);border-radius:99px;background:#000;z-index:3}
-.pph .ps{position:relative;width:100%;height:100%;border-radius:11.5%/5.3%;overflow:hidden;background:var(--paper);display:grid;grid-template-rows:auto auto 1fr auto;container-type:inline-size}
-.ps .sb{display:flex;justify-content:space-between;align-items:center;padding:4.2cqw 8cqw 0;height:13cqw;font:600 4.2cqw var(--num);letter-spacing:-.01em}
+.pph{position:relative;width:100%;aspect-ratio:70.6/146.6;border-radius:16.9%/8.1%;background:#151514;padding:3.9%;
+  box-shadow:inset 0 0 0 1.5px #77746d,inset 0 0 0 3px #1d1d1b,0 0 0 .5px #8d8a83,0 50px 80px -50px rgba(21,21,19,.55),0 20px 34px -26px rgba(21,21,19,.3)}
+.pph::before{content:"";position:absolute;right:-1.5px;top:27%;width:2px;height:11%;border-radius:0 2px 2px 0;background:#8d8a83}
+.pph::after{content:"";position:absolute;left:-1.5px;top:13%;width:2px;height:23%;border-radius:2px 0 0 2px;background:linear-gradient(#8d8a83 0 18%,transparent 18% 30%,#8d8a83 30% 62%,transparent 62% 68%,#8d8a83 68%)}
+.pph .di{position:absolute;top:3.15%;left:50%;width:29.5%;height:3.9%;transform:translateX(-50%);border-radius:99px;background:#050505;z-index:3}
+.pph .ps{position:relative;width:100%;height:100%;border-radius:14%/6.45%;overflow:hidden;background:var(--paper);display:grid;grid-template-rows:auto auto 1fr auto;container-type:inline-size}
+.ps .sb{display:flex;justify-content:space-between;align-items:center;padding:3.6cqw 9cqw 0;height:13cqw;font:600 4.2cqw var(--num);letter-spacing:-.01em}
 .ps .sb span{font-size:2.6cqw;letter-spacing:.1em}
 .ps .ab{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:3cqw 5cqw;border-bottom:1px solid var(--line);font:400 3.2cqw var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--grey)}
 .ps .ab b{font-weight:400;color:var(--ink)}
@@ -155,6 +157,53 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .ps .pg2 .hd{display:flex;justify-content:space-between;font:400 2.4cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:3cqw}
 .ps .pg2 .gr{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw}
 .ps .pg2 .gr span{aspect-ratio:4/3;background:var(--tint) center/cover}
+
+/* upright: the lock screen and Selects, drawn like the app */
+.pair.up .pp .lab{display:block}
+@media (max-width:820px){.pair.up{grid-template-columns:minmax(0,300px)}.pair.up .pp{display:grid!important}}
+.ps .hb{position:absolute;left:50%;bottom:2.2cqw;width:36cqw;height:1.3cqw;border-radius:9px;background:#fff;transform:translateX(-50%);opacity:.9}
+.ps .hb.dk{background:var(--ink)}
+.ps.lock{background:#2a2a28 center/cover;color:#fff;display:block;text-align:center}
+.ps.lock::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,0) 40%,rgba(0,0,0,.15))}
+.ps.lock>*{position:relative}
+.sb.lt{color:#fff}
+.lk{display:grid;justify-items:center;margin-top:4cqw}
+.lk .dt{font:500 4.6cqw var(--num);letter-spacing:-.01em}
+.lk .tm{font:600 22cqw/.9 var(--num);letter-spacing:-.04em;margin-top:2.4cqw}
+.lk .wg{display:grid;grid-template-columns:1fr 1fr;gap:3cqw;width:88%;margin-top:4cqw}
+.lk .wg div{display:grid;justify-items:start;gap:.6cqw;padding:3cqw 3.6cqw;border-radius:5cqw;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.lk .wg span{font:400 2.8cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;opacity:.85}
+.lk .wg span i{display:inline-block;width:1.4cqw;height:1.4cqw;border-radius:50%;background:var(--sun);vertical-align:middle;margin-left:1cqw}
+.lk .wg b{font:500 6.4cqw var(--num);letter-spacing:-.02em}
+.ps .la{position:absolute!important;left:4cqw;right:4cqw;bottom:21cqw;background:var(--paper);color:var(--ink);border-radius:7cqw;padding:5cqw 5cqw 4.4cqw;text-align:left;display:grid;gap:1.4cqw}
+.la .lh{display:flex;justify-content:space-between;font:400 2.6cqw var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.la .lh span+span{color:var(--grey)}
+.la .big{font:500 12cqw/1 var(--num);letter-spacing:-.05em;color:var(--sun);padding:1cqw 0 2cqw;border-bottom:.35cqw solid var(--sun);margin-bottom:1cqw}
+.la .lr{display:flex;justify-content:space-between;font:400 2.9cqw var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.la .lr.o span+span{color:var(--sun)}
+.la .go,.ps.sel .go{display:block;text-align:center;background:var(--sun);color:#fff;font:400 3.1cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3.4cqw 0;margin-top:2cqw}
+.ps .lb{position:absolute!important;left:12cqw;right:12cqw;bottom:6.5cqw;display:flex;justify-content:space-between}
+.ps .lb i{width:11cqw;height:11cqw;border-radius:50%;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ps.sel{display:block;padding:0 5.5%}
+.ps.sel .sb{padding-inline:3.5cqw}
+.ps.sel .tb{display:flex;gap:5cqw;font:400 2.9cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);padding:2.4cqw 0;border-bottom:.3cqw solid var(--ink)}
+.ps.sel .tb .on{color:var(--ink);box-shadow:0 2.6cqw 0 -1.9cqw var(--sun)}
+.ps.sel .cr{font:400 2.8cqw var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--grey);margin-top:3cqw}
+.ps.sel .cr b{font-weight:400;color:var(--ink)}
+.ps.sel .bn{font:400 30cqw/.85 var(--num);letter-spacing:-.06em;color:var(--sun);margin-top:4cqw}
+.ps.sel .rl{display:flex;justify-content:space-between;font:400 2.8cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--sun);border-top:.35cqw solid var(--sun);padding-top:1.6cqw;margin-top:2cqw}
+.ps.sel .rl span+span{color:var(--grey)}
+.ps.sel .gd{display:grid;grid-template-columns:1fr 1fr;gap:3.4cqw 2.6cqw;margin-top:4cqw}
+.ps.sel .gd>div{display:grid;gap:1.4cqw}
+.ps.sel .ph{position:relative;aspect-ratio:4/3;background:var(--tint) center/cover}
+.ps.sel .ph i{position:absolute;top:2cqw;right:2cqw;width:4.6cqw;height:4.6cqw;border-radius:50%;background:var(--sun);box-shadow:0 0 0 .5cqw rgba(255,255,255,.7)}
+.ps.sel .ph i.n{background:none;box-shadow:inset 0 0 0 .5cqw #fff}
+.ps.sel .c{font:400 2.5cqw var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--grey)}
+.ps.sel .c.o{color:var(--sun)}
+.ps.sel .bf{display:flex;justify-content:space-between;align-items:center;border:.3cqw solid var(--line);padding:2.6cqw 3cqw;margin-top:4.6cqw;font:400 2.8cqw var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.ps.sel .tg{width:8.5cqw;height:4.8cqw;border-radius:9cqw;background:var(--sun);position:relative}
+.ps.sel .tg::after{content:"";position:absolute;right:.6cqw;top:.6cqw;width:3.6cqw;height:3.6cqw;border-radius:50%;background:#fff}
+.ps.sel .go{margin-top:3cqw}
 
 
 /* tiles */
@@ -186,6 +235,7 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .end{text-align:center;padding-block:clamp(110px,18vh,200px) clamp(90px,14vh,140px)}
 .end h2{font-size:clamp(48px,8.5vw,112px);line-height:1;letter-spacing:-.055em}
 .end .cta{margin-top:34px;display:flex;justify-content:center}
+.end .shot.last{margin:clamp(48px,8vh,84px) auto 0;transform:none}
 footer{border-top:1px solid rgba(21,21,19,.1);padding-block:22px calc(26px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--grey)}
 footer nav{display:flex;gap:18px}
 
@@ -226,6 +276,39 @@ footer nav{display:flex;gap:18px}
   </div>
 </section>
 
+<section class="sec wrap" id="upright">
+  <div class="max">
+    <div class="head rv"><span class="lab">Upright too</span><h2>Shoot day,<br>on your lock screen.</h2></div>
+    <div class="pair up rv">
+      <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps lock" style="background-image:url(img/lock-53A.webp)">
+        <div class="sb lt"><b>EE</b><span>●●● ▮</span></div>
+        <div class="lk"><span class="dt">Friday 20 November</span><span class="tm">07:12</span>
+          <div class="wg"><div><span>Sunrise</span><b>07:26</b></div><div><span>Golden <i></i></span><b>15:11</b></div></div></div>
+        <div class="la"><div class="lh"><span>Out &amp; Scout · Shoot day</span><span>Run recce</span></div><b class="big">15 shots</b>
+          <div class="lr"><span>First</span><span>1A · 09:17 · Front</span></div><div class="lr o"><span>Best light</span><span>54A · 14:35–15:25</span></div><div class="lr"><span>Sunset</span><span>16:05</span></div>
+          <span class="go">Open shot list PDF</span></div>
+        <div class="lb"><i></i><i></i></div><i class="hb"></i>
+      </div></div><figcaption class="lab">Shoot day</figcaption></figure>
+      <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps sel">
+        <div class="sb"><b>15:21</b><span>●●● ▮</span></div>
+        <div class="tb"><span>Camera</span><span>Shots</span><span class="on">Selects</span><span>Export</span></div>
+        <div class="cr">Run recce / <b>All scenes ▾</b></div>
+        <div class="bn">04</div><div class="rl"><span>Picked</span><span>of 15</span></div>
+        <div class="gd">
+          <div><span class="ph" style="background-image:url(img/sum-1A.webp)"><i></i></span><span class="c o">1A · 09:17 · F</span></div>
+          <div><span class="ph" style="background-image:url(img/sum-3A.webp)"><i></i></span><span class="c o">3A · 09:21 · ¾B</span></div>
+          <div><span class="ph" style="background-image:url(img/sum-4A.webp)"><i class="n"></i></span><span class="c">4A · 09:24 · S</span></div>
+          <div><span class="ph" style="background-image:url(img/sum-5A.webp)"><i></i></span><span class="c o">5A · 09:31 · F</span></div>
+          <div><span class="ph" style="background-image:url(img/sum-47A.webp)"><i class="n"></i></span><span class="c">47A · 12:06 · ¾B</span></div>
+          <div><span class="ph" style="background-image:url(img/sum-54A.webp)"><i></i></span><span class="c o">54A · 12:19 · B</span></div>
+        </div>
+        <div class="bf"><span>Blur faces</span><i class="tg"></i></div>
+        <span class="go">Send 4 stills</span><i class="hb dk"></i>
+      </div></div><figcaption class="lab">Selects</figcaption></figure>
+    </div>
+  </div>
+</section>
+
 <section class="sec wrap">
   <div class="max">
     <div class="head rv"><h2>Made for a long day out.</h2></div>
@@ -258,7 +341,8 @@ footer nav{display:flex;gap:18px}
 </section>
 
 <section class="end wrap" id="get">
-  <div class="max rv"><h2>Scout it once.</h2><div class="cta"><a class="pill sun" href="https://apps.apple.com/app/id6823591366">Download on the App Store</a></div></div>
+  <div class="max rv"><h2>Scout it once.</h2><div class="cta"><a class="pill sun" href="https://apps.apple.com/app/id6823591366">Download on the App Store</a></div>
+    <div class="shot last"><img src="img/mk-hero.webp" alt="" loading="lazy"></div></div>
 </section>
 
 <footer class="wrap"><div class="max" style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;width:100%"><span>© 2026 Eltio Studio Ltd</span><nav><a href="support/">Help</a><a href="privacy/">Privacy</a><span>hello@eltio.studio</span></nav></div></footer>

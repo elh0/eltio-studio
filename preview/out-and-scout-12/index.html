@@ -139,7 +139,7 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .pph .di{position:absolute;top:3.15%;left:50%;width:29.5%;height:3.9%;transform:translateX(-50%);border-radius:99px;background:#050505;z-index:3}
 .pph .ps{position:relative;width:100%;height:100%;border-radius:14%/6.45%;overflow:hidden;background:var(--paper);display:grid;grid-template-rows:auto auto 1fr auto;container-type:inline-size}
 .ps .sb{display:flex;justify-content:space-between;align-items:center;padding:3.6cqw 9cqw 0;height:13cqw;font:600 4.2cqw var(--num);letter-spacing:-.01em}
-.ps .sb span{font-size:2.6cqw;letter-spacing:.1em}
+.ps .sb .sbi{display:flex;fill:currentColor}.ps .sb .sbi svg{width:17.5cqw;height:auto;display:block;overflow:visible}.ps .sb .sbi text{fill:currentColor}
 .ps .ab{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:3cqw 5cqw;border-bottom:1px solid var(--line);font:400 3.2cqw var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--grey)}
 .ps .ab b{font-weight:400;color:var(--ink)}
 .ps .ab .sh{justify-self:end;color:var(--sun);font-size:4cqw}
@@ -281,7 +281,7 @@ footer nav{display:flex;gap:18px}
     <div class="head rv"><span class="lab">Upright too</span><h2>Shoot day,<br>on your lock screen.</h2></div>
     <div class="pair up rv">
       <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps lock" style="background-image:url(img/lock-53A.webp)">
-        <div class="sb lt"><b>EE</b><span>●●● ▮</span></div>
+        <div class="sb lt"><b>EE</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div>
         <div class="lk"><span class="dt">Friday 20 November</span><span class="tm">07:12</span>
           <div class="wg"><div><span>Sunrise</span><b>07:26</b></div><div><span>Golden <i></i></span><b>15:11</b></div></div></div>
         <div class="la"><div class="lh"><span>Out &amp; Scout · Shoot day</span><span>Run recce</span></div><b class="big">15 shots</b>
@@ -290,7 +290,7 @@ footer nav{display:flex;gap:18px}
         <div class="lb"><i></i><i></i></div><i class="hb"></i>
       </div></div><figcaption class="lab">Shoot day</figcaption></figure>
       <figure class="pp on"><div class="pph"><i class="di"></i><div class="ps sel">
-        <div class="sb"><b>15:21</b><span>●●● ▮</span></div>
+        <div class="sb"><b>15:21</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div>
         <div class="tb"><span>Camera</span><span>Shots</span><span class="on">Selects</span><span>Export</span></div>
         <div class="cr">Run recce / <b>All scenes ▾</b></div>
         <div class="bn">04</div><div class="rl"><span>Picked</span><span>of 15</span></div>
@@ -377,7 +377,7 @@ function DOC(){
       '<div class="tt"><span class="nn">01</span><span class="nm"><b>Docks</b><span class="k">18 Nov 2026 · Royal Docks'+(det?' · 51.5055N 0.0300E':'')+'</span></span></div>'+
       '<div class="band">'+band+'</div><div class="rows">'+rows+'</div><div class="fade"></div></div>';}
   function ph(det){var nm=det?"Detailed":"Simple";return '<figure class="pp'+(det?'':' on')+'" data-k="'+nm+'"><div class="pph"><i class="di"></i><div class="ps">'+
-    '<div class="sb"><b>12:19</b><span>●●● ▮</span></div><div class="ab"><span>‹ Export</span><b>Docks · '+nm+'.pdf</b><span class="sh">↑</span></div>'+
+    '<div class="sb"><b>12:19</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div><div class="ab"><span>‹ Export</span><b>Docks · '+nm+'.pdf</b><span class="sh">↑</span></div>'+
     '<div class="pv">'+page(det)+'<div class="pn">1 / 2</div><div class="pg2"><div class="hd"><span>Photos</span><span>'+nm+'</span></div><div class="gr">'+["1A","3A","5A","47A"].map(function(n){return '<span style="background-image:url('+SRC("sum-"+n)+')"></span>';}).join("")+'</div></div></div><div class="ft"><span class="go">Send '+nm+' PDF</span></div></div></div><figcaption class="lab">'+nm+'</figcaption></figure>';}
   return '<div class="seg" role="tablist" aria-label="Summary style"><button role="tab" aria-selected="true" data-k="Simple">Simple</button><button role="tab" aria-selected="false" data-k="Detailed">Detailed</button></div><div class="pair">'+ph(false)+ph(true)+'</div>';
 }

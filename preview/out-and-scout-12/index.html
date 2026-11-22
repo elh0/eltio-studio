@@ -99,11 +99,9 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .head .lab{display:block;margin-bottom:16px}
 
 /* Simple or Detailed */
-.doc{display:grid;justify-items:center}
+.doc{display:grid;justify-items:center;text-align:center}
 /* 04: the same page, Simple on the left, Detailed on the right; drag the line */
-.doc .wipe{position:relative;width:min(100%,600px);min-width:min(100%,320px);text-align:left;justify-self:center;margin-top:34px;container-type:inline-size;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:ew-resize}
-.wipe .pg{--u:calc(100cqw / 440);position:relative;background:#FBFAF6;box-shadow:0 1px 0 var(--line),0 24px 50px -28px rgba(21,21,19,.35);aspect-ratio:440/470;overflow:hidden;padding:calc(var(--u)*22) calc(var(--u)*22) 0;font-size:calc(var(--u)*9.5);line-height:1.35;color:var(--ink)}
-.wipe .pg.det{position:absolute;inset:0;clip-path:inset(0 0 0 var(--x,50%))}
+.pv .pg{text-align:left;--u:calc(100cqw / 440);position:relative;background:#FBFAF6;box-shadow:0 1px 0 var(--line),0 24px 50px -28px rgba(21,21,19,.35);aspect-ratio:440/470;overflow:hidden;padding:calc(var(--u)*22) calc(var(--u)*22) 0;font-size:calc(var(--u)*9.5);line-height:1.35;color:var(--ink)}
 .pg .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:calc(var(--u)*8);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
 .pg .hd b{font:400 calc(var(--u)*12) var(--num);letter-spacing:-.02em;text-transform:none;color:var(--ink)}
 .pg .tt{display:flex;align-items:flex-end;gap:calc(var(--u)*12);margin-top:calc(var(--u)*12);padding-bottom:calc(var(--u)*6);border-bottom:calc(var(--u)*1.2) solid var(--sun)}
@@ -126,15 +124,38 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .pg .rw .bl .tm{font-variant-numeric:tabular-nums;font-size:calc(var(--u)*10.5)}
 .pg .chip{border:calc(var(--u)*.8) solid var(--sun);color:var(--sun);padding:calc(var(--u)*1) calc(var(--u)*4);font-size:calc(var(--u)*7.5);letter-spacing:.06em;text-transform:uppercase}
 .pg .fade{position:absolute;left:0;right:0;bottom:0;height:calc(var(--u)*46);background:linear-gradient(rgba(251,250,246,0),#FBFAF6 85%)}
-.wipe .tag{position:absolute;top:-28px;font:400 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .2s}
-.wipe .tag.l{left:0}.wipe .tag.r{right:0}
-.wipe .tag.on{color:var(--ink)}
-.wipe .bar{position:absolute;top:-8px;bottom:-8px;left:var(--x,50%);width:0;border-left:1.5px solid var(--sun);z-index:3}
-.wipe .knob{position:absolute;top:50%;left:0;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--sun);color:#fff;display:grid;place-items:center;font:500 14px var(--mono);box-shadow:0 6px 18px -6px rgba(226,83,31,.6);cursor:ew-resize}
-.wipe .knob:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 
-.wipe .pg{border-radius:6px}
-.wipe .knob{width:38px;height:38px;margin:-19px 0 0 -19px;font-size:12px}
+/* Simple or Detailed: the same recce on two phones (side by side on a wide screen, a switch on a phone) */
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:99px;background:rgba(21,21,19,.07);margin-bottom:28px}
+.seg button{appearance:none;border:0;background:none;font:500 14px var(--num);letter-spacing:-.01em;color:#55534d;padding:8px 18px;border-radius:99px;cursor:pointer;transition:background .25s,color .25s,box-shadow .25s}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(21,21,19,.15)}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,360px));gap:clamp(28px,5vw,72px);justify-content:center}
+.pp{margin:0;display:grid;gap:16px;justify-items:center;transition:opacity .5s,transform .7s var(--e)}
+.pp .lab{color:var(--ink)}
+.pph{position:relative;width:100%;aspect-ratio:1179/2556;border-radius:14%/6.5%;background:#1b1b1a;padding:3.2%;
+  box-shadow:inset 0 0 0 1.5px #5d5b56,inset 0 0 0 3px #111,0 0 0 1px #a7a49d,0 50px 80px -50px rgba(21,21,19,.55),0 20px 34px -26px rgba(21,21,19,.3)}
+.pph .di{position:absolute;top:4.6%;left:50%;width:30%;height:3.4%;transform:translateX(-50%);border-radius:99px;background:#000;z-index:3}
+.pph .ps{position:relative;width:100%;height:100%;border-radius:11.5%/5.3%;overflow:hidden;background:var(--paper);display:grid;grid-template-rows:auto auto 1fr auto;container-type:inline-size}
+.ps .sb{display:flex;justify-content:space-between;align-items:center;padding:4.2cqw 8cqw 0;height:13cqw;font:600 4.2cqw var(--num);letter-spacing:-.01em}
+.ps .sb span{font-size:2.6cqw;letter-spacing:.1em}
+.ps .ab{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:3cqw 5cqw;border-bottom:1px solid var(--line);font:400 3.2cqw var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--grey)}
+.ps .ab b{font-weight:400;color:var(--ink)}
+.ps .ab .sh{justify-self:end;color:var(--sun);font-size:4cqw}
+.ps .pv{background:var(--tint);padding:5cqw 4cqw;overflow:hidden}
+.ps .pv .pg{aspect-ratio:auto;padding-bottom:calc(var(--u)*8);box-shadow:0 1px 0 var(--line),0 12px 24px -16px rgba(21,21,19,.3);border-radius:2px}
+.ps .pv .pg .fade{display:none}
+.ps .ft{padding:4cqw 5cqw 7cqw;background:var(--paper)}
+.ps .go{display:block;text-align:center;background:var(--sun);color:#fff;font:400 3.4cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:3.6cqw 0}
+.pv{container-type:inline-size}
+.pg{--u:calc(100cqw / 440)}
+@media (min-width:821px){.seg{display:none}}
+@media (max-width:820px){.pair{grid-template-columns:minmax(0,320px)}.pp:not(.on){display:none}.pp .lab{display:none}}
+.ps .pn{font:400 2.6cqw var(--mono);letter-spacing:.1em;color:var(--grey);text-align:center;padding:3cqw 0}
+.ps .pg2{background:#FBFAF6;padding:5cqw;box-shadow:0 1px 0 var(--line),0 12px 24px -16px rgba(21,21,19,.3);border-radius:2px}
+.ps .pg2 .hd{display:flex;justify-content:space-between;font:400 2.4cqw var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:3cqw}
+.ps .pg2 .gr{display:grid;grid-template-columns:1fr 1fr;gap:2.4cqw}
+.ps .pg2 .gr span{aspect-ratio:4/3;background:var(--tint) center/cover}
+
 
 /* tiles */
 .bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
@@ -200,7 +221,7 @@ footer nav{display:flex;gap:18px}
 
 <section class="sec wrap" id="summary">
   <div class="max">
-    <div class="head rv"><span class="lab">Summary</span><h2>Detailed or simple,<br>you choose.</h2><p>Our summary document is made to be detailed or simple, whatever the job needs. Drag to compare.</p></div>
+    <div class="head rv"><span class="lab">Summary</span><h2>Detailed or simple,<br>you choose.</h2><p>Our summary document is made to be detailed or simple, whatever the job needs.</p></div>
     <div class="doc rv" id="doc"></div>
   </div>
 </section>
@@ -276,26 +297,18 @@ function DOC(){
     return '<div class="pg'+(det?' det':'')+'"'+(det?'':' aria-hidden="false"')+'><div class="hd"><b>Out &amp; Sc&middot;out</b><span>Run recce · '+(det?'Detailed':'Simple')+'</span></div>'+
       '<div class="tt"><span class="nn">01</span><span class="nm"><b>Docks</b><span class="k">18 Nov 2026 · Royal Docks'+(det?' · 51.5055N 0.0300E':'')+'</span></span></div>'+
       '<div class="band">'+band+'</div><div class="rows">'+rows+'</div><div class="fade"></div></div>';}
-  return '<div class="wipe" id="wipe" style="--x:50%"><span class="tag l">Simple</span><span class="tag r on">Detailed</span>'+page(false)+page(true)+
-    '<div class="bar"><span class="knob" role="slider" tabindex="0" aria-label="Drag to compare the Simple and Detailed summary" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">‹›</span></div></div>';
+  function ph(det){var nm=det?"Detailed":"Simple";return '<figure class="pp'+(det?'':' on')+'" data-k="'+nm+'"><div class="pph"><i class="di"></i><div class="ps">'+
+    '<div class="sb"><b>12:19</b><span>●●● ▮</span></div><div class="ab"><span>‹ Export</span><b>Docks · '+nm+'.pdf</b><span class="sh">↑</span></div>'+
+    '<div class="pv">'+page(det)+'<div class="pn">1 / 2</div><div class="pg2"><div class="hd"><span>Photos</span><span>'+nm+'</span></div><div class="gr">'+["1A","3A","5A","47A"].map(function(n){return '<span style="background-image:url('+SRC("sum-"+n)+')"></span>';}).join("")+'</div></div></div><div class="ft"><span class="go">Send '+nm+' PDF</span></div></div></div><figcaption class="lab">'+nm+'</figcaption></figure>';}
+  return '<div class="seg" role="tablist" aria-label="Summary style"><button role="tab" aria-selected="true" data-k="Simple">Simple</button><button role="tab" aria-selected="false" data-k="Detailed">Detailed</button></div><div class="pair">'+ph(false)+ph(true)+'</div>';
 }
 (function(){
-  var w=document.getElementById("wipe");if(!w)return;var k=w.querySelector(".knob"),tl=w.querySelector(".tag.l"),tr=w.querySelector(".tag.r"),x=50,drag=false,touched=false;
-  function set(v){x=Math.max(0,Math.min(100,v));w.style.setProperty("--x",x+"%");k.setAttribute("aria-valuenow",Math.round(x));tl.classList.toggle("on",x>55);tr.classList.toggle("on",x<45);}
-  function at(e){var r=w.getBoundingClientRect();set((e.clientX-r.left)/r.width*100);}
-  w.addEventListener("pointerdown",function(e){drag=true;touched=true;at(e);});
-  window.addEventListener("pointermove",function(e){if(drag)at(e);});
-  window.addEventListener("pointerup",function(){drag=false;});
-  k.addEventListener("keydown",function(e){if(e.key==="ArrowLeft"){set(x-5);e.preventDefault();}if(e.key==="ArrowRight"){set(x+5);e.preventDefault();}touched=true;});
-  /* one gentle sweep the first time it comes into view, so it reads as draggable */
-  if("IntersectionObserver" in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){
-    var io=new IntersectionObserver(function(es){es.forEach(function(en){if(!en.isIntersecting||touched)return;io.disconnect();
-      var t0=performance.now();(function step(t){if(touched)return;var p=Math.min(1,(t-t0)/2200);set(50+Math.sin(p*Math.PI*2)*28*(1-p*.3)*(p<1?1:0));if(p<1)requestAnimationFrame(step);else set(50);})(t0);});},{threshold:.6});
-    io.observe(w);}
+  var d=document.getElementById("doc");if(!d)return;var bs=[].slice.call(d.querySelectorAll(".seg button")),ps=[].slice.call(d.querySelectorAll(".pp")),touched=false;
+  function show(k){bs.forEach(function(b){b.setAttribute("aria-selected",b.dataset.k===k?"true":"false");});ps.forEach(function(p){p.classList.toggle("on",p.dataset.k===k);});}
+  bs.forEach(function(b){b.addEventListener("click",function(){touched=true;show(b.dataset.k);});});
+  /* on a phone only one shows at a time; it swaps once by itself so the difference reads */
+  if("IntersectionObserver" in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();setTimeout(function(){if(!touched)show("Detailed");},1800);}},{threshold:.5});io.observe(d);}
 })();
-
-/* app clips play with your scroll: scroll down and the app moves forward, scroll up and it rewinds.
-   Under reduced motion they stay as stills. */
 
 
 /* the phone stays put; scroll position picks the feature and plays its clip forward or back */

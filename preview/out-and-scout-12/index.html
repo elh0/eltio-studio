@@ -97,6 +97,9 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .head h2{font-size:clamp(36px,5.4vw,72px);line-height:1.02;letter-spacing:-.05em}
 .head p{margin:18px auto 0;max-width:40ch;color:#55534d;font-size:clamp(17px,1.6vw,21px)}
 .head .lab{display:block;margin-bottom:16px}
+.lhead{max-width:820px;margin:0 0 clamp(30px,5vh,52px)}.lhead h2{font-size:clamp(36px,5vw,68px);line-height:1.02;letter-spacing:-.05em;margin-top:14px}.lhead p{margin-top:20px;max-width:46ch;font-size:clamp(17px,1.5vw,20px);color:#55534d}
+.bt img{display:block;width:100%;height:auto;border-radius:clamp(18px,2.4vw,32px)}
+
 .band{background:#0e0e0e;color:#F1EEE7;margin-top:clamp(90px,15vh,170px);padding:clamp(70px,11vh,130px) 22px}
 .band .lab{color:#8A877F}
 .split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(36px,6vw,96px);align-items:center}
@@ -334,6 +337,13 @@ footer nav{display:flex;gap:18px}
   </div>
 </section>
 
+<section class="sec wrap" id="besttime">
+  <div class="max">
+    <div class="lhead rv"><span class="lab">Best time to shoot</span><h2>Back, side or front lit.<br>You know when.</h2><p>Every shot quietly tells you when it's back lit, ¾ back, side &amp; front lit today. It's in the detailed summary &amp; in Selects, so you can plan the day round the light you want.</p></div>
+    <div class="bt rv"><img src="img/mk-besttime.webp" alt="Out &amp; Scout on iPhone, held on its side: shot 3C lists back lit 14:30 to 15:55, three quarter back 11:20 to 14:30, side 08:50 to 11:20, front not from here today" loading="lazy"></div>
+  </div>
+</section>
+
 <section class="sec wrap" id="price">
   <div class="max">
     <div class="head rv"><span class="lab">Pay once · no subscription</span><h2>Every feature is free.</h2></div>
@@ -345,8 +355,7 @@ footer nav{display:flex;gap:18px}
 </section>
 
 <section class="end wrap" id="get">
-  <div class="max rv"><h2>Scout it once.</h2><p class="soon">Coming soon to the App Store. Join the early list and we'll email you on launch day, while Pro is <b>£9.99</b> instead of £19.99 for the first two weeks.</p><form class="su" data-signup data-app="outandscout" data-list="launch" data-done="You're on the early list. We'll email you on launch day." novalidate><div class="su-row"><label class="sr" for="su-em">Your email</label><input id="su-em" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required><input class="sr" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="pill sun" type="submit">Join the early list</button></div><p class="su-done" role="status" aria-live="polite"></p></form>
-    <div class="shot last"><img src="img/mk-close.webp" alt="Close up of Out &amp; Scout on iPhone: shot 2A, best light 15:18 to 15:52, ¾ backlit" loading="lazy"></div></div>
+  <div class="max rv"><h2>Scout it once.</h2><p class="soon">Coming soon to the App Store. Join the early list and we'll email you on launch day, while Pro is <b>£9.99</b> instead of £19.99 for the first two weeks.</p><form class="su" data-signup data-app="outandscout" data-list="launch" data-done="You're on the early list. We'll email you on launch day." novalidate><div class="su-row"><label class="sr" for="su-em">Your email</label><input id="su-em" type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required><input class="sr" name="website" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="pill sun" type="submit">Join the early list</button></div><p class="su-done" role="status" aria-live="polite"></p></form></div>
 </section>
 
 <footer class="wrap"><div class="max" style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;width:100%"><span>© 2026 Eltio Studio Ltd</span><nav><a href="support/">Help</a><a href="privacy/">Privacy</a><span>hello@eltio.studio</span></nav></div></footer>

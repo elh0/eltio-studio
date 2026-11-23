@@ -216,6 +216,90 @@ h1,h2,h3{font-family:var(--num);font-weight:600;margin:0;text-wrap:balance}
 .ps.sel .tg::after{content:"";position:absolute;right:.6cqw;top:.6cqw;width:3.6cqw;height:3.6cqw;border-radius:50%;background:#fff}
 .ps.sel .go{margin-top:3cqw}
 
+/* Detailed page: map, sun compass, light read per shot */
+.dd2{padding-bottom:calc(var(--u)*10)}
+.dd2 .sl{display:flex;gap:calc(var(--u)*16);font-size:calc(var(--u)*8.5);color:var(--grey);padding:calc(var(--u)*8) 0;border-bottom:calc(var(--u)*.8) solid var(--line)}
+.dd2 .sl b{font-weight:400;color:var(--ink)}.dd2 .sl b.o{color:var(--sun)}
+.dd2 .two{display:grid;grid-template-columns:1.45fr 1fr;gap:calc(var(--u)*14);padding:calc(var(--u)*10) 0;border-bottom:calc(var(--u)*.8) solid var(--line)}
+.dd2 .two > div{display:grid;gap:calc(var(--u)*5);align-content:start}
+.dd2 .map,.dd2 .cmp{width:100%;height:auto;display:block}
+.dd2 .dr{display:grid;grid-template-columns:calc(var(--u)*112) minmax(0,1fr) calc(var(--u)*52);gap:calc(var(--u)*10);padding:calc(var(--u)*9) 0;border-bottom:calc(var(--u)*.8) solid var(--line);align-items:start}
+.dd2 .dr .ph{aspect-ratio:4/3;background:var(--tint) center/cover;border-radius:calc(var(--u)*2)}
+.dd2 .tx{display:grid;gap:calc(var(--u)*2.5);min-width:0}
+.dd2 .tx .n{color:var(--sun);font-size:calc(var(--u)*9)}
+.dd2 .tx b{font:500 calc(var(--u)*11.5)/1.2 var(--num);letter-spacing:-.01em}
+.dd2 .tx .m{font-size:calc(var(--u)*7.5);color:var(--grey)}
+.dd2 .tx .be{font-size:calc(var(--u)*8.5);color:var(--sun)}
+.dd2 .tx .lt{display:grid;grid-template-columns:1fr 1fr;gap:calc(var(--u)*1.5) calc(var(--u)*8);font-size:calc(var(--u)*7.5);font-variant-numeric:tabular-nums;margin-top:calc(var(--u)*2)}
+.dd2 .tx .lt em{font-style:normal;color:var(--grey);text-transform:uppercase;letter-spacing:.06em;margin-right:calc(var(--u)*3)}
+.dd2 .dl svg{width:100%;height:auto;display:block}
+/* motion */
+.dd2 .cn{transform:scale(0);transition:transform .9s cubic-bezier(.2,.8,.2,1) calc(.25s + var(--i)*.14s)}
+.dd2 .sp{opacity:0;transition:opacity .4s calc(.1s + var(--i)*.14s)}
+.dd2 .ln{opacity:0;transition:opacity .5s calc(.8s + var(--i)*.1s)}
+.dd2 .path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.6s ease .3s}
+.dd2 .gold{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .8s ease 1.7s}
+.dd2 .dr{opacity:0;transform:translateY(calc(var(--u)*10));transition:opacity .6s calc(.6s + var(--i)*.12s),transform .8s cubic-bezier(.2,.8,.2,1) calc(.6s + var(--i)*.12s)}
+.dd2 .ds{transform-origin:30px 30px;transform:rotate(var(--from));transition:transform 1.4s cubic-bezier(.2,.8,.2,1) calc(1s + var(--i)*.12s)}
+.dd2.play .cn{transform:none}.dd2.play .sp,.dd2.play .ln{opacity:1}.dd2.play .path,.dd2.play .gold{stroke-dashoffset:0}
+.dd2.play .dr{opacity:1;transform:none}.dd2.play .ds{transform:none}
+/* the page drifts down so the shots come up, then back */
+.ps .pv .sc{will-change:transform}
+.pp:has(.dd2.play:not(.still)) .sc{animation:drift 16s cubic-bezier(.45,0,.55,1) 2.8s infinite}
+@keyframes drift{0%,12%{transform:none}45%,62%{transform:translateY(-38%)}92%,100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.dd2 *{transition:none!important}.ps .pv .sc{animation:none!important}}
+/* Detailed: the scene's day page, then a shot card, as ShotCards.swift draws them */
+.dd2 .be i{font-style:normal;color:var(--ink)}
+.dd3{padding-bottom:calc(var(--u)*14)}
+.dd3 .ttl{font:400 calc(var(--u)*21)/1.1 var(--mono);letter-spacing:-.02em;margin-top:calc(var(--u)*14)}
+.dd3 .sub{font-size:calc(var(--u)*8.2);color:var(--grey);margin-top:calc(var(--u)*4)}
+.dd3 .lnk{font-size:calc(var(--u)*8.2);text-decoration:underline;text-underline-offset:2px;margin-top:calc(var(--u)*3)}
+.dd3 .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*8);margin:calc(var(--u)*12) 0;padding-top:calc(var(--u)*6);border-top:calc(var(--u)*.8) solid var(--line)}
+.dd3 .g4 div{display:grid;gap:calc(var(--u)*2)}.dd3 .g4 b{font-weight:400;font-size:calc(var(--u)*10);font-variant-numeric:tabular-nums}.dd3 .g4 b.o{color:var(--sun)}
+.dd3 .mapw svg,.dd3 .chart,.dd3 .strip{width:100%;height:auto;display:block}
+.dd3 .chart{margin:calc(var(--u)*8) 0}
+.dd3 .tb{display:grid;font-size:calc(var(--u)*8);margin-top:calc(var(--u)*6)}
+.dd3 .th,.dd3 .tr{display:grid;grid-template-columns:calc(var(--u)*34) calc(var(--u)*40) 1fr 1fr;gap:calc(var(--u)*6);padding:calc(var(--u)*4) 0}
+.dd3 .th{font-size:calc(var(--u)*6.8);letter-spacing:.08em;text-transform:uppercase;color:var(--grey)}
+.dd3 .tr{border-top:calc(var(--u)*.5) solid var(--line)}.dd3 .tr span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps .pv .dd3.cd{margin-top:0}
+.dd3.cd{border-top:calc(var(--u)*1) solid var(--ink);padding-top:calc(var(--u)*10)}
+.dd3 .ch{display:flex;align-items:baseline;gap:calc(var(--u)*8)}.dd3 .ch .id{font:400 calc(var(--u)*18) var(--mono);letter-spacing:-.02em}
+.dd3 .ch .cp{font-size:calc(var(--u)*9);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dd3 .ch .wh{font-size:calc(var(--u)*7.5);color:var(--grey)}.dd3 .ch u{color:var(--ink)}
+.dd3 .cb{display:grid;grid-template-columns:1.25fr 1fr;gap:calc(var(--u)*12);margin-top:calc(var(--u)*10)}
+.dd3 .fr{aspect-ratio:16/9;background:#222 center/cover}
+.dd3 .rc{display:grid;gap:calc(var(--u)*4);align-content:start}
+.dd3 .ln2{display:grid;grid-template-columns:1fr calc(var(--u)*48);gap:calc(var(--u)*6);align-items:center}
+.dd3 .ln2 b{display:block;font-weight:400;font-size:calc(var(--u)*10.5);line-height:1.15}.dd3 .g{color:var(--grey);font-size:calc(var(--u)*7.5)}
+.dd3 .plan{width:100%;height:auto;display:block}
+.dd3 .rw2{display:grid;grid-template-columns:calc(var(--u)*34) 1fr;gap:calc(var(--u)*4);font-size:calc(var(--u)*7.8);border-top:calc(var(--u)*.5) solid var(--line);padding-top:calc(var(--u)*3)}
+.dd3 .rw2 em,.dd3 .lt2 em{font-style:normal;color:var(--grey)}.dd3 .rw2.st em{color:var(--ink)}.dd3 .rw2 b{font-weight:400;font-size:calc(var(--u)*9.5)}
+.dd3 .lt2{display:grid;font-size:calc(var(--u)*7.5);border-top:calc(var(--u)*.5) solid var(--line);padding-top:calc(var(--u)*3);font-variant-numeric:tabular-nums}
+.dd3 .lt2 div{display:grid;grid-template-columns:calc(var(--u)*34) 1fr;gap:calc(var(--u)*4)}
+.dd3 .spec{display:grid;grid-template-columns:repeat(5,1fr);gap:calc(var(--u)*6);font-size:calc(var(--u)*7.5);margin:calc(var(--u)*10) 0}
+.dd3 .spec div{display:grid;gap:calc(var(--u)*2)}
+.dd3 .strip{margin:calc(var(--u)*4) 0 calc(var(--u)*8)}
+.dd3 .nt{display:grid;grid-template-columns:1fr calc(var(--u)*80);gap:calc(var(--u)*10);align-items:end}
+.dd3 .nt i{display:block;height:calc(var(--u)*12);border-bottom:calc(var(--u)*.5) solid var(--line)}
+.dd3 .qr{display:flex;align-items:end;gap:calc(var(--u)*5)}.dd3 .qr b{width:calc(var(--u)*38);height:calc(var(--u)*38);background:repeating-conic-gradient(#151513 0 25%,#fff 0 50%) 0 0/calc(var(--u)*6.3) calc(var(--u)*6.3)}
+/* motion for Detailed */
+.dd3 .cn{transform:scale(0);transition:transform .9s cubic-bezier(.2,.8,.2,1) calc(.3s + var(--i)*.14s)}
+.dd3 .sp{opacity:0;transition:opacity .4s calc(.2s + var(--i)*.14s)}
+.dd3 .path{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.8s ease .5s}
+.dd3 .tr{opacity:0;transition:opacity .5s calc(1.2s + var(--i)*.1s)}
+.dd3 .strip .fill{clip-path:inset(0 100% 0 0);transition:clip-path 2s ease .4s}
+.dd3 .ds{transform-origin:30px 30px;transform:rotate(var(--from));transition:transform 1.6s cubic-bezier(.2,.8,.2,1) .6s}
+.dd3.play .cn{transform:none}.dd3.play .sp,.dd3.play .tr{opacity:1}.dd3.play .path{stroke-dashoffset:0}.dd3.play .strip .fill{clip-path:inset(0 0 0 0)}.dd3.play .ds{transform:none}
+.pp:has(.dd3.play) .sc{animation:drift3 20s cubic-bezier(.45,0,.55,1) 2.6s infinite}
+@keyframes drift3{0%,10%{transform:none}38%,72%{transform:translateY(-45%)}95%,100%{transform:none}}
+@media (prefers-reduced-motion:reduce){.dd3 *{transition:none!important}}
+.dd3.cd .fr{display:block;margin-top:calc(var(--u)*10)}
+.dd3.cd .cb{grid-template-columns:1fr 1fr;gap:calc(var(--u)*14)}
+.dd3.cd .lt2{grid-template-columns:1fr 1fr;gap:calc(var(--u)*3) calc(var(--u)*14);margin-top:calc(var(--u)*8);font-size:calc(var(--u)*8.5)}
+.dd3.cd .lt2 div{grid-template-columns:calc(var(--u)*40) 1fr}
+.dd3 .spec{grid-template-columns:repeat(4,1fr)}
+.dd3.cd .ln2 b{font-size:calc(var(--u)*12)}
+
 
 /* tiles */
 .bento{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
@@ -284,14 +368,14 @@ footer nav{display:flex;gap:18px}
 
 <section class="sec wrap" id="summary">
   <div class="max">
-    <div class="head rv"><span class="lab">Summary</span><h2>Detailed or simple,<br>you choose.</h2><p>Our summary document is made to be detailed or simple, whatever the job needs.</p></div>
+    <div class="head rv"><span class="lab">Summary</span><h2>Detailed or summary,<br>you choose.</h2><p>Our summary document is made to be detailed or simple, whatever the job needs.</p></div>
     <div class="doc rv" id="doc"></div>
   </div>
 </section>
 
 <section class="sec wrap" id="shootday">
   <div class="max split">
-    <div class="sx rv"><span class="lab">Shoot day</span><h2>The day,<br>on your lock screen.</h2><p>On the morning of a shoot, Out &amp; Scout puts the day on your lock screen. First shot, best light, sunset, &amp; the shot list PDF one tap away.</p></div>
+    <div class="sx rv"><span class="lab">Shoot day</span><h2>The day,<br>on your lock screen.</h2><p>On the morning of a shoot, pin the shot list, or anyone's call sheet, &amp; open it from a button on your lock screen in one press.</p></div>
     <div class="sp card rv"><img src="img/mk-lock-coffee.webp" alt="A hand holding an iPhone next to an espresso, the lock screen showing the Out &amp; Scout shoot day card: 11 shots, first shot, best light & sunset" loading="lazy"></div>
   </div>
 </section>
@@ -324,7 +408,7 @@ footer nav{display:flex;gap:18px}
     <div class="bento">
       <div class="tile t-cam rv"><div class="cw"><span class="lab">iPhone only</span><h3>iPhone only, on purpose.</h3><p>We wanted to make sure we had the best camera, &amp; that you can choose your exposure when recceing, just like the iPhone camera.</p></div>
         <img class="camimg" src="img/mk-cam-p.webp" alt="The Out &amp; Scout camera on iPhone, held on its side" loading="lazy"></div>
-      <div class="tile t-a rv"><span class="lab">Privacy</span><h3>Nothing leaves your phone.</h3><p>No account, no sign-in, no tracking. Your stills stay on your phone until you send them.</p></div>
+      <div class="tile t-a rv"><span class="lab">Privacy</span><h3>No account. No tracking.</h3><p>No sign-in, nothing to sign up for. Your stills stay on your phone until you send them.</p></div>
       <div class="tile t-b t-sun rv"><span class="lab">The sun in London now</span><h3 id="sunh">Golden today —</h3><p id="sunp">Every frame gets a best-light window from the same maths.</p>
         <svg viewBox="0 0 400 120" aria-hidden="true"><path d="M10 110 Q200 -40 390 110" fill="none" stroke="#3b3a36" stroke-width="1.5"/><line x1="0" y1="110" x2="400" y2="110" stroke="#3b3a36"/><circle id="sund" cx="200" cy="35" r="7" fill="#E2531F"/></svg></div>
       <div class="tile t-c rv"><span class="lab">Faces</span><h3>Found &amp; blurred on the phone.</h3></div>
@@ -336,7 +420,7 @@ footer nav{display:flex;gap:18px}
 
 <section class="sec wrap" id="besttime">
   <div class="max">
-    <div class="lhead rv"><span class="lab">Best time to shoot</span><h2>Back, side or front lit.<br>You know when.</h2><p>Every shot quietly tells you when it's back lit, ¾ back, side &amp; front lit today. It's in the detailed summary &amp; in Selects, so you can plan the day round the light you want.</p></div>
+    <div class="lhead rv"><span class="lab">Best time to shoot</span><h2>Back, side or front lit.<br>You know when.</h2><p>Every shot quietly tells you when it's back lit, ¾ back, side &amp; front lit today. It's on both PDFs, in Selects &amp; on every shot, so you can plan the day round the light you want.</p></div>
     <div class="bt rv"><img src="img/mk-besttime.webp" alt="Out &amp; Scout on iPhone, held on its side: shot 3C lists back lit 14:30 to 15:55, three quarter back 11:20 to 14:30, side 08:50 to 11:20, front not from here today" loading="lazy"></div>
   </div>
 </section>
@@ -392,10 +476,101 @@ function DOC(){
     return '<div class="pg'+(det?' det':'')+'"'+(det?'':' aria-hidden="false"')+'><div class="hd"><b>Out &amp; Sc&middot;out</b><span>Run recce · '+(det?'Detailed':'Simple')+'</span></div>'+
       '<div class="tt"><span class="nn">01</span><span class="nm"><b>Docks</b><span class="k">18 Nov 2026 · Royal Docks'+(det?' · 51.5055N 0.0300E':'')+'</span></span></div>'+
       '<div class="band">'+band+'</div><div class="rows">'+rows+'</div><div class="fade"></div></div>';}
-  function ph(det){var nm=det?"Detailed":"Simple";return '<figure class="pp'+(det?'':' on')+'" data-k="'+nm+'"><div class="pph"><i class="di"></i><div class="ps">'+
+
+  /* Detailed page, as the app's Summary now draws it: map + sun compass per scene, light read per shot */
+  function mins(s){var a=s.split(":");return +a[0]*60+ +a[1];}
+  function hhmm(m){m=Math.round(m);return ("0"+Math.floor(m/60)).slice(-2)+":"+("0"+m%60).slice(-2);}
+  var R0=mins(D.rise),S0=mins(D.set),NOON=(R0+S0)/2;
+  function sunAz(m){return m<=NOON?122+(m-R0)/(NOON-R0)*58:180+(m-NOON)/(S0-NOON)*58;}
+  function sunEl(m){var x=(m-R0)/(S0-R0);return Math.max(0,18*Math.sin(Math.PI*x));}
+  function dif(a,b){var d=Math.abs(((a-b)%360+360)%360);return d>180?360-d:d;}
+  function cls(d){return d<=30?"B":d<=75?"Q":d<=105?"S":d<=150?"X":"F";}
+  var SH={B:"backlit",Q:"¾ back",S:"side lit",X:"¾ front",F:"front lit"};
+  function wins(b){var w=[],m,c,cur=null;for(m=R0;m<=S0;m+=2){c=cls(dif(sunAz(m),b));if(!cur||cur.k!==c){cur={k:c,a:m,z:m};w.push(cur);}cur.z=m;}return w;}
+  function times(b){var w=wins(b),out={};
+    w.forEach(function(x){if(x.z-x.a>=10)(out[x.k]=out[x.k]||[]).push(x);});
+    function f(k){return out[k]?out[k].map(function(x){return hhmm(x.a)+"–"+hhmm(x.z);}).join(", "):"–";}
+    var g0=mins(D.golden[0]),g1=mins(D.golden[1]),gk=cls(dif(sunAz((g0+g1)/2),b)),best=null;
+    if("BQS".indexOf(gk)>=0)best={a:g0,z:g1,why:"golden hour, "+SH[gk]};
+    else ["B","Q"].some(function(k){return (out[k]||[]).some(function(x){var s=x.a;while(s<x.z&&sunEl(s)<6)s+=2;if(x.z-s<20)return false;best={a:s,z:Math.min(x.z,s+60),why:SH[k]+", sun "+Math.round(sunEl(s))+"° up"};return true;});});
+    if(!best)best={a:g0,z:g1,why:"golden hour, "+SH[gk]};
+    times.best=[hhmm(best.a)+"–"+hhmm(best.z),best.why];times.az=sunAz((best.a+best.z)/2);times.out=out;times.f=f;
+    return '<span><em>Back</em> '+f("B")+'</span><span><em>¾ back</em> '+f("Q")+'</span><span><em>Side</em> '+f("S")+'</span><span><em>Front</em> '+f("F")+'</span>';}
+  var POS={"1A":[46,78],"3A":[88,50],"5A":[150,34],"47A":[156,84],"54A":[112,96]};
+  function P(cx,cy,az,r){var R=Math.PI/180;return [(cx+r*Math.sin(az*R)).toFixed(1),(cy-r*Math.cos(az*R)).toFixed(1)];}
+  function map(){var s='<svg viewBox="0 0 200 118" class="map" role="img" aria-label="Scene map: each camera spot and the way it faces">'+
+    '<rect x="0" y="0" width="200" height="118" fill="#EFECE5"/>'+
+    '<path d="M-2 58 L70 58 L78 66 L200 66 L200 76 L76 76 L68 68 L-2 68 Z" fill="#E1DED6"/>'+
+    '<g fill="none" stroke="#D6D2C8" stroke-width=".7"><path d="M-2 22 L200 14"/><path d="M-2 104 C60 98 120 110 200 102"/><path d="M128 -2 L122 120"/><path d="M30 -2 L36 58"/></g>'+
+    '<g stroke="#D0CCC2" stroke-width=".5"><path d="M10 62 h14 M40 63 h12 M100 70 h16 M140 71 h14 M170 70 h12"/></g>';
+    D.shots.forEach(function(x,i){var p=POS[x.n],f=Math.atan(18/x.lens)*180/Math.PI,L=x.lens>99?40:26,a=P(p[0],p[1],x.bearing-f,L),b=P(p[0],p[1],x.bearing+f,L);
+      s+='<g class="cn" style="--i:'+i+';transform-origin:'+p[0]+'px '+p[1]+'px"><path d="M'+p[0]+' '+p[1]+' L'+a.join(" ")+' L'+b.join(" ")+' Z" fill="rgba(226,83,31,.16)" stroke="#E2531F" stroke-width=".6"/></g>'+
+        '<g class="sp" style="--i:'+i+'"><circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.6" fill="#151513"/><text x="'+(p[0]+4)+'" y="'+(p[1]-3)+'" font-size="7" font-family="Geist,sans-serif" font-weight="500" fill="#151513">'+x.n+'</text></g>';});
+    return s+'<text x="196" y="113" font-size="5.5" text-anchor="end" font-family="Geist Mono,monospace" fill="#8A877F">N ↑ · 200 m</text></svg>';}
+  function compass(){var c=60,r=44,pts=[],gold=[],m,g0=mins(D.golden[0]);
+    for(m=R0;m<=S0;m+=6){var p=P(c,c,sunAz(m),r*(1-sunEl(m)/60));pts.push(p.join(" "));if(m>=g0)gold.push(p.join(" "));}
+    var s='<svg viewBox="-6 -6 132 132" class="cmp" role="img" aria-label="Sun compass: today\'s sun path and each shot\'s direction">'+
+      '<circle cx="60" cy="60" r="44" fill="none" stroke="#CFCBC2" stroke-width=".8"/>'+
+      ["N","E","S","W"].map(function(t,i){var p=P(c,c,i*90,52);return '<text x="'+p[0]+'" y="'+(+p[1]+2.4)+'" font-size="7" text-anchor="middle" fill="#8A877F" font-family="Geist Mono,monospace">'+t+'</text>';}).join("");
+    D.shots.forEach(function(x,i){var e=P(c,c,x.bearing,40),t=P(c,c,x.bearing,47);s+='<g class="ln" style="--i:'+i+'"><line x1="60" y1="60" x2="'+e[0]+'" y2="'+e[1]+'" stroke="#151513" stroke-width=".7" stroke-dasharray="2 1.5"/><text x="'+t[0]+'" y="'+(+t[1]+2)+'" font-size="5.2" text-anchor="middle" fill="#151513" font-family="Geist Mono,monospace">'+x.n+'</text></g>';});
+    s+='<path class="path" pathLength="1" d="M'+pts.join(" L")+'" fill="none" stroke="#8A877F" stroke-width="1"/>'+
+      '<path class="gold" pathLength="1" d="M'+gold.join(" L")+'" fill="none" stroke="#E2531F" stroke-width="2.6" stroke-linecap="round"/>'+
+      '<circle class="sun" r="3.6" fill="#E2531F" cx="'+pts[0].split(" ")[0]+'" cy="'+pts[0].split(" ")[1]+'"/><circle cx="60" cy="60" r="1.8" fill="#151513"/></svg>';
+    return s;}
+  function dial(x,i){var R=Math.PI/180,f=Math.atan(18/x.lens)/R,a=P(30,30,x.bearing-f,24),b=P(30,30,x.bearing+f,24),s=P(30,30,x._az!=null?x._az:x.bestAz,24);
+    return '<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="24" fill="none" stroke="#CFCBC2" stroke-width=".9"/><text x="30" y="4.6" font-size="5.5" text-anchor="middle" fill="#8A877F" font-family="Geist Mono,monospace">N</text>'+
+      '<path d="M30 30 L'+a.join(" ")+' A24 24 0 0 1 '+b.join(" ")+' Z" fill="rgba(21,21,19,.12)" stroke="#151513" stroke-width=".7"/>'+
+      '<g class="ds" style="--i:'+i+';--from:'+(x.bearing-x.bestAz)+'deg"><circle cx="'+s[0]+'" cy="'+s[1]+'" r="4" fill="#E2531F"/></g><circle cx="30" cy="30" r="1.6" fill="#151513"/></svg>';}
+  function pageD(){
+    var rows=D.shots.map(function(x,i){return '<div class="dr" style="--i:'+i+'"><span class="ph" style="background-image:url('+SRC("sum-"+x.n)+')"></span>'+
+      '<span class="tx"><span class="n">'+x.n+'</span><b>'+x.cap+'</b><span class="m">'+x.lens+'mm · '+x.t+' · facing '+x.bearing+'° · maps ↗</span>'+
+      (function(){var t=times(x.bearing);x._az=times.az;return '<span class="be">Best '+times.best[0]+' · <i>'+times.best[1]+'</i></span><span class="lt">'+t+'</span></span>';})()+
+      '<span class="dl">'+dial(x,i)+'</span></div>';}).join("");
+    return '<div class="pg det dd2"><div class="hd"><b>Out &amp; Sc&middot;out</b><span>Run recce · Summary</span></div>'+
+      '<div class="tt"><span class="nn">01</span><span class="nm"><b>Docks</b><span class="k">18 Nov 2026 · Royal Docks · cloud, dry · 9°</span></span></div>'+
+      '<div class="sl"><span>Rise <b>'+D.rise+'</b></span><span>Golden <b class="o">'+D.golden[0]+'–'+D.golden[1]+'</b></span><span>Set <b>'+D.set+'</b></span></div>'+
+      '<div class="two"><div><span class="k">Map · where each shot stands</span>'+map()+'</div><div><span class="k">Sun · today</span>'+compass()+'</div></div>'+
+      '<div class="drs">'+rows+'</div></div>';}
+
+  function chart(){var W=200,H=58,x=function(m){return 4+(m-(R0-40))/((S0+50)-(R0-40))*(W-8);},y=function(e){return H-8-e/20*(H-16);},pts=[],m;
+    for(m=R0-40;m<=S0+50;m+=8){var e=m<R0||m>S0?-((m<R0?R0-m:m-S0)/10):sunEl(m);pts.push(x(m).toFixed(1)+" "+y(Math.max(e,-4)).toFixed(1));}
+    var g0=mins(D.golden[0]),g1=mins(D.golden[1]);
+    var s='<svg viewBox="0 0 '+W+' '+H+'" class="chart" aria-hidden="true"><rect x="'+x(g0)+'" y="4" width="'+(x(g1)-x(g0))+'" height="'+(H-12)+'" fill="rgba(226,83,31,.12)"/>'+
+      '<rect x="'+x(S0)+'" y="4" width="'+(x(S0+38)-x(S0))+'" height="'+(H-12)+'" fill="rgba(80,96,120,.10)"/>'+
+      '<line x1="4" y1="'+y(0)+'" x2="'+(W-4)+'" y2="'+y(0)+'" stroke="#CFCBC2" stroke-width=".6"/>'+
+      '<path class="path" pathLength="1" d="M'+pts.join(" L")+'" fill="none" stroke="#151513" stroke-width=".9"/>';
+    D.shots.forEach(function(sh,i){var t=mins(sh.t);s+='<g class="sp" style="--i:'+i+'"><line x1="'+x(t)+'" y1="'+(H-8)+'" x2="'+x(t)+'" y2="'+(H-4)+'" stroke="#151513" stroke-width=".7"/><text x="'+x(t)+'" y="'+(H-0.5)+'" font-size="4.6" text-anchor="middle" fill="#8A877F" font-family="Geist Mono,monospace">'+sh.n+'</text></g>';});
+    ["08","10","12","14","16"].forEach(function(h){var m=+h*60;s+='<text x="'+x(m)+'" y="'+(y(0)-2)+'" font-size="4.4" text-anchor="middle" fill="#B5B1A8" font-family="Geist Mono,monospace">'+h+'</text>';});
+    return s+'<text x="'+(x(g0)+2)+'" y="10" font-size="4.6" fill="#E2531F" font-family="Geist Mono,monospace">GOLDEN</text></svg>';}
+  function plain(sh){var a=dif(sunAz(mins(sh.t)),sh.bearing),k=cls(a);return {B:"sun ahead, backlit",Q:"sun ahead, off to one side",S:"sun to the side",X:"sun behind, off to one side",F:"sun behind the camera"}[k];}
+  function strip(b){var w=wins(b),T=S0-R0,col={B:"#151513",Q:"#55534d",S:"#9A968D",X:"#C9C5BC",F:"#E4E0D8"},s='<svg viewBox="0 0 200 26" class="strip" aria-hidden="true"><g class="fill">';
+    w.forEach(function(x){var a=4+(x.a-R0)/T*192,z=4+(x.z-R0)/T*192;s+='<rect x="'+a.toFixed(1)+'" y="4" width="'+Math.max(.5,z-a).toFixed(1)+'" height="9" fill="'+col[x.k]+'"/>'+(z-a>16?'<text x="'+((a+z)/2).toFixed(1)+'" y="20" font-size="4.6" text-anchor="middle" fill="#8A877F" font-family="Geist Mono,monospace">'+({B:"B",Q:"¾B",S:"S",X:"¾F",F:"F"}[x.k])+'</text>':'');});
+    var g0=4+(mins(D.golden[0])-R0)/T*192;
+    return s+'</g><rect x="'+g0.toFixed(1)+'" y="2.5" width="'+(196-g0).toFixed(1)+'" height="12" fill="none" stroke="#E2531F" stroke-width=".8"/><text x="4" y="25.5" font-size="4.4" fill="#B5B1A8" font-family="Geist Mono,monospace">'+D.rise+'</text><text x="196" y="25.5" font-size="4.4" text-anchor="end" fill="#B5B1A8" font-family="Geist Mono,monospace">'+D.set+'</text></svg>';}
+  function planD(sh){var rel=sunAz(mins(sh.t))-sh.bearing,f=Math.atan(18/sh.lens)*180/Math.PI,a=P(30,30,-f,22),b=P(30,30,f,22),s=P(30,30,rel,24);
+    return '<svg viewBox="0 0 60 60" class="plan" aria-hidden="true"><circle cx="30" cy="30" r="24" fill="none" stroke="#CFCBC2" stroke-width=".8"/><path d="M30 30 L'+a.join(" ")+' A22 22 0 0 1 '+b.join(" ")+' Z" fill="rgba(21,21,19,.12)" stroke="#151513" stroke-width=".7"/><g class="ds" style="--i:0;--from:-120deg"><circle cx="'+s[0]+'" cy="'+s[1]+'" r="4" fill="#E2531F"/></g><rect x="27" y="29" width="6" height="4" rx=".8" fill="#151513"/></svg>';}
+  function pageDetailed(){
+    var sh=D.shots[4],t=(times(sh.bearing),{f:times.f,best:times.best}),rel=dif(sunAz(mins(sh.t)),sh.bearing),k=cls(rel);
+    var tbl=D.shots.map(function(x,i){return '<div class="tr" style="--i:'+i+'"><span>'+x.n+'</span><span>'+x.t+'</span><span>'+x.cap+'</span><span>'+plain(x)+'</span></div>';}).join("");
+    var lt=["B","Q","S","F"].map(function(kk){return '<div><em>'+{B:"Back",Q:"¾ back",S:"Side",F:"Front"}[kk]+'</em><span>'+t.f(kk)+'</span></div>';}).join("");
+    return '<div class="pg det dd3"><div class="hd"><b>Out &amp; Sc&middot;out</b><span>Run recce · scene 01</span></div>'+
+      '<div class="ttl">Docks</div><div class="sub">18 Nov 2026 · Royal Docks · 5 shots</div><div class="lnk">Open in Maps ↗</div>'+
+      '<div class="g4"><div><span class="k">Sunrise</span><b>'+D.rise+'</b></div><div><span class="k">Golden hour</span><b class="o">'+D.golden[0]+'–'+D.golden[1]+'</b></div><div><span class="k">Sunset</span><b>'+D.set+'</b></div><div><span class="k">Blue hour</span><b>16:07–16:45</b></div></div>'+
+      '<div class="mapw">'+map()+'</div>'+chart()+
+      '<div class="tb"><div class="th"><span>Shot</span><span>Time</span><span>Caption</span><span>The light</span></div>'+tbl+'</div></div>'+
+      '<div class="pg det dd3 cd"><div class="ch"><span class="id">'+sh.n+'</span><span class="cp">'+sh.cap+'</span><span class="wh">01 · Docks · <u>Open in Maps ↗</u></span></div>'+
+      '<span class="fr" style="background-image:url('+SRC("sum-"+sh.n)+')"></span><div class="cb"><div class="rc">'+
+        '<span class="k">Light now</span><div class="ln2"><div><b>'+{B:"Backlit",Q:"Three-quarter back",S:"Side lit",X:"Three-quarter front",F:"Front lit"}[k]+'</b><span class="g">'+Math.round(rel)+'° off the lens</span></div>'+planD(sh)+'</div></div>'+
+        '<div class="rc"><span class="k">When to be there</span><div class="rw2 st"><em>Best</em><span><b>'+t.best[0]+'</b><br><span class="g">'+t.best[1]+'</span></span></div>'+
+        '<div class="rw2"><em>Recce</em><span>'+sh.t+' <span class="g">· '+SH[k]+'</span></span></div></div></div>'+
+        '<div class="lt2">'+lt+'</div>'+
+      '<div class="spec"><div><span class="k">Camera</span>iPhone 15 Pro</div><div><span class="k">Lens</span>'+sh.lens+'mm</div><div><span class="k">H. field</span>'+Math.round(2*Math.atan(18/sh.lens)*180/Math.PI)+'°</div><div><span class="k">Heading</span>'+sh.bearing+'° S</div></div>'+
+      '<span class="k">Through the day from here</span>'+strip(sh.bearing)+
+      '<div class="nt"><div><span class="k">Notes</span><i></i><i></i></div><div class="qr"><span class="k">Directions</span><b></b></div></div></div>';}
+  function ph(det){var nm=det?"Detailed":"Summary";return '<figure class="pp'+(det?'':' on')+'" data-k="'+nm+'"><div class="pph"><i class="di"></i><div class="ps">'+
     '<div class="sb"><b>12:19</b><span class="sbi"><svg viewBox="0 0 77 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="4.5" y="6" width="3" height="6" rx=".8"/><rect x="9" y="3.5" width="3" height="8.5" rx=".8"/><rect x="13.5" y="1" width="3" height="11" rx=".8"/><text x="19.5" y="11.2" font-size="11.4" font-weight="600" font-family="-apple-system,Geist,sans-serif" letter-spacing="-.2">5G</text><g fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M36.6 4.6a9 9 0 0 1 12.8 0"/><path d="M39.1 7.3a5.4 5.4 0 0 1 7.8 0"/></g><path d="M41.4 10.1a2.3 2.3 0 0 1 3.2 0L43 11.8z"/><rect x="52.5" y=".75" width="21.5" height="10.5" rx="3.3" fill="none" stroke="currentColor" stroke-opacity=".38" stroke-width="1.1"/><rect x="54.4" y="2.65" width="14.2" height="6.7" rx="1.8"/><path d="M75.3 4.2v3.6a1.9 1.9 0 0 0 0-3.6z" fill-opacity=".4"/></svg></span></div><div class="ab"><span>‹ Export</span><b>Docks · '+nm+'.pdf</b><span class="sh">↑</span></div>'+
-    '<div class="pv">'+page(det)+'<div class="pn">1 / 2</div><div class="pg2"><div class="hd"><span>Photos</span><span>'+nm+'</span></div><div class="gr">'+["1A","3A","5A","47A"].map(function(n){return '<span style="background-image:url('+SRC("sum-"+n)+')"></span>';}).join("")+'</div></div></div><div class="ft"><span class="go">Send '+nm+' PDF</span></div></div></div><figcaption class="lab">'+nm+'</figcaption></figure>';}
-  return '<div class="seg" role="tablist" aria-label="Summary style"><button role="tab" aria-selected="true" data-k="Simple">Simple</button><button role="tab" aria-selected="false" data-k="Detailed">Detailed</button></div><div class="pair">'+ph(false)+ph(true)+'</div>';
+    '<div class="pv"><div class="sc">'+(det?pageDetailed():pageD())+'</div></div><div class="ft"><span class="go">Send '+nm+' PDF</span></div></div></div><figcaption class="lab">'+nm+'</figcaption></figure>';}
+  return '<div class="seg" role="tablist" aria-label="Summary style"><button role="tab" aria-selected="true" data-k="Summary">Summary</button><button role="tab" aria-selected="false" data-k="Detailed">Detailed</button></div><div class="pair">'+ph(false)+ph(true)+'</div>';
 }
 (function(){
   var d=document.getElementById("doc");if(!d)return;var bs=[].slice.call(d.querySelectorAll(".seg button")),ps=[].slice.call(d.querySelectorAll(".pp")),touched=false;
@@ -403,6 +578,17 @@ function DOC(){
   bs.forEach(function(b){b.addEventListener("click",function(){touched=true;show(b.dataset.k);});});
   /* on a phone only one shows at a time; it swaps once by itself so the difference reads */
   if("IntersectionObserver" in window&&!matchMedia("(prefers-reduced-motion:reduce)").matches){var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();setTimeout(function(){if(!touched)show("Detailed");},1800);}},{threshold:.5});io.observe(d);}
+})();
+
+/* detailed page comes alive when it's on screen: cones open, the sun walks the day, rows arrive */
+(function(){
+  var d=document.getElementById("doc");if(!d)return;var pg=d.querySelector(".dd2");if(!pg)return;
+  [].slice.call(d.querySelectorAll(".dd3")).forEach(function(p){if(!("IntersectionObserver" in window)){p.classList.add("play");return;}var o=new IntersectionObserver(function(es){if(es[0].isIntersecting){p.classList.add("play");o.disconnect();}},{threshold:.15});o.observe(p.closest(".pp"));});
+  var calm=matchMedia("(prefers-reduced-motion:reduce)").matches,sun=pg.querySelector(".cmp .sun"),path=pg.querySelector(".cmp .path"),t0=0,raf=0,on=false;
+  function step(t){if(!on){raf=0;return;}if(!t0)t0=t;var L=path.getTotalLength(),k=((t-t0)/9000)%1,p=path.getPointAtLength(L*k);sun.setAttribute("cx",p.x);sun.setAttribute("cy",p.y);raf=requestAnimationFrame(step);}
+  if(calm||!("IntersectionObserver" in window)){pg.classList.add("play","still");return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){pg.classList.add("play");on=true;if(!raf)raf=requestAnimationFrame(step);}else{on=false;}});},{threshold:.25});
+  io.observe(pg.closest(".pp"));
 })();
 
 

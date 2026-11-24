@@ -158,6 +158,8 @@
     try { u.track(name, d); } catch (e) {}
   }
   function hook(rec) {
+    /* 24 Nov, Elliot: at the end of a film, roll on to the next one like a showreel */
+    rec.p.on('ended', function () { if (mine(rec) && typeof step === 'function') step(1); });
     rec.p.on('playing', function () { if (mine(rec)) { rec.ifr.classList.add('on'); if (host) host.classList.remove('ld'); track('Play', rec.v); } });
     rec.p.on('timeupdate', function (e) {
       if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000;

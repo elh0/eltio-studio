@@ -642,14 +642,17 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
 .opk span { display: inline-flex; gap: 4px; align-items: center; }
 .opk button { font: inherit; color: inherit; background: none; border: 1px solid transparent; border-radius: 999px; padding: 3px 9px; cursor: pointer; opacity: .75; }
 .opk button.on { border-color: currentColor; opacity: 1; }
+/* 24 Nov, Elliot: try Cargo's own Diatype (?ft=2). Cargo declares the faces on every site page,
+   so naming them is enough there; anywhere else it falls back to the free fonts. */
+html.ft-2 { --sans: "Diatype Variable", "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "Diatype Mono Variable", "Geist Mono", ui-monospace, Menlo, monospace; }
 </style>
 <script>
 (function () {
   var de = document.documentElement, q = location.search;
-  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1' };
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1', ft: (q.match(/ft=(\d)/) || [])[1] || '1' };
   function apply() {
-    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
-    if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
+    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); de.classList.toggle('ft-' + n, st.ft === n); });
+    if (/[?&](lk|th|ft|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th|ft)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th + '&ft=' + st.ft; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
   }
   apply();
   /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
@@ -660,10 +663,11 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
-    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';
+    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+    + '<span><b>Font</b>' + opts.ft.map(function (t, i) { return t ? '<button type="button" data-g="ft" data-v="' + i + '">' + t + '</button>' : ''; }).join('') + '</span>';
   function mark() { [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.toggle('on', st[b.dataset.g] === b.dataset.v); }); }
   bar.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st[b.dataset.g] = b.dataset.v; apply(); mark(); });
   mark(); document.body.appendChild(bar);

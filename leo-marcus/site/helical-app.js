@@ -223,6 +223,8 @@ setWay(); document.documentElement.classList.add('white');
     try { u.track(name, d); } catch (e) {}
   }
   function hook(rec) {
+    /* 24 Nov, Elliot: at the end of a film, roll on to the next one like a showreel */
+    rec.p.on('ended', function () { if (mine(rec) && typeof step === 'function') step(1); });
     rec.p.on('playing', function () { if (mine(rec)) { rec.ifr.classList.add('on'); if (host) host.classList.remove('ld'); track('Play', rec.v); } });
     rec.p.on('timeupdate', function (e) {
       if (!mine(rec)) return; window.pos = e.seconds; window.t0 = performance.now() - e.seconds * 1000;
@@ -769,10 +771,10 @@ function fitCap(film) {
 
 (function () {
   var de = document.documentElement, q = location.search;
-  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1' };
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1', ft: (q.match(/ft=(\d)/) || [])[1] || '1' };
   function apply() {
-    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); });
-    if (/[?&](lk|th|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
+    ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); de.classList.toggle('ft-' + n, st.ft === n); });
+    if (/[?&](lk|th|ft|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th|ft)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th + '&ft=' + st.ft; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
   }
   apply();
   /* plain loading: bring the still back if the film still hasn't started after 6 seconds */
@@ -783,10 +785,11 @@ function fitCap(film) {
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
-    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>';
+    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+    + '<span><b>Font</b>' + opts.ft.map(function (t, i) { return t ? '<button type="button" data-g="ft" data-v="' + i + '">' + t + '</button>' : ''; }).join('') + '</span>';
   function mark() { [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.toggle('on', st[b.dataset.g] === b.dataset.v); }); }
   bar.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st[b.dataset.g] = b.dataset.v; apply(); mark(); });
   mark(); document.body.appendChild(bar);

@@ -53,6 +53,7 @@ open(os.path.join(HERE, 'helical-app.js'), 'w').write('\n;\n'.join(parts))
 
 # test fixtures: the round 2 films shaped like Cargo's API answers
 films = json.loads(subprocess.check_output(['node', '-e', "var document={documentElement:{setAttribute(){},classList:{add(){}}},head:{insertAdjacentHTML(){}},querySelectorAll(){return[]},addEventListener(){}};var localStorage={getItem(){},setItem(){}};var location={search:\"\"};" + open(os.path.join(DIR, 'shared.js')).read() + open(os.path.join(DIR, 'r2/work.js')).read() + ";console.log(JSON.stringify(WORK))"]))
+BF = json.load(open(os.path.join(HERE, 'bunny-films.json')))
 names = {'comp': 'Composition', 'sd': 'Sound design', 'mix': 'Mix'}
 def purl(x): 
     import unicodedata
@@ -60,7 +61,9 @@ def purl(x):
     return re.sub(r'[^a-z0-9]+', '-', s).strip('-')
 pages = []
 for i, x in enumerate(films):
-    lines = [x['p'], 'https://vimeo.com/' + x['v']]
+    # 24 Nov: films on Leo's Bunny library play from Bunny, the rest stay on Vimeo
+    bk = BF['site'].get(x['c'] + '|' + x['p']) or BF['site'].get(x['c'])
+    lines = [x['p'], 'https://%s/%s/playlist.m3u8' % (BF['host'], BF['films'][bk]) if bk else 'https://vimeo.com/' + x['v']]
     if x.get('dir'): lines.append('Director: ' + x['dir'])
     if x.get('ag'): lines.append('Creative direction: ' + x['ag'])
     pages.append({'id': 'P%d' % i, 'set_id': 'S1', 'title': x['c'], 'purl': purl(x), 'page_type': 'page', 'display': True, 'sort': i,

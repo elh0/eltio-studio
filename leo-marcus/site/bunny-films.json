@@ -1,0 +1,35 @@
+{
+  "_note": "Leo's Bunny Stream library 813969 (read 24 Nov 2026). Play link per film: https://<host>/<guid>/playlist.m3u8",
+  "host": "vz-93f8704d-bec.b-cdn.net",
+  "films": {
+    "Emporio Armani .mp4": "b0df136c-4f6e-41f3-ac92-aa618c8695f5",
+    "Dyson.mp4": "73fbd3e7-361d-4c52-a27c-dd682dc98ad7",
+    "Frederic Malle.mp4": "5c0d62be-8f9e-4120-9df2-4b893ec41704",
+    "Polène - Winter 25.mp4": "c8795391-9db7-49a7-98ad-6bd0f1565ab9",
+    "Polène - Summer 25.mp4": "1b99315d-e335-46b4-9f43-9c7283d70d18",
+    "Polène - Champs Élysées.mp4": "4cf5023b-6dcb-433a-a316-8e6a18594391",
+    "BMW.mp4": "cb38c858-a333-44c2-9e06-be3d94927534",
+    "Canada Goose.mp4": "a50eb4a3-f457-40dd-8256-da2f94f1a6b5",
+    "Loro Piana - Resort .mov": "40059505-470f-4c3d-804e-235af640c0a8",
+    "Loro Piana - Holiday.mp4": "b3974da1-c770-4c19-a389-86a765d4b957",
+    "Moncler.mp4": "ec866f51-bd4d-467d-ba3a-d97dd903a94a",
+    "Tiffany & Co.mp4": "96ee0372-41b6-44e8-87db-9c53bf15061b",
+    "Margaret Howell.mp4": "d2f2db5c-9ad1-4f33-88dd-09899f67739e",
+    "Jo Malone - Myrrh & Tonka .mp4": "73583a83-58a7-42f2-8c81-a853742d5425",
+    "Nike.mp4": "b271bb87-de31-497b-b33c-ebf3fb254db3",
+    "Versace - FW23.mp4": "9f8d6b94-56ac-404f-8569-4dbd04746869",
+    "Versace - Watches.mp4": "7c456319-dce5-462c-b147-ad6dc7e29b73",
+    "Lanvin Sneakers.mp4": "5d9df541-fd41-40c9-9f72-877aca78d176",
+    "Roberto Cavalli.mp4": "69d20071-d75a-46a1-8314-8cbf7581fff8",
+    "Liu Jo.mp4": "2992a1ca-5147-4ca1-9da8-051419c9dbf5",
+    "Ferregamo.mp4": "60a618cb-f0dd-43dc-8784-9117bda829b9"
+  },
+  "site": {
+    "Emporio Armani": "Emporio Armani .mp4", "Dyson Beauty": "Dyson.mp4", "Frederic Malle": "Frederic Malle.mp4",
+    "Polène|Winter 25 Campaign": "Polène - Winter 25.mp4", "Polène|Champs-Élysées": "Polène - Champs Élysées.mp4",
+    "BMW": "BMW.mp4", "Canada Goose": "Canada Goose.mp4", "Loro Piana": "Loro Piana - Resort .mov", "Moncler": "Moncler.mp4",
+    "Tiffany & Co.": "Tiffany & Co.mp4", "Margaret Howell": "Margaret Howell.mp4", "Jo Malone|Myrrh & Tonka": "Jo Malone - Myrrh & Tonka .mp4",
+    "Nike": "Nike.mp4", "Versace": "Versace - FW23.mp4", "Lanvin": "Lanvin Sneakers.mp4", "Roberto Cavalli": "Roberto Cavalli.mp4",
+    "Liu Jo": "Liu Jo.mp4", "Ferragamo": "Ferregamo.mp4"
+  }
+}

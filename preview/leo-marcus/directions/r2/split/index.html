@@ -502,7 +502,7 @@ function fitCap(film) {
   return Math.max(220, mh - (inn.scrollHeight - film.offsetHeight));
 }
 (function () {
-  var info = document.getElementById('info');
+  var info = document.querySelector('section.info'); /* not getElementById: Cargo adds its own <a id="info"> for the Info page */
   function show(on) { info.classList.toggle('open', on); info.setAttribute('aria-hidden', !on); }
   document.getElementById('infob').onclick = function () { show(true); };
   document.getElementById('infox').onclick = function () { show(false); };

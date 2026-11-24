@@ -374,7 +374,7 @@ html.ft-3 .pm, html.ft-3 .mhd, html.ft-3 .hud, html.ft-3 .in .ctl, html.ft-3 .in
 
 .ways{display:none!important}html.white{--paper:#fff;--bg:#fff}
 /* Cargo wrapper: hide Cargo's own page while the Helical Sound site is drawn over it */
-html.hs-on body > :not(#hs):not(.vmhost) { display: none !important; }
+html.hs-on body > :not(#hs):not(.vmhost):not(.opk) { display: none !important; }
 html.hs-on, html.hs-on body { background: var(--bg) !important; }
 /* Cargo may set its own sizes on p/span/a/button (it did on eltio.studio). If text looks off on
    Cargo, pin those sizes here with !important. */

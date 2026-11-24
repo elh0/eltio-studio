@@ -241,7 +241,7 @@
       el.removeAttribute('src'); el.load();
       if (/\.m3u8(\?|$)/i.test(u) && !el.canPlayType('application/vnd.apple.mpegurl')) {
         return hlsLib().then(function (H) {
-          if (H && H.isSupported()) { me.h = new H({ capLevelToPlayerSize: true, abrEwmaDefaultEstimate: 2e7, abrBandWidthUpFactor: 0.9, startFragPrefetch: true }); /* assume a fast line: open sharp, drop only if it stalls */ me.h.loadSource(u); me.h.attachMedia(el); } else el.src = u;
+          if (H && H.isSupported()) { me.h = new H({ capLevelToPlayerSize: true, startLevel: -1, abrEwmaDefaultEstimate: 2e7, abrBandWidthUpFactor: 0.9, startFragPrefetch: true }); /* assume a fast line: open sharp, drop only if it stalls */ me.h.loadSource(u); me.h.attachMedia(el); } else el.src = u;
         });
       }
       el.src = u; return Promise.resolve();

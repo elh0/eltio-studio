@@ -644,7 +644,11 @@ html.th-1 .vmhost.ld::after, html.th-2 .vmhost.ld::after { display: none; }
 .opk button.on { border-color: currentColor; opacity: 1; }
 /* 24 Nov, Elliot: try Cargo's own Diatype (?ft=2). Cargo declares the faces on every site page,
    so naming them is enough there; anywhere else it falls back to the free fonts. */
-html.ft-2 { --sans: "Diatype Variable", "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "Diatype Mono Variable", "Geist Mono", ui-monospace, Menlo, monospace; }
+html.ft-2, html.ft-3 { --sans: "Diatype Variable", "Inter Tight", "Helvetica Neue", Arial, sans-serif; --mono: "Diatype Mono Variable", "Geist Mono", ui-monospace, Menlo, monospace; }
+/* Cargo's "Diatype Mono" is the same file as Diatype; the mono look comes from its MONO axis
+   (1 = mono, .5 = semi-mono), so the mono labels have to ask for it. */
+html.ft-2 .pm, html.ft-2 .mhd, html.ft-2 .hud, html.ft-2 .in .ctl, html.ft-2 .in .cr dt { font-variation-settings: 'MONO' 1; }
+html.ft-3 .pm, html.ft-3 .mhd, html.ft-3 .hud, html.ft-3 .in .ctl, html.ft-3 .in .cr dt { font-variation-settings: 'MONO' .5; }
 </style>
 <script>
 (function () {
@@ -663,7 +667,7 @@ html.ft-2 { --sans: "Diatype Variable", "Inter Tight", "Helvetica Neue", Arial, 
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype + mono', 'Diatype + semi-mono'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
     + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'

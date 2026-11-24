@@ -789,7 +789,7 @@ function fitCap(film) {
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
   if (!/[?&]pick/.test(q)) return;
-  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype'] };
+  var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype + mono', 'Diatype + semi-mono'] };
   var bar = document.createElement('div'); bar.className = 'opk';
   bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
     + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'

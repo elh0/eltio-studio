@@ -405,7 +405,7 @@ var S=[
  {k:"Captions & scenes",vid:"vf",img:"os11-shots",h:"Captions & scenes, done for you.",p:"Auto captions & scene change detection, so the app keeps up as you walk round a recce."},
  {k:"Blur faces",vid:"blur",img:"os11-viewer-blur",h:"Blur faces.",p:"We realise not everyone wants to show their face in recce images, so we added a feature to blur them."},
  {k:"Best light",vid:"",img:"os11-best-story",h:"A suggestion for the best light.",p:"Picked the way working cinematographers would. We love the backlight. Plus when each shot is back, ¾ back, side & front lit."},
- {k:"Send photos",vid:"sel",img:"os11-selects",h:"Just send the photos.",p:"You can now easily send photos like you're used to."}
+ {k:"Send photos",vid:"sel",img:"os11-selects",h:"Just send the photos.",p:"Tick the stills you want & send them as normal photos, full size & cropped to your frame lines. AirDrop, WhatsApp, Mail or straight to your camera roll, like you're used to."}
 ];
 document.getElementById("feats").innerHTML=S.map(function(s,i){return '<div class="f"><div class="iph"><i class="isl"></i><div class="scr"><img src="'+SRC(s.img)+'" alt="Out &amp; Scout: '+s.k+'"'+(i>1?' loading="lazy"':'')+'></div></div><span class="lab"><span class="o">0'+(i+1)+'</span> · '+s.k+'</span><h2>'+s.h+'</h2><p>'+s.p+'</p></div>';}).join("");
 document.getElementById("doc").innerHTML=DOC();

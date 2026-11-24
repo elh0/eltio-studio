@@ -231,7 +231,11 @@
     hlsP = new Promise(function (ok, no) { var s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js'; s.onload = function () { ok(window.Hls); }; s.onerror = no; document.head.appendChild(s); });
     return hlsP;
   }
-  if (WORK.some(function (x) { return x.u && /\.m3u8/i.test(x.u); }) && !document.createElement('video').canPlayType('application/vnd.apple.mpegurl')) hlsLib().catch(function () {});
+  /* 24 Nov: Chrome now plays HLS itself too, but opens on the lowest quality and takes seconds to
+     climb; hls.js opens at full quality. So only Apple's browsers (Safari, every iPhone browser)
+     use the built-in player. */
+  var NATIVE_HLS = /Apple/.test(navigator.vendor || '') && !!document.createElement('video').canPlayType('application/vnd.apple.mpegurl');
+  if (WORK.some(function (x) { return x.u && /\.m3u8/i.test(x.u); }) && !NATIVE_HLS) hlsLib().catch(function () {});
   /* the few calls the page makes to Vimeo's player, answered by a video element */
   function NP(el) { this.el = el; this.h = null; this.w = []; }
   NP.prototype = {
@@ -239,7 +243,7 @@
       var el = this.el, me = this;
       if (me.h) { me.h.destroy(); me.h = null; }
       el.removeAttribute('src'); el.load();
-      if (/\.m3u8(\?|$)/i.test(u) && !el.canPlayType('application/vnd.apple.mpegurl')) {
+      if (/\.m3u8(\?|$)/i.test(u) && !NATIVE_HLS) {
         return hlsLib().then(function (H) {
           if (H && H.isSupported()) { me.h = new H({ capLevelToPlayerSize: true, startLevel: -1, abrEwmaDefaultEstimate: 2e7, abrBandWidthUpFactor: 0.9, startFragPrefetch: true }); /* assume a fast line: open sharp, drop only if it stalls */ me.h.loadSource(u); me.h.attachMedia(el); } else el.src = u;
         });

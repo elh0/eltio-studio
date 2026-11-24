@@ -666,11 +666,12 @@ html.ft-3 .pm, html.ft-3 .mhd, html.ft-3 .hud, html.ft-3 .in .ctl, html.ft-3 .in
     if (!f || live || f !== last) { since = performance.now(); last = f; de.classList.remove('th-late'); return; }
     if (performance.now() - since > 6000) de.classList.add('th-late');
   }, 250);
-  if (!/[?&]pick/.test(q)) return;
+  var fontsOnly = /[?&]fonts/.test(q); /* ?fonts = just the font row, for Leo to play with */
+  if (!/[?&]pick/.test(q) && !fontsOnly) return;
   var opts = { lk: ['Old', 'Darker', 'Flip hover', 'Arrow', 'Arrow + flip'], th: ['Old', 'Plain', 'Still, no fade'], ft: ['', 'Now (free fonts)', 'Diatype + mono', 'Diatype + semi-mono'] };
   var bar = document.createElement('div'); bar.className = 'opk';
-  bar.innerHTML = '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
-    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+  bar.innerHTML = (fontsOnly ? '' : '<span><b>Links</b>' + opts.lk.map(function (t, i) { return '<button type="button" data-g="lk" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>'
+    + '<span><b>Loading</b>' + opts.th.map(function (t, i) { return '<button type="button" data-g="th" data-v="' + i + '">' + t + '</button>'; }).join('') + '</span>')
     + '<span><b>Font</b>' + opts.ft.map(function (t, i) { return t ? '<button type="button" data-g="ft" data-v="' + i + '">' + t + '</button>' : ''; }).join('') + '</span>';
   function mark() { [].forEach.call(bar.querySelectorAll('button'), function (b) { b.classList.toggle('on', st[b.dataset.g] === b.dataset.v); }); }
   bar.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; st[b.dataset.g] = b.dataset.v; apply(); mark(); });

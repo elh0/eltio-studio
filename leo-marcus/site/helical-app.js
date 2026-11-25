@@ -775,7 +775,7 @@ function fitCap(film) {
 
 (function () {
   var de = document.documentElement, q = location.search;
-  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1', ft: (q.match(/ft=(\d)/) || [])[1] || '1' };
+  var st = { lk: (q.match(/lk=(\d)/) || [])[1] || '4', th: (q.match(/th=(\d)/) || [])[1] || '1', ft: (q.match(/ft=(\d)/) || [])[1] || '3' };
   function apply() {
     ['1', '2', '3', '4'].forEach(function (n) { de.classList.toggle('lk-' + n, st.lk === n); de.classList.toggle('th-' + n, st.th === n); de.classList.toggle('ft-' + n, st.ft === n); });
     if (/[?&](lk|th|ft|pick)/.test(q)) try { var u = location.search.replace(/[?&](lk|th|ft)=\d/g, '').replace(/^&/, '?'); u += (u ? '&' : '?') + 'lk=' + st.lk + '&th=' + st.th + '&ft=' + st.ft; history.replaceState(null, '', location.pathname + u + location.hash); } catch (e) {}
